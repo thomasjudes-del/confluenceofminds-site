@@ -14,18 +14,21 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 let ticking = false;
 function updateScrollScene() {
   const scrollY = window.scrollY;
-  header?.classList.toggle('is-scrolled', scrollY > 28);
+  header?.classList.toggle('is-scrolled', scrollY > 24);
 
   if (hero && !reduceMotion) {
     const rect = hero.getBoundingClientRect();
     const travel = Math.max(hero.offsetHeight - window.innerHeight, 1);
     const progress = clamp(-rect.top / travel, 0, 1);
+    const mobile = window.innerWidth < 760;
 
-    hero.style.setProperty('--scene-scale', (1 + progress * 0.085).toFixed(4));
-    hero.style.setProperty('--scene-brightness', (1 - progress * 0.26).toFixed(4));
-    hero.style.setProperty('--copy-opacity', clamp(1 - progress * 1.55, 0, 1).toFixed(4));
-    hero.style.setProperty('--copy-shift', `${Math.round(progress * -72)}px`);
-    hero.style.setProperty('--scroll-opacity', clamp(1 - progress * 3.2, 0, 1).toFixed(4));
+    hero.style.setProperty('--art-scale', (1 + progress * (mobile ? 0.1 : 0.2)).toFixed(4));
+    hero.style.setProperty('--art-x', `${Math.round(progress * (mobile ? -12 : -78))}px`);
+    hero.style.setProperty('--art-y', `${Math.round(progress * (mobile ? -12 : -30))}px`);
+    hero.style.setProperty('--river-y', `${Math.round(progress * (mobile ? -26 : -72))}px`);
+    hero.style.setProperty('--copy-opacity', clamp(1 - progress * 1.3, 0, 1).toFixed(4));
+    hero.style.setProperty('--copy-y', `${Math.round(progress * -52)}px`);
+    hero.style.setProperty('--index-opacity', clamp(1 - progress * 3.3, 0, 1).toFixed(4));
   }
 
   ticking = false;
@@ -47,10 +50,10 @@ const observer = new IntersectionObserver((entries) => {
     entry.target.classList.add('is-visible');
     observer.unobserve(entry.target);
   });
-}, { threshold: 0.12, rootMargin: '0px 0px -4% 0px' });
+}, { threshold: 0.1, rootMargin: '0px 0px -4% 0px' });
 
 revealItems.forEach((item, index) => {
-  item.style.transitionDelay = `${Math.min(index % 3, 2) * 75}ms`;
+  item.style.transitionDelay = `${Math.min(index % 3, 2) * 65}ms`;
   observer.observe(item);
 });
 
@@ -60,29 +63,13 @@ function showToast(message) {
   toastMessage.textContent = message;
   toast.classList.add('is-visible');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2600);
+  toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2500);
 }
 
 projectButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const card = button.closest('[data-portal]');
     const portal = card?.dataset.portal || 'This world';
-
-    if (portal === 'Incident on Titan') {
-      window.location.assign('./titan/');
-      return;
-    }
-
-    showToast(`${portal} will be connected to its project page next.`);
+    showToast(`${portal} will open here when its project page is ready.`);
   });
 });
-
-if (!reduceMotion) {
-  const scene = document.querySelector('.cinematic-scene');
-  window.addEventListener('pointermove', (event) => {
-    if (!scene || window.innerWidth < 900) return;
-    const x = (event.clientX / window.innerWidth - 0.5) * 8;
-    const y = (event.clientY / window.innerHeight - 0.5) * 5;
-    scene.style.transformOrigin = `${50 + x * 0.15}% ${47 + y * 0.12}%`;
-  }, { passive: true });
-}
