@@ -10,7 +10,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cinzel:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&family=Noto+Serif+JP:wght@500;600;700&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -41,6 +41,7 @@
       <div class="hero-sticky">
         <div class="hero-art" aria-hidden="true">
           <div class="hero-art__sun"></div>
+          <div class="hero-art__void"></div>
           <svg class="hero-art__canvas" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="paperFold" x1="0" y1="0" x2="1" y2="1">
@@ -52,11 +53,6 @@
                 <stop offset="0" stop-color="#a99d89" />
                 <stop offset="0.38" stop-color="#e9e1d3" />
                 <stop offset="1" stop-color="#f8f3ea" />
-              </linearGradient>
-              <linearGradient id="riverFade" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#f5efe4" stop-opacity="0" />
-                <stop offset="0.32" stop-color="#f5efe4" stop-opacity="0.9" />
-                <stop offset="1" stop-color="#f5efe4" />
               </linearGradient>
               <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
                 <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#101716" flood-opacity="0.18" />
@@ -80,142 +76,180 @@
             </g>
           </svg>
 
-          <div class="hero-art__microcopy">
-            <span>FICTION · PLAY · IMAGE · MACHINE</span>
-            <span>ONE CONFLUENCE / MANY DIRECTIONS</span>
-          </div>
+          <span class="hero-shard hero-shard--one"></span>
+          <span class="hero-shard hero-shard--two"></span>
+          <span class="hero-shard hero-shard--three"></span>
+          <span class="hero-shard hero-shard--four"></span>
         </div>
 
         <div class="hero-copy">
-          <p class="hero-kicker reveal">Stories · games · experiments · impossible worlds</p>
-          <h1 id="hero-title" class="hero-title reveal">
-            <span>Too many ideas</span>
-            <span>for one world.</span>
-          </h1>
-          <p class="hero-lede reveal">A creative universe built one door at a time.</p>
-          <div class="hero-actions reveal">
-            <a class="button button--dark" href="#worlds">Explore the worlds <span aria-hidden="true">↓</span></a>
-            <a class="button button--line" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">Instagram ↗</a>
-          </div>
-          <p class="hero-signature reveal">Come for one world. <em>Get lost in a universe.</em></p>
+          <p class="hero-kicker">Stories · games · experiments · impossible worlds</p>
+          <h1 id="hero-title">Too many ideas<br />for one world.</h1>
+          <p>A creative universe built one door at a time.</p>
+          <a class="hero-cta" href="#worlds">Enter the worlds <span>↓</span></a>
         </div>
 
-        <div class="hero-index" aria-hidden="true">
-          <span>COM / 001</span>
-          <i></i>
-          <span>Scroll to enter</span>
+        <div class="hero-signature" aria-hidden="true">Come for one world. Get lost in a universe.</div>
+      </div>
+    </section>
+
+    <section id="worlds" class="worlds" aria-labelledby="worlds-title">
+      <div class="section-shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="section-label">The current constellation</p>
+            <h2 id="worlds-title">Choose your entrance.</h2>
+          </div>
+          <p>Every project keeps its own codes, atmosphere and voice. Confluence of Minds is simply where their doors meet.</p>
+        </div>
+
+        <div class="world-grid">
+          <article class="world-card world-card--titan reveal" data-portal="Incident on Titan">
+            <div class="world-card__visual titan-visual" aria-hidden="true">
+              <span class="titan-ring"></span>
+              <span class="titan-sun"></span>
+              <span class="titan-ground"></span>
+              <span class="titan-base"></span>
+              <strong>IOTI</strong>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>Interactive science fiction</span><span>01</span></div>
+              <h3>Incident on Titan</h3>
+              <p>A weekly command incident on humanity’s most remote colony. Make five decisions, reveal your doctrine and face Sybille — an AI that learns from every compromise you make.</p>
+              <a class="world-card__link" href="./titan/">Enter Titan <span>↗</span></a>
+            </div>
+          </article>
+
+          <article class="world-card world-card--talent reveal" data-portal="AI's Got Talent">
+            <div class="world-card__visual talent-visual" aria-hidden="true">
+              <span class="talent-light talent-light--one"></span>
+              <span class="talent-light talent-light--two"></span>
+              <span class="talent-stage"></span>
+              <strong>AI'S<br />GOT<br />TALENT</strong>
+              <i>CASTING OPEN</i>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>Open creative casting</span><span>02</span></div>
+              <h3>AI’s Got Talent</h3>
+              <p>A public casting for people creating, performing and experimenting with artificial intelligence. A place to discover unusual makers before their work fits a familiar category.</p>
+              <button class="world-card__link" type="button" data-project-link>Discover the casting <span>↗</span></button>
+            </div>
+          </article>
+
+          <article class="world-card world-card--anjin reveal" data-portal="Anjin of the Shogun">
+            <div class="world-card__visual anjin-visual" aria-hidden="true">
+              <span class="anjin-sun"></span>
+              <span class="anjin-brush anjin-brush--one"></span>
+              <span class="anjin-brush anjin-brush--two"></span>
+              <span class="anjin-figure"></span>
+              <strong>按針</strong>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>Japan · ink · culture</span><span>03</span></div>
+              <h3>Anjin of the Shogun</h3>
+              <p>An illustrated exploration of Japanese culture through sumi-e, samurai codes, objects, rituals and the tension between restraint and violence. Each fragment opens another layer of the same world.</p>
+              <button class="world-card__link" type="button" data-project-link>Enter the ink world <span>↗</span></button>
+            </div>
+          </article>
+
+          <article class="world-card world-card--wecan reveal" data-portal="We Can / But We Can't">
+            <div class="world-card__visual wecan-visual" aria-hidden="true">
+              <span>WE CAN</span>
+              <strong>BUT<br />WE<br />CAN'T</strong>
+              <i>THE NUMBERS DO NOT AGREE</i>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>Militant visual series</span><span>04</span></div>
+              <h3>We Can / But We Can’t</h3>
+              <p>A confrontational series about civilisation’s contradictions: extraordinary technical capacity placed beside hunger, climate collapse, inequality and the basic problems we still choose not to solve.</p>
+              <button class="world-card__link" type="button" data-project-link>Face the contradiction <span>↗</span></button>
+            </div>
+          </article>
+
+          <article class="world-card world-card--dragons reveal" data-portal="Shattered Dragons">
+            <div class="world-card__visual dragons-visual" aria-hidden="true">
+              <span class="dragon-wing"></span>
+              <span class="dragon-spine"></span>
+              <span class="dragon-eye"></span>
+              <strong>SHATTERED<br />DRAGONS</strong>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>Myth engineered as science</span><span>05</span></div>
+              <h3>Shattered Dragons</h3>
+              <p>Ancient creatures awaken in forgotten ecosystems — but their scales, fire and wings carry the signature of human engineering. A bestiary of power, loss, family and creations that turned on their makers.</p>
+              <button class="world-card__link" type="button" data-project-link>Wake the dragons <span>↗</span></button>
+            </div>
+          </article>
+
+          <article class="world-card world-card--kashgar reveal" data-portal="Chronicles of Kashgar">
+            <div class="world-card__visual kashgar-visual" aria-hidden="true">
+              <span class="kashgar-sun"></span>
+              <span class="kashgar-arch"></span>
+              <span class="kashgar-road"></span>
+              <span class="kashgar-stars"></span>
+              <strong>CHRONICLES<br />OF KASHGAR</strong>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>Illustrated chronicle</span><span>06</span></div>
+              <h3>Chronicles of Kashgar</h3>
+              <p>An illustrated narrative world assembled through places, fragments and recurring visual signs. A chronicle still in formation, designed to feel discovered rather than explained all at once.</p>
+              <button class="world-card__link" type="button" data-project-link>Open the chronicles <span>↗</span></button>
+            </div>
+          </article>
+
+          <article class="world-card world-card--victim reveal" data-portal="Authentic Victim">
+            <div class="world-card__visual victim-visual" aria-hidden="true">
+              <span class="victim-paper victim-paper--one"></span>
+              <span class="victim-paper victim-paper--two"></span>
+              <span class="victim-redaction"></span>
+              <strong>AUTHENTIC<br />VICTIM</strong>
+              <i>A NOVEL IN RECONSTRUCTION</i>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>Long-form fiction</span><span>07</span></div>
+              <h3>Authentic Victim</h3>
+              <p>A long-form fiction project being rebuilt chapter by chapter. The work lives here not as a finished object, but as a narrative under reconstruction — sharpened, questioned and rewritten in public view.</p>
+              <button class="world-card__link" type="button" data-project-link>Enter the manuscript <span>↗</span></button>
+            </div>
+          </article>
+
+          <article class="world-card world-card--guess reveal" data-portal="Guess the Book">
+            <div class="world-card__visual guess-visual" aria-hidden="true">
+              <span class="guess-tile guess-tile--one">?</span>
+              <span class="guess-tile guess-tile--two">50</span>
+              <span class="guess-tile guess-tile--three">📖</span>
+              <strong>GUESS<br />THE BOOK</strong>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>Visual game series</span><span>08</span></div>
+              <h3>Guess the Book</h3>
+              <p>Books translated into images, symbols and deliberately misleading clues. A compact visual game for readers who enjoy recognising a story before its title becomes obvious.</p>
+              <button class="world-card__link" type="button" data-project-link>Take the challenge <span>↗</span></button>
+            </div>
+          </article>
+
+          <article class="world-card world-card--next reveal" data-portal="The next world">
+            <div class="world-card__visual next-visual" aria-hidden="true">
+              <span></span>
+              <strong>NEXT<br />WORLD</strong>
+              <i>FORMING NOW</i>
+            </div>
+            <div class="world-card__content">
+              <div class="world-card__meta"><span>In formation</span><span>∞</span></div>
+              <h3>The next impossible thing</h3>
+              <p>This map is deliberately incomplete. New games, stories and experiments appear whenever an idea becomes too persistent to remain only an idea.</p>
+              <button class="world-card__link" type="button" data-project-link>Signal pending <span>···</span></button>
+            </div>
+          </article>
         </div>
       </div>
     </section>
 
-    <section id="worlds" class="worlds section-shell" aria-labelledby="worlds-title">
-      <header class="section-heading reveal">
-        <div>
-          <p class="section-label">The current constellation</p>
-          <h2 id="worlds-title">Choose a world.</h2>
-        </div>
-        <p>Stories, games and experiments. Each keeps its own rules.</p>
-      </header>
-
-      <div class="project-grid">
-        <a class="project-card project-card--titan reveal" href="./titan/" aria-label="Enter Incident on Titan">
-          <div class="project-card__art titan-art" aria-hidden="true">
-            <span class="titan-sun"></span>
-            <span class="titan-ring"></span>
-            <span class="titan-horizon"></span>
-            <span class="titan-base"></span>
-          </div>
-          <div class="project-card__content">
-            <div class="project-card__meta"><span>Interactive narrative</span><span>01</span></div>
-            <h3>Incident on Titan</h3>
-            <p>A weekly mission judged by Sybille AI.</p>
-            <span class="project-card__arrow">Enter ↗</span>
-          </div>
-        </a>
-
-        <article class="project-card project-card--anjin reveal" data-portal="Anjin of the Shogun">
-          <div class="project-card__art anjin-art" aria-hidden="true">
-            <span class="anjin-sun"></span>
-            <span class="anjin-mountain anjin-mountain--back"></span>
-            <span class="anjin-mountain anjin-mountain--front"></span>
-            <span class="anjin-mark">按針</span>
-          </div>
-          <div class="project-card__content">
-            <div class="project-card__meta"><span>Illustrated world</span><span>02</span></div>
-            <h3>Anjin of the Shogun</h3>
-            <p>Foreign eyes inside a world of ink and power.</p>
-            <button class="project-card__arrow" type="button" data-project-link>Discover ↗</button>
-          </div>
-        </article>
-
-        <article class="project-card project-card--dragons reveal" data-portal="Shattered Dragons">
-          <div class="project-card__art dragon-art" aria-hidden="true">
-            <span class="dragon-mass"></span>
-            <span class="dragon-spine"></span>
-            <span class="dragon-eye"></span>
-          </div>
-          <div class="project-card__content">
-            <div class="project-card__meta"><span>Speculative fantasy</span><span>03</span></div>
-            <h3>Shattered Dragons</h3>
-            <p>Engineered creatures returning through living systems.</p>
-            <button class="project-card__arrow" type="button" data-project-link>Discover ↗</button>
-          </div>
-        </article>
-
-        <article class="project-card project-card--wecan reveal" data-portal="We Can / We Can't">
-          <div class="project-card__art wecan-art" aria-hidden="true">
-            <span>WE CAN</span>
-            <strong>WE CAN’T</strong>
-          </div>
-          <div class="project-card__content">
-            <div class="project-card__meta"><span>Visual provocations</span><span>04</span></div>
-            <h3>We Can / We Can’t</h3>
-            <p>Human brilliance beside its most absurd failures.</p>
-            <button class="project-card__arrow" type="button" data-project-link>Discover ↗</button>
-          </div>
-        </article>
-
-        <article class="project-card project-card--play reveal" data-portal="Playground">
-          <div class="project-card__art play-art" aria-hidden="true">
-            <span class="play-path play-path--one"></span>
-            <span class="play-path play-path--two"></span>
-            <i>?</i><i>42</i><i>A</i>
-          </div>
-          <div class="project-card__content">
-            <div class="project-card__meta"><span>Games & prototypes</span><span>05</span></div>
-            <h3>Playground</h3>
-            <p>Small games and ideas before they become worlds.</p>
-            <button class="project-card__arrow" type="button" data-project-link>Discover ↗</button>
-          </div>
-        </article>
-
-        <article class="project-card project-card--incoming reveal" data-portal="The next world">
-          <div class="project-card__art incoming-art" aria-hidden="true">
-            <span class="incoming-orbit"></span>
-            <strong>∞</strong>
-          </div>
-          <div class="project-card__content">
-            <div class="project-card__meta"><span>In formation</span><span>∞</span></div>
-            <h3>The next impossible thing</h3>
-            <p>Another door is already taking shape.</p>
-            <button class="project-card__arrow" type="button" data-project-link>Signal pending ···</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section id="about" class="about section-shell" aria-labelledby="about-title">
-      <div class="about__mark reveal" aria-hidden="true">
-        <svg viewBox="0 0 360 240">
-          <path d="M12 62c95-3 160 23 215 70-83 10-137 42-163 96C37 181 20 126 12 62Z" />
-          <path d="M189 129c58-34 109-47 159-39-19 59-55 103-105 133-10-39-28-70-54-94Z" />
-          <path class="about__river" d="M184 94c0 49-30 69-76 91-30 14-41 29-34 45" />
-        </svg>
-      </div>
-      <div class="about__content reveal">
+    <section id="about" class="about">
+      <div class="section-shell about__inner reveal">
         <p class="section-label">Confluence of Minds</p>
-        <h2 id="about-title">Different doors.<br />One expanding universe.</h2>
-        <p>Speculative fiction, interactive experiences, visual narratives and creative experiments — connected without being made identical.</p>
+        <h2>Different doors.<br />One expanding universe.</h2>
+        <p>Fiction, games, visual narratives, cultural series and AI experiments — each free to become its own thing.</p>
       </div>
     </section>
   </main>
