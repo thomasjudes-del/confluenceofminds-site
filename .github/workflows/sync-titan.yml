@@ -1,4 +1,5 @@
 name: Sync Incident on Titan
+# Sync trigger: incident-on-titan v54 @ ee49a35496ed8552ed93198eb0581bdeb87d8ac8
 
 on:
   workflow_dispatch:
