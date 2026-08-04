@@ -1,7 +1,9 @@
 (() => {
+  'use strict';
+
   const tr = (key, fallback) => window.IOTI_I18N?.t(key) || fallback;
-  const SHARE_URL = 'https://confluenceofminds.com/titan/';
-  const SHARE_LABEL = 'confluenceofminds.com/titan/';
+  const BRAND_LABEL = 'confluenceofminds.com/titan/';
+  const context = window.IOTI_MISSION_CONTEXT;
 
   function roundedRect(ctx, x, y, width, height, radius) {
     const r = Math.min(radius, width / 2, height / 2);
@@ -52,12 +54,14 @@
     ctx.fillText(tr('decisionPath', 'Decision path').toUpperCase(), 110, y - 34);
     const size = 58;
     const gap = 25;
+
     path.forEach((choice, index) => {
       const x = 110 + index * (size + gap);
       ctx.strokeStyle = 'rgba(255,201,121,.7)';
       ctx.lineWidth = 3;
       roundedRect(ctx, x, y, size, size, 8);
       ctx.stroke();
+
       if (choice === 1) {
         ctx.fillStyle = 'rgba(237,141,50,.72)';
         roundedRect(ctx, x + 9, y + 9, size - 18, size - 18, 5);
@@ -78,8 +82,17 @@
     });
   }
 
+  function missionShareUrl() {
+    const url = new URL('https://confluenceofminds.com/titan/');
+    url.searchParams.set('incident', context?.selectedMissionId || mission.number);
+    const language = window.IOTI_I18N?.language;
+    if (language === 'fr') url.searchParams.set('lang', 'fr');
+    return url;
+  }
+
   async function createResultPng(result) {
     try { await document.fonts?.ready; } catch (_) {}
+
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
     canvas.height = 1350;
@@ -123,8 +136,7 @@
 
     ctx.fillStyle = '#aaa198';
     ctx.font = '700 22px "Space Mono", monospace';
-    const incidentWord = window.IOTI_I18N?.language === 'fr' ? 'INCIDENT' : 'INCIDENT';
-    ctx.fillText(`${incidentWord} ${mission.number}  /  ${mission.role.toUpperCase()}`, 110, 205);
+    ctx.fillText(`INCIDENT ${mission.number}  /  ${mission.role.toUpperCase()}`, 110, 205);
 
     ctx.fillStyle = '#f5ede2';
     ctx.font = '600 52px Rajdhani, sans-serif';
@@ -176,9 +188,11 @@
     ctx.fillText(tr('playSameIncident', 'Play the same incident').toUpperCase(), 110, 1252);
     ctx.fillStyle = '#91877d';
     ctx.font = '400 19px "Space Mono", monospace';
-    ctx.fillText(SHARE_LABEL, 110, 1288);
+    ctx.fillText(BRAND_LABEL, 110, 1288);
 
-    return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('PNG generation failed')), 'image/png', 1));
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('PNG generation failed')), 'image/png', 1);
+    });
   }
 
   function download(blob, filename) {
@@ -192,11 +206,14 @@
     setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
   }
 
-  window.shareResult = async function localizedImageShare() {
+  window.shareResult = async function missionSpecificShare() {
     const result = window.result || window.loadStoredResult?.();
     if (!result) return;
-    const button = document.querySelector('[data-action="share-result"]') || [...document.querySelectorAll('button')].find(item => /share|partager/i.test(item.textContent));
+
+    const button = document.querySelector('[data-action="share-result"]')
+      || [...document.querySelectorAll('button')].find(item => /share|partager/i.test(item.textContent));
     const originalLabel = button?.textContent;
+
     if (button) {
       button.disabled = true;
       button.textContent = tr('preparingImage', 'Preparing image…');
@@ -206,12 +223,17 @@
       const blob = await createResultPng(result);
       const filename = `incident-on-titan-${String(result.simulation || 'result').replace(/[^a-z0-9-]/gi, '')}.png`;
       const file = new File([blob], filename, { type: 'image/png' });
-      const gameUrl = new URL(SHARE_URL);
-      const text = `${tr('weeklyIncident', 'Incident')} ${mission.number} · ${mission.role.toUpperCase()}\n${tr('scoreAttributedCaps', 'SCORE ATTRIBUTED BY SYBILLE AI')}: ${result.score}\n${result.simulation}`;
+      const gameUrl = missionShareUrl();
+      const text = `${tr('weeklyIncident', 'Incident')} ${mission.number} · ${mission.title}\n${mission.role.toUpperCase()}\n${tr('scoreAttributedCaps', 'SCORE ATTRIBUTED BY SYBILLE AI')}: ${result.score}\n${result.simulation}`;
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ title: 'Incident on Titan', text, url: gameUrl.toString(), files: [file] });
+          await navigator.share({
+            title: `Incident on Titan — ${mission.title}`,
+            text,
+            url: gameUrl.toString(),
+            files: [file]
+          });
           return;
         } catch (error) {
           if (error?.name === 'AbortError') return;
