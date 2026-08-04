@@ -10,39 +10,62 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 if (year) year.textContent = new Date().getFullYear();
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+const easeIn = (value) => value * value;
+const easeInCubic = (value) => value * value * value;
 
 let ticking = false;
-function updateScrollScene() {
+
+function updateHero() {
   const scrollY = window.scrollY;
-  header?.classList.toggle('is-scrolled', scrollY > 24);
+  header?.classList.toggle('is-scrolled', scrollY > 28);
 
   if (hero && !reduceMotion) {
     const rect = hero.getBoundingClientRect();
     const travel = Math.max(hero.offsetHeight - window.innerHeight, 1);
     const progress = clamp(-rect.top / travel, 0, 1);
-    const mobile = window.innerWidth < 760;
+    const surge = easeInCubic(progress);
+    const burst = clamp((progress - 0.46) / 0.54, 0, 1);
+    const burstEase = easeIn(burst);
 
-    hero.style.setProperty('--art-scale', (1 + progress * (mobile ? 0.1 : 0.2)).toFixed(4));
-    hero.style.setProperty('--art-x', `${Math.round(progress * (mobile ? -12 : -78))}px`);
-    hero.style.setProperty('--art-y', `${Math.round(progress * (mobile ? -12 : -30))}px`);
-    hero.style.setProperty('--river-y', `${Math.round(progress * (mobile ? -26 : -72))}px`);
-    hero.style.setProperty('--copy-opacity', clamp(1 - progress * 1.3, 0, 1).toFixed(4));
-    hero.style.setProperty('--copy-y', `${Math.round(progress * -52)}px`);
-    hero.style.setProperty('--index-opacity', clamp(1 - progress * 3.3, 0, 1).toFixed(4));
+    hero.style.setProperty('--art-scale', (1 + progress * 0.6 + surge * 5.2).toFixed(4));
+    hero.style.setProperty('--art-rotate', `${(-1.5 + surge * 8.5).toFixed(2)}deg`);
+    hero.style.setProperty('--art-x', `${Math.round(surge * window.innerWidth * -0.035)}px`);
+    hero.style.setProperty('--art-y', `${Math.round(surge * window.innerHeight * 0.035)}px`);
+
+    hero.style.setProperty('--copy-opacity', clamp(1 - progress * 2.25, 0, 1).toFixed(4));
+    hero.style.setProperty('--copy-y', `${Math.round(progress * -125)}px`);
+    hero.style.setProperty('--signature-opacity', clamp(1 - progress * 3.1, 0, 1).toFixed(4));
+    hero.style.setProperty('--void-opacity', (clamp((progress - 0.63) / 0.37, 0, 1) * 1.04).toFixed(4));
+
+    hero.style.setProperty('--shard-one-x', `${Math.round(burstEase * window.innerWidth * -0.48)}px`);
+    hero.style.setProperty('--shard-one-y', `${Math.round(burstEase * window.innerHeight * -0.38)}px`);
+    hero.style.setProperty('--shard-one-r', `${Math.round(burstEase * -46)}deg`);
+
+    hero.style.setProperty('--shard-two-x', `${Math.round(burstEase * window.innerWidth * 0.46)}px`);
+    hero.style.setProperty('--shard-two-y', `${Math.round(burstEase * window.innerHeight * -0.22)}px`);
+    hero.style.setProperty('--shard-two-r', `${Math.round(burstEase * 58)}deg`);
+
+    hero.style.setProperty('--shard-three-x', `${Math.round(burstEase * window.innerWidth * -0.36)}px`);
+    hero.style.setProperty('--shard-three-y', `${Math.round(burstEase * window.innerHeight * 0.42)}px`);
+    hero.style.setProperty('--shard-three-r', `${Math.round(burstEase * 34)}deg`);
+
+    hero.style.setProperty('--shard-four-x', `${Math.round(burstEase * window.innerWidth * 0.4)}px`);
+    hero.style.setProperty('--shard-four-y', `${Math.round(burstEase * window.innerHeight * 0.36)}px`);
+    hero.style.setProperty('--shard-four-r', `${Math.round(burstEase * -52)}deg`);
   }
 
   ticking = false;
 }
 
-function requestScrollUpdate() {
+function requestUpdate() {
   if (ticking) return;
   ticking = true;
-  requestAnimationFrame(updateScrollScene);
+  requestAnimationFrame(updateHero);
 }
 
-window.addEventListener('scroll', requestScrollUpdate, { passive: true });
-window.addEventListener('resize', requestScrollUpdate);
-requestScrollUpdate();
+window.addEventListener('scroll', requestUpdate, { passive: true });
+window.addEventListener('resize', requestUpdate);
+requestUpdate();
 
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
@@ -63,13 +86,29 @@ function showToast(message) {
   toastMessage.textContent = message;
   toast.classList.add('is-visible');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2500);
+  toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2800);
 }
 
 projectButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const card = button.closest('[data-portal]');
     const portal = card?.dataset.portal || 'This world';
-    showToast(`${portal} will open here when its project page is ready.`);
+    showToast(`${portal} has its own identity. Its dedicated portal will be connected here.`);
   });
 });
+
+if (!reduceMotion) {
+  document.querySelectorAll('.world-card').forEach((card) => {
+    card.addEventListener('pointermove', (event) => {
+      if (window.innerWidth < 900) return;
+      const rect = card.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width - 0.5;
+      const y = (event.clientY - rect.top) / rect.height - 0.5;
+      card.style.transform = `translateY(-7px) perspective(900px) rotateX(${(-y * 1.7).toFixed(2)}deg) rotateY(${(x * 1.7).toFixed(2)}deg)`;
+    });
+
+    card.addEventListener('pointerleave', () => {
+      card.style.transform = '';
+    });
+  });
+}
