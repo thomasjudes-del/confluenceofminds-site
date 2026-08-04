@@ -1,0 +1,62 @@
+name: Sync Incident on Titan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sync-titan.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-incident-on-titan
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Confluence of Minds
+        uses: actions/checkout@v4
+        with:
+          path: site
+          fetch-depth: 0
+
+      - name: Check out Incident on Titan
+        uses: actions/checkout@v4
+        with:
+          repository: thomasjudes-del/incident-on-titan
+          ref: main
+          path: titan-source
+
+      - name: Sync Titan into /titan
+        run: |
+          rm -rf site/titan
+          mkdir -p site/titan
+          rsync -a --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'README.md' \
+            titan-source/ site/titan/
+          touch site/titan/.nojekyll
+
+      - name: Commit synchronized files
+        working-directory: site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add titan
+
+          if git diff --cached --quiet; then
+            echo "Titan is already up to date."
+            exit 0
+          fi
+
+          git commit -m "Sync Incident on Titan into /titan"
+          git push
