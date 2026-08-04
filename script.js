@@ -67,6 +67,12 @@ projectButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const card = button.closest('[data-portal]');
     const portal = card?.dataset.portal || 'This world';
+
+    if (portal === 'Incident on Titan') {
+      window.location.assign('./titan/');
+      return;
+    }
+
     showToast(`${portal} will be connected to its project page next.`);
   });
 });
