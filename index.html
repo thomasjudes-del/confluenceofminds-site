@@ -3,24 +3,30 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Confluence of Minds — stories, games, creative experiments and impossible worlds." />
-  <meta name="theme-color" content="#05070a" />
+  <meta name="description" content="Confluence of Minds — stories, games, visual experiments and impossible worlds." />
+  <meta name="theme-color" content="#eee8dc" />
 
   <title>Confluence of Minds</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="grain" aria-hidden="true"></div>
+  <div class="paper-grain" aria-hidden="true"></div>
 
   <header class="site-header" data-header>
     <a class="wordmark" href="#top" aria-label="Confluence of Minds — home">
-      <span>Confluence</span>
-      <span>of Minds</span>
+      <svg class="wordmark__symbol" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M6 43C18 37 25 28 31 8c9 8 15 18 19 31-14-5-28-4-44 4Z" />
+        <path d="M8 46c18-4 31-2 48 8-20-3-34-2-48 2Z" />
+      </svg>
+      <span class="wordmark__text">
+        <strong>Confluence</strong>
+        <small>of Minds</small>
+      </span>
     </a>
 
     <nav class="site-nav" aria-label="Main navigation">
@@ -33,121 +39,117 @@
   <main id="top">
     <section class="hero-sequence" data-hero aria-labelledby="hero-title">
       <div class="hero-sticky">
-        <div class="cinematic-scene" aria-hidden="true">
-          <div class="scene-sky"></div>
-          <div class="scene-stars"></div>
-          <div class="scene-aurora scene-aurora--left"></div>
-          <div class="scene-aurora scene-aurora--right"></div>
-          <div class="scene-horizon-glow"></div>
-
-          <svg class="confluence-lines" viewBox="0 0 1600 900" preserveAspectRatio="none">
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-art__sun"></div>
+          <svg class="hero-art__canvas" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
             <defs>
-              <linearGradient id="riverLight" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#fff3d6" stop-opacity="0" />
-                <stop offset="0.35" stop-color="#e9c987" stop-opacity="0.36" />
-                <stop offset="1" stop-color="#fff8e8" stop-opacity="0.9" />
+              <linearGradient id="paperFold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#f4eee3" />
+                <stop offset="0.52" stop-color="#cfc5b3" />
+                <stop offset="1" stop-color="#938874" />
               </linearGradient>
-              <filter id="riverGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="10" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
+              <linearGradient id="paperFoldLight" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0" stop-color="#a99d89" />
+                <stop offset="0.38" stop-color="#e9e1d3" />
+                <stop offset="1" stop-color="#f8f3ea" />
+              </linearGradient>
+              <linearGradient id="riverFade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#f5efe4" stop-opacity="0" />
+                <stop offset="0.32" stop-color="#f5efe4" stop-opacity="0.9" />
+                <stop offset="1" stop-color="#f5efe4" />
+              </linearGradient>
+              <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#101716" flood-opacity="0.18" />
               </filter>
             </defs>
-            <path d="M-100 840 C 250 720, 440 610, 795 435" />
-            <path d="M260 940 C 450 760, 560 610, 798 435" />
-            <path d="M820 980 C 805 760, 805 590, 800 435" />
-            <path d="M1360 960 C 1170 740, 1040 600, 802 435" />
-            <path d="M1710 790 C 1360 690, 1110 580, 805 435" />
-            <path class="confluence-lines__core" d="M800 930 C 800 720, 800 590, 800 435" filter="url(#riverGlow)" />
+
+            <g class="hero-art__folds" filter="url(#softShadow)">
+              <path class="fold fold--terra" d="M196 462C317 419 390 451 499 561H221c-4-39-12-70-25-99Z" />
+              <path class="fold fold--dark" d="M492 250c153 67 231 187 246 350-108-75-212-96-330-54 58-96 86-194 84-296Z" />
+              <path class="fold fold--back" d="M296 360C430 319 519 213 635 99c-6 167-39 300-124 416-118-16-195-67-215-155Z" />
+              <path class="fold fold--front" d="M299 352c128 42 211 76 306 177-118 14-228 11-338-8 8-54 20-110 32-169Z" />
+              <path class="fold fold--light" d="M296 352c117 23 208 68 309 177-126 2-224-8-325-47 5-50 10-88 16-130Z" />
+            </g>
+
+            <g class="hero-art__river">
+              <path class="river-bank river-bank--left" d="M103 764c147-12 258 1 365 52-124 28-198 78-241 151-58-55-101-123-124-203Z" />
+              <path class="river-bank river-bank--right" d="M510 812c138-65 258-80 381-41-53 82-120 149-203 201-23-69-82-122-178-160Z" />
+              <path class="river-path river-path--wide" d="M492 714c-22 65-91 88-156 120-73 36-82 85-27 145 63-58 140-81 231-110 72-24 117-76 151-155-65 19-130 20-199 0Z" />
+              <path class="river-path river-path--core" d="M513 717c-2 70-47 103-113 136-70 36-91 75-63 123 57-38 126-57 207-82 91-28 126-87 151-178-63 31-124 32-182 1Z" />
+              <path class="river-glint" d="M511 718c6 72-29 111-88 148-48 30-64 60-49 94" />
+            </g>
           </svg>
 
-          <div class="scene-ridge scene-ridge--back"></div>
-          <div class="scene-ridge scene-ridge--front"></div>
-          <div class="scene-foreground"></div>
-          <div class="scene-vignette"></div>
+          <div class="hero-art__microcopy">
+            <span>FICTION · PLAY · IMAGE · MACHINE</span>
+            <span>ONE CONFLUENCE / MANY DIRECTIONS</span>
+          </div>
         </div>
 
         <div class="hero-copy">
           <p class="hero-kicker reveal">Stories · games · experiments · impossible worlds</p>
-          <h1 id="hero-title" class="hero-title reveal">Too many ideas<br />for this world.</h1>
-          <p class="hero-lede reveal">
-            Confluence of Minds is a growing universe of speculative stories, interactive experiences
-            and visual worlds — made to be entered, not simply observed.
-          </p>
+          <h1 id="hero-title" class="hero-title reveal">
+            <span>Too many ideas</span>
+            <span>for one world.</span>
+          </h1>
+          <p class="hero-lede reveal">A creative universe built one door at a time.</p>
           <div class="hero-actions reveal">
-            <a class="button button--light" href="#worlds">Explore the worlds <span aria-hidden="true">↓</span></a>
-            <a class="button button--glass" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">Follow the experiments ↗</a>
+            <a class="button button--dark" href="#worlds">Explore the worlds <span aria-hidden="true">↓</span></a>
+            <a class="button button--line" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">Instagram ↗</a>
           </div>
+          <p class="hero-signature reveal">Come for one world. <em>Get lost in a universe.</em></p>
         </div>
 
-        <div class="hero-scroll" aria-hidden="true">
-          <span>Scroll to enter</span>
+        <div class="hero-index" aria-hidden="true">
+          <span>COM / 001</span>
           <i></i>
+          <span>Scroll to enter</span>
         </div>
-      </div>
-    </section>
-
-    <section class="threshold" aria-labelledby="threshold-title">
-      <div class="threshold__inner section-shell reveal">
-        <p class="section-label">One entrance. Many destinations.</p>
-        <h2 id="threshold-title">Come for one world.<br /><span>Get lost in a universe.</span></h2>
-        <p>
-          Follow a distress signal on Titan, cross a landscape drawn in ink, wake an engineered dragon,
-          or stumble into an experiment that did not exist yesterday.
-        </p>
       </div>
     </section>
 
     <section id="worlds" class="worlds section-shell" aria-labelledby="worlds-title">
-      <div class="section-heading reveal">
+      <header class="section-heading reveal">
         <div>
           <p class="section-label">The current constellation</p>
-          <h2 id="worlds-title">Worlds, stories<br />and experiments.</h2>
+          <h2 id="worlds-title">Choose a world.</h2>
         </div>
-        <p>
-          Each project keeps its own atmosphere, rules and visual language. Together, they form the larger
-          territory of Confluence of Minds.
-        </p>
-      </div>
+        <p>Stories, games and experiments. Each keeps its own rules.</p>
+      </header>
 
       <div class="project-grid">
-        <article class="project-card project-card--feature project-card--titan reveal" data-portal="Incident on Titan">
+        <a class="project-card project-card--titan reveal" href="./titan/" aria-label="Enter Incident on Titan">
           <div class="project-card__art titan-art" aria-hidden="true">
-            <span class="titan-atmosphere"></span>
-            <span class="titan-moon"></span>
-            <span class="titan-sea"></span>
+            <span class="titan-sun"></span>
+            <span class="titan-ring"></span>
+            <span class="titan-horizon"></span>
             <span class="titan-base"></span>
-            <span class="titan-beacon"></span>
           </div>
           <div class="project-card__content">
             <div class="project-card__meta"><span>Interactive narrative</span><span>01</span></div>
             <h3>Incident on Titan</h3>
-            <p>A weekly mission. Conflicting roles. Three fragile resources. And Sybille — an intelligence whose judgment you will have to understand.</p>
-            <button class="project-link" type="button" data-project-link>Enter Titan <span>↗</span></button>
+            <p>A weekly mission judged by Sybille AI.</p>
+            <span class="project-card__arrow">Enter ↗</span>
           </div>
-        </article>
+        </a>
 
         <article class="project-card project-card--anjin reveal" data-portal="Anjin of the Shogun">
           <div class="project-card__art anjin-art" aria-hidden="true">
-            <span class="anjin-paper"></span>
-            <span class="anjin-mountain"></span>
             <span class="anjin-sun"></span>
-            <span class="anjin-figure"></span>
+            <span class="anjin-mountain anjin-mountain--back"></span>
+            <span class="anjin-mountain anjin-mountain--front"></span>
             <span class="anjin-mark">按針</span>
           </div>
           <div class="project-card__content">
             <div class="project-card__meta"><span>Illustrated world</span><span>02</span></div>
             <h3>Anjin of the Shogun</h3>
-            <p>Foreign eyes, feudal power and a world of restraint, rendered through ink, silence and consequence.</p>
-            <button class="project-link" type="button" data-project-link>Cross the threshold <span>↗</span></button>
+            <p>Foreign eyes inside a world of ink and power.</p>
+            <button class="project-card__arrow" type="button" data-project-link>Discover ↗</button>
           </div>
         </article>
 
         <article class="project-card project-card--dragons reveal" data-portal="Shattered Dragons">
           <div class="project-card__art dragon-art" aria-hidden="true">
-            <span class="dragon-fog"></span>
             <span class="dragon-mass"></span>
             <span class="dragon-spine"></span>
             <span class="dragon-eye"></span>
@@ -155,87 +157,72 @@
           <div class="project-card__content">
             <div class="project-card__meta"><span>Speculative fantasy</span><span>03</span></div>
             <h3>Shattered Dragons</h3>
-            <p>Ancient creatures with engineered origins, returning through ecosystems that never forgot them.</p>
-            <button class="project-link" type="button" data-project-link>Wake the dragons <span>↗</span></button>
+            <p>Engineered creatures returning through living systems.</p>
+            <button class="project-card__arrow" type="button" data-project-link>Discover ↗</button>
           </div>
         </article>
 
         <article class="project-card project-card--wecan reveal" data-portal="We Can / We Can't">
           <div class="project-card__art wecan-art" aria-hidden="true">
             <span>WE CAN</span>
-            <i></i>
-            <strong>WE CAN'T</strong>
+            <strong>WE CAN’T</strong>
           </div>
           <div class="project-card__content">
             <div class="project-card__meta"><span>Visual provocations</span><span>04</span></div>
-            <h3>We Can / We Can't</h3>
-            <p>What human civilisation can achieve — placed beside the things it somehow still refuses to solve.</p>
-            <button class="project-link" type="button" data-project-link>Face the contradiction <span>↗</span></button>
+            <h3>We Can / We Can’t</h3>
+            <p>Human brilliance beside its most absurd failures.</p>
+            <button class="project-card__arrow" type="button" data-project-link>Discover ↗</button>
           </div>
         </article>
 
         <article class="project-card project-card--play reveal" data-portal="Playground">
           <div class="project-card__art play-art" aria-hidden="true">
-            <span class="play-orbit play-orbit--one"></span>
-            <span class="play-orbit play-orbit--two"></span>
-            <span class="play-object play-object--one">?</span>
-            <span class="play-object play-object--two">42</span>
-            <span class="play-object play-object--three">A</span>
+            <span class="play-path play-path--one"></span>
+            <span class="play-path play-path--two"></span>
+            <i>?</i><i>42</i><i>A</i>
           </div>
           <div class="project-card__content">
             <div class="project-card__meta"><span>Games & prototypes</span><span>05</span></div>
             <h3>Playground</h3>
-            <p>Small games, visual puzzles, unusual rules and interactive ideas tested before they grow into worlds.</p>
-            <button class="project-link" type="button" data-project-link>Start playing <span>↗</span></button>
+            <p>Small games and ideas before they become worlds.</p>
+            <button class="project-card__arrow" type="button" data-project-link>Discover ↗</button>
           </div>
         </article>
 
         <article class="project-card project-card--incoming reveal" data-portal="The next world">
           <div class="project-card__art incoming-art" aria-hidden="true">
-            <span class="incoming-light"></span>
-            <p>NEXT WORLD<br />FORMING</p>
+            <span class="incoming-orbit"></span>
+            <strong>∞</strong>
           </div>
           <div class="project-card__content">
             <div class="project-card__meta"><span>In formation</span><span>∞</span></div>
             <h3>The next impossible thing</h3>
-            <p>The collection stays unfinished by design. New doors appear whenever an idea becomes too persistent to ignore.</p>
-            <button class="project-link" type="button" data-project-link>Signal pending <span>···</span></button>
+            <p>Another door is already taking shape.</p>
+            <button class="project-card__arrow" type="button" data-project-link>Signal pending ···</button>
           </div>
         </article>
       </div>
     </section>
 
     <section id="about" class="about section-shell" aria-labelledby="about-title">
-      <div class="about__visual reveal" aria-hidden="true">
-        <span class="about__line about__line--one"></span>
-        <span class="about__line about__line--two"></span>
-        <span class="about__line about__line--three"></span>
-        <strong>∞</strong>
+      <div class="about__mark reveal" aria-hidden="true">
+        <svg viewBox="0 0 360 240">
+          <path d="M12 62c95-3 160 23 215 70-83 10-137 42-163 96C37 181 20 126 12 62Z" />
+          <path d="M189 129c58-34 109-47 159-39-19 59-55 103-105 133-10-39-28-70-54-94Z" />
+          <path class="about__river" d="M184 94c0 49-30 69-76 91-30 14-41 29-34 45" />
+        </svg>
       </div>
       <div class="about__content reveal">
-        <p class="section-label">A creative universe in permanent expansion</p>
-        <h2 id="about-title">Start anywhere.<br />You may end up somewhere else entirely.</h2>
-        <p>
-          Confluence of Minds brings together speculative fiction, interactive experiences, visual narratives,
-          social provocations and experiments made with artificial intelligence. Every project opens a different door;
-          the pleasure is discovering where the doors connect.
-        </p>
-      </div>
-    </section>
-
-    <section class="closing" aria-labelledby="closing-title">
-      <div class="closing__glow" aria-hidden="true"></div>
-      <div class="closing__inner section-shell reveal">
-        <p class="section-label">The confluence is open</p>
-        <h2 id="closing-title">Come for one world.<br />Get lost in a universe.</h2>
-        <a class="button button--light" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">Continue on Instagram ↗</a>
+        <p class="section-label">Confluence of Minds</p>
+        <h2 id="about-title">Different doors.<br />One expanding universe.</h2>
+        <p>Speculative fiction, interactive experiences, visual narratives and creative experiments — connected without being made identical.</p>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <span>© <span data-year></span> Confluence of Minds</span>
-    <span>Stories · games · experiments · impossible worlds</span>
+    <a href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">Instagram ↗</a>
   </footer>
 
   <div class="portal-toast" role="status" aria-live="polite" data-toast>
