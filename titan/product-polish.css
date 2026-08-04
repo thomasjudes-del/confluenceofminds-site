@@ -1,0 +1,206 @@
+/* Product clarity: neutral choices and a readable initial/final operational debrief. */
+.choice-icon{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(237,141,50,.35);
+  border-radius:999px;
+  background:rgba(237,141,50,.07);
+  color:var(--amber2);
+  font:700 10px "Space Mono",monospace;
+}
+
+.role-identity{
+  display:grid;
+  grid-template-columns:84px minmax(0,1fr);
+  gap:14px;
+  align-items:center;
+  padding:10px;
+  margin-bottom:12px;
+}
+
+.role-avatar{
+  width:84px;
+  height:84px;
+  overflow:hidden;
+  border:1px solid rgba(255,201,121,.42);
+  border-radius:13px;
+  background:#080a0d;
+  box-shadow:0 0 24px rgba(237,141,50,.08);
+}
+
+.role-avatar img{
+  display:block;
+  width:145%;
+  height:145%;
+  max-width:none;
+  transform:translate(-15.5%,-8%);
+}
+
+.role-copy{min-width:0}
+.role-copy small{
+  margin:0 0 5px;
+  color:#9d7753;
+}
+.role-copy strong{
+  margin:0;
+  color:var(--amber2);
+  font-size:32px;
+  line-height:.94;
+  text-transform:uppercase;
+}
+.role-copy span{
+  display:block;
+  margin-top:6px;
+  color:#d8c3aa;
+  font:700 10px "Space Mono",monospace;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+
+.initial-state{
+  grid-column:1 / -1;
+  padding-top:9px;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+
+.initial-state > small{
+  display:block;
+  margin-bottom:7px;
+  color:#847d75;
+  font:700 7px "Space Mono",monospace;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+.initial-state-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+}
+
+.initial-state-grid span{
+  min-width:0;
+  padding:7px 8px;
+  border:1px solid rgba(237,141,50,.13);
+  border-radius:9px;
+  background:rgba(0,0,0,.13);
+}
+
+.initial-state-grid b{
+  display:block;
+  overflow:hidden;
+  color:#8f8175;
+  font:700 7px "Space Mono",monospace;
+  letter-spacing:.06em;
+  text-overflow:ellipsis;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.initial-state-grid strong{
+  display:block;
+  margin-top:3px;
+  color:#eee4d8;
+  font:700 14px "Space Mono",monospace;
+  line-height:1;
+}
+
+.outcome-card{
+  margin-top:12px;
+  padding:11px 12px 10px;
+  border:1px solid rgba(237,141,50,.24);
+  border-radius:15px;
+  background:linear-gradient(180deg,#10151b,#0a0d12);
+}
+
+.outcome-title{
+  margin-bottom:8px;
+  color:var(--amber2);
+  font:700 9px "Space Mono",monospace;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.outcome-head,
+.outcome-row{
+  display:grid;
+  grid-template-columns:minmax(86px,1fr) 44px 44px 48px;
+  gap:7px;
+  align-items:center;
+}
+
+.outcome-head{
+  padding-bottom:5px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.outcome-head b{
+  color:#847d75;
+  font:700 7px "Space Mono",monospace;
+  text-align:right;
+  text-transform:uppercase;
+}
+
+.outcome-row{
+  min-height:31px;
+  border-bottom:1px solid rgba(255,255,255,.045);
+}
+
+.outcome-row:last-child{
+  border-bottom:0;
+}
+
+.outcome-row strong{
+  color:#d9cfc3;
+  font:700 10px "Space Mono",monospace;
+  text-transform:uppercase;
+}
+
+.outcome-row span,
+.outcome-row em{
+  font:700 11px "Space Mono",monospace;
+  text-align:right;
+  font-style:normal;
+}
+
+.outcome-row span{
+  color:#eee4d8;
+}
+
+.outcome-row em.gain{color:#86c7ff}
+.outcome-row em.loss{color:#ff8a78}
+.outcome-row em.neutral{color:#8d8984}
+
+/* The response-time component affects the score but stays out of the compact UI. */
+.decision-tempo{display:none}
+
+@media(max-width:380px){
+  .role-identity{
+    grid-template-columns:74px minmax(0,1fr);
+    gap:11px;
+  }
+
+  .role-avatar{
+    width:74px;
+    height:74px;
+  }
+
+  .role-copy strong{font-size:28px}
+
+  .initial-state-grid{gap:5px}
+  .initial-state-grid span{padding:6px}
+  .initial-state-grid b{font-size:6.5px}
+  .initial-state-grid strong{font-size:13px}
+
+  .outcome-head,
+  .outcome-row{
+    grid-template-columns:minmax(76px,1fr) 39px 39px 43px;
+    gap:5px;
+  }
+
+  .outcome-row strong{
+    font-size:9px;
+  }
+}

@@ -1,0 +1,44 @@
+.topbar{gap:8px}
+.music-toggle{
+  position:relative;
+  width:29px;
+  height:27px;
+  flex:0 0 29px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:9px;
+  color:#8b7e70;
+  background:rgba(255,255,255,.015);
+  cursor:pointer;
+  transition:border-color .2s ease,color .2s ease,background .2s ease,box-shadow .2s ease;
+}
+.music-toggle span{font:700 15px/1 "Space Mono",monospace;transform:translateY(-1px)}
+.music-toggle:after{
+  content:"";
+  position:absolute;
+  width:17px;
+  height:1px;
+  background:currentColor;
+  transform:rotate(-43deg);
+  opacity:.9;
+  transition:opacity .2s ease;
+}
+.music-toggle.is-on{
+  color:var(--amber2);
+  border-color:rgba(237,141,50,.5);
+  background:rgba(237,141,50,.09);
+  box-shadow:0 0 18px rgba(237,141,50,.1);
+}
+.music-toggle.is-on:after{opacity:0}
+.music-toggle.is-on span{animation:musicPulse 1.6s ease-in-out infinite}
+.music-toggle.is-off{color:#8b7e70}
+.music-toggle:hover{border-color:rgba(255,201,121,.5);color:var(--amber2)}
+.music-toggle:focus-visible{outline:2px solid var(--amber2);outline-offset:2px}
+@keyframes musicPulse{0%,100%{opacity:.68;transform:translateY(-1px) scale(.94)}50%{opacity:1;transform:translateY(-1px) scale(1.08)}}
+@media(max-width:430px){
+  .topbar{gap:5px}
+  .music-toggle{width:27px;height:25px;flex-basis:27px}
+  .protocol{font-size:8px;letter-spacing:.09em}
+}

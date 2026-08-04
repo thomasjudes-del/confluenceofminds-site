@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07090c">
+  <meta name="description" content="Incident on Titan — the weekly command incident scored by Sybille AI.">
+  <title>Incident on Titan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=51">
+  <link rel="stylesheet" href="takeover.css?v=51">
+  <link rel="stylesheet" href="i18n.css?v=51">
+  <link rel="stylesheet" href="mobile-fit.css?v=51">
+  <link rel="stylesheet" href="product-polish.css?v=51">
+</head>
+<body>
+  <div class="app" id="app" data-stage="home">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Return to start">
+        <span class="brand-mark">◈</span>
+        <span>IOTI</span>
+      </a>
+      <div class="lang-switch" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        <button type="button" data-lang="fr" aria-pressed="false">FR</button>
+      </div>
+      <button id="soundToggle" class="sound-toggle is-on" type="button" aria-pressed="true" aria-label="Sound on. Press to mute.">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path class="sound-body" d="M4 9v6h4l5 4V5L8 9H4z"></path>
+          <path class="sound-waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"></path>
+          <path class="sound-slash" d="M5 5l14 14"></path>
+        </svg>
+        <span class="sound-state">ON</span>
+      </button>
+      <div class="protocol" id="stepText">Weekly incident</div>
+    </header>
+
+    <section class="shell">
+      <div class="hero" id="hero">
+        <img id="heroImage" alt="A human base beneath Saturn on Titan">
+        <div class="hero-shade"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-copy" aria-hidden="true"></div>
+      </div>
+      <main id="screen" aria-live="polite"></main>
+    </section>
+
+    <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+  </div>
+
+  <script src="hero-fix.js?v=51"></script>
+  <script src="app.js?v=51"></script>
+  <script src="i18n.js?v=51"></script>
+  <script src="mission-001.config.js?v=51"></script>
+  <script src="scoring-engine.js?v=51"></script>
+  <script src="character-ui.js?v=51"></script>
+  <script src="product-polish.js?v=51"></script>
+  <script src="runtime-fixes.js?v=51"></script>
+  <script src="share-card.js?v=51"></script>
+  <script src="music.js?v=51"></script>
+  <script src="runtime-boot.js?v=51"></script>
+</body>
+</html>
