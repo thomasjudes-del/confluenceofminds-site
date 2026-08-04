@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Confluence of Minds — stories, games, experiments and impossible worlds." />
+  <meta name="theme-color" content="#08080b" />
+
+  <title>Confluence of Minds</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="confluence-canvas" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="site-header" data-header>
+    <a class="wordmark" href="#top" aria-label="Confluence of Minds — home">
+      <span class="wordmark__top">Confluence</span>
+      <span class="wordmark__bottom">of Minds</span>
+    </a>
+
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="#worlds">Worlds</a>
+      <a href="#about">About</a>
+      <a class="nav-pill" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">Instagram ↗</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__content">
+        <p class="eyebrow reveal">A creative territory in permanent expansion</p>
+
+        <h1 id="hero-title" class="hero__title reveal">
+          <span>Too many ideas</span>
+          <span>for one world.</span>
+        </h1>
+
+        <p class="hero__intro reveal">
+          Stories, games, speculative worlds, visual experiments and contradictions —
+          gathered in one place, then allowed to collide.
+        </p>
+
+        <div class="hero__actions reveal">
+          <a class="button button--primary" href="#worlds">Enter the worlds <span aria-hidden="true">↓</span></a>
+          <button class="button button--ghost" type="button" data-random-portal>Open a random portal</button>
+        </div>
+      </div>
+
+      <div class="hero__signal" aria-hidden="true">
+        <div class="signal-frame signal-frame--one"></div>
+        <div class="signal-frame signal-frame--two"></div>
+        <div class="signal-frame signal-frame--three"></div>
+
+        <div class="signal-copy">
+          <span class="signal-copy__line">FICTION</span>
+          <span class="signal-copy__line">SCIENCE</span>
+          <span class="signal-copy__line">PLAY</span>
+          <span class="signal-copy__line">HUMAN</span>
+          <span class="signal-copy__line">MACHINE</span>
+        </div>
+
+        <div class="signal-core">
+          <span>COM</span>
+          <small>001 / ∞</small>
+        </div>
+      </div>
+
+      <div class="hero__footer" aria-hidden="true">
+        <span>Scroll to explore</span>
+        <span class="hero__footer-line"></span>
+        <span>Human imagination × artificial minds</span>
+      </div>
+    </section>
+
+    <section class="ticker" aria-label="Creative fields">
+      <div class="ticker__track">
+        <span>STORIES</span><i>✦</i>
+        <span>GAMES</span><i>✦</i>
+        <span>SPECULATIVE FICTION</span><i>✦</i>
+        <span>AI EXPERIMENTS</span><i>✦</i>
+        <span>VISUAL WORLDS</span><i>✦</i>
+        <span>CONTRADICTIONS</span><i>✦</i>
+        <span>STORIES</span><i>✦</i>
+        <span>GAMES</span><i>✦</i>
+        <span>SPECULATIVE FICTION</span><i>✦</i>
+        <span>AI EXPERIMENTS</span><i>✦</i>
+        <span>VISUAL WORLDS</span><i>✦</i>
+        <span>CONTRADICTIONS</span><i>✦</i>
+      </div>
+    </section>
+
+    <section id="worlds" class="worlds section-shell" aria-labelledby="worlds-title">
+      <div class="section-heading reveal">
+        <div>
+          <p class="eyebrow">Current portals</p>
+          <h2 id="worlds-title">Choose a world.</h2>
+        </div>
+        <p>
+          Each project has its own visual language. All of them belong to the same restless constellation.
+        </p>
+      </div>
+
+      <div class="world-grid">
+        <article class="world-card world-card--titan reveal" data-portal="Titan">
+          <div class="world-card__visual" aria-hidden="true">
+            <span class="titan-sun"></span>
+            <span class="titan-horizon"></span>
+            <span class="titan-structure"></span>
+          </div>
+          <div class="world-card__meta">
+            <span>01</span>
+            <span>Interactive experiment</span>
+          </div>
+          <div class="world-card__body">
+            <h3>Incident on Titan</h3>
+            <p>A colony, a shared mission, conflicting roles — and an intelligence that never tells you everything.</p>
+          </div>
+          <button class="world-card__link" type="button" data-project-link>
+            Enter Titan <span aria-hidden="true">↗</span>
+          </button>
+        </article>
+
+        <article class="world-card world-card--anjin reveal" data-portal="Anjin">
+          <div class="world-card__visual" aria-hidden="true">
+            <span class="ink-stroke ink-stroke--one"></span>
+            <span class="ink-stroke ink-stroke--two"></span>
+            <span class="anjin-glyph">按針</span>
+          </div>
+          <div class="world-card__meta">
+            <span>02</span>
+            <span>Illustrated world</span>
+          </div>
+          <div class="world-card__body">
+            <h3>Anjin of the Shogun</h3>
+            <p>Ink, power, foreign eyes and the quiet violence of a world built on codes.</p>
+          </div>
+          <button class="world-card__link" type="button" data-project-link>
+            Cross the threshold <span aria-hidden="true">↗</span>
+          </button>
+        </article>
+
+        <article class="world-card world-card--dragons reveal" data-portal="Dragons">
+          <div class="world-card__visual" aria-hidden="true">
+            <span class="dragon-ridge dragon-ridge--one"></span>
+            <span class="dragon-ridge dragon-ridge--two"></span>
+            <span class="dragon-eye"></span>
+          </div>
+          <div class="world-card__meta">
+            <span>03</span>
+            <span>Speculative fantasy</span>
+          </div>
+          <div class="world-card__body">
+            <h3>Shattered Dragons</h3>
+            <p>Ancient creatures, engineered origins and ecosystems that remember what humanity tried to bury.</p>
+          </div>
+          <button class="world-card__link" type="button" data-project-link>
+            Wake the dragons <span aria-hidden="true">↗</span>
+          </button>
+        </article>
+
+        <article class="world-card world-card--contradictions reveal" data-portal="Contradictions">
+          <div class="world-card__visual" aria-hidden="true">
+            <span class="can">WE CAN</span>
+            <span class="cant">WE CAN'T</span>
+          </div>
+          <div class="world-card__meta">
+            <span>04</span>
+            <span>Provocations</span>
+          </div>
+          <div class="world-card__body">
+            <h3>We Can / We Can't</h3>
+            <p>Human brilliance measured against the absurd things we still fail to solve.</p>
+          </div>
+          <button class="world-card__link" type="button" data-project-link>
+            Face the contradiction <span aria-hidden="true">↗</span>
+          </button>
+        </article>
+
+        <article class="world-card world-card--play reveal" data-portal="Play">
+          <div class="world-card__visual" aria-hidden="true">
+            <span class="play-tile play-tile--one">?</span>
+            <span class="play-tile play-tile--two">A</span>
+            <span class="play-tile play-tile--three">42</span>
+          </div>
+          <div class="world-card__meta">
+            <span>05</span>
+            <span>Games & puzzles</span>
+          </div>
+          <div class="world-card__body">
+            <h3>Playground</h3>
+            <p>Guessing games, strange rules, prototypes and small interactive obsessions.</p>
+          </div>
+          <button class="world-card__link" type="button" data-project-link>
+            Start playing <span aria-hidden="true">↗</span>
+          </button>
+        </article>
+
+        <article class="world-card world-card--incoming reveal" data-portal="Unknown">
+          <div class="world-card__visual" aria-hidden="true">
+            <span class="incoming-noise"></span>
+            <span class="incoming-code">NEXT SIGNAL<br />NOT YET NAMED</span>
+          </div>
+          <div class="world-card__meta">
+            <span>∞</span>
+            <span>In formation</span>
+          </div>
+          <div class="world-card__body">
+            <h3>The next impossible thing</h3>
+            <p>The collection is deliberately unfinished. New worlds appear whenever an idea refuses to stay quiet.</p>
+          </div>
+          <button class="world-card__link" type="button" data-project-link>
+            Signal pending <span aria-hidden="true">···</span>
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="manifesto section-shell" aria-labelledby="manifesto-title">
+      <div class="manifesto__number reveal" aria-hidden="true">∞</div>
+      <div class="manifesto__content reveal">
+        <p class="eyebrow">Why Confluence of Minds?</p>
+        <h2 id="manifesto-title">Not one brand for one idea.<br />One territory for all of them.</h2>
+        <p>
+          Confluence of Minds is a creative laboratory: part studio, part cabinet of curiosities,
+          part collision between human imagination and artificial intelligence. It does not ask every idea
+          to fit the same format. It gives each one a door.
+        </p>
+      </div>
+    </section>
+
+    <section class="closing section-shell" aria-labelledby="closing-title">
+      <p class="eyebrow reveal">The confluence is open</p>
+      <h2 id="closing-title" class="reveal">Come for one world.<br />Get lost in the others.</h2>
+      <a class="button button--primary reveal" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">
+        Follow the experiments on Instagram ↗
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>© <span data-year></span> Confluence of Minds</span>
+    <span>Made somewhere between obsession and emergence.</span>
+  </footer>
+
+  <div class="portal-toast" role="status" aria-live="polite" data-toast>
+    <span class="portal-toast__label">PORTAL STATUS</span>
+    <strong data-toast-message>This world will be connected next.</strong>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
