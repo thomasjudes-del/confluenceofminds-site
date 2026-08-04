@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Confluence of Minds — stories, games, visual experiments and impossible worlds." />
   <meta name="theme-color" content="#eee8dc" />
-
   <title>Confluence of Minds</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cinzel:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&family=Noto+Serif+JP:wght@500;600;700&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cinzel:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+JP:wght@500;600;700&family=Oswald:wght@500;600;700&family=Rajdhani:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -18,64 +16,95 @@
   <div class="paper-grain" aria-hidden="true"></div>
 
   <header class="site-header" data-header>
-    <a class="wordmark" href="#top" aria-label="Confluence of Minds — home">
-      <svg class="wordmark__symbol" viewBox="0 0 64 64" aria-hidden="true">
-        <path d="M6 43C18 37 25 28 31 8c9 8 15 18 19 31-14-5-28-4-44 4Z" />
-        <path d="M8 46c18-4 31-2 48 8-20-3-34-2-48 2Z" />
+    <a class="brand" href="#top" aria-label="Confluence of Minds — home">
+      <svg class="brand__emblem" viewBox="0 0 94 94" aria-hidden="true">
+        <path class="brand-fold brand-fold--terra" d="M10 47c17-9 29-5 42 9H16c-1-4-3-7-6-9Z" />
+        <path class="brand-fold brand-fold--dark" d="M47 20c20 8 31 23 33 43-14-9-28-12-43-7 7-12 11-24 10-36Z" />
+        <path class="brand-fold brand-fold--back" d="M26 38C43 33 55 20 70 7c-1 21-5 38-16 52-15-2-25-8-28-21Z" />
+        <path class="brand-fold brand-fold--front" d="M26 37c16 5 27 9 39 22-15 2-29 1-43-1 1-7 2-14 4-21Z" />
+        <path class="brand-river brand-river--left" d="M12 70c17-2 31 0 44 7-16 3-27 9-33 17-6-7-10-15-11-24Z" />
+        <path class="brand-river brand-river--right" d="M57 77c12-7 23-9 35-5-6 10-14 17-23 22-2-7-6-12-12-17Z" />
+        <path class="brand-river brand-river--core" d="M52 70c-1 7-7 11-14 14-6 3-8 6-6 10 6-4 14-6 22-9 9-3 14-8 17-15-7 3-13 3-19 0Z" />
       </svg>
-      <span class="wordmark__text">
+      <span class="brand__text">
         <strong>Confluence</strong>
-        <small>of Minds</small>
+        <small><i></i> of mind <i></i></small>
       </span>
     </a>
 
     <nav class="site-nav" aria-label="Main navigation">
       <a href="#worlds">Worlds</a>
       <a href="#about">About</a>
-      <a class="nav-pill" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">Instagram ↗</a>
+      <a class="instagram-link" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer" aria-label="Confluence of Minds on Instagram">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <defs><radialGradient id="ig-header" cx="30%" cy="100%" r="120%"><stop offset="0" stop-color="#ffd600"/><stop offset=".32" stop-color="#ff7a00"/><stop offset=".62" stop-color="#ff0169"/><stop offset="1" stop-color="#7b2cff"/></radialGradient></defs>
+          <circle cx="32" cy="32" r="31" fill="url(#ig-header)"/>
+          <rect x="17" y="17" width="30" height="30" rx="9" fill="none" stroke="#fff" stroke-width="4"/>
+          <circle cx="32" cy="32" r="7" fill="none" stroke="#fff" stroke-width="4"/>
+          <circle cx="42" cy="22" r="2.6" fill="#fff"/>
+        </svg>
+      </a>
     </nav>
   </header>
 
   <main id="top">
     <section class="hero-sequence" data-hero aria-labelledby="hero-title">
       <div class="hero-sticky">
+        <div class="hero-void" aria-hidden="true"></div>
+
         <div class="hero-art" aria-hidden="true">
-          <div class="hero-art__sun"></div>
-          <div class="hero-art__void"></div>
-          <svg class="hero-art__canvas" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+          <svg class="hero-art__svg" viewBox="0 0 860 660">
             <defs>
-              <linearGradient id="paperFold" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#f4eee3" />
-                <stop offset="0.52" stop-color="#cfc5b3" />
-                <stop offset="1" stop-color="#938874" />
+              <linearGradient id="heroPaper" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#fffaf2" />
+                <stop offset=".45" stop-color="#d8cebd" />
+                <stop offset="1" stop-color="#918471" />
               </linearGradient>
-              <linearGradient id="paperFoldLight" x1="0" y1="1" x2="1" y2="0">
-                <stop offset="0" stop-color="#a99d89" />
-                <stop offset="0.38" stop-color="#e9e1d3" />
-                <stop offset="1" stop-color="#f8f3ea" />
+              <linearGradient id="heroPaperLight" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0" stop-color="#9e927f" />
+                <stop offset=".42" stop-color="#eee6d8" />
+                <stop offset="1" stop-color="#fffdf8" />
               </linearGradient>
-              <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
-                <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#101716" flood-opacity="0.18" />
+              <linearGradient id="heroInk" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#101817" />
+                <stop offset="1" stop-color="#26322f" />
+              </linearGradient>
+              <filter id="heroShadow" x="-30%" y="-30%" width="160%" height="170%">
+                <feDropShadow dx="0" dy="28" stdDeviation="22" flood-color="#17201f" flood-opacity=".22" />
               </filter>
+              <filter id="heroGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="9" /></filter>
+              <pattern id="heroLines" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(24)"><path d="M0 0V16" stroke="#17201f" stroke-opacity=".12" /></pattern>
             </defs>
 
-            <g class="hero-art__folds" filter="url(#softShadow)">
-              <path class="fold fold--terra" d="M196 462C317 419 390 451 499 561H221c-4-39-12-70-25-99Z" />
-              <path class="fold fold--dark" d="M492 250c153 67 231 187 246 350-108-75-212-96-330-54 58-96 86-194 84-296Z" />
-              <path class="fold fold--back" d="M296 360C430 319 519 213 635 99c-6 167-39 300-124 416-118-16-195-67-215-155Z" />
-              <path class="fold fold--front" d="M299 352c128 42 211 76 306 177-118 14-228 11-338-8 8-54 20-110 32-169Z" />
-              <path class="fold fold--light" d="M296 352c117 23 208 68 309 177-126 2-224-8-325-47 5-50 10-88 16-130Z" />
+            <g class="hero-layer hero-layer--back" filter="url(#heroShadow)">
+              <path fill="url(#heroPaper)" d="M54 357C115 161 287 81 488 122c-33 142-97 271-227 390C141 481 79 428 54 357Z" />
+              <path fill="url(#heroInk)" d="M410 103c173 73 283 196 306 389-127-80-259-112-407-54 69-119 106-226 101-335Z" />
+              <path fill="#b66b49" d="M44 447c143-83 263-54 366 67H70c-4-24-13-47-26-67Z" />
             </g>
 
-            <g class="hero-art__river">
-              <path class="river-bank river-bank--left" d="M103 764c147-12 258 1 365 52-124 28-198 78-241 151-58-55-101-123-124-203Z" />
-              <path class="river-bank river-bank--right" d="M510 812c138-65 258-80 381-41-53 82-120 149-203 201-23-69-82-122-178-160Z" />
-              <path class="river-path river-path--wide" d="M492 714c-22 65-91 88-156 120-73 36-82 85-27 145 63-58 140-81 231-110 72-24 117-76 151-155-65 19-130 20-199 0Z" />
-              <path class="river-path river-path--core" d="M513 717c-2 70-47 103-113 136-70 36-91 75-63 123 57-38 126-57 207-82 91-28 126-87 151-178-63 31-124 32-182 1Z" />
-              <path class="river-glint" d="M511 718c6 72-29 111-88 148-48 30-64 60-49 94" />
+            <g class="hero-layer hero-layer--front" filter="url(#heroShadow)">
+              <path fill="url(#heroPaperLight)" d="M124 305c164 31 304 104 448 237-172 24-328 4-471-72 2-65 9-120 23-165Z" />
+              <path fill="#f8f3ea" opacity=".86" d="M118 301c154 58 277 122 414 247-169 10-307-27-433-98 5-56 11-104 19-149Z" />
+              <path fill="url(#heroLines)" opacity=".7" d="M30 394C126 283 227 252 357 314 232 369 160 449 106 577 48 531 19 460 30 394Z" />
+            </g>
+
+            <g class="hero-streams">
+              <path d="M40 595C167 526 266 497 380 493c124-5 234 28 403 101" />
+              <path d="M10 545C173 483 268 456 386 458c140 2 262 50 447 149" />
+              <path d="M92 634c122-67 226-89 351-78 102 9 194 37 313 86" />
+            </g>
+
+            <g class="hero-particles">
+              <circle cx="654" cy="124" r="54" fill="#17201f" opacity=".94" />
+              <circle cx="735" cy="236" r="13" fill="#b66b49" />
+              <circle cx="592" cy="190" r="8" fill="#17201f" opacity=".72" />
+              <circle cx="770" cy="330" r="5" fill="#17201f" opacity=".6" />
+              <circle cx="332" cy="105" r="7" fill="#b66b49" opacity=".75" />
+              <g fill="#b66b49" opacity=".7">
+                <circle cx="115" cy="270" r="3"/><circle cx="152" cy="240" r="2"/><circle cx="191" cy="214" r="3"/><circle cx="541" cy="111" r="2"/><circle cx="566" cy="94" r="3"/><circle cx="789" cy="216" r="2"/>
+              </g>
             </g>
           </svg>
-
           <span class="hero-shard hero-shard--one"></span>
           <span class="hero-shard hero-shard--two"></span>
           <span class="hero-shard hero-shard--three"></span>
@@ -85,185 +114,174 @@
         <div class="hero-copy">
           <p class="hero-kicker">Stories · games · experiments · impossible worlds</p>
           <h1 id="hero-title">Too many ideas<br />for one world.</h1>
-          <p>A creative universe built one door at a time.</p>
-          <a class="hero-cta" href="#worlds">Enter the worlds <span>↓</span></a>
+          <p class="hero-lede">A growing creative universe of speculative stories, interactive experiences and visual worlds.</p>
+          <a class="primary-button" href="#worlds">Explore the worlds <span aria-hidden="true">↓</span></a>
         </div>
 
-        <div class="hero-signature" aria-hidden="true">Come for one world. Get lost in a universe.</div>
+        <div class="scroll-cue" aria-hidden="true"><span>Scroll to enter</span><i></i></div>
       </div>
     </section>
 
-    <section id="worlds" class="worlds" aria-labelledby="worlds-title">
-      <div class="section-shell">
-        <div class="section-heading reveal">
-          <div>
-            <p class="section-label">The current constellation</p>
-            <h2 id="worlds-title">Choose your entrance.</h2>
+    <section id="about" class="universe-statement section-shell" aria-labelledby="statement-title">
+      <div class="living-mark reveal" aria-hidden="true">
+        <svg viewBox="0 0 620 620">
+          <defs>
+            <filter id="organic-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="22" stdDeviation="18" flood-color="#17201f" flood-opacity=".18" /></filter>
+            <linearGradient id="living-paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffaf2"/><stop offset=".5" stop-color="#d6ccba"/><stop offset="1" stop-color="#948875"/></linearGradient>
+          </defs>
+          <g filter="url(#organic-shadow)">
+            <path fill="#17201f"><animate attributeName="d" dur="11s" repeatCount="indefinite" values="M150 392C188 202 332 114 489 177C557 204 538 336 450 447C340 542 202 516 150 392Z;M108 322C164 143 350 111 506 227C565 309 501 430 387 494C236 526 102 454 108 322Z;M164 426C119 249 246 101 430 127C566 163 578 332 480 455C353 545 216 536 164 426Z;M150 392C188 202 332 114 489 177C557 204 538 336 450 447C340 542 202 516 150 392Z"/></path>
+            <path fill="url(#living-paper)"><animate attributeName="d" dur="9s" repeatCount="indefinite" values="M94 318C228 309 254 179 398 91C397 252 361 376 247 472C155 428 102 378 94 318Z;M133 211C283 278 345 140 480 112C419 292 338 416 206 467C144 388 111 290 133 211Z;M92 368C210 305 217 166 382 92C421 238 368 414 235 494C149 480 95 428 92 368Z;M94 318C228 309 254 179 398 91C397 252 361 376 247 472C155 428 102 378 94 318Z"/></path>
+            <path fill="#b66b49"><animate attributeName="d" dur="13s" repeatCount="indefinite" values="M76 421C185 357 257 369 337 458C211 488 127 477 76 421Z;M95 443C178 347 296 360 380 447C270 514 160 509 95 443Z;M72 397C188 350 286 389 348 484C217 495 118 473 72 397Z;M76 421C185 357 257 369 337 458C211 488 127 477 76 421Z"/></path>
+            <path fill="#eee8dc" opacity=".94"><animate attributeName="d" dur="10s" repeatCount="indefinite" values="M163 282C290 302 372 347 458 462C324 465 222 439 134 374C141 337 150 305 163 282Z;M146 254C285 280 390 355 471 445C334 491 213 449 121 374C126 324 133 282 146 254Z;M180 302C301 297 381 349 469 477C328 474 212 433 151 365C156 341 166 319 180 302Z;M163 282C290 302 372 347 458 462C324 465 222 439 134 374C141 337 150 305 163 282Z"/></path>
+          </g>
+          <circle cx="462" cy="143" r="28" fill="#17201f" opacity=".85"><animate attributeName="r" values="24;38;24" dur="5s" repeatCount="indefinite"/></circle>
+          <circle cx="520" cy="242" r="9" fill="#b66b49"><animate attributeName="cy" values="242;208;242" dur="6s" repeatCount="indefinite"/></circle>
+        </svg>
+      </div>
+      <div class="statement-copy reveal">
+        <p class="section-label">A creative universe in permanent expansion</p>
+        <h2 id="statement-title">Different doors.<br />One expanding universe.</h2>
+        <p>Each project has its own visual language, rules and atmosphere. Start with one. The others are never very far away.</p>
+      </div>
+    </section>
+
+    <section id="worlds" class="worlds section-shell" aria-labelledby="worlds-title">
+      <div class="worlds-heading reveal">
+        <p class="section-label">Choose an entrance</p>
+        <h2 id="worlds-title">Worlds, series and experiments.</h2>
+      </div>
+
+      <div class="project-grid">
+        <article class="project-card project-card--titan reveal" data-portal="Incident on Titan">
+          <div class="project-card__cover">
+            <svg viewBox="0 0 800 340" aria-hidden="true">
+              <defs><radialGradient id="titanPlanet" cx="65%" cy="40%" r="60%"><stop offset="0" stop-color="#f3a33b"/><stop offset=".55" stop-color="#9d4d1e"/><stop offset="1" stop-color="#1a100c"/></radialGradient><filter id="titanGlow"><feGaussianBlur stdDeviation="10"/></filter></defs>
+              <rect width="800" height="340" fill="#05070a"/>
+              <g fill="#fff" opacity=".7"><circle cx="75" cy="49" r="1"/><circle cx="165" cy="91" r="1.2"/><circle cx="292" cy="39" r="1"/><circle cx="409" cy="73" r="1"/><circle cx="688" cy="48" r="1.3"/><circle cx="751" cy="119" r="1"/></g>
+              <circle cx="620" cy="250" r="212" fill="url(#titanPlanet)"/>
+              <path d="M485 191c49 18 80 52 119 64 35 11 69 7 114-6M501 237c51 3 86 31 126 40 31 7 60 3 92-8" fill="none" stroke="#ffb04a" stroke-width="3" opacity=".66"/>
+              <path d="M412 300h388" stroke="#ef8c31" stroke-width="2" opacity=".8"/>
+              <circle cx="576" cy="198" r="12" fill="#ffb557" filter="url(#titanGlow)"/>
+              <text x="62" y="194" fill="#f5ede2" font-family="Rajdhani" font-size="74" letter-spacing="22">TITAN</text>
+              <path d="M68 225h168" stroke="#ef8c31"/><circle cx="254" cy="225" r="4" fill="#ef8c31"/>
+            </svg>
           </div>
-          <p>Every project keeps its own codes, atmosphere and voice. Confluence of Minds is simply where their doors meet.</p>
-        </div>
+          <div class="project-card__content"><div class="project-card__meta"><span>Interactive science fiction</span><span>Live</span></div><h3>Incident on Titan</h3><p>Take command of a fragile colony through a weekly incident. Your choices affect health, energy and the scientific mission while Sybille quietly learns what kind of leader you are.</p><button class="project-link" type="button" data-project-link>Enter Titan <span>↗</span></button></div>
+        </article>
 
-        <div class="world-grid">
-          <article class="world-card world-card--titan reveal" data-portal="Incident on Titan">
-            <div class="world-card__visual titan-visual" aria-hidden="true">
-              <span class="titan-ring"></span>
-              <span class="titan-sun"></span>
-              <span class="titan-ground"></span>
-              <span class="titan-base"></span>
-              <strong>IOTI</strong>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>Interactive science fiction</span><span>01</span></div>
-              <h3>Incident on Titan</h3>
-              <p>A weekly command incident on humanity’s most remote colony. Make five decisions, reveal your doctrine and face Sybille — an AI that learns from every compromise you make.</p>
-              <a class="world-card__link" href="./titan/">Enter Titan <span>↗</span></a>
-            </div>
-          </article>
+        <article class="project-card project-card--ai reveal" data-portal="AI's Got Talent" data-url="https://aitalent.show/">
+          <div class="project-card__cover">
+            <svg viewBox="0 0 800 340" aria-hidden="true">
+              <defs><linearGradient id="aiStage" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#211039"/><stop offset="1" stop-color="#060612"/></linearGradient><linearGradient id="aiBeam" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".65"/><stop offset="1" stop-color="#d748ff" stop-opacity="0"/></linearGradient></defs>
+              <rect width="800" height="340" fill="url(#aiStage)"/>
+              <path d="M125 0l175 284H50Z" fill="url(#aiBeam)" opacity=".35"/><path d="M680 0L505 284h250Z" fill="url(#aiBeam)" opacity=".3"/>
+              <ellipse cx="400" cy="322" rx="330" ry="52" fill="#130822"/>
+              <g fill="#c84cff" opacity=".65"><circle cx="105" cy="280" r="5"/><circle cx="167" cy="298" r="4"/><circle cx="230" cy="276" r="6"/><circle cx="570" cy="289" r="5"/><circle cx="640" cy="272" r="4"/><circle cx="708" cy="298" r="6"/></g>
+              <path d="M390 132c-18 23-19 47-12 71l-32 83h108l-32-83c7-24 6-48-12-71Z" fill="#06070b"/><circle cx="400" cy="106" r="25" fill="#06070b"/><path d="M378 171l-84 37M422 171l84 37" stroke="#06070b" stroke-width="13" stroke-linecap="round"/>
+              <text x="400" y="77" fill="#f8f0ff" text-anchor="middle" font-family="Oswald" font-size="42" letter-spacing="6">AI'S GOT TALENT</text>
+            </svg>
+          </div>
+          <div class="project-card__content"><div class="project-card__meta"><span>Open creative showcase</span><span>Live</span></div><h3>AI’s Got Talent</h3><p>A stage for the best, strangest and most impressive AI creations on the internet. Submit an act, get selected and face the public vote.</p><button class="project-link" type="button" data-project-link>Visit the stage <span>↗</span></button></div>
+        </article>
 
-          <article class="world-card world-card--talent reveal" data-portal="AI's Got Talent">
-            <div class="world-card__visual talent-visual" aria-hidden="true">
-              <span class="talent-light talent-light--one"></span>
-              <span class="talent-light talent-light--two"></span>
-              <span class="talent-stage"></span>
-              <strong>AI'S<br />GOT<br />TALENT</strong>
-              <i>CASTING OPEN</i>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>Open creative casting</span><span>02</span></div>
-              <h3>AI’s Got Talent</h3>
-              <p>A public casting for people creating, performing and experimenting with artificial intelligence. A place to discover unusual makers before their work fits a familiar category.</p>
-              <button class="world-card__link" type="button" data-project-link>Discover the casting <span>↗</span></button>
-            </div>
-          </article>
+        <article class="project-card project-card--anjin reveal" data-portal="Anjin of the Shogun">
+          <div class="project-card__cover">
+            <svg viewBox="0 0 800 340" aria-hidden="true">
+              <defs><linearGradient id="anjinFog" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d8d3c9"/><stop offset="1" stop-color="#5b6260"/></linearGradient><filter id="anjinBlur"><feGaussianBlur stdDeviation="12"/></filter></defs>
+              <rect width="800" height="340" fill="url(#anjinFog)"/>
+              <circle cx="610" cy="90" r="60" fill="#9d2e26" opacity=".85"/>
+              <g fill="#27302e" opacity=".75"><path d="M560 180h160v91H560Z"/><path d="M540 184h200l-28-24H568Z"/><path d="M575 149h130l-19-20h-92Z"/><path d="M602 117h77l-12-18h-52Z"/></g>
+              <path d="M0 245c126-64 240-72 364-24 102 39 205 48 436 8v111H0Z" fill="#343d3a" opacity=".55" filter="url(#anjinBlur)"/>
+              <path d="M224 116c-27 36-31 83-21 126l-51 98h164l-52-98c11-43 7-90-20-126Z" fill="#101514"/><circle cx="234" cy="81" r="35" fill="#101514"/><path d="M203 65c19-24 42-30 66-15-8 4-16 12-21 23Z" fill="#101514"/>
+              <text x="390" y="205" fill="#f4efe5" font-family="Noto Serif JP" font-size="58" letter-spacing="12">ANJIN</text><text x="397" y="246" fill="#f4efe5" font-family="Bodoni Moda" font-size="28" letter-spacing="5">OF THE SHOGUN</text>
+            </svg>
+          </div>
+          <div class="project-card__content"><div class="project-card__meta"><span>Visual and cultural series</span><span>Series</span></div><h3>Anjin of the Shogun</h3><p>A visual series around <em>Shōgun</em>: the objects, rituals, codes and tensions of feudal Japan, interpreted through ink, historical fragments and cultural storytelling.</p><button class="project-link" type="button" data-project-link>Explore Anjin <span>↗</span></button></div>
+        </article>
 
-          <article class="world-card world-card--anjin reveal" data-portal="Anjin of the Shogun">
-            <div class="world-card__visual anjin-visual" aria-hidden="true">
-              <span class="anjin-sun"></span>
-              <span class="anjin-brush anjin-brush--one"></span>
-              <span class="anjin-brush anjin-brush--two"></span>
-              <span class="anjin-figure"></span>
-              <strong>按針</strong>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>Japan · ink · culture</span><span>03</span></div>
-              <h3>Anjin of the Shogun</h3>
-              <p>An illustrated exploration of Japanese culture through sumi-e, samurai codes, objects, rituals and the tension between restraint and violence. Each fragment opens another layer of the same world.</p>
-              <button class="world-card__link" type="button" data-project-link>Enter the ink world <span>↗</span></button>
-            </div>
-          </article>
+        <article class="project-card project-card--wecan reveal" data-portal="We Can / But We Can't">
+          <div class="project-card__cover">
+            <svg viewBox="0 0 800 340" aria-hidden="true">
+              <defs><linearGradient id="weSplit" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#651c0f"/><stop offset=".49" stop-color="#1b0a08"/><stop offset=".51" stop-color="#112735"/><stop offset="1" stop-color="#06131d"/></linearGradient></defs>
+              <rect width="800" height="340" fill="url(#weSplit)"/>
+              <path d="M604 64c-57 20-88 73-81 124 4 35 25 70 65 94-17 8-39 11-65 10-72-3-129-55-130-121-1-73 70-126 137-117 27 3 52 13 74 30Z" fill="#b2d0df" opacity=".74"/>
+              <path d="M204 56c55 23 83 77 73 129-7 36-31 67-72 88 18 10 40 14 66 14 72 0 132-49 136-115 4-73-65-129-133-122-27 2-52 10-74 26Z" fill="#ec7c3d" opacity=".76"/>
+              <text x="400" y="115" text-anchor="middle" fill="#fff6dd" font-family="Anton" font-size="58" letter-spacing="4">WE CAN</text>
+              <text x="400" y="171" text-anchor="middle" fill="#ffe300" font-family="DM Sans" font-size="20" letter-spacing="7">BUT</text>
+              <text x="400" y="241" text-anchor="middle" fill="#fff6dd" font-family="Anton" font-size="58" letter-spacing="4">WE CAN'T</text>
+            </svg>
+          </div>
+          <div class="project-card__content"><div class="project-card__meta"><span>Militant visual series</span><span>Series</span></div><h3>We Can / But We Can’t</h3><p>Human ingenuity confronted with collective failure. Each episode places what civilisation can accomplish beside what it still refuses—or fails—to solve.</p><button class="project-link" type="button" data-project-link>Face the contradiction <span>↗</span></button></div>
+        </article>
 
-          <article class="world-card world-card--wecan reveal" data-portal="We Can / But We Can't">
-            <div class="world-card__visual wecan-visual" aria-hidden="true">
-              <span>WE CAN</span>
-              <strong>BUT<br />WE<br />CAN'T</strong>
-              <i>THE NUMBERS DO NOT AGREE</i>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>Militant visual series</span><span>04</span></div>
-              <h3>We Can / But We Can’t</h3>
-              <p>A confrontational series about civilisation’s contradictions: extraordinary technical capacity placed beside hunger, climate collapse, inequality and the basic problems we still choose not to solve.</p>
-              <button class="world-card__link" type="button" data-project-link>Face the contradiction <span>↗</span></button>
-            </div>
-          </article>
+        <article class="project-card project-card--dragons reveal" data-portal="Shattered Dragons">
+          <div class="project-card__cover">
+            <svg viewBox="0 0 800 340" aria-hidden="true">
+              <defs><radialGradient id="dragonGlow" cx="68%" cy="43%" r="44%"><stop stop-color="#758f77"/><stop offset="1" stop-color="#06100d"/></radialGradient></defs>
+              <rect width="800" height="340" fill="url(#dragonGlow)"/>
+              <g fill="#dae5d9" opacity=".24"><path d="M620 26l18 48 50-29-26 50 52 15-55 7 12 54-34-44-36 42 14-53-55-9 53-13-23-51Z"/><path d="M714 190l11 29 31-18-16 31 32 9-34 4 8 34-22-27-22 26 9-33-35-6 34-8-14-32Z"/></g>
+              <path d="M492 104c69-45 139-37 205 27-31-10-56-7-74 8 36 6 63 28 78 65-31-19-58-25-82-18 13 18 12 38-4 60-7-31-24-51-50-60-22 35-53 57-94 66 28-25 42-52 41-83-37 14-72 11-106-9 40-2 69-15 86-37-25-15-53-22-85-20 31-18 60-23 85-15Z" fill="#050a08"/>
+              <path d="M477 166c76-16 134-5 176 35" fill="none" stroke="#b6d0b4" stroke-width="4" opacity=".55"/>
+              <circle cx="599" cy="146" r="6" fill="#dff09a"/><text x="66" y="157" fill="#e8eee6" font-family="Cinzel" font-size="47" letter-spacing="8">SHATTERED</text><text x="67" y="221" fill="#e8eee6" font-family="Cinzel" font-size="57" letter-spacing="7">DRAGONS</text>
+            </svg>
+          </div>
+          <div class="project-card__content"><div class="project-card__meta"><span>Speculative fantasy</span><span>World</span></div><h3>Shattered Dragons</h3><p>Ancient dragons return as living ecosystems and engineered weapons. Their biology, loyalties and forgotten origins turn myth into a dangerous form of science.</p><button class="project-link" type="button" data-project-link>Wake the dragons <span>↗</span></button></div>
+        </article>
 
-          <article class="world-card world-card--dragons reveal" data-portal="Shattered Dragons">
-            <div class="world-card__visual dragons-visual" aria-hidden="true">
-              <span class="dragon-wing"></span>
-              <span class="dragon-spine"></span>
-              <span class="dragon-eye"></span>
-              <strong>SHATTERED<br />DRAGONS</strong>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>Myth engineered as science</span><span>05</span></div>
-              <h3>Shattered Dragons</h3>
-              <p>Ancient creatures awaken in forgotten ecosystems — but their scales, fire and wings carry the signature of human engineering. A bestiary of power, loss, family and creations that turned on their makers.</p>
-              <button class="world-card__link" type="button" data-project-link>Wake the dragons <span>↗</span></button>
-            </div>
-          </article>
+        <article class="project-card project-card--kashgar reveal" data-portal="Chronicles of Kashgar">
+          <div class="project-card__cover">
+            <svg viewBox="0 0 800 340" aria-hidden="true">
+              <defs><linearGradient id="kSky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#c9a36f"/><stop offset="1" stop-color="#5b3c24"/></linearGradient></defs>
+              <rect width="800" height="340" fill="url(#kSky)"/>
+              <path d="M0 183 95 101l83 66 84-93 113 98 109-126 106 115 101-73 109 95v157H0Z" fill="#5c432d" opacity=".55"/>
+              <g fill="#241c14"><path d="M0 225h800v115H0Z"/><path d="M84 178h126v162H84Z"/><path d="M65 180h164l-25-23H90Z"/><path d="M278 209h82v131h-82Z"/><circle cx="319" cy="207" r="38"/><path d="M470 190h121v150H470Z"/><circle cx="530" cy="188" r="50"/><path d="M640 218h82v122h-82Z"/></g>
+              <text x="400" y="120" text-anchor="middle" fill="#f4e2c2" font-family="Cinzel" font-size="29" letter-spacing="6">CHRONICLES OF</text><text x="400" y="175" text-anchor="middle" fill="#fff1d3" font-family="Cinzel" font-size="53" letter-spacing="9">KASHGAR</text>
+            </svg>
+          </div>
+          <div class="project-card__content"><div class="project-card__meta"><span>Illustrated chronicles</span><span>World</span></div><h3>Chronicles of Kashgar</h3><p>A city at the crossroads of empires, memories and trade routes. Stories emerge through travellers, vanished dynasties and the secrets carried across the desert.</p><button class="project-link" type="button" data-project-link>Enter Kashgar <span>↗</span></button></div>
+        </article>
 
-          <article class="world-card world-card--kashgar reveal" data-portal="Chronicles of Kashgar">
-            <div class="world-card__visual kashgar-visual" aria-hidden="true">
-              <span class="kashgar-sun"></span>
-              <span class="kashgar-arch"></span>
-              <span class="kashgar-road"></span>
-              <span class="kashgar-stars"></span>
-              <strong>CHRONICLES<br />OF KASHGAR</strong>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>Illustrated chronicle</span><span>06</span></div>
-              <h3>Chronicles of Kashgar</h3>
-              <p>An illustrated narrative world assembled through places, fragments and recurring visual signs. A chronicle still in formation, designed to feel discovered rather than explained all at once.</p>
-              <button class="world-card__link" type="button" data-project-link>Open the chronicles <span>↗</span></button>
-            </div>
-          </article>
+        <article class="project-card project-card--authentic reveal" data-portal="Authentic Victim">
+          <div class="project-card__cover">
+            <svg viewBox="0 0 800 340" aria-hidden="true">
+              <defs><linearGradient id="authRoom" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#202c27"/><stop offset="1" stop-color="#667268"/></linearGradient></defs>
+              <rect width="800" height="340" fill="url(#authRoom)"/>
+              <rect x="540" y="0" width="3" height="340" fill="#111815" opacity=".7"/><rect x="646" y="0" width="3" height="340" fill="#111815" opacity=".7"/>
+              <path d="M505 251h137l35 89H468Z" fill="#111815" opacity=".45"/>
+              <g fill="#191e1b"><rect x="535" y="154" width="84" height="66" rx="3"/><rect x="548" y="211" width="8" height="97"/><rect x="601" y="211" width="8" height="97"/><rect x="524" y="141" width="105" height="15" rx="4"/></g>
+              <text x="92" y="137" fill="#f2ead8" font-family="Special Elite" font-size="54" letter-spacing="5">AUTHENTIC</text><text x="174" y="205" fill="#f2ead8" font-family="Special Elite" font-size="54" letter-spacing="5">VICTIM</text>
+              <path d="M93 230h255" stroke="#a07a64"/><circle cx="368" cy="230" r="4" fill="#a07a64"/>
+            </svg>
+          </div>
+          <div class="project-card__content"><div class="project-card__meta"><span>Novel and narrative project</span><span>Fiction</span></div><h3>Authentic Victim</h3><p>A story about identity, testimony and the unstable border between lived experience and the version of ourselves that others are prepared to believe.</p><button class="project-link" type="button" data-project-link>Open the dossier <span>↗</span></button></div>
+        </article>
 
-          <article class="world-card world-card--victim reveal" data-portal="Authentic Victim">
-            <div class="world-card__visual victim-visual" aria-hidden="true">
-              <span class="victim-paper victim-paper--one"></span>
-              <span class="victim-paper victim-paper--two"></span>
-              <span class="victim-redaction"></span>
-              <strong>AUTHENTIC<br />VICTIM</strong>
-              <i>A NOVEL IN RECONSTRUCTION</i>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>Long-form fiction</span><span>07</span></div>
-              <h3>Authentic Victim</h3>
-              <p>A long-form fiction project being rebuilt chapter by chapter. The work lives here not as a finished object, but as a narrative under reconstruction — sharpened, questioned and rewritten in public view.</p>
-              <button class="world-card__link" type="button" data-project-link>Enter the manuscript <span>↗</span></button>
-            </div>
-          </article>
-
-          <article class="world-card world-card--guess reveal" data-portal="Guess the Book">
-            <div class="world-card__visual guess-visual" aria-hidden="true">
-              <span class="guess-tile guess-tile--one">?</span>
-              <span class="guess-tile guess-tile--two">50</span>
-              <span class="guess-tile guess-tile--three">📖</span>
-              <strong>GUESS<br />THE BOOK</strong>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>Visual game series</span><span>08</span></div>
-              <h3>Guess the Book</h3>
-              <p>Books translated into images, symbols and deliberately misleading clues. A compact visual game for readers who enjoy recognising a story before its title becomes obvious.</p>
-              <button class="world-card__link" type="button" data-project-link>Take the challenge <span>↗</span></button>
-            </div>
-          </article>
-
-          <article class="world-card world-card--next reveal" data-portal="The next world">
-            <div class="world-card__visual next-visual" aria-hidden="true">
-              <span></span>
-              <strong>NEXT<br />WORLD</strong>
-              <i>FORMING NOW</i>
-            </div>
-            <div class="world-card__content">
-              <div class="world-card__meta"><span>In formation</span><span>∞</span></div>
-              <h3>The next impossible thing</h3>
-              <p>This map is deliberately incomplete. New games, stories and experiments appear whenever an idea becomes too persistent to remain only an idea.</p>
-              <button class="world-card__link" type="button" data-project-link>Signal pending <span>···</span></button>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="about" class="about">
-      <div class="section-shell about__inner reveal">
-        <p class="section-label">Confluence of Minds</p>
-        <h2>Different doors.<br />One expanding universe.</h2>
-        <p>Fiction, games, visual narratives, cultural series and AI experiments — each free to become its own thing.</p>
+        <article class="project-card project-card--guess reveal" data-portal="Guess the Book">
+          <div class="project-card__cover">
+            <svg viewBox="0 0 800 340" aria-hidden="true">
+              <rect width="800" height="340" fill="#f4e8cd"/>
+              <g transform="translate(70 42) rotate(-7 95 120)"><rect width="190" height="240" rx="10" fill="#e15b3e"/><rect x="22" y="25" width="146" height="180" fill="#f7d97a"/><text x="95" y="139" text-anchor="middle" font-family="Bodoni Moda" font-size="88" fill="#17201f">?</text></g>
+              <g transform="translate(295 58) rotate(4 95 120)"><rect width="190" height="240" rx="10" fill="#224d5b"/><circle cx="95" cy="104" r="55" fill="#91c6c7"/><path d="M55 180h80" stroke="#fff" stroke-width="5"/></g>
+              <g transform="translate(520 34) rotate(9 95 120)"><rect width="190" height="240" rx="10" fill="#412b55"/><path d="M30 190 95 40l65 150Z" fill="#bd8fd3"/><circle cx="95" cy="124" r="26" fill="#ffd76a"/></g>
+              <text x="400" y="323" text-anchor="middle" font-family="DM Sans" font-weight="700" font-size="31" letter-spacing="6" fill="#17201f">GUESS THE BOOK</text>
+            </svg>
+          </div>
+          <div class="project-card__content"><div class="project-card__meta"><span>Visual puzzle series</span><span>Game</span></div><h3>Guess the Book</h3><p>Books transformed into visual clues, hidden references and impossible collages. Recognise one title—or lose yourself trying to identify all of them.</p><button class="project-link" type="button" data-project-link>Start guessing <span>↗</span></button></div>
+        </article>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <span>© <span data-year></span> Confluence of Minds</span>
-    <a href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer">Instagram ↗</a>
+    <span>Come for one world. Get lost in a universe.</span>
+    <a class="instagram-link instagram-link--footer" href="https://www.instagram.com/confluenceofminds/" target="_blank" rel="noreferrer" aria-label="Confluence of Minds on Instagram">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="ig-footer" cx="30%" cy="100%" r="120%"><stop offset="0" stop-color="#ffd600"/><stop offset=".32" stop-color="#ff7a00"/><stop offset=".62" stop-color="#ff0169"/><stop offset="1" stop-color="#7b2cff"/></radialGradient></defs><circle cx="32" cy="32" r="31" fill="url(#ig-footer)"/><rect x="17" y="17" width="30" height="30" rx="9" fill="none" stroke="#fff" stroke-width="4"/><circle cx="32" cy="32" r="7" fill="none" stroke="#fff" stroke-width="4"/><circle cx="42" cy="22" r="2.6" fill="#fff"/></svg>
+    </a>
   </footer>
 
-  <div class="portal-toast" role="status" aria-live="polite" data-toast>
-    <span>Portal not connected yet</span>
-    <strong data-toast-message>This world will open soon.</strong>
-  </div>
-
+  <div class="portal-toast" role="status" aria-live="polite" data-toast><span>Portal not connected yet</span><strong data-toast-message>This world will open soon.</strong></div>
   <script src="script.js"></script>
 </body>
 </html>
