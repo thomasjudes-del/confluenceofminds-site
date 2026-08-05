@@ -1,0 +1,39 @@
+name: Embed header logo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/embed-header-logo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Embed PNG directly in header
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+
+          page = Path('index.html')
+          html = page.read_text(encoding='utf-8')
+          old = 'src="assets/confluence-logo.png?v=3"'
+          if old not in html:
+              raise SystemExit('Current header logo reference not found')
+          encoded = base64.b64encode(Path('assets/confluence-logo.png').read_bytes()).decode('ascii')
+          new = f'src="data:image/png;base64,{encoded}"'
+          page.write_text(html.replace(old, new, 1), encoding='utf-8')
+          PY
+          grep -F 'data:image/png;base64,' index.html >/dev/null
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Embed supplied logo directly in header"
+          git push
