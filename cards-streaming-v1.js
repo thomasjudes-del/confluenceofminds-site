@@ -1,137 +1,87 @@
 (() => {
+  if (window.matchMedia('(max-width: 760px)').matches) return;
+
   const R2_BASE = 'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev';
-  const coarsePointer = window.matchMedia('(hover: none), (pointer: coarse)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const configureInlineVideo = (video) => {
-    video.muted = true;
-    video.defaultMuted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.preload = 'auto';
-    video.setAttribute('muted', '');
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
-    video.setAttribute('disablepictureinpicture', '');
-  };
-
-  const safePlay = (video, onSuccess) => {
-    const promise = video.play();
-    if (promise && typeof promise.then === 'function') {
-      promise.then(() => onSuccess?.()).catch(() => {});
-    } else {
-      onSuccess?.();
-    }
-  };
-
-  const revealARealFrame = (video, preferredTime = .7) => {
-    if (!Number.isFinite(video.duration) || video.duration <= .2) return;
-    if (video.currentTime > .08) return;
-    try {
-      video.currentTime = Math.min(preferredTime, Math.max(.1, video.duration * .18));
-    } catch (_) {}
-  };
-
-  const aboutVideo = document.querySelector('.about__background');
-  if (aboutVideo) {
-    configureInlineVideo(aboutVideo);
-    aboutVideo.autoplay = true;
-    aboutVideo.setAttribute('autoplay', '');
-    aboutVideo.src = `${R2_BASE}/confluence-portal-1080.mp4.mp4?v=20260805-mobile-v3`;
-
-    const startAbout = () => {
-      revealARealFrame(aboutVideo, .8);
-      if (!reducedMotion) safePlay(aboutVideo);
-    };
-
-    aboutVideo.addEventListener('loadedmetadata', startAbout, { once: true });
-    aboutVideo.addEventListener('loadeddata', startAbout, { once: true });
-    aboutVideo.addEventListener('canplay', startAbout);
-    window.addEventListener('pageshow', startAbout);
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) startAbout();
-    });
-    aboutVideo.load();
-  }
 
   document.querySelectorAll('.world-card__meta').forEach((meta) => meta.remove());
 
-  const titanCard = document.querySelector('.world-card--titan');
-  if (!titanCard) return;
+  const about = document.querySelector('.about.about--video');
+  const aboutVideo = about?.querySelector('.about__background');
+  if (about && aboutVideo) {
+    about.style.backgroundImage = "url('assets/about-poster-mobile.jpg?v=20260805-stable-v1')";
+    aboutVideo.poster = 'assets/about-poster-mobile.jpg?v=20260805-stable-v1';
+    aboutVideo.src = `${R2_BASE}/confluence-portal-1080.mp4.mp4?v=20260805-stable-v1`;
+    aboutVideo.muted = true;
+    aboutVideo.defaultMuted = true;
+    aboutVideo.loop = true;
+    aboutVideo.playsInline = true;
+    aboutVideo.preload = 'metadata';
+    aboutVideo.setAttribute('muted', '');
+    aboutVideo.setAttribute('playsinline', '');
+    aboutVideo.setAttribute('webkit-playsinline', '');
+    aboutVideo.addEventListener('playing', () => about.classList.add('is-video-playing'));
+    aboutVideo.addEventListener('pause', () => about.classList.remove('is-video-playing'));
+    aboutVideo.addEventListener('error', () => about.classList.remove('is-video-playing'));
+    if (!reducedMotion) {
+      const promise = aboutVideo.play();
+      if (promise?.catch) promise.catch(() => {});
+    }
+  }
 
-  const cover = titanCard.querySelector('.world-cover');
-  const body = titanCard.querySelector('.world-card__body');
+  const titan = document.querySelector('.world-card--titan');
+  if (!titan) return;
+
+  const cover = titan.querySelector('.world-cover');
+  const body = titan.querySelector('.world-card__body');
   if (!cover || !body) return;
 
-  titanCard.classList.add('world-card--streaming');
-  cover.querySelectorAll('svg, .world-card__preview, .world-card__scrim').forEach((node) => node.remove());
+  titan.classList.add('world-card--streaming');
+  cover.querySelectorAll('svg, video, img, .world-card__scrim').forEach((node) => node.remove());
+
+  const poster = document.createElement('img');
+  poster.className = 'world-card__poster';
+  poster.src = 'assets/titan-poster-mobile.jpg?v=20260805-stable-v1';
+  poster.alt = '';
+  poster.setAttribute('aria-hidden', 'true');
 
   const video = document.createElement('video');
   video.className = 'world-card__preview';
-  configureInlineVideo(video);
+  video.src = `${R2_BASE}/incident-on-titan-preview.mp4.mp4?v=20260805-stable-v1`;
+  video.poster = poster.src;
+  video.muted = true;
+  video.defaultMuted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.preload = 'metadata';
+  video.setAttribute('muted', '');
+  video.setAttribute('playsinline', '');
+  video.setAttribute('webkit-playsinline', '');
   video.setAttribute('aria-hidden', 'true');
-  video.src = `${R2_BASE}/incident-on-titan-preview.mp4.mp4?v=20260805-mobile-v3`;
 
   const scrim = document.createElement('span');
   scrim.className = 'world-card__scrim';
   scrim.setAttribute('aria-hidden', 'true');
 
-  cover.append(video, scrim, body);
+  cover.append(poster, video, scrim, body);
 
-  const startPreview = () => {
-    revealARealFrame(video, .65);
+  const play = () => {
     if (reducedMotion) return;
-    safePlay(video, () => titanCard.classList.add('is-previewing'));
+    const promise = video.play();
+    if (promise?.catch) promise.catch(() => {});
   };
 
-  const stopPreview = (reset = true) => {
+  const stop = () => {
     video.pause();
-    titanCard.classList.remove('is-previewing');
-    if (reset) {
-      try { video.currentTime = .65; } catch (_) {}
-    }
+    titan.classList.remove('is-video-playing');
   };
 
-  video.addEventListener('loadedmetadata', () => revealARealFrame(video, .65), { once: true });
-  video.addEventListener('loadeddata', () => {
-    revealARealFrame(video, .65);
-    titanCard.classList.add('has-video-frame');
-  }, { once: true });
-  video.load();
+  video.addEventListener('playing', () => titan.classList.add('is-video-playing'));
+  video.addEventListener('pause', () => titan.classList.remove('is-video-playing'));
+  video.addEventListener('error', () => titan.classList.remove('is-video-playing'));
 
-  if (coarsePointer.matches) {
-    video.autoplay = true;
-    video.setAttribute('autoplay', '');
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= .01) startPreview();
-        else stopPreview(false);
-      });
-    }, { threshold: [0, .01, .12, .35, .65, 1], rootMargin: '180px 0px 180px 0px' });
-
-    observer.observe(titanCard);
-    requestAnimationFrame(() => {
-      const rect = titanCard.getBoundingClientRect();
-      if (rect.top < window.innerHeight + 180 && rect.bottom > -180) startPreview();
-    });
-  } else {
-    titanCard.addEventListener('pointerenter', startPreview);
-    titanCard.addEventListener('pointerleave', () => stopPreview(true));
-    titanCard.addEventListener('focusin', startPreview);
-    titanCard.addEventListener('focusout', () => stopPreview(true));
-  }
+  titan.addEventListener('pointerenter', play);
+  titan.addEventListener('pointerleave', stop);
+  titan.addEventListener('focusin', play);
+  titan.addEventListener('focusout', stop);
 })();
-
-/* Mobile v3 is loaded separately so its strict overrides always win over legacy mobile rules. */
-if (window.matchMedia('(max-width: 760px)').matches) {
-  const mobileStyles = document.createElement('link');
-  mobileStyles.rel = 'stylesheet';
-  mobileStyles.href = 'mobile-media-v3.css?v=20260805-mobile-v3';
-  document.head.appendChild(mobileStyles);
-
-  const mobileScript = document.createElement('script');
-  mobileScript.src = 'mobile-media-v3.js?v=20260805-mobile-v3';
-  mobileScript.defer = true;
-  document.body.appendChild(mobileScript);
-}
