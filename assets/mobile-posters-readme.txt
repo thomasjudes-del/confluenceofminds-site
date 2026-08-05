@@ -1,0 +1,1 @@
+Mobile video fallback posters are stored alongside this marker.
