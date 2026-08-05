@@ -28,7 +28,7 @@ jobs:
           html = index_path.read_text(encoding="utf-8")
           new_about = """<section id="about" class="about about--video" aria-labelledby="about-title">
           <video class="about__background" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-          <source src="assets/content_of_mind_portal_v6_hd_960.webm?v=20260805-1240" type="video/webm" />
+          <source src="assets/content_of_mind_portal_v6_hd_960.webm?v=20260805-1248" type="video/webm" />
           </video>
           <div class="about__veil" aria-hidden="true"></div>
           <div class="about-copy reveal">
@@ -37,7 +37,7 @@ jobs:
           <p>Confluence of Minds brings together stories, games, visual series and sound worlds that were never meant to look alike. Each one opens its own door; together, they form a territory still expanding.</p>
           </div>
           </section>"""
-          pattern = re.compile(r'<section id="about"\b.*?</section>', re.S)
+          pattern = re.compile(r'<section id="about".*?</section>', re.S)
           html, count = pattern.subn(new_about, html, count=1)
           if count != 1:
               raise SystemExit(f"Expected one About section, replaced {count}")
