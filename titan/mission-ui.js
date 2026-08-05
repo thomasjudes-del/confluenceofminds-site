@@ -3,6 +3,7 @@
 
   const definition = window.IOTI_MISSION_DEFINITION;
   const i18n = window.IOTI_I18N;
+  const sybilleEngine = window.IOTI_SYBILLE_ENGINE;
   if (!definition || !i18n) return;
 
   const originalT = i18n.t.bind(i18n);
@@ -11,6 +12,23 @@
 
   i18n.t = key => locale()[key] ?? originalT(key);
   const t = (key, fallback) => i18n.t(key) || fallback;
+  const incidentLabel = () => locale().incidentLabel || (language() === 'fr' ? 'Incident actuel' : 'Current incident');
+
+  function applyMissionTheme() {
+    const root = document.documentElement;
+    const theme = definition.theme || {};
+    root.dataset.mission = definition.id;
+    root.dataset.missionTheme = theme.id || 'titan-amber';
+    app.dataset.mission = definition.id;
+
+    if (theme.accent) root.style.setProperty('--amber', theme.accent);
+    if (theme.accent2) root.style.setProperty('--amber2', theme.accent2);
+    if (theme.blue) root.style.setProperty('--blue', theme.blue);
+    if (theme.ambientRgb) root.style.setProperty('--mission-ambient-rgb', theme.ambientRgb);
+
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta && theme.cardBackground) themeMeta.content = theme.cardBackground;
+  }
 
   function applyMissionLocale() {
     const copy = locale();
@@ -30,16 +48,23 @@
     }
   }
 
+  function restoreHero() {
+    window.IOTI_SET_MISSION_HERO?.();
+  }
+
   window.sceneTransmission = index => definition.getSceneTransmission?.(language(), index, flags) || '';
-  window.inferSybilleDecision = () => definition.inferSybilleDecision(flags, language());
+  window.inferSybilleDecision = () => sybilleEngine?.infer(definition, flags, language())
+    || definition.inferSybilleDecision?.(flags, language());
 
   window.home = function missionHome() {
     applyMissionLocale();
+    applyMissionTheme();
+    restoreHero();
     app.classList.remove('sybille-control', 'takeover-hit');
-    setStage('home', t('weeklyIncident', 'Weekly incident'), 0);
+    setStage('home', incidentLabel(), 0);
     view(`
       <div class="home-mark">IOTI</div>
-      <div class="eyebrow">${t('weeklyIncident', 'Weekly incident')} #${mission.number}</div>
+      <div class="eyebrow">${incidentLabel()} #${mission.number}</div>
       <h1 class="headline">Incident on Titan</h1>
       <div id="homeTransmission" class="terminal-text compact-terminal"></div>
       <div class="home-meta"><span>${mission.title}</span><span>${t('approxTime', '≈ 5 minutes')}</span></div>
@@ -54,6 +79,8 @@
 
   window.briefing = function missionBriefing() {
     applyMissionLocale();
+    applyMissionTheme();
+    restoreHero();
     startedAt = Date.now();
     setStage('brief', t('missionBrief', 'Mission brief'), 7);
 
@@ -63,7 +90,7 @@
       : { title: 'Initial state', crew: 'Crew', energy: 'Energy', science: 'Science' };
 
     view(`
-      <div class="eyebrow">${t('weeklyIncident', 'Weekly incident')} #${mission.number}</div>
+      <div class="eyebrow">${incidentLabel()} #${mission.number}</div>
       <h1 class="headline">${mission.title}</h1>
       <div class="role-panel role-identity">
         <div class="role-avatar"><img src="${mission.character.avatar}" alt="${mission.character.name} — ${mission.role}"></div>
@@ -95,10 +122,11 @@
   window.renderSybilleTakeover = function missionSybilleTakeover() {
     applyMissionLocale();
     const decision = window.inferSybilleDecision();
+    if (!decision) throw new Error('Sybille decision could not be inferred.');
     window.sybilleDecision = decision;
-    const optionIds = definition.sybille?.options || ['restore', 'vent', 'preserve'];
+    const optionIds = definition.sybille?.options || [];
 
-    setSceneImage(definition.sybille?.image || 'assets/scene-core.svg', t('sybilleControl', 'Sybille AI control'));
+    setSceneImage(definition.sybille?.image || mission.scenes.at(-1)?.image, t('sybilleControl', 'Sybille AI control'));
     setStage('sybille', t('sybilleControl', 'Sybille AI control'), 86);
     view(`
       <div class="sybille-seal"><span>△</span></div>
@@ -111,7 +139,7 @@
       <div id="sybilleOptions" class="delayed-ui decision-options">
         ${optionIds.map(id => {
           const option = definition.getSybilleDecision(id, language());
-          return `<div class="decision-option" data-decision="${option.label}"><span>${option.label}</span><i></i></div>`;
+          return `<div class="decision-option" data-decision="${id}"><span>${option.label}</span><i></i></div>`;
         }).join('')}
       </div>
       <div id="sybilleResult" class="delayed-ui sybille-result">
@@ -137,8 +165,7 @@
       if (!commandDone) return;
       reveal('#sybilleOptions');
       await sleep(950);
-      const selected = [...document.querySelectorAll('.decision-option')]
-        .find(option => option.dataset.decision === decision.label);
+      const selected = document.querySelector(`.decision-option[data-decision="${decision.id}"]`);
       if (selected) selected.classList.add('selected');
       applySybilleDecision(decision);
       await sleep(1100);
@@ -146,18 +173,7 @@
     });
   };
 
+  applyMissionTheme();
   applyMissionLocale();
   window.IOTI_APPLY_MISSION_LOCALE = applyMissionLocale;
-
-  document.querySelectorAll('[data-lang]').forEach(button => {
-    button.addEventListener('click', () => {
-      applyMissionLocale();
-      const stage = app.dataset.stage;
-      if (stage === 'brief') return window.briefing();
-      if (stage === 'scene') return window.renderScene();
-      if (stage === 'sybille') return window.renderSybilleTakeover();
-      if (stage === 'score' && window.result) return window.renderScore(window.result);
-      return window.home();
-    });
-  });
 })();

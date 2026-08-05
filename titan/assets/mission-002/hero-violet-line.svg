@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">The Violet Line</title>
+  <desc id="desc">Hestia power station on Titan beneath Saturn, crossed by a violet electrical front.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#080813"/><stop offset=".5" stop-color="#17142c"/><stop offset="1" stop-color="#321c39"/></linearGradient>
+    <radialGradient id="sat" cx="35%" cy="28%" r="70%"><stop stop-color="#f1c88c"/><stop offset=".48" stop-color="#b8865f"/><stop offset="1" stop-color="#4b2f35"/></radialGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#30213c"/><stop offset="1" stop-color="#090a11"/></linearGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5ccfff" stop-opacity="0"/><stop offset=".42" stop-color="#9b89ff"/><stop offset=".62" stop-color="#d8d1ff"/><stop offset="1" stop-color="#7c67dc" stop-opacity="0"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <g opacity=".75" fill="#d8e7ff"><circle cx="140" cy="130" r="2"/><circle cx="310" cy="85" r="3"/><circle cx="520" cy="145" r="2"/><circle cx="1340" cy="120" r="2"/><circle cx="1470" cy="230" r="3"/><circle cx="1160" cy="70" r="2"/></g>
+  <g transform="translate(1220 220) rotate(-12)">
+    <ellipse rx="330" ry="74" fill="none" stroke="#d5b27f" stroke-opacity=".45" stroke-width="19"/>
+    <ellipse rx="260" ry="58" fill="none" stroke="#6f566a" stroke-opacity=".75" stroke-width="10"/>
+    <circle r="126" fill="url(#sat)"/>
+    <path d="M-110-42c78 30 150 30 220 3M-120 2c83 25 164 24 240-5M-104 44c70 19 139 18 207-2" fill="none" stroke="#f0d09c" stroke-opacity=".2" stroke-width="8"/>
+  </g>
+  <path d="M0 630C210 554 420 560 624 620c191 56 363 49 562-9 169-49 293-42 414 18v371H0Z" fill="url(#ground)"/>
+  <path d="M0 695c228-61 430-39 631 36 191 71 375 66 568-8 156-60 287-49 401 15" fill="none" stroke="#6c517b" stroke-opacity=".34" stroke-width="10"/>
+  <g transform="translate(300 490)">
+    <path d="M0 224h690l-48-128H78Z" fill="#10131d" stroke="#6e668f" stroke-width="4"/>
+    <path d="M92 96h176V0h142v96h150l48 128H44Z" fill="#151927" stroke="#746aa1" stroke-width="4"/>
+    <rect x="123" y="126" width="88" height="60" rx="8" fill="#211d39" stroke="#9b89ff" stroke-opacity=".6"/>
+    <rect x="286" y="52" width="84" height="138" rx="8" fill="#0f1420" stroke="#74cfff" stroke-opacity=".55"/>
+    <path d="M329 52V-72M315-72h28M329-72l-42-72M329-72l43-72" stroke="#8ad9ff" stroke-width="7"/>
+    <circle cx="329" cy="-148" r="16" fill="#d6d0ff" filter="url(#glow)"/>
+    <g fill="#bdb4ff"><rect x="455" y="132" width="72" height="52" rx="5"/><rect x="548" y="144" width="50" height="40" rx="5"/></g>
+    <g fill="#bfffff"><circle cx="167" cy="155" r="5"/><circle cx="329" cy="116" r="6"/><circle cx="491" cy="157" r="5"/><circle cx="573" cy="163" r="5"/></g>
+  </g>
+  <path d="M-120 760C260 704 477 758 714 722c258-39 449-169 1006-87" fill="none" stroke="url(#violet)" stroke-width="20" filter="url(#glow)"/>
+  <path d="M-80 781C270 733 492 785 723 746c277-46 469-172 939-100" fill="none" stroke="#a692ff" stroke-opacity=".85" stroke-width="4"/>
+  <g opacity=".7" filter="url(#soft)"><circle cx="870" cy="690" r="13" fill="#a99aff"/><circle cx="985" cy="648" r="10" fill="#7ad8ff"/><circle cx="1110" cy="617" r="14" fill="#d2ccff"/></g>
+  <text x="96" y="120" fill="#cfc8ff" font-family="Rajdhani, sans-serif" font-size="34" letter-spacing="10">HESTIA GRID STATUS</text>
+  <text x="92" y="192" fill="#ffffff" font-family="Rajdhani, sans-serif" font-size="84" font-weight="700" letter-spacing="7">THE VIOLET LINE</text>
+  <text x="98" y="236" fill="#78d0ff" font-family="Space Mono, monospace" font-size="22" letter-spacing="4">PHASE DRIFT 11.8° · MAIN BUS UNSTABLE</text>
+</svg>

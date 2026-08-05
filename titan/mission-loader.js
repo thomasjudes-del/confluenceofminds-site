@@ -30,12 +30,12 @@
   window.IOTI_MISSION_CONTEXT = {
     currentMissionId: registry.currentMissionId,
     selectedMissionId: selectedEntry.id,
-    isArchived: selectedEntry.id !== registry.currentMissionId,
+    isArchived: selectedEntry.status === 'archived' || selectedEntry.id !== registry.currentMissionId,
     requestedMissionId: requestedId,
     selectedEntry,
     registry
   };
 
   const separator = selectedEntry.config.includes('?') ? '&' : '?';
-  document.write(`<script src="${selectedEntry.config}${separator}v=54"><\/script>`);
+  document.write(`<script src="${selectedEntry.config}${separator}v=55"><\/script>`);
 })();

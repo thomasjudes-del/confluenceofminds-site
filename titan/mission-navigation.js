@@ -5,20 +5,21 @@
   if (!context) return;
 
   const currentEntry = context.registry.missions.find(item => item.id === context.currentMissionId);
-  const archivedEntries = context.registry.missions.filter(item => item.id !== context.currentMissionId);
+  const archivedEntries = context.registry.missions.filter(item => item.status === 'archived');
+  const historyEntries = archivedEntries.filter(item => item.id !== context.selectedMissionId);
   const originalView = window.view;
 
   const copy = () => document.documentElement.lang.toLowerCase().startsWith('fr')
     ? {
         archived: 'Incident archivé',
-        latest: `Mission actuelle : ${currentEntry?.number || context.currentMissionId}`,
+        latest: `Incident actuel : ${currentEntry?.number || context.currentMissionId}`,
         playLatest: 'Jouer au dernier incident',
         previous: 'Incidents précédents',
         close: 'Fermer'
       }
     : {
         archived: 'Archived incident',
-        latest: `Latest incident: ${currentEntry?.number || context.currentMissionId}`,
+        latest: `Current incident: ${currentEntry?.number || context.currentMissionId}`,
         playLatest: 'Play latest incident',
         previous: 'Previous incidents',
         close: 'Close'
@@ -53,7 +54,7 @@
       root.prepend(banner);
     }
 
-    if (app.dataset.stage === 'home' && archivedEntries.length) {
+    if (app.dataset.stage === 'home' && historyEntries.length) {
       const homeAction = root.querySelector('#homeAction');
       if (homeAction) {
         const history = document.createElement('div');
@@ -61,7 +62,7 @@
         history.innerHTML = `
           <button class="history-toggle" type="button" aria-expanded="false">${labels.previous}</button>
           <div class="history-panel" hidden>
-            ${archivedEntries.map(item => `
+            ${historyEntries.map(item => `
               <button type="button" onclick="IOTI_OPEN_MISSION('${item.id}')">
                 <span>${item.number}</span><strong>${item.title}</strong>
               </button>
