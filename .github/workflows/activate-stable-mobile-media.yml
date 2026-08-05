@@ -1,0 +1,29 @@
+name: Activate stable mobile media
+
+on:
+  push:
+    paths:
+      - '.github/workflows/activate-stable-mobile-media.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refresh mobile media asset URLs
+        run: |
+          sed -i 's/cards-streaming-v1.css?v=20260805-mobile-v3/cards-streaming-v1.css?v=20260805-stable-v2/g' index.html
+          sed -i 's/mobile-media-v3.css?v=20260805-mobile-v3/mobile-media-v3.css?v=20260805-stable-v2/g' index.html
+          sed -i 's/cards-streaming-v1.js?v=20260805-mobile-v3/cards-streaming-v1.js?v=20260805-stable-v2/g' index.html
+          sed -i 's/mobile-media-v3.js?v=20260805-mobile-v3/mobile-media-v3.js?v=20260805-stable-v2/g' index.html
+          rm .github/workflows/activate-stable-mobile-media.yml
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html .github/workflows/activate-stable-mobile-media.yml
+          git commit -m 'Load stable poster-backed mobile media'
+          git push
