@@ -10,7 +10,7 @@
         title: 'The Violet Line',
         status: 'current',
         date: '2026-08-05',
-        config: 'missions/002.js'
+        config: ['missions/002-en.js', 'missions/002-fr.js', 'missions/002-scenes.js', 'missions/002-transmissions-a.js', 'missions/002-transmissions-b.js', 'missions/002-scoring.js', 'missions/002.js']
       },
       {
         id: '001',

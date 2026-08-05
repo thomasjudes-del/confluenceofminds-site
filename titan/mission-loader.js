@@ -7,7 +7,7 @@
   }
 
   const normalizeId = value => {
-    const match = String(value || '').trim().match(/(?:incident-)?(\d{1,3})$/i);
+    const match = String(value || '').trim().match(/^(?:incident-)?(\d{1,3})$/i);
     return match ? match[1].padStart(3, '0') : null;
   };
 
@@ -36,6 +36,9 @@
     registry
   };
 
-  const separator = selectedEntry.config.includes('?') ? '&' : '?';
-  document.write(`<script src="${selectedEntry.config}${separator}v=55"><\/script>`);
+  const configs = Array.isArray(selectedEntry.config) ? selectedEntry.config : [selectedEntry.config];
+  configs.forEach(config => {
+    const separator = config.includes('?') ? '&' : '?';
+    document.write(`<script src="${config}${separator}v=55"><\/script>`);
+  });
 })();
