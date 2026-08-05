@@ -55,6 +55,16 @@ html[data-mission-theme="violet-grid"] .hero img{
   filter:saturate(1.05) contrast(1.08);
   object-position:center 50%;
 }
+html[data-mission-theme="violet-grid"] .app[data-stage="home"] .hero img,
+html[data-mission-theme="violet-grid"] .app[data-stage="brief"] .hero img{
+  object-position:center 38%;
+}
 html[data-mission-theme="violet-grid"] .hero-shade{
   background:linear-gradient(180deg,rgba(4,5,12,.02),rgba(7,5,18,.08) 48%,rgba(5,5,12,.58) 100%);
+}
+@media(min-width:760px){
+  html[data-mission-theme="violet-grid"] .app[data-stage="home"] .hero img,
+  html[data-mission-theme="violet-grid"] .app[data-stage="brief"] .hero img{
+    object-position:center 50%;
+  }
 }

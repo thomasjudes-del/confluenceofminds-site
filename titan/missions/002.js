@@ -8,9 +8,21 @@
   const getSybilleDecision = (id, language='en') => ({id,label:locales[language][id],effects:{...M.decisionEffects[id]},line:locales[language][`${id}Line`]});
   window.IOTI_MISSION_DEFINITION = {
     id:'002',
-    game:{id:'incident-002',number:'002',title:locales.en.title,role:locales.en.role,character:{name:'Viktor',avatar:'assets/avatars/viktor.svg'},initial:{health:84,energy:64,science:22},scenes:M.scenes},
+    game:{id:'incident-002',number:'002',title:locales.en.title,role:locales.en.role,character:{name:'Viktor',avatar:'assets/crew-canon/viktor.webp'},initial:{health:84,energy:64,science:22},scenes:M.scenes},
     scoring:M.scoring, locales,
-    hero:{src:'assets/mission-002/hero-violet-line.svg',alt:'Hestia power station beneath Saturn with a violet electrical front crossing Titan'},
+    hero:{
+      parts:[
+        'assets/mission-002/hero-violet-line-cinematic-0.txt',
+        'assets/mission-002/hero-violet-line-cinematic-1.txt',
+        'assets/mission-002/hero-violet-line-cinematic-2.txt',
+        'assets/mission-002/hero-violet-line-cinematic-3.txt',
+        'assets/mission-002/hero-violet-line-cinematic-4.txt',
+        'assets/mission-002/hero-violet-line-cinematic-5.txt',
+        'assets/mission-002/hero-violet-line-cinematic-6.txt'
+      ],
+      type:'image/webp',
+      alt:'Hestia power station beneath Saturn as a violet electrical front crosses Titan'
+    },
     theme:{id:'violet-grid',accent:'#8f7cff',accent2:'#d2ccff',ambientRgb:'108, 82, 210',blue:'#72c8ff',cardBackground:'#080611',cardAccent:'#9b89ff',cardAccent2:'#75d5ff'},
     sybille:{options:['blackstart','island','pulse'],image:'assets/mission-002/scene-bus.svg',inference:{groups:{blackstart:['isolate_bus','power_winch','shut_lab','quench_trunk','brake_flywheel','evacuate_hall'],island:['hold_sync','manual_lock','local_cells','split_grid','dump_heaters','hold_local'],pulse:['route_diagnostics','map_tunnel','keep_cryopumps','counterphase','feed_lidar','preserve_trace']},tieBreak:['island','blackstart','pulse']}},
     getSybilleDecision, getSceneTransmission:M.getSceneTransmission

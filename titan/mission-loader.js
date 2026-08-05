@@ -39,6 +39,6 @@
   const configs = Array.isArray(selectedEntry.config) ? selectedEntry.config : [selectedEntry.config];
   configs.forEach(config => {
     const separator = config.includes('?') ? '&' : '?';
-    document.write(`<script src="${config}${separator}v=55"><\/script>`);
+    document.write(`<script src="${config}${separator}v=56"><\/script>`);
   });
 })();
