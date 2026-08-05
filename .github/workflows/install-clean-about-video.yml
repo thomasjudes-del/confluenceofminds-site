@@ -1,0 +1,86 @@
+name: Install clean About video
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/install-clean-about-video.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebuild and verify the exact animation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import hashlib
+          import re
+
+          expected_chunks = {
+              'v480.part00': '48cac59b138e60729f461af2ca4588e0cbda00ed362191c563db8883d31e11a8',
+              'v480.part01': 'c97a2a11aeb7dd4cbf8b8682797a3e6cd20f79253c2f73cdf42dd9c35c0861b0',
+              'v480.part02': 'c682824f2dd4ddc96d3443bea2c0e053db392399f1210953ac75807a7101120d',
+              'v480.part03': '3f623043d5609126b76ea13db0a63c3241f72d30334ff5e372aec75301b00520',
+              'v480.part04': '63bf4899782ec978ee640ca84c67e592cef37def621e8eeaefa879366a8d3d3f',
+              'v480.part05': '15354efe4dd5b6a0a1e6f8565ab8ce0b6fca20629124139ed7f605f88bace03d',
+          }
+
+          chunks = []
+          for name, expected in expected_chunks.items():
+              path = Path('.video-upload') / name
+              text = path.read_text(encoding='utf-8').strip()
+              actual = hashlib.sha256(text.encode()).hexdigest()
+              if actual != expected:
+                  raise SystemExit(f'Chunk mismatch: {name}: {actual}')
+              chunks.append(text)
+
+          encoded = ''.join(chunks)
+          if len(encoded) != 20048:
+              raise SystemExit(f'Unexpected base64 length: {len(encoded)}')
+          if hashlib.sha256(encoded.encode()).hexdigest() != '9a8e2590926e1c588fc329f78a3ce4eec87ea76c6cbe9622e0ae948eac174f23':
+              raise SystemExit('Combined base64 mismatch')
+
+          video = base64.b64decode(encoded, validate=True)
+          if len(video) != 15035:
+              raise SystemExit(f'Unexpected MP4 size: {len(video)}')
+          if hashlib.sha256(video).hexdigest() != 'c2845d39c62b6b069af98f3b8c34a94e671a16e2d99389c23ac9bd8c80249a8f':
+              raise SystemExit('MP4 checksum mismatch')
+          if video[4:8] != b'ftyp':
+              raise SystemExit('Invalid MP4 header')
+
+          target = Path('assets/content_of_mind_portal_v6_hd_480.mp4')
+          target.write_bytes(video)
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          html, count = re.subn(
+              r'<source src="assets/content_of_mind_portal_v6_hd_960\.webm\?v=[^"]+" type="video/webm"\s*/>',
+              '<source src="assets/content_of_mind_portal_v6_hd_480.mp4?v=20260805-1406" type="video/mp4" />',
+              html,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one video source replacement, got {count}')
+          index.write_text(html, encoding='utf-8')
+          PY
+
+      - name: Commit only the corrected media reference
+        shell: bash
+        run: |
+          rm -f assets/content_of_mind_portal_v6_hd_960.webm
+          rm -rf .video-upload
+          rm -f .github/workflows/install-clean-about-video.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Replace corrupted About animation with clean video"
+          git push
