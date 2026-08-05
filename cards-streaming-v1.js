@@ -1,4 +1,19 @@
 (() => {
+  const R2_BASE = 'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev';
+
+  /* Replace the degraded local About asset with the real HD video hosted on R2. */
+  const aboutVideo = document.querySelector('.about__background');
+  if (aboutVideo) {
+    aboutVideo.muted = true;
+    aboutVideo.loop = true;
+    aboutVideo.playsInline = true;
+    aboutVideo.preload = 'auto';
+    aboutVideo.src = `${R2_BASE}/confluence-portal-1080.mp4.mp4?v=20260805-r2`;
+    aboutVideo.load();
+    const aboutPlay = aboutVideo.play();
+    if (aboutPlay && typeof aboutPlay.catch === 'function') aboutPlay.catch(() => {});
+  }
+
   document.querySelectorAll('.world-card__meta').forEach((meta) => meta.remove());
 
   const titanCard = document.querySelector('.world-card--titan');
@@ -20,7 +35,7 @@
   video.playsInline = true;
   video.preload = 'auto';
   video.setAttribute('aria-hidden', 'true');
-  video.innerHTML = '<source src="assets/incident-on-titan-preview.mp4?v=20260805-clean-tile" type="video/mp4">';
+  video.src = `${R2_BASE}/incident-on-titan-preview.mp4.mp4?v=20260805-r2`;
 
   const scrim = document.createElement('span');
   scrim.className = 'world-card__scrim';
