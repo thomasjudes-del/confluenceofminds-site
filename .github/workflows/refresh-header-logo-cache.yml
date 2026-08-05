@@ -23,7 +23,7 @@ jobs:
           import re
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          s2, n = re.subn(r'assets/confluence-logo\.png(?:\?v=[^\"]*)?', 'assets/confluence-logo.png?v=20260805-1020', s, count=1)
+          s2, n = re.subn(r'assets/confluence-logo\.png(?:\?v=[^\"]*)?', 'assets/confluence-logo.png?v=20260805-1029', s, count=1)
           if n != 1:
               raise SystemExit('logo reference not found exactly once')
           p.write_text(s2, encoding='utf-8')
@@ -31,5 +31,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Refresh header logo cache key"
+          git commit -m "Refresh transparent header logo cache key"
           git push
