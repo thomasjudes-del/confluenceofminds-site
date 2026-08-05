@@ -19,8 +19,61 @@ jobs:
       - name: Apply compact world grid
         shell: bash
         run: |
-          printf '%s' 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCgppbmRleCA9IFBhdGgoImluZGV4Lmh0bWwiKQpodG1sID0gaW5kZXgucmVhZF90ZXh0KGVuY29kaW5nPSJ1dGYtOCIpCm9sZCA9ICIiIiAgICAgIDxkaXYgY2xhc3M9Indvcmxkcy1oZWFkaW5nIHJldmVhbCI+CiAgICAgICAgPGRpdj4KICAgICAgICAgIDxwIGNsYXNzPSJzZWN0aW9uLWxhYmVsIj5DaG9vc2UgYW4gZW50cmFuY2U8L3A+CiAgICAgICAgICA8aDIgaWQ9Indvcmxkcy10aXRsZSI+V29ybGRzPC9oMj4KICAgICAgICA8L2Rpdj4KICAgICAgICA8cD5FYWNoIHByb2plY3Qga2VlcHMgaXRzIG93biBjb2RlcywgYXRtb3NwaGVyZSBhbmQgZm9ybS4gVGhlIGdyaWQgaXMgdGhlIG1hcDsgdGhlIHdvcmxkcyB0aGVtc2VsdmVzIGRvIG5vdCBoYXZlIHRvIG1hdGNoLjwvcD4KICAgICAgPC9kaXY+IiIiCm5ldyA9ICIiIiAgICAgIDxkaXYgY2xhc3M9Indvcmxkcy1oZWFkaW5nIHJldmVhbCI+CiAgICAgICAgPGRpdj4KICAgICAgICAgIDxwIGNsYXNzPSJzZWN0aW9uLWxhYmVsIj5DaG9vc2UgYW4gZW50cmFuY2U8L3A+CiAgICAgICAgICA8aDIgaWQ9Indvcmxkcy10aXRsZSI+V29ybGRzPC9oMj4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+IiIiCmlmIG9sZCBub3QgaW4gaHRtbDoKICAgIHJhaXNlIFN5c3RlbUV4aXQoIkV4cGVjdGVkIFdvcmxkcyBoZWFkaW5nIGJsb2NrIG5vdCBmb3VuZCIpCmluZGV4LndyaXRlX3RleHQoaHRtbC5yZXBsYWNlKG9sZCwgbmV3LCAxKSwgZW5jb2Rpbmc9InV0Zi04IikKCmNzc19wYXRoID0gUGF0aCgic3R5bGVzLmNzcyIpCmNzcyA9IGNzc19wYXRoLnJlYWRfdGV4dChlbmNvZGluZz0idXRmLTgiKQpyZXBsYWNlbWVudHMgPSBbCigiIiIud29ybGRzLWhlYWRpbmcgewogIGRpc3BsYXk6IGdyaWQ7CiAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnIgbWlubWF4KDI4MHB4LCA1MjBweCk7CiAgZ2FwOiA1MHB4OwogIGFsaWduLWl0ZW1zOiBlbmQ7CiAgbWFyZ2luLWJvdHRvbTogNTBweDsKfSIiLCAiIiIud29ybGRzLWhlYWRpbmcgewogIG1hcmdpbi1ib3R0b206IDM0cHg7Cn0iIiIpLAooIiIiLndvcmxkcy1oZWFkaW5nID4gcCB7CiAgbWFyZ2luOiAwIDAgOHB4OwogIGZvbnQtZmFtaWx5OiB2YXIoLS1zZXJpZik7CiAgZm9udC1zaXplOiBjbGFtcCgxN3B4LCAxLjN2dywgMjJweCk7CiAgbGluZS1oZWlnaHQ6IDEuNTsKICBjb2xvcjogIzVmNjQ2MTsKfQoKIiIiLCAiIiksCigiIiIud29ybGQtZ3JpZCB7CiAgZGlzcGxheTogZ3JpZDsKICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdCgzLCBtaW5tYXgoMCwgMWZyKSk7CiAgZ2FwOiAyNHB4Owp9IiIiLCAiIiIud29ybGQtZ3JpZCB7CiAgZGlzcGxheTogZ3JpZDsKICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdCg1LCBtaW5tYXgoMCwgMWZyKSk7CiAgZ2FwOiAxNnB4Owp9IiIiKSwKKCIgIGJvcmRlci1yYWRpdXM6IDE2cHg7IiwgIiAgYm9yZGVyLXJhZGl1czogMTJweDsiKSwKKCIiIi53b3JsZC1jYXJkX19ib2R5IHsgZmxleDogMTsgZGlzcGxheTogZmxleDsgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsgbWluLWhlaWdodDogMzMwcHg7IHBhZGRpbmc6IDI0cHggMjRweCAyMHB4OyB9IiIiLCAiIiIud29ybGQtY2FyZF9fYm9keSB7IGZsZXg6IDE7IGRpc3BsYXk6IGZsZXg7IGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47IG1pbi1oZWlnaHQ6IDI0NXB4OyBwYWRkaW5nOiAxN3B4IDE3cHggMTVweDsgfSIiIiksCigiIiIud29ybGQtY2FyZF9fbWV0YSB7IGRpc3BsYXk6IGZsZXg7IGp1c3RpZnktY29udGVudDogc3BhY2UtYmV0d2VlbjsgZ2FwOiAxMnB4OyBtYXJnaW4tYm90dG9tOiAxOXB4OyBmb250LWZhbWlseTogdmFyKC0tbW9ubyk7IGZvbnQtc2l6ZTogMTBweDsgbGV0dGVyLXNwYWNpbmc6IC4xZW07IHRleHQtdHJhbnNmb3JtOiB1cHBlcmNhc2U7IGNvbG9yOiB2YXIoLS1tdXRlZCk7IH0iIiIsICIiIi53b3JsZC1jYXJkX19tZXRhIHsgZGlzcGxheTogZmxleDsganVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuOyBnYXA6IDhweDsgbWFyZ2luLWJvdHRvbTogMTNweDsgZm9udC1mYW1pbHk6IHZhcigtLW1vbm8pOyBmb250LXNpemU6IDhweDsgbGV0dGVyLXNwYWNpbmc6IC4wOGVtOyB0ZXh0LXRyYW5zZm9ybTogdXBwZXJjYXNlOyBjb2xvcjogdmFyKC0tbXV0ZWQpOyB9IiIiKSwKKCIiIi53b3JsZC1jYXJkIGgzIHsgbWFyZ2luOiAwOyBmb250LWZhbWlseTogdmFyKC0tc2VyaWYpOyBmb250LXNpemU6IGNsYW1wKDI3cHgsIDJ2dywgMzZweCk7IGZvbnQtd2VpZ2h0OiA1MDA7IGxpbmUtaGVpZ2h0OiAxLjAzOyBsZXR0ZXItc3BhY2luZzogLS4wM2VtOyB9IiIiLCAiIiIud29ybGQtY2FyZCBoMyB7IG1hcmdpbjogMDsgZm9udC1mYW1pbHk6IHZhcigtLXNlcmlmKTsgZm9udC1zaXplOiBjbGFtcCgyMXB4LCAxLjU1dncsIDI3cHgpOyBmb250LXdlaWdodDogNTAwOyBsaW5lLWhlaWdodDogMS4wNTsgbGV0dGVyLXNwYWNpbmc6IC0uMDNlbTsgfSIiIiksCigiIiIud29ybGQtY2FyZCBwIHsgbWFyZ2luOiAxOHB4IDAgMjhweDsgZm9udC1zaXplOiAxNXB4OyBsaW5lLWhlaWdodDogMS42NTsgY29sb3I6ICM1YzYyNWY7IH0iIiIsICIiIi53b3JsZC1jYXJkIHAgeyBtYXJnaW46IDEzcHggMCAyMHB4OyBmb250LXNpemU6IDEyLjVweDsgbGluZS1oZWlnaHQ6IDEuNTsgY29sb3I6ICM1YzYyNWY7IH0iIiIpLAooIiAgcGFkZGluZzogMTRweCAwIDA7IiwgIiAgcGFkZGluZzogMTFweCAwIDA7IiksCigiICBmb250LXNpemU6IDEycHg7IiwgIiAgZm9udC1zaXplOiAxMHB4OyIpLAooIiIiICAud29ybGQtZ3JpZCB7IGdyaWQtdGVtcGxhdGUtY29sdW1uczogcmVwZWF0KDIsIG1pbm1heCgwLCAxZnIpKTsgfQogIC53b3JsZC1jYXJkX19ib2R5IHsgbWluLWhlaWdodDogMzEwcHg7IH0iIiIsICIiIiAgLndvcmxkLWdyaWQgeyBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdCgzLCBtaW5tYXgoMCwgMWZyKSk7IH0KICAud29ybGQtY2FyZF9fYm9keSB7IG1pbi1oZWlnaHQ6IDI0NXB4OyB9IiIiKSwKKCIiIiAgLndvcmxkcy1oZWFkaW5nIHsgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnI7IGdhcDogMjJweDsgbWFyZ2luLWJvdHRvbTogMzRweDsgfQogIC53b3JsZC1ncmlkIHsgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnI7IGdhcDogMjBweDsgfQogIC53b3JsZC1jYXJkX19ib2R5IHsgbWluLWhlaWdodDogYXV0bzsgcGFkZGluZzogMjJweDsgfSIiIiwgIiIiICAud29ybGRzLWhlYWRpbmcgeyBtYXJnaW4tYm90dG9tOiAyOHB4OyB9CiAgLndvcmxkLWdyaWQgeyBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdCgyLCBtaW5tYXgoMCwgMWZyKSk7IGdhcDogMTZweDsgfQogIC53b3JsZC1jYXJkX19ib2R5IHsgbWluLWhlaWdodDogYXV0bzsgcGFkZGluZzogMTdweDsgfSIiIiksCigiIiIgIC53b3JsZHMtaGVhZGluZyBoMiB7IGZvbnQtc2l6ZTogNjhweDsgfQogIC53b3JsZC1jYXJkIGgzIHsgZm9udC1zaXplOiAyOXB4OyB9CiAgLndvcmxkLWNhcmQgcCB7IGZvbnQtc2l6ZTogMTRweDsgfSIiIiwgIiIiICAud29ybGRzLWhlYWRpbmcgaDIgeyBmb250LXNpemU6IDY4cHg7IH0KICAud29ybGQtZ3JpZCB7IGdyaWQtdGVtcGxhdGUtY29sdW1uczogMWZyOyB9CiAgLndvcmxkLWNhcmQgaDMgeyBmb250LXNpemU6IDI3cHg7IH0KICAud29ybGQtY2FyZCBwIHsgZm9udC1zaXplOiAxNHB4OyB9IiIiKSwKXQpmb3Igb2xkX2NzcywgbmV3X2NzcyBpbiByZXBsYWNlbWVudHM6CiAgICBpZiBvbGRfY3NzIG5vdCBpbiBjc3M6CiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgiRXhwZWN0ZWQgQ1NTIGJsb2NrIG5vdCBmb3VuZDogIiArIHJlcHIob2xkX2Nzc1s6ODBdKSkKICAgIGNzcyA9IGNzcy5yZXBsYWNlKG9sZF9jc3MsIG5ld19jc3MsIDEpCmNzc19wYXRoLndyaXRlX3RleHQoY3NzLCBlbmNvZGluZz0idXRmLTgiKQ==' | base64 --decode > /tmp/compact.py
-          python /tmp/compact.py
+          python -c 'from pathlib import Path; p=Path("index.html"); s=p.read_text(encoding="utf-8"); t="        <p>Each project keeps its own codes, atmosphere and form. The grid is the map; the worlds themselves do not have to match.</p>\n"; assert t in s; p.write_text(s.replace(t,"",1),encoding="utf-8")'
+          cat >> styles.css <<'EOF'
+
+/* Compact Worlds grid — client-facing V6 */
+.worlds-heading {
+  display: block;
+  margin-bottom: 34px;
+}
+.worlds-heading > p { display: none; }
+.world-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+.world-card { border-radius: 12px; }
+.world-card__body {
+  min-height: 245px;
+  padding: 17px 17px 15px;
+}
+.world-card__meta {
+  gap: 8px;
+  margin-bottom: 13px;
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+.world-card h3 {
+  font-size: clamp(21px, 1.55vw, 27px);
+  line-height: 1.05;
+}
+.world-card p {
+  margin: 13px 0 20px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.world-card button {
+  padding-top: 11px;
+  font-size: 10px;
+}
+
+@media (max-width: 1180px) {
+  .world-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .world-card__body { min-height: 245px; }
+}
+
+@media (max-width: 820px) {
+  .worlds-heading { margin-bottom: 28px; }
+  .world-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .world-card__body { min-height: auto; padding: 17px; }
+}
+
+@media (max-width: 520px) {
+  .world-grid { grid-template-columns: 1fr; }
+  .world-card h3 { font-size: 27px; }
+  .world-card p { font-size: 14px; }
+}
+EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html styles.css
