@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cinzel:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+JP:wght@500;600;700&family=Oswald:wght@500;600;700&family=Rajdhani:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260805-about-video-v1" />
   <link rel="preload" as="image" href="assets/confluence-hero-organic.png?v=20260805-hero-v7">
 </head>
 <body>
@@ -342,26 +342,17 @@
       </div>
     </section>
 
-    <section id="about" class="about section-shell" aria-labelledby="about-title">
-      <div class="about-art reveal" aria-hidden="true">
-        <svg viewBox="0 0 560 430">
-          <defs><linearGradient id="aboutPaper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffaf2"/><stop offset=".48" stop-color="#d7ccba"/><stop offset="1" stop-color="#8e826f"/></linearGradient><filter id="aboutShadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#17201f" flood-opacity=".18"/></filter></defs>
-          <g filter="url(#aboutShadow)">
-            <path fill="#17201f" d="M180 341C139 220 233 85 382 79c113 20 157 132 89 237-72 105-242 117-291 25Z"><animate attributeName="d" dur="12s" repeatCount="indefinite" values="M180 341C139 220 233 85 382 79c113 20 157 132 89 237-72 105-242 117-291 25Z;M111 267C143 126 291 58 420 125c110 67 101 203 7 274-117 69-269 25-316-132Z;M180 341C139 220 233 85 382 79c113 20 157 132 89 237-72 105-242 117-291 25Z"/></path>
-            <path fill="url(#aboutPaper)" d="M77 244C194 220 217 111 354 43c-8 136-52 244-157 324-73-29-113-70-120-123Z"><animate attributeName="d" dur="10s" repeatCount="indefinite" values="M77 244C194 220 217 111 354 43c-8 136-52 244-157 324-73-29-113-70-120-123Z;M126 129c121 69 200-40 331-42-52 149-139 245-273 284-68-76-83-166-58-242Z;M77 244C194 220 217 111 354 43c-8 136-52 244-157 324-73-29-113-70-120-123Z"/></path>
-            <path fill="#b66b49" d="M50 339c97-61 172-52 247 34-103 34-190 22-247-34Z"><animate attributeName="d" dur="14s" repeatCount="indefinite" values="M50 339c97-61 172-52 247 34-103 34-190 22-247-34Z;M60 362c77-88 187-79 276 9-101 53-212 48-276-9Z;M50 339c97-61 172-52 247 34-103 34-190 22-247-34Z"/></path>
-            <path fill="#eee8dc" opacity=".94" d="M145 212c116 27 190 75 269 171-115 5-207-16-291-70 4-40 11-74 22-101Z"><animate attributeName="d" dur="11s" repeatCount="indefinite" values="M145 212c116 27 190 75 269 171-115 5-207-16-291-70 4-40 11-74 22-101Z;M133 187c124 31 215 94 284 180-122 32-225-5-307-68 5-44 12-82 23-112Z;M145 212c116 27 190 75 269 171-115 5-207-16-291-70 4-40 11-74 22-101Z"/></path>
-          </g>
-          <circle cx="447" cy="93" r="24" fill="#17201f" opacity=".85"><animate attributeName="r" values="20;34;20" dur="6s" repeatCount="indefinite"/></circle>
-          <circle cx="498" cy="181" r="8" fill="#b66b49"><animate attributeName="cy" values="181;150;181" dur="7s" repeatCount="indefinite"/></circle>
-        </svg>
-      </div>
-      <div class="about-copy reveal">
-        <p class="section-label">Different doors. One universe.</p>
-        <h2 id="about-title">Come for one world.<br />Get lost in a universe.</h2>
-        <p>Confluence of Minds brings together stories, games, visual series and sound worlds that were never meant to look alike. Each one opens its own door; together, they form a territory still expanding.</p>
-      </div>
-    </section>
+    <section id="about" class="about about--video" aria-labelledby="about-title">
+<video class="about__background" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+<source src="assets/content_of_mind_portal_v6_hd_960.webm?v=20260805-1248" type="video/webm" />
+</video>
+<div class="about__veil" aria-hidden="true"></div>
+<div class="about-copy reveal">
+<p class="section-label">Different doors. One universe.</p>
+<h2 id="about-title">Come for one world.<br />Get lost in a universe.</h2>
+<p>Confluence of Minds brings together stories, games, visual series and sound worlds that were never meant to look alike. Each one opens its own door; together, they form a territory still expanding.</p>
+</div>
+</section>
   </main>
 
   <footer class="site-footer">
