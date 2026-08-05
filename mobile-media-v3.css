@@ -1,0 +1,167 @@
+/* Mobile-only corrections for a compact hero and genuinely cinematic media cards. */
+@media (max-width: 760px) {
+  .hero-sequence {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .hero-sticky {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
+    padding: 108px 24px 44px !important;
+    overflow: hidden !important;
+  }
+
+  .hero-copy {
+    max-width: 100% !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .hero-kicker {
+    margin-bottom: 18px !important;
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+    letter-spacing: .13em !important;
+    white-space: normal !important;
+  }
+
+  .hero-copy h1 {
+    max-width: 100% !important;
+    font-size: clamp(47px, 13.5vw, 67px) !important;
+    line-height: .91 !important;
+    letter-spacing: -.055em !important;
+    text-wrap: balance !important;
+  }
+
+  .hero-lede {
+    max-width: 100% !important;
+    margin-top: 22px !important;
+    font-size: 17px !important;
+    line-height: 1.43 !important;
+  }
+
+  .primary-button {
+    width: auto !important;
+    margin-top: 24px !important;
+    padding: 14px 20px !important;
+  }
+
+  .hero-art.hero-art--immersive {
+    position: relative !important;
+    inset: auto !important;
+    width: min(91vw, 500px) !important;
+    margin: 24px auto 0 !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .hero-art__image--echo,
+  .hero-paper,
+  .hero-orbit,
+  .hero-cosmos,
+  .hero-starfield,
+  .hero-void,
+  .scroll-cue {
+    display: none !important;
+  }
+
+  .worlds {
+    padding-top: 62px !important;
+  }
+
+  .world-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    gap: 22px !important;
+  }
+
+  .world-card--streaming {
+    width: 100% !important;
+    min-height: 0 !important;
+    aspect-ratio: 16 / 9 !important;
+    border-radius: 15px !important;
+  }
+
+  .world-card--streaming .world-cover,
+  .world-card--streaming .world-card__preview {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .world-card--streaming .world-card__preview {
+    object-fit: cover !important;
+    object-position: center !important;
+    background: #111917 center / cover no-repeat !important;
+  }
+
+  .world-card--streaming .world-card__scrim {
+    background: linear-gradient(180deg, rgba(3,7,10,.02) 0%, rgba(3,7,10,.08) 43%, rgba(3,7,10,.82) 79%, rgba(3,7,10,.97) 100%) !important;
+  }
+
+  .world-card--streaming .world-card__body {
+    padding: 18px 19px 15px !important;
+  }
+
+  .world-card--streaming h3 {
+    font-size: clamp(27px, 8vw, 36px) !important;
+  }
+
+  .world-card--streaming p {
+    margin: 8px 0 10px !important;
+    font-size: 12px !important;
+    line-height: 1.38 !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .world-card--streaming button {
+    padding-top: 10px !important;
+    font-size: 10px !important;
+  }
+
+  .about.about--video {
+    position: relative !important;
+    min-height: 86svh !important;
+    padding: 92px 24px 66px !important;
+    background: #111917 center / cover no-repeat !important;
+    overflow: hidden !important;
+  }
+
+  .about.about--video .about__background {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    z-index: 0 !important;
+  }
+
+  .about.about--video .about__veil {
+    z-index: 1 !important;
+    background: linear-gradient(180deg, rgba(5,10,10,.18), rgba(5,10,10,.55) 62%, rgba(5,10,10,.72)) !important;
+  }
+
+  .about.about--video .about-copy {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  .about.about--video h2 {
+    font-size: clamp(54px, 15.2vw, 75px) !important;
+    line-height: .91 !important;
+  }
+
+  .about.about--video .about-copy > p:last-child {
+    font-size: 17px !important;
+    line-height: 1.55 !important;
+  }
+}
