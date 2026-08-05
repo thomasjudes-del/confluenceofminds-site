@@ -1,0 +1,1 @@
+Install about and Titan poster blobs into assets paths.
