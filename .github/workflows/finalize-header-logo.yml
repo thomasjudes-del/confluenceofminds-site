@@ -1,0 +1,44 @@
+name: Finalize header logo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/finalize-header-logo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Point header to verified PNG
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('index.html')
+          html = path.read_text(encoding='utf-8')
+          updated, count = re.subn(
+              r'src="(?:data:image/png;base64,[^"]+|assets/confluence-logo(?:\.svg|\.png)(?:\?[^\"]*)?)"',
+              'src="assets/confluence-logo.png?v=20260805-0946"',
+              html,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit('Header logo reference not found exactly once')
+          path.write_text(updated, encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Use verified PNG for header logo"
+          git push
