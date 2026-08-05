@@ -1,0 +1,35 @@
+name: Switch About to HD video
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/switch-about-to-hd.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  switch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update About video source
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('index.html')
+          html = path.read_text(encoding='utf-8')
+          old = 'assets/content_of_mind_portal_v6_hd_480.mp4?v=20260805-1406'
+          new = 'assets/content_of_mind_portal_v6_hd_1080.mp4?v=20260805-1615'
+          if old not in html:
+              raise SystemExit('Current About video source not found')
+          path.write_text(html.replace(old, new, 1), encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Use optimized 1080p About background video"
+          git push
