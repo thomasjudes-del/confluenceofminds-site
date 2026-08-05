@@ -32,13 +32,12 @@
     } catch (_) {}
   };
 
-  /* Full-width About movie: play automatically and move away from a black first frame on iOS. */
   const aboutVideo = document.querySelector('.about__background');
   if (aboutVideo) {
     configureInlineVideo(aboutVideo);
     aboutVideo.autoplay = true;
     aboutVideo.setAttribute('autoplay', '');
-    aboutVideo.src = `${R2_BASE}/confluence-portal-1080.mp4.mp4?v=20260805-mobile-v2`;
+    aboutVideo.src = `${R2_BASE}/confluence-portal-1080.mp4.mp4?v=20260805-mobile-v3`;
 
     const startAbout = () => {
       revealARealFrame(aboutVideo, .8);
@@ -65,15 +64,13 @@
   if (!cover || !body) return;
 
   titanCard.classList.add('world-card--streaming');
-
-  /* Remove the old illustrated cover so its lettering cannot overlap the real preview. */
   cover.querySelectorAll('svg, .world-card__preview, .world-card__scrim').forEach((node) => node.remove());
 
   const video = document.createElement('video');
   video.className = 'world-card__preview';
   configureInlineVideo(video);
   video.setAttribute('aria-hidden', 'true');
-  video.src = `${R2_BASE}/incident-on-titan-preview.mp4.mp4?v=20260805-mobile-v2`;
+  video.src = `${R2_BASE}/incident-on-titan-preview.mp4.mp4?v=20260805-mobile-v3`;
 
   const scrim = document.createElement('span');
   scrim.className = 'world-card__scrim';
@@ -103,21 +100,20 @@
   video.load();
 
   if (coarsePointer.matches) {
-    /* On mobile, start as soon as a modest part of the single-width card enters the viewport. */
     video.autoplay = true;
     video.setAttribute('autoplay', '');
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= .12) startPreview();
+        if (entry.isIntersecting && entry.intersectionRatio >= .01) startPreview();
         else stopPreview(false);
       });
-    }, { threshold: [0, .12, .35, .65, 1], rootMargin: '120px 0px 120px 0px' });
+    }, { threshold: [0, .01, .12, .35, .65, 1], rootMargin: '180px 0px 180px 0px' });
 
     observer.observe(titanCard);
     requestAnimationFrame(() => {
       const rect = titanCard.getBoundingClientRect();
-      if (rect.top < window.innerHeight + 120 && rect.bottom > -120) startPreview();
+      if (rect.top < window.innerHeight + 180 && rect.bottom > -180) startPreview();
     });
   } else {
     titanCard.addEventListener('pointerenter', startPreview);
@@ -126,3 +122,16 @@
     titanCard.addEventListener('focusout', () => stopPreview(true));
   }
 })();
+
+/* Mobile v3 is loaded separately so its strict overrides always win over legacy mobile rules. */
+if (window.matchMedia('(max-width: 760px)').matches) {
+  const mobileStyles = document.createElement('link');
+  mobileStyles.rel = 'stylesheet';
+  mobileStyles.href = 'mobile-media-v3.css?v=20260805-mobile-v3';
+  document.head.appendChild(mobileStyles);
+
+  const mobileScript = document.createElement('script');
+  mobileScript.src = 'mobile-media-v3.js?v=20260805-mobile-v3';
+  mobileScript.defer = true;
+  document.body.appendChild(mobileScript);
+}
