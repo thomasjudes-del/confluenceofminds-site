@@ -1,0 +1,27 @@
+name: Apply supplied header logo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/apply-header-logo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace header logo only
+        shell: bash
+        run: |
+          printf '%s' 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCmltcG9ydCByZQoKaW5kZXhfcGF0aCA9IFBhdGgoImluZGV4Lmh0bWwiKQpodG1sID0gaW5kZXhfcGF0aC5yZWFkX3RleHQoZW5jb2Rpbmc9InV0Zi04IikKCnBhdHRlcm4gPSByZS5jb21waWxlKAogICAgcicgICAgPGEgY2xhc3M9ImJyYW5kIiBocmVmPSIjdG9wIiBhcmlhLWxhYmVsPSJDb25mbHVlbmNlIG9mIE1pbmRzIOKAlCBob21lIj4uKj8gICAgPC9hPlxuXG4gICAgPG5hdicsCiAgICByZS5TLAopCnJlcGxhY2VtZW50ID0gJycnICAgIDxhIGNsYXNzPSJicmFuZCIgaHJlZj0iI3RvcCIgYXJpYS1sYWJlbD0iQ29uZmx1ZW5jZSBvZiBNaW5kcyDigJQgaG9tZSI+CiAgICAgIDxpbWcgY2xhc3M9ImJyYW5kX19pbWFnZSIgc3JjPSJhc3NldHMvY29uZmx1ZW5jZS1sb2dvLnN2ZyIgYWx0PSJDb25mbHVlbmNlIG9mIE1pbmRzIiAvPgogICAgPC9hPgoKICAgIDxuYXYnJycKCmh0bWwsIGNvdW50ID0gcGF0dGVybi5zdWJuKHJlcGxhY2VtZW50LCBodG1sLCBjb3VudD0xKQppZiBjb3VudCAhPSAxOgogICAgcmFpc2UgU3lzdGVtRXhpdChmIkV4cGVjdGVkIG9uZSBoZWFkZXIgYnJhbmQgYmxvY2ssIHJlcGxhY2VkIHtjb3VudH0iKQoKaW5kZXhfcGF0aC53cml0ZV90ZXh0KGh0bWwsIGVuY29kaW5nPSJ1dGYtOCIpCgpjc3NfcGF0aCA9IFBhdGgoInN0eWxlcy5jc3MiKQpjc3MgPSBjc3NfcGF0aC5yZWFkX3RleHQoZW5jb2Rpbmc9InV0Zi04IikKbWFya2VyID0gIi8qIEF0dGFjaGVkIENvbmZsdWVuY2UgbG9nbyAtIGhlYWRlciAqLyIKaWYgbWFya2VyIG5vdCBpbiBjc3M6CiAgICBjc3MgKz0gJycnCgovKiBBdHRhY2hlZCBDb25mbHVlbmNlIGxvZ28gLSBoZWFkZXIgKi8KLmJyYW5kIHsgZ2FwOiAwOyB9Ci5icmFuZF9faW1hZ2UgewogIGRpc3BsYXk6IGJsb2NrOwogIHdpZHRoOiA5MHB4OwogIGhlaWdodDogOTBweDsKICBvYmplY3QtZml0OiBjb250YWluOwogIGZsZXg6IDAgMCBhdXRvOwogIHRyYW5zaXRpb246IHdpZHRoIC4zNXMgZWFzZSwgaGVpZ2h0IC4zNXMgZWFzZTsKfQouc2l0ZS1oZWFkZXIuaXMtc2Nyb2xsZWQgLmJyYW5kX19pbWFnZSB7CiAgd2lkdGg6IDY4cHg7CiAgaGVpZ2h0OiA2OHB4Owp9CgpAbWVkaWEgKG1heC13aWR0aDogODIwcHgpIHsKICAuYnJhbmRfX2ltYWdlIHsKICAgIHdpZHRoOiA2OHB4OwogICAgaGVpZ2h0OiA2OHB4OwogIH0KICAuc2l0ZS1oZWFkZXIuaXMtc2Nyb2xsZWQgLmJyYW5kX19pbWFnZSB7CiAgICB3aWR0aDogNThweDsKICAgIGhlaWdodDogNThweDsKICB9Cn0KCkBtZWRpYSAobWF4LXdpZHRoOiA1MjBweCkgewogIC5icmFuZF9faW1hZ2UgewogICAgd2lkdGg6IDYycHg7CiAgICBoZWlnaHQ6IDYycHg7CiAgfQp9CicnJwogICAgY3NzX3BhdGgud3JpdGVfdGV4dChjc3MsIGVuY29kaW5nPSJ1dGYtOCIpCg==' | base64 --decode > /tmp/apply-logo.py
+          python /tmp/apply-logo.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html styles.css
+          git commit -m "Use supplied Confluence logo in header"
+          git push
