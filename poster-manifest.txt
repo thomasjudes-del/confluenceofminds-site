@@ -1,0 +1,2 @@
+about-poster-mobile.jpg -> generated from the About background video
+titan-poster-mobile.jpg -> generated from the Incident on Titan preview video
