@@ -21,7 +21,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p assets
-          cat .titan-preview-upload/part* > /tmp/titan-preview.b64
+          {
+            head -c 8000 .titan-preview-upload/part00
+            cat .titan-preview-upload/part01 .titan-preview-upload/part02 .titan-preview-upload/part03 .titan-preview-upload/part04
+          } > /tmp/titan-preview.b64
           base64 --decode /tmp/titan-preview.b64 > assets/incident-on-titan-preview.mp4
           echo "6a7a0d82f5f795befbbe2a3a09a7dc22aaac25e8619d1a0f9b42d8b5c03becee  assets/incident-on-titan-preview.mp4" | sha256sum --check --strict
           test -s assets/incident-on-titan-preview.mp4
