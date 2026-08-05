@@ -1,0 +1,60 @@
+name: Activate mobile v3 assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/activate-mobile-v3.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load mobile v3 directly
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          html = path.read_text(encoding='utf-8')
+
+          html = html.replace(
+              'cards-streaming-v1.css?v=20260805-mobile-v2',
+              'cards-streaming-v1.css?v=20260805-mobile-v3'
+          )
+          html = html.replace(
+              'cards-streaming-v1.js?v=20260805-mobile-v2',
+              'cards-streaming-v1.js?v=20260805-mobile-v3'
+          )
+
+          mobile_css = '  <link rel="stylesheet" href="mobile-media-v3.css?v=20260805-mobile-v3" />\n'
+          if 'mobile-media-v3.css?v=20260805-mobile-v3' not in html:
+              html = html.replace(
+                  '  <link rel="preload" as="image" href="assets/confluence-hero-organic.png?v=20260805-hero-v7">',
+                  mobile_css + '  <link rel="preload" as="image" href="assets/confluence-hero-organic.png?v=20260805-hero-v7">'
+              )
+
+          mobile_js = '  <script src="mobile-media-v3.js?v=20260805-mobile-v3"></script>\n'
+          if 'mobile-media-v3.js?v=20260805-mobile-v3' not in html:
+              html = html.replace(
+                  '  <script src="cards-streaming-v1.js?v=20260805-mobile-v3"></script>',
+                  '  <script src="cards-streaming-v1.js?v=20260805-mobile-v3"></script>\n' + mobile_js.rstrip()
+              )
+
+          path.write_text(html, encoding='utf-8')
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Load mobile v3 layout and media directly"
+          git push
