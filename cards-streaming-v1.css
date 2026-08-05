@@ -39,10 +39,13 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  display: block;
+  display: block !important;
+  visibility: visible !important;
   width: 100%;
   height: 100%;
+  opacity: 1 !important;
   object-fit: cover;
+  object-position: center;
   transform: scale(1.01);
   transition: transform 1.4s cubic-bezier(.2,.75,.2,1), filter .45s ease;
   pointer-events: none;
@@ -58,8 +61,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(3,7,10,.02) 0%, rgba(3,7,10,.04) 35%, rgba(3,7,10,.56) 68%, rgba(3,7,10,.96) 100%),
-    linear-gradient(90deg, rgba(3,7,10,.16), transparent 58%);
+    linear-gradient(180deg, rgba(3,7,10,.01) 0%, rgba(3,7,10,.03) 42%, rgba(3,7,10,.54) 70%, rgba(3,7,10,.94) 100%),
+    linear-gradient(90deg, rgba(3,7,10,.12), transparent 62%);
 }
 
 .world-card--streaming .world-card__body {
@@ -87,7 +90,7 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   margin: 11px 0 14px;
-  color: rgba(255,255,255,.84);
+  color: rgba(255,255,255,.86);
   font-size: 14px;
   line-height: 1.45;
 }
@@ -98,10 +101,117 @@
   text-shadow: none;
 }
 
+/* Keep the full-width About movie visible behind the copy. */
+.about.about--video .about__background {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
 @media (max-width: 760px) {
-  .world-grid { grid-template-columns: 1fr !important; }
-  .world-card--streaming { aspect-ratio: 4 / 3; }
-  .world-card--streaming .world-card__body { padding: 20px !important; }
+  /* The immersive desktop scroll was far too long on a phone. */
+  .hero-sequence {
+    height: 138svh !important;
+    min-height: 1020px !important;
+  }
+
+  .hero-sticky {
+    height: 100svh !important;
+    min-height: 650px !important;
+    padding: 92px 30px 24px !important;
+    align-content: start !important;
+    overflow: hidden !important;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(58px, 16.8vw, 84px) !important;
+    line-height: .9 !important;
+  }
+
+  .hero-lede {
+    margin-top: 24px !important;
+    font-size: 18px !important;
+    line-height: 1.42 !important;
+  }
+
+  .primary-button { margin-top: 26px !important; }
+  .scroll-cue { display: none !important; }
+
+  .hero-art.hero-art--immersive {
+    width: min(90vw, 560px) !important;
+    margin-top: -18px !important;
+  }
+
+  .worlds { padding-top: 72px !important; }
+  .world-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  .world-card--streaming {
+    width: 100% !important;
+    aspect-ratio: 16 / 10 !important;
+    min-height: 360px !important;
+  }
+
+  .world-card--streaming .world-card__body {
+    padding: 22px 22px 19px !important;
+  }
+
+  .world-card--streaming h3 { font-size: clamp(32px, 9.5vw, 43px); }
+
+  .about.about--video {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    min-height: 100svh !important;
+    padding: 108px 30px 78px !important;
+    overflow: hidden !important;
+    background: #111917 !important;
+  }
+
+  .about.about--video .about__background {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 0 !important;
+    filter: none !important;
+  }
+
+  .about.about--video .about__veil {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    background:
+      linear-gradient(90deg, rgba(5,10,10,.46), rgba(5,10,10,.24) 55%, rgba(5,10,10,.42)),
+      linear-gradient(180deg, rgba(5,10,10,.13), rgba(5,10,10,.55)) !important;
+  }
+
+  .about.about--video .about-copy {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .hero-sequence {
+    height: 128svh !important;
+    min-height: 940px !important;
+  }
+
+  .hero-sticky { padding-inline: 24px !important; }
+  .hero-art.hero-art--immersive { width: 88vw !important; }
+
+  .world-card--streaming {
+    aspect-ratio: 4 / 3 !important;
+    min-height: 390px !important;
+  }
+
+  .about.about--video { padding-inline: 24px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
