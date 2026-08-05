@@ -549,3 +549,37 @@ button { color: inherit; }
   .world-card h3 { font-size: 27px; }
   .world-card p { font-size: 14px; }
 }
+
+
+/* Attached Confluence logo - header */
+.brand { gap: 0; }
+.brand__image {
+  display: block;
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  transition: width .35s ease, height .35s ease;
+}
+.site-header.is-scrolled .brand__image {
+  width: 68px;
+  height: 68px;
+}
+
+@media (max-width: 820px) {
+  .brand__image {
+    width: 68px;
+    height: 68px;
+  }
+  .site-header.is-scrolled .brand__image {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand__image {
+    width: 62px;
+    height: 62px;
+  }
+}
