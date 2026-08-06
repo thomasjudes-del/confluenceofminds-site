@@ -11,8 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cinzel:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+JP:wght@500;600;700&family=Oswald:wght@500;600;700&family=Rajdhani:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css?v=20260805-about-video-v1" />
-  <link rel="stylesheet" href="cards-streaming-v1.css?v=20260805-stable-v2" />
-  <link rel="stylesheet" href="mobile-media-v3.css?v=20260805-stable-v2" />
+  <link rel="stylesheet" href="native-media-v4.css?v=20260806-native-v2" />
   <link rel="preload" as="image" href="assets/confluence-hero-organic.png?v=20260805-hero-v7">
 </head>
 <body>
@@ -118,27 +117,21 @@
       </div>
 
       <div class="world-grid">
-        <article class="world-card world-card--titan reveal" data-portal="Incident on Titan">
-          <div class="world-cover">
-            <svg viewBox="0 0 640 360" aria-hidden="true">
-              <defs><radialGradient id="titanPlanet" cx="62%" cy="42%" r="55%"><stop offset="0" stop-color="#f9b55d"/><stop offset=".38" stop-color="#b96526"/><stop offset=".72" stop-color="#492418"/><stop offset="1" stop-color="#090c10"/></radialGradient><linearGradient id="titanGlow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f6a33b" stop-opacity=".9"/><stop offset="1" stop-color="#e46120" stop-opacity="0"/></linearGradient></defs>
-              <rect width="640" height="360" fill="#070b10"/>
-              <circle cx="478" cy="165" r="176" fill="url(#titanPlanet)"/>
-              <path d="M334 96c82 25 170 15 257-27M314 136c105 31 206 18 300-23M312 185c99 29 203 19 304-18M331 232c90 22 180 16 270-15" fill="none" stroke="#f4bd72" stroke-opacity=".22" stroke-width="8"/>
-              <ellipse cx="473" cy="161" rx="226" ry="42" fill="none" stroke="url(#titanGlow)" stroke-width="7" transform="rotate(-11 473 161)"/>
-              <g fill="#f4d29d"><circle cx="70" cy="54" r="2"/><circle cx="111" cy="92" r="1.8"/><circle cx="192" cy="42" r="2"/><circle cx="246" cy="119" r="1.5"/><circle cx="84" cy="242" r="1.5"/><circle cx="222" cy="278" r="2"/></g>
-              <path d="M37 300h176l28-35 24 18 28-37 42 54" fill="none" stroke="#e9822a" stroke-width="3"/>
-              <text x="42" y="91" fill="#f7e8cf" font-family="Rajdhani, sans-serif" font-size="18" letter-spacing="5">INCIDENT ON</text>
-              <text x="38" y="157" fill="#fff8ea" font-family="Rajdhani, sans-serif" font-weight="700" font-size="72" letter-spacing="11">TITAN</text>
-              <text x="41" y="194" fill="#e9822a" font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="3">COLONY STATUS: UNSTABLE</text>
-            </svg>
-          </div>
-          <div class="world-card__body">
-            <div class="world-card__meta"><span>Collaborative game</span><span>Live</span></div>
-            <h3>Incident on Titan</h3>
-            <p>A weekly collaborative science-fiction game. Choose a role, face a shared incident, and protect the colony’s health, energy and scientific mission—while Sybille keeps part of the score hidden.</p>
-            <button type="button" data-project-link>Enter Titan <span>↗</span></button>
-          </div>
+        <article class="world-card world-card--titan world-card--native reveal" data-portal="Incident on Titan" data-media-container>
+          <a class="world-card__link" href="/titan/" aria-label="Enter Incident on Titan">
+            <div class="world-cover">
+              <img class="world-card__poster" src="assets/titan-poster-mobile.jpg?v=20260806-native-v2" alt="" aria-hidden="true" />
+              <video class="world-card__preview" data-viewport-video autoplay muted loop playsinline preload="auto" poster="assets/titan-poster-mobile.jpg?v=20260806-native-v2" aria-hidden="true">
+                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/incident-on-titan-preview.mp4" type="video/mp4" />
+              </video>
+              <span class="world-card__scrim" aria-hidden="true"></span>
+              <div class="world-card__body">
+                <h3>Incident on Titan</h3>
+                <p>A weekly collaborative science-fiction game. Choose a role, face a shared incident, and protect the colony while Sybille keeps part of the score hidden.</p>
+                <span class="world-card__cta">Enter Titan <span aria-hidden="true">↗</span></span>
+              </div>
+            </div>
+          </a>
         </article>
 
         <article class="world-card world-card--aitalent reveal" data-portal="AI’s Got Talent">
@@ -343,18 +336,18 @@
         </article>
       </div>
     </section>
-
-    <section id="about" class="about about--video" aria-labelledby="about-title">
-<video class="about__background" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-<source src="assets/content_of_mind_portal_v6_hd_1080.mp4?v=20260805-1615" type="video/mp4" />
-</video>
-<div class="about__veil" aria-hidden="true"></div>
-<div class="about-copy reveal">
-<p class="section-label">Different doors. One universe.</p>
-<h2 id="about-title">Come for one world.<br />Get lost in a universe.</h2>
-<p>Confluence of Minds brings together stories, games, visual series and sound worlds that were never meant to look alike. Each one opens its own door; together, they form a territory still expanding.</p>
-</div>
-</section>
+    <section id="about" class="about about--video about--native" aria-labelledby="about-title" data-media-container>
+      <img class="about__poster" src="assets/about-poster-mobile.jpg?v=20260806-native-v2" alt="" aria-hidden="true" />
+      <video class="about__background" data-viewport-video autoplay muted loop playsinline preload="auto" poster="assets/about-poster-mobile.jpg?v=20260806-native-v2" aria-hidden="true">
+        <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/confluence-portal-1080.mp4" type="video/mp4" />
+      </video>
+      <div class="about__veil" aria-hidden="true"></div>
+      <div class="about-copy reveal">
+        <p class="section-label">Different doors. One universe.</p>
+        <h2 id="about-title">Come for one world.<br />Get lost in a universe.</h2>
+        <p>Confluence of Minds brings together stories, games, visual series and sound worlds that were never meant to look alike. Each one opens its own door; together, they form a territory still expanding.</p>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -377,7 +370,6 @@
   </div>
 
   <script src="script.js?v=20260805-hero-v7"></script>
-  <script src="cards-streaming-v1.js?v=20260805-stable-v2"></script>
-  <script src="mobile-media-v3.js?v=20260805-stable-v2"></script>
+  <script src="native-media-v4.js?v=20260806-native-v2"></script>
 </body>
 </html>
