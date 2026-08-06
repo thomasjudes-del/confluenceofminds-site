@@ -1,0 +1,37 @@
+name: Add Authentiques Victimes video
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-authentiques-victimes-video.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Validate R2 video
+        run: |
+          URL='https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Authentiques_Victimes_Cinematic_Teaser_V2_Nils_Frahm.mp4'
+          curl -fL --retry 3 --retry-delay 2 "$URL" -o /tmp/authentiques-victimes.mp4
+          test -s /tmp/authentiques-victimes.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height -of default=noprint_wrappers=1 /tmp/authentiques-victimes.mp4
+
+      - name: Update card
+        run: python3 scripts/add_authentiques_victimes_video.py
+
+      - name: Commit video integration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -f .github/workflows/add-authentiques-victimes-video.yml scripts/add_authentiques_victimes_video.py
+          git add index.html .github/workflows/add-authentiques-victimes-video.yml scripts/add_authentiques_victimes_video.py
+          git commit -m 'Use R2 teaser for Authentiques Victimes'
+          git push
