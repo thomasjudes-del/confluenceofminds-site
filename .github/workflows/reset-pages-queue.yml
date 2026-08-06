@@ -1,0 +1,64 @@
+name: Reset Pages deployment queue
+
+on:
+  push:
+    branches:
+      - repair-pages-card-videos-20260806
+    paths:
+      - '.github/workflows/reset-pages-queue.yml'
+
+permissions:
+  actions: write
+  contents: write
+  pages: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel competing workflow runs and Pages deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}"
+          headers=(
+            --header 'Accept: application/vnd.github+json'
+            --header "Authorization: Bearer ${GH_TOKEN}"
+            --header 'X-GitHub-Api-Version: 2026-03-10'
+          )
+
+          for run_id in 31105580722 31105575332; do
+            code=$(curl --location --silent --show-error --output /tmp/run-${run_id}.txt --write-out '%{http_code}' \
+              --request POST "${headers[@]}" "${api}/actions/runs/${run_id}/cancel")
+            cat /tmp/run-${run_id}.txt || true
+            echo "Cancel run ${run_id}: HTTP ${code}"
+            case "${code}" in 202|409) ;; *) exit 1 ;; esac
+          done
+
+          code=$(curl --location --silent --show-error --output /tmp/pages-cancel.txt --write-out '%{http_code}' \
+            --request POST "${headers[@]}" "${api}/pages/deployments/0dc4aef06ffb26909a222480c15ab817bae9b571/cancel")
+          cat /tmp/pages-cancel.txt || true
+          echo "Cancel Pages deployment: HTTP ${code}"
+          case "${code}" in 204|404|409) ;; *) exit 1 ;; esac
+
+          sleep 10
+
+      - name: Trigger one clean Pages deployment from main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" site
+          cd site
+          git checkout main
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          printf '%s\n' \
+            'Confluence of Minds deployment' \
+            'Card video refresh: 2026-08-06 15:26 Europe/Paris' > deployment-version.txt
+          git add deployment-version.txt
+          git commit -m 'Publish refreshed card videos cleanly'
+          git push origin main
