@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Confluence of Minds</title>
+  <desc id="desc">Stories, games, sound worlds and impossible worlds.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111817"/>
+      <stop offset="0.44" stop-color="#1a211f"/>
+      <stop offset="0.68" stop-color="#d4c4ad"/>
+      <stop offset="1" stop-color="#eee8dc"/>
+    </linearGradient>
+    <radialGradient id="planet" cx="65%" cy="35%" r="68%">
+      <stop offset="0" stop-color="#323835"/>
+      <stop offset="0.55" stop-color="#131918"/>
+      <stop offset="1" stop-color="#080c0b"/>
+    </radialGradient>
+    <linearGradient id="creamFold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffaf1"/>
+      <stop offset="0.6" stop-color="#d9ccba"/>
+      <stop offset="1" stop-color="#938776"/>
+    </linearGradient>
+    <linearGradient id="darkFold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1413"/>
+      <stop offset="1" stop-color="#36403c"/>
+    </linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="170%">
+      <feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="#070b0a" flood-opacity="0.35"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.78" numOctaves="3" seed="21" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono"/>
+      <feComponentTransfer in="mono" result="faded">
+        <feFuncA type="table" tableValues="0 0.08"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" in2="faded" mode="multiply"/>
+    </filter>
+    <clipPath id="rightClip"><path d="M520 0H1200V630H465c78-114 96-220 74-318C516 208 510 104 520 0Z"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#paper)"/>
+  <rect width="1200" height="630" fill="#eee8dc" opacity="0.1" filter="url(#grain)"/>
+
+  <g clip-path="url(#rightClip)">
+    <circle cx="965" cy="170" r="156" fill="url(#planet)"/>
+    <circle cx="965" cy="170" r="198" fill="none" stroke="#6e6253" stroke-width="1" opacity="0.28"/>
+    <circle cx="965" cy="170" r="238" fill="none" stroke="#6e6253" stroke-width="1" opacity="0.2"/>
+    <circle cx="846" cy="70" r="16" fill="#171d1c"/>
+    <circle cx="1078" cy="292" r="7" fill="#b66b49"/>
+    <path d="M612 470c92-134 192-181 307-142 90 30 169 8 281-76v378H515c6-62 38-115 97-160Z" fill="#0f1514" opacity="0.92"/>
+    <path d="M590 530c126-94 244-121 352-78 88 35 168 25 258-32v210H540c0-38 17-71 50-100Z" fill="#5a5147" opacity="0.8"/>
+    <path d="M586 547c147-76 268-83 364-22 69 43 152 49 250 16v89H551c4-31 16-58 35-83Z" fill="#b66b49" opacity="0.78"/>
+    <path d="M567 577c147-59 267-59 361 1 69 44 160 48 272 10v42H540c5-20 14-38 27-53Z" fill="#f5eee2" opacity="0.92"/>
+  </g>
+
+  <g transform="translate(717 246)" filter="url(#shadow)">
+    <path d="M-170 72C-112-44-28-109 87-122 48-23-15 80-111 190-155 160-176 121-170 72Z" fill="url(#creamFold)"/>
+    <path d="M-36-123C75-86 164-17 228 84 119 53 23 77-68 155-28 57-17-36-36-123Z" fill="url(#darkFold)"/>
+    <path d="M-137 105C-31 56 72 69 176 145 54 166-60 152-164 104Z" fill="#f5eee2" opacity="0.95"/>
+    <path d="M-75 20C20-36 107-42 188 1 113 6 43 43-23 111-51 82-68 52-75 20Z" fill="#b66b49" opacity="0.84"/>
+    <circle cx="104" cy="-111" r="54" fill="#1a211f"/>
+    <circle cx="179" cy="-44" r="10" fill="#b66b49"/>
+  </g>
+
+  <g fill="none" stroke="#b66b49" stroke-width="1" opacity="0.46">
+    <ellipse cx="820" cy="284" rx="328" ry="159" transform="rotate(-13 820 284)"/>
+    <ellipse cx="820" cy="284" rx="274" ry="244" transform="rotate(28 820 284)"/>
+    <path d="M551 134C741 42 969 54 1155 196"/>
+  </g>
+  <g fill="#b66b49">
+    <circle cx="552" cy="134" r="3"/>
+    <circle cx="1027" cy="75" r="3"/>
+    <circle cx="1125" cy="360" r="3"/>
+  </g>
+
+  <g transform="translate(64 70)">
+    <g transform="translate(0 0)">
+      <path d="M6 27C30 4 61 0 97 16 78 29 57 44 35 64 17 53 7 41 6 27Z" fill="#eee8dc"/>
+      <path d="M62 2C95 13 120 34 138 66 106 55 79 60 51 82 61 52 65 25 62 2Z" fill="#303a37"/>
+      <path d="M13 65C48 48 83 52 119 78 76 84 38 80 4 63Z" fill="#b66b49"/>
+      <g fill="none" stroke="#b66b49" stroke-width="1" opacity="0.55">
+        <ellipse cx="72" cy="43" rx="84" ry="32" transform="rotate(-8 72 43)"/>
+        <ellipse cx="72" cy="43" rx="58" ry="66" transform="rotate(28 72 43)"/>
+      </g>
+    </g>
+
+    <text x="0" y="176" fill="#f8f3ea" font-family="Georgia, 'Times New Roman', serif" font-size="88" letter-spacing="2">CONFLUENCE</text>
+    <text x="202" y="224" fill="#f8f3ea" font-family="Georgia, 'Times New Roman', serif" font-size="36" letter-spacing="15">OF MINDS</text>
+    <line x1="102" y1="249" x2="440" y2="249" stroke="#b66b49" stroke-width="1" opacity="0.6"/>
+    <circle cx="271" cy="249" r="4" fill="#b66b49"/>
+
+    <text x="0" y="310" fill="#f8f3ea" font-family="Georgia, 'Times New Roman', serif" font-size="29">Too many ideas for one world.</text>
+    <text x="0" y="355" fill="#cf8a65" font-family="Georgia, 'Times New Roman', serif" font-size="25">Come for one world. Get lost in a universe.</text>
+
+    <g transform="translate(0 425)" fill="#f8f3ea" font-family="Arial, Helvetica, sans-serif" font-size="12" letter-spacing="3">
+      <text x="0" y="0">STORIES</text>
+      <line x1="96" y1="-11" x2="96" y2="8" stroke="#b66b49" opacity="0.65"/>
+      <text x="123" y="0">GAMES</text>
+      <line x1="205" y1="-11" x2="205" y2="8" stroke="#b66b49" opacity="0.65"/>
+      <text x="233" y="0">SOUND</text>
+      <line x1="323" y1="-11" x2="323" y2="8" stroke="#b66b49" opacity="0.65"/>
+      <text x="351" y="0">IMPOSSIBLE WORLDS</text>
+    </g>
+  </g>
+</svg>
