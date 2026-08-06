@@ -1,0 +1,64 @@
+name: Repair and deploy current Pages site
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/repair-pages-main.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel the stale Pages deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=$(curl --location --silent --show-error \
+            --output /tmp/cancel-response.txt \
+            --write-out '%{http_code}' \
+            --request POST \
+            --header 'Accept: application/vnd.github+json' \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header 'X-GitHub-Api-Version: 2026-03-10' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/deployments/f33dfb4f561f629d2dec8b248e29b8f9e9f5c616/cancel")
+          cat /tmp/cancel-response.txt || true
+          echo "Cancel endpoint returned HTTP ${code}"
+          case "${code}" in
+            204|404|409) ;;
+            *) exit 1 ;;
+          esac
+          sleep 8
+
+      - name: Checkout the current main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the current site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: '.'
+
+      - name: Deploy the current site
+        id: deployment
+        uses: actions/deploy-pages@v5
