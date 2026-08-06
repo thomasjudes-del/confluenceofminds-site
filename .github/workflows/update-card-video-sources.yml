@@ -1,0 +1,67 @@
+name: Update card video sources
+
+on:
+  push:
+    paths:
+      - '.github/workflows/update-card-video-sources.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffprobe
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Validate the four R2 videos
+        shell: bash
+        run: |
+          set -euo pipefail
+          R2='https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev'
+          files=(
+            'Incident_on_Titan_Teaser_Minimal_Cut_HD_Final.mp4'
+            'Authentiques_Victimes_Cinematic_Teaser_V2_Nils_Frahm.mp4'
+            'A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4'
+            'SILMEA_Films_Sonores_Teaser_V3_Court_Cinematique.mp4'
+          )
+
+          mkdir -p /tmp/confluence-videos
+          for file in "${files[@]}"; do
+            echo "Validating ${file}"
+            target="/tmp/confluence-videos/${file}"
+            curl --fail --location --silent --show-error --retry 2 --connect-timeout 20 \
+              "${R2}/${file}" -o "${target}"
+            test -s "${target}"
+            ffprobe -v error -select_streams v:0 \
+              -show_entries stream=codec_name,width,height,duration \
+              -of default=noprint_wrappers=1 "${target}"
+            test -n "$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "${target}")"
+          done
+
+      - name: Update the four cards
+        run: python3 scripts/update_card_video_sources.py
+
+      - name: Verify the final integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'Incident_on_Titan_Teaser_Minimal_Cut_HD_Final.mp4' index.html
+          grep -Fq 'Authentiques_Victimes_Cinematic_Teaser_V2_Nils_Frahm.mp4' index.html
+          grep -Fq 'A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4' index.html
+          grep -Fq 'SILMEA_Films_Sonores_Teaser_V3_Court_Cinematique.mp4' index.html
+          grep -Fq 'world-card--silmea world-card--native' index.html
+
+      - name: Commit the refreshed teasers
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -f .github/workflows/update-card-video-sources.yml scripts/update_card_video_sources.py
+          git add index.html .github/workflows/update-card-video-sources.yml scripts/update_card_video_sources.py
+          git commit -m 'Refresh Titan Katephomi Authentiques and SILMEA teasers'
+          git push
