@@ -1,0 +1,27 @@
+name: Install video lightbox
+
+on:
+  push:
+    paths:
+      - '.github/workflows/install-video-lightbox.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript
+        run: node --check video-lightbox-v1.js
+      - name: Install lightbox assets
+        run: python3 scripts/install_video_lightbox.py
+      - name: Commit video lightbox
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -f .github/workflows/install-video-lightbox.yml scripts/install_video_lightbox.py
+          git add index.html video-lightbox-v1.js video-lightbox-v1.css .github/workflows/install-video-lightbox.yml scripts/install_video_lightbox.py
+          git commit -m 'Open project teasers in a sound-enabled lightbox'
+          git push
