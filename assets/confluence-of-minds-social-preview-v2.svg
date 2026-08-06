@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5efe5"/>
+      <stop offset="0.52" stop-color="#eee4d5"/>
+      <stop offset="1" stop-color="#ded0bb"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="43%" r="52%">
+      <stop offset="0" stop-color="#fffaf2" stop-opacity="0.98"/>
+      <stop offset="0.58" stop-color="#f1e8da" stop-opacity="0.76"/>
+      <stop offset="1" stop-color="#d6c6af" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="planet" cx="36%" cy="32%" r="70%">
+      <stop offset="0" stop-color="#f4eadb"/>
+      <stop offset="0.72" stop-color="#d9c8b2"/>
+      <stop offset="1" stop-color="#b7a58f"/>
+    </radialGradient>
+    <linearGradient id="rust" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b56b45"/>
+      <stop offset="1" stop-color="#8e4f34"/>
+    </linearGradient>
+    <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="7" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono"/>
+      <feComponentTransfer in="mono" result="soft">
+        <feFuncA type="table" tableValues="0 0.08"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" in2="soft" mode="multiply"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#1d2726" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#paper)"/>
+  <rect width="1200" height="630" fill="url(#halo)"/>
+
+  <g opacity="0.58" fill="none" stroke="#a87955">
+    <ellipse cx="600" cy="305" rx="470" ry="270" stroke-width="1.1"/>
+    <ellipse cx="600" cy="305" rx="370" ry="212" stroke-width="0.8"/>
+    <path d="M108 397C257 194 435 116 650 156c175 32 305 123 449 308" stroke-width="0.9"/>
+    <path d="M78 251C251 357 418 389 617 356c184-30 338-106 505-222" stroke="#6f756f" stroke-opacity="0.34" stroke-width="0.8"/>
+  </g>
+
+  <circle cx="1050" cy="160" r="136" fill="url(#planet)" opacity="0.72"/>
+  <circle cx="76" cy="260" r="78" fill="#17201f" opacity="0.96"/>
+  <circle cx="160" cy="235" r="18" fill="#b66b49"/>
+  <circle cx="971" cy="92" r="5" fill="#b66b49"/>
+  <circle cx="289" cy="111" r="4" fill="#17201f"/>
+  <circle cx="893" cy="493" r="4" fill="#17201f"/>
+
+  <path d="M0 485C139 416 240 412 373 476c123 59 245 63 373 2 137-65 267-63 454 28v124H0Z" fill="#d3c4af" opacity="0.82"/>
+  <path d="M0 520C144 436 276 447 406 524c104 61 227 65 358 5 147-68 271-75 436 4v97H0Z" fill="#b66b49" opacity="0.95"/>
+  <path d="M0 558C168 475 302 486 425 550c114 60 237 60 365-2 139-67 265-78 410-22v104H0Z" fill="#17201f"/>
+  <path d="M0 583C133 532 253 535 382 579c124 43 238 41 361-8 152-61 282-66 457-10v69H0Z" fill="#f5efe5" opacity="0.92"/>
+
+  <g transform="translate(600 155)" filter="url(#shadow)">
+    <path d="M-92 26C-68-20-33-47 9-58c-3 48 12 88 49 121-48 5-94-8-150-37Z" fill="#efe4d3"/>
+    <path d="M-5-54C39-21 67 14 85 60c-45-15-87-13-129 8 22-39 35-80 39-122Z" fill="#17201f"/>
+    <path d="M-111 39C-75 16-44 19-15 46c-28 10-58 14-92 11Z" fill="url(#rust)"/>
+    <path d="M-53 1C-27-26-2-31 21-12c-6 35-24 60-52 74-20-13-27-34-22-61Z" fill="#f8f2e8"/>
+  </g>
+
+  <g text-anchor="middle">
+    <text x="600" y="322" fill="#17201f" font-family="Georgia, 'Times New Roman', serif" font-size="92" letter-spacing="6">CONFLUENCE</text>
+    <line x1="372" y1="366" x2="504" y2="366" stroke="#17201f" stroke-opacity="0.52" stroke-width="1"/>
+    <circle cx="536" cy="366" r="4" fill="#b66b49"/>
+    <text x="600" y="384" fill="#a85f3c" font-family="Georgia, 'Times New Roman', serif" font-size="34" letter-spacing="15">OF MINDS</text>
+    <circle cx="664" cy="366" r="4" fill="#17201f"/>
+    <line x1="696" y1="366" x2="828" y2="366" stroke="#17201f" stroke-opacity="0.52" stroke-width="1"/>
+    <text x="600" y="438" fill="#17201f" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" letter-spacing="5">STORIES · GAMES · AUDIO FICTION</text>
+    <text x="600" y="468" fill="#17201f" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" letter-spacing="5">AND IMPOSSIBLE WORLDS</text>
+  </g>
+
+  <g fill="#fffaf2" opacity="0.88">
+    <circle cx="132" cy="156" r="2.2"/><circle cx="132" cy="156" r="6" opacity="0.16"/>
+    <circle cx="1060" cy="356" r="2.2"/><circle cx="1060" cy="356" r="6" opacity="0.16"/>
+    <circle cx="252" cy="488" r="2.1"/><circle cx="252" cy="488" r="5.5" opacity="0.16"/>
+  </g>
+
+  <rect width="1200" height="630" fill="transparent" filter="url(#grain)"/>
+</svg>
