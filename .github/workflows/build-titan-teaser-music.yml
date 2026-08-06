@@ -1,0 +1,64 @@
+name: Build Titan teaser with music
+
+on:
+  push:
+    branches:
+      - temp/titan-teaser-music
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure FFmpeg is available
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+      - name: Mix Titan soundtrack into teaser
+        shell: bash
+        run: |
+          set -euo pipefail
+          VIDEO="assets/incident-on-titan-preview.mp4"
+          NORMAL="titan/assets/audio/ioti-titan-pulse-v1.mp3"
+          DARK="titan/assets/audio/ioti-titan-pulse-v1-dark.mp3"
+          INTERFERENCE="titan/assets/audio/sybille-takeover-interference.mp3"
+          OUT="incident-on-titan-preview-with-music.mp4"
+
+          DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$VIDEO")
+          SWITCH=$(python3 -c "d=float('$DUR'); print(max(0.0, d*0.62))")
+          DELAY_MS=$(python3 -c "d=float('$SWITCH'); print(int(d*1000))")
+          FADE_OUT=$(python3 -c "d=float('$DUR'); print(max(0.0, d-0.8))")
+
+          ffmpeg -y \
+            -i "$VIDEO" \
+            -stream_loop -1 -i "$NORMAL" \
+            -stream_loop -1 -i "$DARK" \
+            -i "$INTERFERENCE" \
+            -filter_complex "\
+              [1:a]atrim=0:${DUR},asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.45,afade=t=out:st=${FADE_OUT}:d=0.8,volume=0.82[normal];\
+              [2:a]atrim=0:${DUR},asetpts=PTS-STARTPTS,adelay=${DELAY_MS}|${DELAY_MS},afade=t=in:st=0:d=0.55,afade=t=out:st=${FADE_OUT}:d=0.8,volume=0.58[dark];\
+              [3:a]adelay=${DELAY_MS}|${DELAY_MS},volume=0.34[glitch];\
+              [normal][dark][glitch]amix=inputs=3:duration=longest:dropout_transition=0,alimiter=limit=0.92[aout]" \
+            -map 0:v:0 -map "[aout]" \
+            -c:v copy -c:a aac -b:a 192k \
+            -t "$DUR" -movflags +faststart "$OUT"
+
+          mkdir -p deliverable
+          cp "$OUT" deliverable/
+          (cd deliverable && zip -q incident-on-titan-teaser-with-music.zip "$OUT")
+
+      - name: Upload teaser artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: incident-on-titan-teaser-with-music
+          path: deliverable/
+          if-no-files-found: error
