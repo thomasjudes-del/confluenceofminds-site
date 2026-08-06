@@ -1,0 +1,46 @@
+name: Install bilingual site toggle
+
+on:
+  push:
+    paths:
+      - '.github/workflows/install-bilingual-site.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate bilingual JavaScript
+        run: node --check i18n.js
+
+      - name: Add bilingual assets to the page
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          html = path.read_text(encoding='utf-8')
+
+          css = '  <link rel="stylesheet" href="i18n.css?v=20260806-bilingual-v1" />\n'
+          js = '  <script src="i18n.js?v=20260806-bilingual-v1"></script>\n'
+
+          if 'i18n.css?' not in html:
+              html = html.replace('</head>', css + '</head>', 1)
+          if 'i18n.js?' not in html:
+              html = html.replace('</body>', js + '</body>', 1)
+
+          path.write_text(html, encoding='utf-8')
+          PY
+
+      - name: Commit bilingual interface
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -f .github/workflows/install-bilingual-site.yml
+          git add index.html i18n.js i18n.css .github/workflows/install-bilingual-site.yml
+          git commit -m 'Add French English language toggle'
+          git push
