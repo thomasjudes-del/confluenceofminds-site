@@ -1,4 +1,4 @@
-name: Build Titan teaser with music
+name: Build full Titan teaser with music
 
 on:
   push:
@@ -23,20 +23,34 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
 
-      - name: Mix Titan soundtrack into teaser
+      - name: Download the full teaser from Cloudflare R2
         shell: bash
         run: |
           set -euo pipefail
-          VIDEO="assets/incident-on-titan-preview.mp4"
+          curl --fail --location --retry 5 --retry-all-errors \
+            "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/incident-on-titan-preview.mp4" \
+            --output incident-on-titan-preview-original-r2.mp4
+          test -s incident-on-titan-preview-original-r2.mp4
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 incident-on-titan-preview-original-r2.mp4
+
+      - name: Mix Titan soundtrack without shortening the video
+        shell: bash
+        run: |
+          set -euo pipefail
+          VIDEO="incident-on-titan-preview-original-r2.mp4"
           NORMAL="titan/assets/audio/ioti-titan-pulse-v1.mp3"
           DARK="titan/assets/audio/ioti-titan-pulse-v1-dark.mp3"
           INTERFERENCE="titan/assets/audio/sybille-takeover-interference.mp3"
-          OUT="incident-on-titan-preview-with-music.mp4"
+          OUT="Incident_on_Titan_Teaser_Full_with_Music.mp4"
 
           DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$VIDEO")
           SWITCH=$(python3 -c "d=float('$DUR'); print(max(0.0, d*0.62))")
           DELAY_MS=$(python3 -c "d=float('$SWITCH'); print(int(d*1000))")
-          FADE_OUT=$(python3 -c "d=float('$DUR'); print(max(0.0, d-0.8))")
+          DARK_FADE=$(python3 -c "d=float('$SWITCH'); print(max(0.0, d-0.6))")
+          FADE_OUT=$(python3 -c "d=float('$DUR'); print(max(0.0, d-0.9))")
+
+          echo "Original duration: ${DUR}s"
+          echo "Sybille transition: ${SWITCH}s"
 
           ffmpeg -y \
             -i "$VIDEO" \
@@ -44,21 +58,24 @@ jobs:
             -stream_loop -1 -i "$DARK" \
             -i "$INTERFERENCE" \
             -filter_complex "\
-              [1:a]atrim=0:${DUR},asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.45,afade=t=out:st=${FADE_OUT}:d=0.8,volume=0.82[normal];\
-              [2:a]atrim=0:${DUR},asetpts=PTS-STARTPTS,adelay=${DELAY_MS}|${DELAY_MS},afade=t=in:st=0:d=0.55,afade=t=out:st=${FADE_OUT}:d=0.8,volume=0.58[dark];\
+              [1:a]atrim=0:${DUR},asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.45,afade=t=out:st=${DARK_FADE}:d=1.2,volume=0.82[normal];\
+              [2:a]atrim=0:${DUR},asetpts=PTS-STARTPTS,adelay=${DELAY_MS}|${DELAY_MS},afade=t=in:st=0:d=0.75,afade=t=out:st=${FADE_OUT}:d=0.9,volume=0.66[dark];\
               [3:a]adelay=${DELAY_MS}|${DELAY_MS},volume=0.34[glitch];\
               [normal][dark][glitch]amix=inputs=3:duration=longest:dropout_transition=0,alimiter=limit=0.92[aout]" \
             -map 0:v:0 -map "[aout]" \
             -c:v copy -c:a aac -b:a 192k \
             -t "$DUR" -movflags +faststart "$OUT"
 
-          mkdir -p deliverable
-          cp "$OUT" deliverable/
-          (cd deliverable && zip -q incident-on-titan-teaser-with-music.zip "$OUT")
+          OUTPUT_DUR=$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$OUT")
+          printf "Original duration: %s s\nOutput duration: %s s\n" "$DUR" "$OUTPUT_DUR" > duration-report.txt
 
-      - name: Upload teaser artifact
+          mkdir -p deliverable
+          cp "$OUT" duration-report.txt deliverable/
+          (cd deliverable && zip -q Incident_on_Titan_Teaser_Full_with_Music.zip "$OUT" duration-report.txt)
+
+      - name: Upload full teaser artifact
         uses: actions/upload-artifact@v4
         with:
-          name: incident-on-titan-teaser-with-music
+          name: incident-on-titan-full-teaser-with-music
           path: deliverable/
           if-no-files-found: error
