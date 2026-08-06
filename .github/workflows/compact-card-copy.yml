@@ -1,0 +1,25 @@
+name: Apply compact card copy
+
+on:
+  push:
+    paths:
+      - '.github/workflows/compact-card-copy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update card copy and cache key
+        run: python3 scripts/compact_card_copy.py
+      - name: Commit final card layout
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -f .github/workflows/compact-card-copy.yml scripts/compact_card_copy.py
+          git add index.html .github/workflows/compact-card-copy.yml scripts/compact_card_copy.py
+          git commit -m 'Use maximized 16:9 cards with compact copy'
+          git push
