@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 
-VERSION = "20260806-native-v1"
+VERSION = "20260806-native-v2"
 R2_BASE = "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev"
 
 html_path = Path("index.html")
@@ -12,7 +12,7 @@ titan = f'''        <article class="world-card world-card--titan world-card--nat
             <div class="world-cover">
               <img class="world-card__poster" src="assets/titan-poster-mobile.jpg?v={VERSION}" alt="" aria-hidden="true" />
               <video class="world-card__preview" data-viewport-video autoplay muted loop playsinline preload="auto" poster="assets/titan-poster-mobile.jpg?v={VERSION}" aria-hidden="true">
-                <source src="{R2_BASE}/incident-on-titan-preview.mp4.mp4" type="video/mp4" />
+                <source src="{R2_BASE}/incident-on-titan-preview.mp4" type="video/mp4" />
               </video>
               <span class="world-card__scrim" aria-hidden="true"></span>
               <div class="world-card__body">
@@ -37,7 +37,7 @@ if count != 1:
 about = f'''    <section id="about" class="about about--video about--native" aria-labelledby="about-title" data-media-container>
       <img class="about__poster" src="assets/about-poster-mobile.jpg?v={VERSION}" alt="" aria-hidden="true" />
       <video class="about__background" data-viewport-video autoplay muted loop playsinline preload="auto" poster="assets/about-poster-mobile.jpg?v={VERSION}" aria-hidden="true">
-        <source src="{R2_BASE}/confluence-portal-1080.mp4.mp4" type="video/mp4" />
+        <source src="{R2_BASE}/confluence-portal-1080.mp4" type="video/mp4" />
       </video>
       <div class="about__veil" aria-hidden="true"></div>
       <div class="about-copy reveal">
