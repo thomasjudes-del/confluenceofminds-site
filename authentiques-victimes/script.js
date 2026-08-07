@@ -37,12 +37,18 @@
   }
 
   window.AV_BOTPRESS_TARGET = '#botpress-mount';
-  window.AV_ROBOTIQUES = { mountId: 'botpress-mount', replacePlaceholder(){ document.querySelector('.botpress-placeholder')?.remove(); } };
+  window.AV_ROBOTIQUES = {
+    mountId: 'botpress-mount',
+    replacePlaceholder(){ document.querySelector('.botpress-placeholder')?.remove(); }
+  };
 
-  const CHANNEL_ID = 'UCTn7Cckyd00h62YeXrGd4Sg';
+  // YouTube uploads playlist for the SILMEA channel (UC… -> UU…).
+  // We cue successive uploads without autoplay until the Authentiques Victimes
+  // preamble / pilot title is found, then leave that video ready to play inline.
+  const UPLOADS_PLAYLIST_ID = 'UUTn7Cckyd00h62YeXrGd4Sg';
   let ytPlayer;
   let scanIndex = 0;
-  const scanLimit = 80;
+  const scanLimit = 100;
   let scanning = false;
 
   const normalize = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -51,10 +57,12 @@
     return t.includes('authentiques victimes') && (t.includes('preambule') || t.includes('episode pilote'));
   };
   const cueIndex = index => {
+    if (!ytPlayer) return;
     scanIndex = index;
     scanning = true;
-    ytPlayer.cuePlaylist({ listType: 'user_uploads', list: CHANNEL_ID, index, startSeconds: 0 });
+    ytPlayer.cuePlaylist({ listType: 'playlist', list: UPLOADS_PLAYLIST_ID, index, startSeconds: 0 });
   };
+
   window.onYouTubeIframeAPIReady = () => {
     ytPlayer = new YT.Player('youtube-preamble', {
       width: '100%', height: '100%',
