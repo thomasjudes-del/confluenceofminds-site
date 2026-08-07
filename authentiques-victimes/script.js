@@ -88,7 +88,7 @@
         z-index:2147483646;
         pointer-events:none;
         opacity:0;
-        transform:translate3d(-100px,-100px,0) rotate(-24deg);
+        transform:translate3d(-100px,-100px,0) rotate(135deg);
         transform-origin:50% 92%;
         filter:drop-shadow(0 5px 6px rgba(0,0,0,.58));
         transition:opacity .12s ease,filter .14s ease;
@@ -181,8 +181,8 @@
     let raf = 0;
     const renderPen = () => {
       raf = 0;
-      // The nib tip sits almost exactly on the native pointer position.
-      pen.style.transform = `translate3d(${px - 8}px,${py - 43}px,0) rotate(-24deg)`;
+      // Cursor hotspot = nib tip. The pen body extends down-right, like a normal arrow cursor.
+      pen.style.transform = `translate3d(${px - 16}px,${py - 44}px,0) rotate(135deg)`;
     };
     addEventListener('pointermove', e => {
       px = e.clientX;
