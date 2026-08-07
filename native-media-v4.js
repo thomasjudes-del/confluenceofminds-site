@@ -51,8 +51,12 @@
     }
   };
 
+  document.querySelectorAll('.world-card--wecan, .world-card--books').forEach((card) => card.remove());
+
   installCardVideo('.world-card--titan', 'Incident_on_Titan_Teaser_Minimal_Cut_HD_Final.mp4');
+  installCardVideo('.world-card--anjin', 'Anjin_of_the_Shogun_Teaser_Cinematic_V4_1080p.mp4');
   installCardVideo('.world-card--katephomi', 'A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4');
+  installCardVideo('.world-card--victims', 'Authentiques_Victimes_Cinematic_Teaser_V2_Nils_Frahm.mp4');
   installCardVideo('.world-card--silmea', 'SILMEA_Films_Sonores_Teaser_V3_Court_Cinematique.mp4');
 
   const videos = [...document.querySelectorAll('[data-viewport-video]')];

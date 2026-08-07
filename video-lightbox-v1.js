@@ -1,11 +1,35 @@
 (() => {
+  const destinations = {
+    'Authentiques Victimes': 'https://www.amazon.com/Authentiques-Victimes-French-Thomas-JUDES/dp/1790733758',
+    'Chronicles of Kashgar': 'https://www.amazon.com/Chroniques-Kashgar-Novices-Papillon-French/dp/1790850193',
+    'Créations SILMEA': 'https://smartlink.ausha.co/creations-silmea',
+    'AI’s Got Talent': 'https://aitalent.show/'
+  };
+
+  const destinationFor = (card) => destinations[card?.dataset.portal] || '';
+
+  document.querySelectorAll('.world-card button[data-project-link]').forEach((button) => {
+    const card = button.closest('.world-card[data-portal]');
+    if (!destinationFor(card)) button.remove();
+  });
+
+  document.querySelectorAll('.world-card[data-portal]').forEach((card) => {
+    const destination = destinationFor(card);
+    if (!destination) return;
+
+    card.addEventListener('click', (event) => {
+      const action = event.target.closest('[data-project-link]');
+      if (!action || !card.contains(action)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      window.open(destination, '_blank', 'noopener,noreferrer');
+    }, true);
+  });
+
   const cards = [...document.querySelectorAll('.world-card[data-media-container]')]
     .filter((card) => card.querySelector('.world-card__preview source'));
 
   if (!cards.length) return;
-
-  /* Only Titan currently has a real destination. Remove placeholder actions. */
-  document.querySelectorAll('.world-card button[data-project-link]').forEach((button) => button.remove());
 
   const lightbox = document.createElement('div');
   lightbox.className = 'video-lightbox';
@@ -127,6 +151,7 @@
     card.addEventListener('click', (event) => {
       const titanDestination = event.target.closest('.world-card--titan .world-card__cta');
       if (titanDestination) return;
+      if (event.target.closest('[data-project-link]')) return;
       if (event.target.closest('.world-card__play')) return;
       event.preventDefault();
       event.stopPropagation();
@@ -149,10 +174,10 @@
     const last = focusable[focusable.length - 1];
     if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
-      last.focus();
+      last.focus({ preventScroll: true });
     } else if (!event.shiftKey && document.activeElement === last) {
       event.preventDefault();
-      first.focus();
+      first.focus({ preventScroll: true });
     }
   });
 
