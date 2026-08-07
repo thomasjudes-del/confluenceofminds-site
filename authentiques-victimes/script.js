@@ -1,35 +1,26 @@
-const header = document.querySelector('.topbar');
+(() => {
+  const header = document.querySelector('.topbar');
+  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 35);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
 
-const updateHeader = () => {
-  header?.classList.toggle('is-scrolled', window.scrollY > 24);
-};
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const items = document.querySelectorAll('.reveal');
+  if (reduced || !('IntersectionObserver' in window)) {
+    items.forEach(el => el.classList.add('is-visible'));
+  } else {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    items.forEach(el => observer.observe(el));
+  }
 
-updateHeader();
-window.addEventListener('scroll', updateHeader, { passive: true });
-
-const revealItems = document.querySelectorAll('.reveal');
-
-if ('IntersectionObserver' in window) {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-visible');
-      observer.unobserve(entry.target);
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-
-  revealItems.forEach((item) => observer.observe(item));
-} else {
-  revealItems.forEach((item) => item.classList.add('is-visible'));
-}
-
-// BOTPress integration point
-// ---------------------------------------------
-// The live Botpress webchat/embed code can be injected later without
-// changing the page architecture. Replace the `.botpress-placeholder`
-// inside `#botpress-mount`, or mount Botpress directly into that element.
-// Keep all provider credentials/configuration out of this public file.
-window.AV_ROBOTIQUES = {
-  mountId: 'botpress-mount',
-  placeholderSelector: '.botpress-placeholder'
-};
+  // Keep the Botpress target stable: when the embed is supplied, replace only
+  // the .botpress-placeholder content or mount the webchat inside #botpress-mount.
+  window.AV_BOTPRESS_TARGET = '#botpress-mount';
+})();
