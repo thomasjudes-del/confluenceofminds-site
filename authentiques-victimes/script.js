@@ -24,6 +24,10 @@
   const interactionStyles = document.createElement('style');
   interactionStyles.id = 'av-interactions-v7';
   interactionStyles.textContent = `
+    @media (min-width:821px){
+      .kiosk{width:min(980px,94vw);}
+    }
+
     .doubt__image[data-user-artwork="true"]{
       filter:saturate(.96) contrast(1.04) brightness(.88);
       object-position:center center;
