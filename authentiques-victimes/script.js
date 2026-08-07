@@ -7,46 +7,18 @@
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-  // Keep the original high-quality hero hosted in Cloudflare R2.
-  const HERO_URL = 'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/pour%20hero.png?v=20260807-av-hero2';
+  // Use only the exact repository-native artwork supplied for this page.
   const heroImage = hero?.querySelector('.hero__image');
   if (heroImage) {
-    heroImage.src = HERO_URL;
+    heroImage.src = 'assets/photos/hero.webp?v=20260807-final';
     heroImage.removeAttribute('srcset');
   }
-
-  // The supplied plagiarism artwork is stored with the site in small text chunks.
-  // Reassemble it client-side as a WebP so GitHub Pages can serve it without another media host.
-  const DOUBT_IMAGE_PARTS = Array.from(
-    { length: 15 },
-    (_, i) => `assets/av-plagiarism-user-${i}.txt?v=20260807-av-plagiarism-1`
-  );
-  let doubtImageObjectUrl = '';
-
-  const loadDoubtImage = async () => {
-    if (!doubtImage) return;
-    try {
-      const parts = await Promise.all(DOUBT_IMAGE_PARTS.map(async url => {
-        const res = await fetch(url, { cache: 'force-cache' });
-        if (!res.ok) throw new Error(`asset ${res.status}: ${url}`);
-        return (await res.text()).trim();
-      }));
-      const binary = atob(parts.join(''));
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-      doubtImageObjectUrl = URL.createObjectURL(new Blob([bytes], { type: 'image/webp' }));
-      doubtImage.src = doubtImageObjectUrl;
-      doubtImage.removeAttribute('srcset');
-      doubtImage.dataset.userArtwork = 'true';
-      doubt?.classList.add('has-user-artwork');
-    } catch (err) {
-      console.warn('AV: plagiarism artwork failed to load; keeping fallback image.', err);
-    }
-  };
-  loadDoubtImage();
-  addEventListener('pagehide', () => {
-    if (doubtImageObjectUrl) URL.revokeObjectURL(doubtImageObjectUrl);
-  }, { once: true });
+  if (doubtImage) {
+    doubtImage.src = 'assets/photos/plagiarism.webp?v=20260807-final';
+    doubtImage.removeAttribute('srcset');
+    doubtImage.dataset.userArtwork = 'true';
+    doubt?.classList.add('has-user-artwork');
+  }
 
   // Visual interaction layer: attached artwork, richer quote focus and the fountain-pen pointer.
   const interactionStyles = document.createElement('style');
