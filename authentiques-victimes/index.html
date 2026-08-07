@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="styles.css?v=20260807-av-v6" />
+  <link rel="stylesheet" href="styles.css?v=20260807-av-v7" />
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -93,18 +93,22 @@
             <div><b>ROBOTIQUES<sup>®</sup></b><span>LITTÉRATURE À LA DEMANDE</span></div>
             <small><i></i> K-FR-378 · ONLINE</small>
           </div>
-          <div class="kiosk__screen" id="botpress-mount">
-            <div class="botpress-placeholder">
-              <p>ROBOTIQUES / TERMINAL K-FR-378</p>
-              <h3>Quel livre<br />voulez-vous lire&nbsp;?</h3>
-              <div class="fake-choices" aria-hidden="true">
-                <button type="button">THRILLER</button>
-                <button type="button">SCIENCE-FICTION</button>
-                <button type="button">ROMAN LITTÉRAIRE</button>
-                <button type="button">AUTRE</button>
-              </div>
-              <small>SYSTÈME EN VEILLE</small>
-            </div>
+          <div class="kiosk__screen" id="chatling-mount">
+            <script>
+              window.chtlConfig = {
+                chatbotId: "6453145734",
+                display: "page_inline"
+              };
+            </script>
+            <div id="chtl-inline-bot" style="width:100%;height:100%;"></div>
+            <script
+              async
+              data-id="6453145734"
+              data-display="page_inline"
+              id="chtl-script"
+              type="text/javascript"
+              src="https://chatling.ai/js/embed.js">
+            </script>
           </div>
           <div class="kiosk__lower" aria-hidden="true"><span>PAIEMENT</span><span>IMPRESSION</span></div>
           <div class="receipt" aria-hidden="true"><b>ROBOTIQUES PUBLISHING INT.</b><span>REQUÊTE : 1435666907</span><span>MODE : SEMI-AUTOMATIQUE</span></div>
