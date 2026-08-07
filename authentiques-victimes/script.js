@@ -4,6 +4,15 @@
   const fragments = document.querySelector('[data-fragments]');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Use the original high-quality hero asset hosted in the Confluence of Minds
+  // Cloudflare R2 media bucket. The query string intentionally busts stale CDN/browser caches.
+  const HERO_URL = 'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/hero.png?v=20260807-av-hero1';
+  const heroImage = hero?.querySelector('.hero__image');
+  if (heroImage) {
+    heroImage.src = HERO_URL;
+    heroImage.removeAttribute('srcset');
+  }
+
   const onScroll = () => {
     const y = window.scrollY || 0;
     header?.classList.toggle('is-scrolled', y > 35);
@@ -42,44 +51,21 @@
     replacePlaceholder(){ document.querySelector('.botpress-placeholder')?.remove(); }
   };
 
-  // YouTube uploads playlist for the SILMEA channel (UC… -> UU…).
-  // We cue successive uploads without autoplay until the Authentiques Victimes
-  // preamble / pilot title is found, then leave that video ready to play inline.
-  const UPLOADS_PLAYLIST_ID = 'UUTn7Cckyd00h62YeXrGd4Sg';
-  let ytPlayer;
-  let scanIndex = 0;
-  const scanLimit = 100;
-  let scanning = false;
-
-  const normalize = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const isTarget = title => {
-    const t = normalize(title);
-    return t.includes('authentiques victimes') && (t.includes('preambule') || t.includes('episode pilote'));
-  };
-  const cueIndex = index => {
-    if (!ytPlayer) return;
-    scanIndex = index;
-    scanning = true;
-    ytPlayer.cuePlaylist({ listType: 'playlist', list: UPLOADS_PLAYLIST_ID, index, startSeconds: 0 });
-  };
+  // Directly load the correct SILMEA Authentiques Victimes preamble video.
+  // Avoid playlist scanning, which could resolve to an unrelated upload.
+  const PREAMBLE_VIDEO_ID = 'orhk4WoPYfs';
 
   window.onYouTubeIframeAPIReady = () => {
-    ytPlayer = new YT.Player('youtube-preamble', {
-      width: '100%', height: '100%',
+    new YT.Player('youtube-preamble', {
+      width: '100%',
+      height: '100%',
+      videoId: PREAMBLE_VIDEO_ID,
       host: 'https://www.youtube-nocookie.com',
-      playerVars: { controls: 1, rel: 0, playsinline: 1, hl: 'fr' },
-      events: {
-        onReady: () => cueIndex(0),
-        onStateChange: ev => {
-          if (!scanning || ev.data !== YT.PlayerState.CUED) return;
-          const title = ytPlayer.getVideoData()?.title || '';
-          if (isTarget(title)) { scanning = false; return; }
-          const list = ytPlayer.getPlaylist?.() || [];
-          const max = list.length ? Math.min(list.length, scanLimit) : scanLimit;
-          if (scanIndex + 1 < max) cueIndex(scanIndex + 1);
-          else scanning = false;
-        },
-        onError: () => { scanning = false; }
+      playerVars: {
+        controls: 1,
+        rel: 0,
+        playsinline: 1,
+        hl: 'fr'
       }
     });
   };
