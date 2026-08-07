@@ -113,6 +113,7 @@
   installCardVideo('.world-card--anjin', 'Good%20Anjin_of_the_Shogun_Teaser_Cinematic_V4_1080p.mp4');
   installCardVideo('.world-card--katephomi', 'A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4');
   installCardVideo('.world-card--victims', 'Authentiques_Victimes_Cinematic_Teaser_V2_Nils_Frahm.mp4');
+  installCardVideo('.world-card--aitalent', 'AI_Talent_Mini_Teaser_V2_Show.mp4');
   installCardVideo('.world-card--silmea', 'SILMEA_Films_Sonores_Teaser_V3_Court_Cinematique.mp4');
   installCardVideo('.world-card--snowwhite', 'Snow_White_Queen_of_Ashes_Cinematic_Teaser_compressed.mp4');
 
