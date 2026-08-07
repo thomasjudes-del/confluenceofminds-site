@@ -16,11 +16,10 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    }, { threshold: 0.1, rootMargin: '0px 0px -5% 0px' });
     items.forEach(el => observer.observe(el));
   }
 
-  // Keep the Botpress target stable: when the embed is supplied, replace only
-  // the .botpress-placeholder content or mount the webchat inside #botpress-mount.
+  // Stable mount point for the future Botpress embed.
   window.AV_BOTPRESS_TARGET = '#botpress-mount';
 })();
