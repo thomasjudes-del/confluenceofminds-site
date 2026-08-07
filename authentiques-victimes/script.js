@@ -20,12 +20,31 @@
     doubt?.classList.add('has-user-artwork');
   }
 
-  // Visual interaction layer: attached artwork, richer quote focus and the fountain-pen pointer.
+  // Visual interaction layer: hero parallax/story hook, artwork, quote focus and fountain-pen pointer.
   const interactionStyles = document.createElement('style');
   interactionStyles.id = 'av-interactions-v7';
   interactionStyles.textContent = `
+    .hero__image{
+      transform:translate3d(0,var(--hero-y,0),0) scale(1.10);
+    }
+    .hero__origin{
+      max-width:820px;
+      margin:19px 0 0;
+      padding-left:16px;
+      border-left:1px solid rgba(216,182,125,.78);
+      font:500 clamp(16px,1.25vw,20px)/1.42 var(--serif);
+      color:#e8e0d4;
+      text-shadow:0 4px 20px rgba(0,0,0,.72);
+    }
+    .hero__origin strong{color:#fff;font-weight:600;}
+    .hero__origin em{color:#f0e6d5;}
+
     @media (min-width:821px){
       .kiosk{width:min(980px,94vw);}
+    }
+    @media (max-width:640px){
+      .hero__origin{font-size:15px;line-height:1.4;margin-top:13px;padding-left:13px;}
+      .hero__actions{margin-top:22px;}
     }
 
     .doubt__image[data-user-artwork="true"]{
@@ -108,8 +127,8 @@
     header?.classList.toggle('is-scrolled', y > 35);
     if (reduced) return;
     if (hero) {
-      const p = Math.max(0, Math.min(1, y / Math.max(1, hero.offsetHeight)));
-      hero.style.setProperty('--hero-y', `${p * 8}px`);
+      const heroParallax = Math.min(58, y * .16);
+      hero.style.setProperty('--hero-y', `${heroParallax}px`);
     }
     if (fragments) {
       const r = fragments.getBoundingClientRect();
