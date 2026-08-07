@@ -74,7 +74,7 @@
 
 .world-card--native .world-card__preview {
   z-index: 1 !important;
-  opacity: 0 !important;
+  opacity: 1 !important;
   transform: scale(1.005);
   transition: opacity .25s ease, transform 1.2s ease !important;
 }
@@ -231,7 +231,7 @@
 
 .about--native .about__background {
   z-index: 1 !important;
-  opacity: 0 !important;
+  opacity: 1 !important;
   transition: opacity .25s ease !important;
 }
 
