@@ -1,0 +1,45 @@
+name: Fix AV images only
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-av-images-only.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch only AV image references
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index = Path('authentiques-victimes/index.html')
+          s = index.read_text(encoding='utf-8')
+          s = s.replace('src="assets/av-hero-hq.webp"', 'src="assets/photos/hero.webp?v=20260807-final"', 1)
+          s = s.replace('src="assets/av-plagiarism-hq.webp"', 'src="assets/photos/plagiarism.webp?v=20260807-final"', 1)
+          s = s.replace('script.js?v=20260807-av-v6-1', 'script.js?v=20260807-images-final')
+          index.write_text(s, encoding='utf-8')
+
+          script = Path('authentiques-victimes/script.js')
+          s = script.read_text(encoding='utf-8')
+          start_marker = '  // Keep the original high-quality hero hosted in Cloudflare R2.\n'
+          end_marker = '  // Visual interaction layer: attached artwork, richer quote focus and the fountain-pen pointer.\n'
+          start = s.index(start_marker)
+          end = s.index(end_marker, start)
+          replacement = '''  // Use only the exact repository-native artwork supplied for this page.\n  const heroImage = hero?.querySelector('.hero__image');\n  if (heroImage) {\n    heroImage.src = 'assets/photos/hero.webp?v=20260807-final';\n    heroImage.removeAttribute('srcset');\n  }\n  if (doubtImage) {\n    doubtImage.src = 'assets/photos/plagiarism.webp?v=20260807-final';\n    doubtImage.removeAttribute('srcset');\n    doubtImage.dataset.userArtwork = 'true';\n    doubt?.classList.add('has-user-artwork');\n  }\n\n'''
+          s = s[:start] + replacement + s[end:]
+          script.write_text(s, encoding='utf-8')
+          PY
+
+          rm -f .github/workflows/fix-av-images-only.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add authentiques-victimes/index.html authentiques-victimes/script.js .github/workflows/fix-av-images-only.yml
+          git commit -m "Fix only AV hero and plagiarism images"
+          git push
