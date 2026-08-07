@@ -150,10 +150,30 @@
   videos.forEach((video) => {
     prepare(video);
     const container = containerFor(video);
-    video.addEventListener('playing', () => container?.classList.add('is-media-playing'));
+    const markReady = () => {
+      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        container?.classList.add('is-media-ready');
+      }
+    };
+
+    video.addEventListener('loadeddata', markReady);
+    video.addEventListener('canplay', markReady);
+    video.addEventListener('playing', () => {
+      markReady();
+      container?.classList.add('is-media-playing');
+    });
     video.addEventListener('pause', () => container?.classList.remove('is-media-playing'));
     video.addEventListener('ended', () => container?.classList.remove('is-media-playing'));
-    video.addEventListener('error', () => container?.classList.remove('is-media-playing'));
+    video.addEventListener('error', () => {
+      container?.classList.remove('is-media-ready');
+      container?.classList.remove('is-media-playing');
+    });
+
+    container?.addEventListener('pointerenter', () => play(video), { passive: true });
+    container?.addEventListener('touchstart', () => play(video), { passive: true });
+    container?.addEventListener('focusin', () => play(video));
+
+    markReady();
   });
 
   const observer = new IntersectionObserver((entries) => {
