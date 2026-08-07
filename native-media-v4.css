@@ -74,17 +74,13 @@
 
 .world-card--native .world-card__preview {
   z-index: 1 !important;
-  opacity: 1 !important;
+  opacity: 0 !important;
   transform: scale(1.005);
   transition: opacity .25s ease, transform 1.2s ease !important;
 }
 
-.world-card--native.is-media-ready .world-card__preview,
 .world-card--native.is-media-playing .world-card__preview {
   opacity: 1 !important;
-}
-
-.world-card--native.is-media-playing .world-card__preview {
   transform: scale(1.018);
 }
 
@@ -231,11 +227,10 @@
 
 .about--native .about__background {
   z-index: 1 !important;
-  opacity: 1 !important;
+  opacity: 0 !important;
   transition: opacity .25s ease !important;
 }
 
-.about--native.is-media-ready .about__background,
 .about--native.is-media-playing .about__background {
   opacity: 1 !important;
 }

@@ -66,10 +66,7 @@
     : { play: 'Play video for', close: 'Close video' };
 
   const cardTitle = (card) => card.querySelector('h3')?.textContent?.trim() || 'Confluence of Minds';
-  const cardSource = (card) => {
-    const source = card.querySelector('.world-card__preview source');
-    return source?.getAttribute('src') || source?.dataset.src || '';
-  };
+  const cardSource = (card) => card.querySelector('.world-card__preview source')?.getAttribute('src') || '';
 
   const refreshLabels = () => {
     const copy = labels();
