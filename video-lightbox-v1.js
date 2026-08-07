@@ -1,6 +1,6 @@
 (() => {
   const destinations = {
-    'Authentiques Victimes': 'https://www.amazon.com/Authentiques-Victimes-French-Thomas-JUDES/dp/1790733758',
+    'Authentiques Victimes': 'https://confluenceofminds.com/authentiques-victimes/',
     'Chronicles of Kashgar': 'https://www.amazon.com/Chroniques-Kashgar-Novices-Papillon-French/dp/1790850193',
     'Créations SILMEA': 'https://smartlink.ausha.co/creations-silmea',
     'AI’s Got Talent': 'https://aitalent.show/'
