@@ -6,7 +6,7 @@
 
   // Use the original high-quality hero asset hosted in the Confluence of Minds
   // Cloudflare R2 media bucket. The query string intentionally busts stale CDN/browser caches.
-  const HERO_URL = 'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/hero.png?v=20260807-av-hero1';
+  const HERO_URL = 'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/pour%20hero.png?v=20260807-av-hero2';
   const heroImage = hero?.querySelector('.hero__image');
   if (heroImage) {
     heroImage.src = HERO_URL;
