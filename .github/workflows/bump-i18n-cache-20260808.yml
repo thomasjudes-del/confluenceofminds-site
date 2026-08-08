@@ -1,0 +1,40 @@
+name: Refresh homepage language script cache
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/bump-i18n-cache-20260808.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bump i18n cache key
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          old = 'i18n.js?v=20260808-card-ctas-v1'
+          new = 'i18n.js?v=20260808-canonical-lang-v2'
+          for name in ['index.html', 'fr/index.html']:
+              p = Path(name)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{name}: expected one old i18n reference, found {count}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Commit cache refresh
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html fr/index.html
+          git commit -m "Refresh canonical language script cache"
+          git push
