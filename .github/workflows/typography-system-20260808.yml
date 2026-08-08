@@ -1,4 +1,4 @@
-name: Harmonize CoM typography system
+name: Apply shared CoM typography layer
 
 on:
   push:
@@ -15,196 +15,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Apply readable editorial typography system
+      - name: Attach shared typography stylesheet
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
 
-          FONT_IMPORT = '@import url("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap");\n\n'
-          VERSION = '20260808-type-system-v1'
+          link = '  <link rel="stylesheet" href="/typography-v1.css?v=20260808-v1" />'
+          pages = [Path('index.html'), Path('fr/index.html')]
+          pages += list(Path('confluences').rglob('*.html'))
+          pages += list(Path('fr/confluences').rglob('*.html'))
 
-          # Main Confluence of Minds shell.
-          p = Path('styles.css')
-          css = p.read_text(encoding='utf-8')
-          if 'family=Newsreader' not in css:
-              css = FONT_IMPORT + css
+          if len(pages) < 10:
+              raise SystemExit(f'Expected CoM and Confluences pages, found only {len(pages)}')
 
-          old_vars = '  --serif: "Bodoni Moda", serif;\n  --sans: "DM Sans", sans-serif;'
-          new_vars = '  --display-serif: "Bodoni Moda", serif;\n  --reading-serif: "Newsreader", Georgia, serif;\n  --serif: var(--reading-serif);\n  --sans: "DM Sans", sans-serif;'
-          if old_vars in css:
-              css = css.replace(old_vars, new_vars, 1)
-          elif '--display-serif:' not in css:
-              raise SystemExit('Main typography variables not found safely')
-
-          marker = '/* TYPOGRAPHY SYSTEM — readable editorial hierarchy */'
-          block = '''
-/* TYPOGRAPHY SYSTEM — readable editorial hierarchy */
-/* Bodoni is deliberately rare: only primary display moments. */
-.hero-copy h1 {
-  font-family: var(--display-serif);
-}
-/* All secondary editorial hierarchy uses Newsreader for clarity. */
-.worlds-heading h2,
-.worlds-heading > p,
-.world-card h3,
-.world-card p em,
-.about-copy h2,
-.about-copy > p:last-child,
-.portal-toast strong {
-  font-family: var(--reading-serif);
-}
-.worlds-heading h2,
-.about-copy h2 {
-  letter-spacing: -.035em;
-}
-.world-card h3 {
-  letter-spacing: -.018em;
-  line-height: 1.08;
-}
-.about-copy > p:last-child,
-.worlds-heading > p {
-  letter-spacing: -.008em;
-}
-'''
-          if marker in css:
-              css = re.sub(r'/\* TYPOGRAPHY SYSTEM — readable editorial hierarchy \*/.*?\Z', block.lstrip(), css, flags=re.S)
-          else:
-              css = css.rstrip() + '\n\n' + block
-          p.write_text(css, encoding='utf-8')
-
-          # Editorial Confluences pages.
-          p = Path('confluences.css')
-          css = p.read_text(encoding='utf-8')
-          if 'family=Newsreader' not in css:
-              css = FONT_IMPORT + css
-
-          old_vars_compact = '--serif:"Bodoni Moda",serif; --sans:"DM Sans",sans-serif; --mono:"IBM Plex Mono",monospace;'
-          new_vars_compact = '--display-serif:"Bodoni Moda",serif; --reading-serif:"Newsreader",Georgia,serif; --serif:var(--reading-serif); --sans:"DM Sans",sans-serif; --mono:"IBM Plex Mono",monospace;'
-          if old_vars_compact in css:
-              css = css.replace(old_vars_compact, new_vars_compact, 1)
-          elif '--display-serif:' not in css:
-              raise SystemExit('Confluences typography variables not found safely')
-
-          marker = '/* TYPOGRAPHY SYSTEM — readable editorial hierarchy */'
-          block = '''
-/* TYPOGRAPHY SYSTEM — readable editorial hierarchy */
-/* Bodoni is reserved for the single primary title on a page. */
-.collection-hero h1,
-.article-hero h1 {
-  font-family: var(--display-serif);
-}
-/* Reading hierarchy: expressive, but designed to survive large screen sizes. */
-.essay-card h2,
-.article-body .lead,
-.article-body h2,
-.pullquote,
-.related h3,
-.article-next strong {
-  font-family: var(--reading-serif);
-}
-.essay-card h2 {
-  line-height: 1.08;
-  letter-spacing: -.018em;
-}
-.article-body .lead {
-  line-height: 1.36;
-  letter-spacing: -.012em;
-}
-.article-body h2 {
-  font-size: clamp(34px, 3.6vw, 48px);
-  line-height: 1.1;
-  letter-spacing: -.018em;
-}
-.pullquote {
-  font-size: clamp(27px, 3.4vw, 42px);
-  line-height: 1.22;
-  letter-spacing: -.01em;
-}
-.related h3 {
-  line-height: 1.1;
-  letter-spacing: -.015em;
-}
-.article-next strong {
-  line-height: 1.04;
-  letter-spacing: -.022em;
-}
-'''
-          if marker in css:
-              css = re.sub(r'/\* TYPOGRAPHY SYSTEM — readable editorial hierarchy \*/.*?\Z', block.lstrip(), css, flags=re.S)
-          else:
-              css = css.rstrip() + '\n\n' + block
-          p.write_text(css, encoding='utf-8')
-
-          # Homepage Confluences cards inherit the readable serif explicitly.
-          p = Path('confluences-home.css')
-          css = p.read_text(encoding='utf-8')
-          marker = '/* TYPOGRAPHY SYSTEM — readable editorial hierarchy */'
-          block = '''
-/* TYPOGRAPHY SYSTEM — readable editorial hierarchy */
-.confluences-home h2,
-.confluence-card h3 {
-  font-family: var(--reading-serif);
-}
-.confluences-home h2 {
-  line-height: .96;
-  letter-spacing: -.026em;
-}
-.confluence-card h3 {
-  line-height: 1.08;
-  letter-spacing: -.018em;
-}
-'''
-          if marker in css:
-              css = re.sub(r'/\* TYPOGRAPHY SYSTEM — readable editorial hierarchy \*/.*?\Z', block.lstrip(), css, flags=re.S)
-          else:
-              css = css.rstrip() + '\n\n' + block
-          p.write_text(css, encoding='utf-8')
-
-          # Cache bust only the shared CoM shell and editorial layer.
-          for page in [Path('index.html'), Path('fr/index.html')]:
+          for page in pages:
               html = page.read_text(encoding='utf-8')
-              html = re.sub(r'(href="/?styles\.css\?v=)[^"]+', rf'\g<1>{VERSION}', html, count=1)
-              html = re.sub(r'(href="/confluences-home\.css\?v=)[^"]+', rf'\g<1>{VERSION}', html, count=1)
-              page.write_text(html, encoding='utf-8')
+              if '/typography-v1.css?' not in html:
+                  if '</head>' not in html:
+                      raise SystemExit(f'Missing head close in {page}')
+                  html = html.replace('</head>', link + '\n</head>', 1)
+                  page.write_text(html, encoding='utf-8')
 
-          editorial_pages = list(Path('confluences').rglob('*.html')) + list(Path('fr/confluences').rglob('*.html'))
-          if not editorial_pages:
-              raise SystemExit('No Confluences HTML pages found')
-          for page in editorial_pages:
+          for page in pages:
               html = page.read_text(encoding='utf-8')
-              updated, count = re.subn(r'(href="/confluences\.css\?v=)[^"]+', rf'\g<1>{VERSION}', html, count=1)
-              if count != 1:
-                  raise SystemExit(f'Confluences stylesheet reference missing in {page}')
-              page.write_text(updated, encoding='utf-8')
-
-          # Validation: display serif is rare and secondary hierarchy is readable.
-          main = Path('styles.css').read_text(encoding='utf-8')
-          editorial = Path('confluences.css').read_text(encoding='utf-8')
-          home = Path('confluences-home.css').read_text(encoding='utf-8')
-          assert '--reading-serif: "Newsreader", Georgia, serif;' in main
-          assert '.hero-copy h1' in main and 'font-family: var(--display-serif);' in main
-          assert '--reading-serif:"Newsreader",Georgia,serif;' in editorial
-          assert 'font-size: clamp(27px, 3.4vw, 42px);' in editorial
-          assert '.article-body h2' in editorial
-          assert '.confluence-card h3' in home
-          assert VERSION in Path('index.html').read_text(encoding='utf-8')
-          assert VERSION in Path('fr/index.html').read_text(encoding='utf-8')
-          for page in editorial_pages:
-              assert VERSION in page.read_text(encoding='utf-8')
+              if '/typography-v1.css?v=20260808-v1' not in html:
+                  raise SystemExit(f'Typography stylesheet missing from {page}')
           PY
-
-      - name: Commit typography system
+      - name: Commit typography activation
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add styles.css confluences.css confluences-home.css index.html fr/index.html confluences fr/confluences
+          git add index.html fr/index.html confluences fr/confluences
           if git diff --cached --quiet; then
-            echo "No typography changes needed."
+            echo "Typography layer already active."
             exit 0
           fi
-          git commit -m "Harmonize CoM typography for readability"
+          git commit -m "Activate readable typography across CoM editorial pages"
           git push
