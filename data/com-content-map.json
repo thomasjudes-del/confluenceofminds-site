@@ -1,0 +1,147 @@
+{
+  "version": "2026-08-08",
+  "purpose": "Lightweight editorial map for the autonomous Confluence of Minds news-to-content loop. This file guides discovery but is not a substitute for checking the current repository before publishing.",
+  "site": "https://confluenceofminds.com/",
+  "repository": "thomasjudes-del/confluenceofminds-site",
+  "buffer": {
+    "organization_name": "My Organization",
+    "instagram_handle": "confluenceofminds",
+    "publishing_mode": "automatic"
+  },
+  "global_rules": [
+    "Before every publication cycle, inspect the current homepage, script.js and native-media-v4.js for live destinations and assets. Never invent a URL or assume a card is still live.",
+    "For news-driven content, prioritize events from the previous 7 days and verify factual claims with reliable sources; prefer primary sources when available.",
+    "Do not force a connection between news and a CoM world. If no news signal is strong, publish one useful evergreen reuse from the archive instead.",
+    "Create a new Confluence article only when the angle is durable enough to remain useful beyond the news cycle. Otherwise use a social post linked to an existing world or Confluence.",
+    "Use only CoM-owned media, media already hosted by the CoM site/R2, or newly generated original media. Do not copy third-party copyrighted images for Instagram.",
+    "Tone: curious, intelligent, non-boastful, concise, culturally respectful. CoM is a personal constellation of interests, not a claim of expertise in every field.",
+    "Avoid duplicate angles and repetitive promotion. Prefer a fresh question, connection, fact or framing.",
+    "If a topic is high-risk, factually uncertain, primarily partisan/political, defamatory, or would require unsupported claims, skip it and choose another topic.",
+    "Every weekly cycle must publish at least one Instagram item. A new website article is optional and should be quality-gated."
+  ],
+  "worlds": [
+    {
+      "id": "incident-on-titan",
+      "name": "Incident on Titan",
+      "themes": ["Titan", "Saturn", "planetary exploration", "astrobiology", "space missions", "NASA", "ESA", "SpaceX", "extraterrestrial habitats", "interactive fiction", "science-fiction game"],
+      "news_triggers": ["new Titan mission", "Saturn system discovery", "Titan atmosphere or ocean research", "spacecraft propulsion or habitat breakthrough", "major space exploration announcement"],
+      "known_destination": "https://confluenceofminds.com/titan/",
+      "known_media": [
+        "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Incident_on_Titan_Teaser_Minimal_Cut_HD_Final.mp4",
+        "https://confluenceofminds.com/assets/titan-poster-mobile.jpg"
+      ],
+      "evergreen_angles": ["Why Titan is such a compelling setting for science fiction", "What would actually be difficult about operating on Titan", "Game design when science is part of the constraint"]
+    },
+    {
+      "id": "anjin-of-the-shogun",
+      "name": "Anjin of the Shogun",
+      "themes": ["Shogun", "historical Japan", "samurai", "Anjin", "William Adams", "Japanese culture", "historical adaptation", "television adaptation"],
+      "news_triggers": ["Shogun series news", "new historical Japan adaptation", "major exhibition or cultural release", "renewed public debate about historical accuracy in adaptations"],
+      "known_destination": null,
+      "known_media": ["https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Good%20Anjin_of_the_Shogun_Teaser_Cinematic_V4_1080p.mp4"],
+      "evergreen_angles": ["What Shogun gets us curious about beyond the screen", "The real Anjin and the appeal of cultural intermediaries", "Historical adaptation versus cultural curiosity"]
+    },
+    {
+      "id": "chronicles-of-kashgar",
+      "name": "Chronicles of Kashgar",
+      "themes": ["Kashgar", "Silk Road", "high fantasy", "Central Asia", "fantasy worldbuilding", "initiation stories"],
+      "news_triggers": ["Kashgar or Silk Road cultural news", "major fantasy adaptation", "renewed interest in Central Asian settings in fiction"],
+      "known_destination": "VERIFY_CURRENT_SITE_EXTERNAL_AMAZON_LINK",
+      "known_media": [],
+      "evergreen_angles": ["Why fantasy keeps returning to crossroads cities", "The Silk Road as a worldbuilding machine"]
+    },
+    {
+      "id": "shattered-dragons",
+      "name": "Shattered Dragons",
+      "themes": ["dragons", "fantasy", "speculative biology", "genetic engineering", "de-extinction", "mythology", "biotechnology"],
+      "news_triggers": ["major dragon/fantasy release", "de-extinction breakthrough", "synthetic biology story with a credible thematic bridge", "new research on origins of dragon myths"],
+      "known_destination": null,
+      "known_media": [],
+      "evergreen_angles": ["Why do humans keep reinventing dragons", "Could a dragon be biologically plausible", "When mythology meets biotechnology"]
+    },
+    {
+      "id": "katephomi-kitembe",
+      "name": "À la recherche de Katephomi Kitembe",
+      "themes": ["climate fiction", "climate anticipation", "game-world", "interactive narrative", "environmental fiction"],
+      "news_triggers": ["climate fiction trend", "new forms of interactive literature", "major cultural debate around climate storytelling"],
+      "known_destination": "https://books.apple.com/fr/book/a-la-recherche-de-katephomi-kitembe/id6442944248?l=fr",
+      "known_media": ["https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4"],
+      "evergreen_angles": ["Can climate fiction be adventurous without becoming a lecture", "What changes when a novel behaves like a game"]
+    },
+    {
+      "id": "authentiques-victimes",
+      "name": "Authentiques Victimes",
+      "themes": ["AI writing", "authorship", "generative literature", "copyright", "publishing", "synthetic media", "memory", "psychological science fiction"],
+      "news_triggers": ["AI-generated books", "publisher AI policy", "AI copyright ruling", "new writing model", "literary prize or controversy involving AI", "research on readers and AI-generated fiction"],
+      "known_destination": "https://confluenceofminds.com/authentiques-victimes/",
+      "known_media": ["https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Authentiques_Victimes_Cinematic_Teaser_V2_Nils_Frahm.mp4"],
+      "evergreen_angles": ["AI-generated books before ChatGPT", "When a fiction about machine-written books gets rewritten with AI", "What does authorship mean when machines can draft"]
+    },
+    {
+      "id": "ai-got-talent",
+      "name": "AI's Got Talent",
+      "themes": ["AI art", "AI music", "AI video", "creative AI", "generative creativity", "AI competitions", "human judging", "synthetic performers"],
+      "news_triggers": ["major generative media model", "AI music or film competition", "AI-created work wins or enters an award", "debate over AI creativity", "new multimodal creative tool"],
+      "known_destination": "https://aitalent.show/",
+      "known_media": ["https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/AI_Talent_Mini_Teaser_V2_Show.mp4"],
+      "evergreen_angles": ["What happens when AI stops imitating and starts performing", "Can creative AI be judged like a performer", "Why a talent show is an interesting interface for generative AI"]
+    },
+    {
+      "id": "silmea",
+      "name": "Créations SILMEA",
+      "themes": ["audio fiction", "immersive sound", "spatial audio", "binaural audio", "audio drama", "sound cinema", "films without images"],
+      "news_triggers": ["spatial audio release", "audio drama revival", "immersive sound technology", "binaural cultural experience", "new audio-first narrative format"],
+      "known_destination": "https://smartlink.ausha.co/creations-silmea",
+      "known_media": ["https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/SILMEA_Films_Sonores_Teaser_V3_Court_Cinematique.mp4"],
+      "evergreen_angles": ["Can a movie exist without images", "Why closing your eyes can make fiction more visual", "From radio drama to spatial audio"]
+    },
+    {
+      "id": "snow-white-queen-of-ashes",
+      "name": "Snow White and the Queen of Ashes",
+      "themes": ["Snow White", "Brothers Grimm", "fairy tales", "retellings", "ecological fiction", "adaptation", "Disney"],
+      "news_triggers": ["new Snow White adaptation", "major fairy-tale remake", "public-domain retelling trend", "ecological reinterpretation of classics"],
+      "known_destination": null,
+      "known_media": ["https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Snow_White_Queen_of_Ashes_Cinematic_Teaser_compressed.mp4"],
+      "evergreen_angles": ["Why fairy tales survive endless rewrites", "What happens when an ecological crisis enters a fairy tale", "Why Snow White remains culturally reusable"]
+    },
+    {
+      "id": "we-can-but-we-cant",
+      "name": "We Can / But We Can't",
+      "themes": ["collective action", "human capability", "environmental contradiction", "visual activism", "social paralysis"],
+      "news_triggers": ["striking example of collective capability versus inaction", "major environmental contradiction with strong visual potential"],
+      "known_destination": null,
+      "known_media": [],
+      "evergreen_angles": ["Why knowing what to do is not the same as doing it", "Collective action as a design problem"]
+    }
+  ],
+  "existing_confluences": [
+    {
+      "id": "001",
+      "title": "Why Confluence of Minds?",
+      "themes": ["Rabindranath Tagore", "Patrick Geddes", "education", "ecology", "interdisciplinarity", "confluence"],
+      "url_en": "https://confluenceofminds.com/confluences/why-confluence-of-minds/",
+      "url_fr": "https://confluenceofminds.com/fr/confluences/why-confluence-of-minds/"
+    },
+    {
+      "id": "002",
+      "title": "AI-generated books before ChatGPT",
+      "themes": ["generative literature", "AI writing", "authorship", "Authentiques Victimes"],
+      "url_en": "https://confluenceofminds.com/confluences/ai-generated-books-before-chatgpt/",
+      "url_fr": "https://confluenceofminds.com/fr/confluences/ai-generated-books-before-chatgpt/"
+    },
+    {
+      "id": "003",
+      "title": "Can a movie exist without images?",
+      "themes": ["audio fiction", "spatial audio", "sound cinema", "SILMEA"],
+      "url_en": "https://confluenceofminds.com/confluences/can-a-movie-exist-without-images/",
+      "url_fr": "https://confluenceofminds.com/fr/confluences/can-a-movie-exist-without-images/"
+    }
+  ],
+  "weekly_selection": {
+    "news_window_days": 7,
+    "minimum_instagram_posts": 1,
+    "maximum_instagram_posts_default": 2,
+    "new_confluence_threshold": "Only for a durable, sourced angle with a clear link to CoM and enough substance for a short useful essay.",
+    "fallback": "If no strong current event exists, select the least-recently-used world or Confluence and create a fresh evergreen social angle using an existing CoM-owned asset."
+  }
+}
