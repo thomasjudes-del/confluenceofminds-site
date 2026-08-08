@@ -426,7 +426,8 @@ function showToast(message) {
 }
 
 const destinations = {
-  'Incident on Titan': './titan/',
+  'Incident on Titan': '/titan/',
+  'Authentiques Victimes': '/authentiques-victimes/',
   'À la recherche de Katephomi Kitembe': 'https://books.apple.com/fr/book/a-la-recherche-de-katephomi-kitembe/id6442944248?l=fr',
   'AI’s Got Talent': 'https://aitalent.show/',
   'Créations SILMEA': 'https://smartlink.ausha.co/creations-silmea',

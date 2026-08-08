@@ -130,7 +130,17 @@
     nav.insertBefore(switcher, instagram || null);
 
     switcher.querySelectorAll('[data-language]').forEach((button) => {
-      button.addEventListener('click', () => applyLanguage(button.dataset.language, true));
+      button.addEventListener('click', () => {
+      const lang = button.dataset.language === 'fr' ? 'fr' : 'en';
+      const targetPath = lang === 'fr' ? '/fr/' : '/';
+      const currentPath = window.location.pathname.replace(/index\.html$/, '');
+      if (currentPath === targetPath) {
+        applyLanguage(lang, true);
+        return;
+      }
+      try { localStorage.setItem('confluence-language', lang); } catch (_) {}
+      window.location.assign(`${targetPath}${window.location.hash || ''}`);
+    });
     });
   }
 
@@ -210,6 +220,9 @@
   }
 
   function initialLanguage() {
+    const pathLanguage = window.location.pathname.replace(/index\.html$/, '') === '/fr/' ? 'fr' : null;
+    if (pathLanguage) return pathLanguage;
+
     const queryLanguage = new URLSearchParams(window.location.search).get('lang');
     if (queryLanguage === 'fr' || queryLanguage === 'en') return queryLanguage;
 
