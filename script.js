@@ -19,11 +19,11 @@ if (heroArt) {
     <div class="hero-orbit hero-orbit--three" aria-hidden="true"></div>
 
     <img class="hero-art__image hero-art__image--echo hero-art__image--echo-one"
-      src="assets/confluence-hero-organic.png?v=20260805-hero-v7" alt="" decoding="async" />
+      src="/assets/confluence-hero-organic.png?v=20260805-hero-v7" alt="" decoding="async" />
     <img class="hero-art__image hero-art__image--echo hero-art__image--echo-two"
-      src="assets/confluence-hero-organic.png?v=20260805-hero-v7" alt="" decoding="async" />
+      src="/assets/confluence-hero-organic.png?v=20260805-hero-v7" alt="" decoding="async" />
     <img class="hero-art__image hero-art__image--main"
-      src="assets/confluence-hero-organic.png?v=20260805-hero-v7" alt="" fetchpriority="high" decoding="async" />
+      src="/assets/confluence-hero-organic.png?v=20260805-hero-v7" alt="" fetchpriority="high" decoding="async" />
 
     <div class="hero-paper hero-paper--one" aria-hidden="true">
       <b>STORIES</b><span>Fragments become worlds.</span>
