@@ -1,0 +1,64 @@
+name: Update CoM hero copy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/update-hero-copy-20260808.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update hero copy in EN and FR
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              'index.html': [
+                  ('<h1 id="hero-title">Too many ideas<br />for one world.</h1>', '<h1 id="hero-title">Different worlds.<br />One confluence.</h1>'),
+                  ('<p class="hero-lede">A growing creative universe of speculative stories, interactive experiences, audio fiction and visual worlds.</p>', '<p class="hero-lede">A personal constellation of stories, games, sound and experiments — connected more by curiosity than by genre.</p>'),
+              ],
+              'fr/index.html': [
+                  ('<h1 id="hero-title">Trop d’idées<br />pour un seul monde.</h1>', '<h1 id="hero-title">Des mondes différents.<br />Une même confluence.</h1>'),
+                  ('<p class="hero-lede">Un univers créatif en expansion, fait de récits spéculatifs, d’expériences interactives, de fictions sonores et de mondes visuels.</p>', '<p class="hero-lede">Une constellation personnelle de récits, jeux, sons et expériences — reliés davantage par la curiosité que par un genre.</p>'),
+              ],
+              'i18n.js': [
+                  ("heroTitle: 'Too many ideas<br />for one world.',", "heroTitle: 'Different worlds.<br />One confluence.',"),
+                  ("heroLede: 'A growing creative universe of speculative stories, interactive experiences, audio fiction and visual worlds.',", "heroLede: 'A personal constellation of stories, games, sound and experiments — connected more by curiosity than by genre.',"),
+                  ("heroTitle: 'Trop d’idées<br />pour un seul monde.',", "heroTitle: 'Des mondes différents.<br />Une même confluence.',"),
+                  ("heroLede: 'Un univers créatif en expansion, fait de récits spéculatifs, d’expériences interactives, de fictions sonores et de mondes visuels.',", "heroLede: 'Une constellation personnelle de récits, jeux, sons et expériences — reliés davantage par la curiosité que par un genre.',"),
+              ],
+          }
+
+          for path_str, pairs in replacements.items():
+              path = Path(path_str)
+              text = path.read_text(encoding='utf-8')
+              for old, new in pairs:
+                  if old not in text:
+                      raise SystemExit(f'Missing expected copy in {path_str}: {old[:60]}')
+                  text = text.replace(old, new, 1)
+              path.write_text(text, encoding='utf-8')
+
+          for path_str in replacements:
+              text = Path(path_str).read_text(encoding='utf-8')
+              assert 'Too many ideas<br />for one world.' not in text
+              assert 'Trop d’idées<br />pour un seul monde.' not in text
+          PY
+
+      - name: Commit hero copy update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html fr/index.html i18n.js
+          git commit -m "Refine hero copy around creative plurality"
+          git push
