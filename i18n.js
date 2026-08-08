@@ -220,20 +220,10 @@
   }
 
   function initialLanguage() {
-    const pathLanguage = window.location.pathname.replace(/index\.html$/, '') === '/fr/' ? 'fr' : null;
-    if (pathLanguage) return pathLanguage;
+  const path = window.location.pathname.replace(/index\.html$/, '');
+  return path === '/fr/' ? 'fr' : 'en';
+}
 
-    const queryLanguage = new URLSearchParams(window.location.search).get('lang');
-    if (queryLanguage === 'fr' || queryLanguage === 'en') return queryLanguage;
-
-    try {
-      const stored = localStorage.getItem('confluence-language');
-      if (stored === 'fr' || stored === 'en') return stored;
-    } catch (_) {}
-
-    return navigator.language?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
-  }
-
-  createSwitcher();
+createSwitcher();
   applyLanguage(initialLanguage());
 })();
