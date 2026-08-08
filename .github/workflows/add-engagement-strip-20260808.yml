@@ -1,0 +1,99 @@
+name: Add CoM contact and notification strip
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/add-engagement-strip-20260808.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add engagement strip to EN and FR homepages
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          pages = {
+              Path('index.html'): '''
+          <section class="engage-strip" aria-labelledby="engage-title">
+            <div class="engage-strip__inner">
+              <div>
+                <p class="engage-strip__label">STAY IN TOUCH</p>
+                <h2 id="engage-title">Stay in touch.</h2>
+                <p class="engage-strip__text">Interested in one of these worlds, or in what opens next?</p>
+              </div>
+              <div class="engage-strip__actions">
+                <button class="engage-action engage-action--secondary" type="button" data-contact-action>Contact</button>
+                <button class="engage-action engage-action--primary" type="button" data-notify-action>Notify me when a new world opens</button>
+              </div>
+            </div>
+          </section>
+          ''',
+              Path('fr/index.html'): '''
+          <section class="engage-strip" aria-labelledby="engage-title">
+            <div class="engage-strip__inner">
+              <div>
+                <p class="engage-strip__label">RESTER EN LIEN</p>
+                <h2 id="engage-title">Rester en lien.</h2>
+                <p class="engage-strip__text">Un de ces mondes vous intéresse, ou vous voulez voir ce qui s’ouvre ensuite ?</p>
+              </div>
+              <div class="engage-strip__actions">
+                <button class="engage-action engage-action--secondary" type="button" data-contact-action>Contact</button>
+                <button class="engage-action engage-action--primary" type="button" data-notify-action>Me prévenir quand un nouveau monde s’ouvre</button>
+              </div>
+            </div>
+          </section>
+          '''
+          }
+
+          css_link = '  <link rel="stylesheet" href="/engagement-v1.css?v=20260808-v1" />\n'
+          js_link = '  <script src="/engagement-v1.js?v=20260808-v1"></script>\n'
+
+          for path, block in pages.items():
+              html = path.read_text(encoding='utf-8')
+
+              if '/engagement-v1.css' not in html:
+                  html = html.replace('</head>', css_link + '</head>', 1)
+
+              if 'class="engage-strip"' not in html:
+                  marker = '<footer class="site-footer">'
+                  if marker not in html:
+                      raise SystemExit(f'Footer marker missing in {path}')
+                  html = html.replace(marker, block.strip() + '\n\n  ' + marker, 1)
+
+              if '/engagement-v1.js' not in html:
+                  html = html.replace('</body>', js_link + '</body>', 1)
+
+              path.write_text(html, encoding='utf-8')
+
+          # Validation
+          for path in pages:
+              html = path.read_text(encoding='utf-8')
+              assert html.count('class="engage-strip"') == 1
+              assert '/engagement-v1.css?v=20260808-v1' in html
+              assert '/engagement-v1.js?v=20260808-v1' in html
+              assert 'data-contact-action' in html
+              assert 'data-notify-action' in html
+          PY
+
+      - name: Commit engagement strip
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html fr/index.html
+          if git diff --cached --quiet; then
+            echo "No engagement changes needed."
+            exit 0
+          fi
+          git commit -m "Add contact and new-world notification actions"
+          git push
