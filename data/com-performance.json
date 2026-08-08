@@ -1,0 +1,86 @@
+{
+  "version": "2026-08-08",
+  "purpose": "Automatic learning layer for Confluence of Minds content performance. Updated by the weekly performance analyst and read by the autonomous editor before future publishing decisions.",
+  "site_analytics": {
+    "status": "not_instrumented",
+    "note": "No Google Analytics, Plausible, Umami, Matomo, GoatCounter or equivalent tracker was found in the current GitHub site. Until web analytics is added, this file learns from Buffer/Instagram performance only and must not pretend to measure website visits or SEO conversions."
+  },
+  "scoring_model": {
+    "principle": "Compare posts primarily against other CoM posts from a similar recent period. Historical 2024 data is directional only and carries lower confidence than post-2026 autonomous-editor data.",
+    "dimensions": {
+      "discovery": "Relative reach and views. High reach with low interaction means awareness, not resonance.",
+      "resonance": "Engagement rate plus saves, shares and comments normalized by reach. Saves/shares/comments are stronger signals than likes alone.",
+      "growth": "Follows attributed to the post, normalized by reach. Treat very small denominators cautiously.",
+      "overall": "Weighted relative score: 35% discovery, 50% resonance, 15% growth. Do not use overall without displaying confidence/post count."
+    },
+    "confidence": {
+      "low": "1-2 comparable posts or mostly historical data",
+      "medium": "3-5 recent comparable posts",
+      "high": "6+ recent comparable posts"
+    }
+  },
+  "historical_baseline": {
+    "confidence": "low",
+    "reason": "Most comparable Instagram history currently available predates the 2026 relaunch and current autonomous publishing system.",
+    "signals": [
+      {
+        "segment": "brand-general",
+        "example": "2026 website relaunch reel",
+        "buffer_post_id": "6a75ea2c8363eb694995a5b6",
+        "metrics": {"reach": 131, "views": 146, "reactions": 0, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 0},
+        "learning": "Generic umbrella-brand awareness can generate views without generating interaction. Do not assume reach means interest in a specific world."
+      },
+      {
+        "segment": "anjin-of-the-shogun",
+        "example": "Kintsugi cultural post",
+        "metrics": {"reach": 39, "views": 150, "reactions": 9, "comments": 1, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 28.2051},
+        "learning": "Specific cultural concepts with a clear curiosity hook can outperform generic project promotion on resonance."
+      },
+      {
+        "segment": "anjin-of-the-shogun",
+        "example": "Sumi-e cultural post",
+        "metrics": {"reach": 53, "views": 177, "reactions": 9, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 16.9811},
+        "learning": "Educational/cultural adjacency around an existing world is a promising editorial mode."
+      },
+      {
+        "segment": "shattered-dragons",
+        "example": "Fire dragon speculative-biology fragment",
+        "metrics": {"reach": 22, "views": 40, "reactions": 6, "comments": 1, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 36.3636},
+        "learning": "Shattered Dragons historically showed strong resonance inside a small audience; test whether news/biotech adjacency can expand discovery without losing that resonance."
+      },
+      {
+        "segment": "shattered-dragons",
+        "example": "Earth dragon fragment",
+        "metrics": {"reach": 33, "views": 60, "reactions": 8, "comments": 0, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 27.2727},
+        "learning": "Narrative fragments with a concrete creature/worldbuilding idea can be efficient engagement assets."
+      },
+      {
+        "segment": "we-can-but-we-cant",
+        "example": "Fast-fashion / Greta contradiction post",
+        "metrics": {"reach": 41, "views": 102, "reactions": 0, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 0},
+        "learning": "Broad contradiction/activism posts can attract some exposure but may fail to generate interaction; use selectively unless new evidence improves performance."
+      },
+      {
+        "segment": "format-meme",
+        "example": "Disaster Girl parody reel",
+        "metrics": {"reach": 262, "views": 499, "reactions": 3, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 1.145},
+        "learning": "Memetic content may produce discovery without meaningful resonance. Treat it as reach-oriented rather than evidence of deep audience fit."
+      }
+    ]
+  },
+  "heatmap": {
+    "updated_at": "2026-08-08",
+    "status": "baseline-only",
+    "rows": [],
+    "note": "The weekly analyst will populate rows by world, content mode and asset type after enough recent autonomous-editor posts exist."
+  },
+  "learning_rules": [
+    "Never optimize solely for views or reach.",
+    "Separate discovery from resonance and conversion/growth.",
+    "Use recent post cohorts preferentially; downweight 2024 history as current data accumulates.",
+    "Do not draw strong conclusions from a single viral or tiny-reach post.",
+    "Record both winners and losers so the editor learns what to stop doing.",
+    "Feed the strongest and weakest patterns back into the next autonomous-editor selection cycle.",
+    "Do not claim website or SEO performance until a web analytics source is actually connected."
+  ]
+}
