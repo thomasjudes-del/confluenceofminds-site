@@ -1,0 +1,55 @@
+name: Fix French asset paths
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/fix-fr-asset-paths-20260808.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fix root-relative hero and French poster paths
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          script = Path('script.js')
+          text = script.read_text(encoding='utf-8')
+          old = 'src="assets/confluence-hero-organic.png?v=20260805-hero-v7"'
+          new = 'src="/assets/confluence-hero-organic.png?v=20260805-hero-v7"'
+          if old not in text and new not in text:
+              raise SystemExit('Hero asset reference not found')
+          text = text.replace(old, new)
+          script.write_text(text, encoding='utf-8')
+
+          fr = Path('fr/index.html')
+          html = fr.read_text(encoding='utf-8')
+          html = html.replace('poster="assets/', 'poster="/assets/')
+          fr.write_text(html, encoding='utf-8')
+
+          assert 'src="assets/confluence-hero-organic.png' not in text
+          assert 'src="/assets/confluence-hero-organic.png' in text
+          assert 'poster="assets/' not in html
+          PY
+
+      - name: Commit French asset path fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add script.js fr/index.html
+          if git diff --cached --quiet; then
+            echo "No asset path changes needed."
+            exit 0
+          fi
+          git commit -m "Fix French homepage asset paths"
+          git push
