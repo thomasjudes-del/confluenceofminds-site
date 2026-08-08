@@ -1,0 +1,97 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap");
+
+:root {
+  --display-serif: "Bodoni Moda", serif;
+  --reading-serif: "Newsreader", Georgia, serif;
+  --serif: var(--reading-serif);
+}
+
+/* Bodoni is deliberately rare: primary display titles only. */
+.hero-copy h1,
+.collection-hero h1,
+.article-hero h1 {
+  font-family: var(--display-serif);
+}
+
+/* Main CoM shell: readable editorial serif everywhere below the primary H1. */
+.worlds-heading h2,
+.worlds-heading > p,
+.world-card h3,
+.world-card p em,
+.about-copy h2,
+.about-copy > p:last-child,
+.portal-toast strong,
+.confluences-home h2,
+.confluence-card h3 {
+  font-family: var(--reading-serif);
+}
+
+.worlds-heading h2,
+.about-copy h2 {
+  letter-spacing: -.035em;
+}
+
+.world-card h3,
+.confluence-card h3 {
+  line-height: 1.08;
+  letter-spacing: -.018em;
+}
+
+.confluences-home h2 {
+  line-height: .96;
+  letter-spacing: -.026em;
+}
+
+.about-copy > p:last-child,
+.worlds-heading > p {
+  letter-spacing: -.008em;
+}
+
+/* Confluences: Newsreader for reading hierarchy, Bodoni only for the page title. */
+.essay-card h2,
+.article-body .lead,
+.article-body h2,
+.pullquote,
+.related h3,
+.article-next strong {
+  font-family: var(--reading-serif);
+}
+
+.essay-card h2 {
+  line-height: 1.08;
+  letter-spacing: -.018em;
+}
+
+.article-body .lead {
+  line-height: 1.36;
+  letter-spacing: -.012em;
+}
+
+.article-body h2 {
+  font-size: clamp(34px, 3.6vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -.018em;
+}
+
+.pullquote {
+  font-size: clamp(27px, 3.4vw, 42px);
+  line-height: 1.22;
+  letter-spacing: -.01em;
+}
+
+.related h3 {
+  line-height: 1.1;
+  letter-spacing: -.015em;
+}
+
+.article-next strong {
+  line-height: 1.04;
+  letter-spacing: -.022em;
+}
+
+@media (max-width: 520px) {
+  .pullquote {
+    font-size: clamp(27px, 8vw, 36px);
+    line-height: 1.2;
+  }
+}
