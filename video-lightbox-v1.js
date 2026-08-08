@@ -2,6 +2,7 @@
   const destinations = {
     'Authentiques Victimes': 'https://confluenceofminds.com/authentiques-victimes/',
     'Chronicles of Kashgar': 'https://www.amazon.com/Chroniques-Kashgar-Novices-Papillon-French/dp/1790850193',
+    'À la recherche de Katephomi Kitembe': 'https://books.apple.com/fr/book/a-la-recherche-de-katephomi-kitembe/id6442944248?l=fr',
     'Créations SILMEA': 'https://smartlink.ausha.co/creations-silmea',
     'AI’s Got Talent': 'https://aitalent.show/'
   };
