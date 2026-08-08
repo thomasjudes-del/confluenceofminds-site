@@ -1,0 +1,672 @@
+name: Add Confluences editorial section
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/add-confluences-section-20260808.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Confluences section and first three essays
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import re
+          import xml.etree.ElementTree as ET
+
+          ROOT = "https://confluenceofminds.com/"
+          DATE = "2026-08-08"
+
+          home_css = r'''
+          .confluences-home {
+            position: relative;
+            padding: clamp(78px, 10vw, 150px) clamp(24px, 5vw, 84px) clamp(88px, 11vw, 160px);
+            background:
+              radial-gradient(circle at 86% 12%, rgba(182,107,73,.13), transparent 32%),
+              radial-gradient(circle at 7% 88%, rgba(23,32,31,.08), transparent 28%),
+              var(--paper);
+            border-top: 1px solid var(--line);
+            overflow: hidden;
+          }
+          .confluences-home__head {
+            display: grid;
+            grid-template-columns: minmax(0, .8fr) minmax(280px, 1.2fr);
+            align-items: end;
+            gap: clamp(28px, 5vw, 90px);
+            margin: 0 auto clamp(42px, 6vw, 78px);
+            max-width: 1320px;
+          }
+          .confluences-home__label {
+            margin: 0 0 13px;
+            font: 500 11px/1.2 var(--mono);
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--terra);
+          }
+          .confluences-home h2 {
+            margin: 0;
+            font: 500 clamp(52px, 7vw, 105px)/.9 var(--serif);
+            letter-spacing: -.045em;
+          }
+          .confluences-home__intro {
+            margin: 0 0 8px;
+            max-width: 680px;
+            font-size: clamp(17px, 1.7vw, 23px);
+            line-height: 1.55;
+            color: #4e5551;
+          }
+          .confluences-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: clamp(15px, 2vw, 28px);
+            max-width: 1320px;
+            margin: 0 auto;
+          }
+          .confluence-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 510px;
+            overflow: hidden;
+            border: 1px solid rgba(23,32,31,.16);
+            border-radius: 2px;
+            background: rgba(248,243,234,.72);
+            text-decoration: none;
+            transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+          }
+          .confluence-card:hover {
+            transform: translateY(-7px);
+            border-color: rgba(23,32,31,.34);
+            box-shadow: 0 24px 55px rgba(23,32,31,.11);
+          }
+          .confluence-card__visual {
+            position: relative;
+            height: 205px;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(23,32,31,.13);
+            background: #17201f;
+          }
+          .confluence-card__visual::before,
+          .confluence-card__visual::after {
+            content: "";
+            position: absolute;
+            inset: auto;
+          }
+          .confluence-card__visual--tagore {
+            background:
+              linear-gradient(135deg, rgba(182,107,73,.95) 0 34%, transparent 34%),
+              linear-gradient(315deg, #1e2c29 0 46%, #eee8dc 46% 58%, #243430 58%);
+          }
+          .confluence-card__visual--tagore::before {
+            width: 210px; height: 210px; border-radius: 50%;
+            border: 1px solid rgba(248,243,234,.55); right: -45px; top: -72px;
+          }
+          .confluence-card__visual--tagore::after {
+            width: 150%; height: 2px; background: rgba(248,243,234,.5);
+            left: -20%; top: 59%; transform: rotate(-13deg);
+          }
+          .confluence-card__visual--ai {
+            background:
+              repeating-linear-gradient(90deg, transparent 0 23px, rgba(238,232,220,.08) 23px 24px),
+              repeating-linear-gradient(0deg, transparent 0 23px, rgba(238,232,220,.08) 23px 24px),
+              linear-gradient(135deg, #101716, #34413d);
+          }
+          .confluence-card__visual--ai::before {
+            width: 42%; height: 74%; top: 16%; left: 29%;
+            background: #f2eadc;
+            box-shadow: 17px 13px 0 rgba(182,107,73,.9), -15px -12px 0 rgba(248,243,234,.12);
+            transform: rotate(-4deg);
+          }
+          .confluence-card__visual--ai::after {
+            width: 27%; height: 1px; background: #17201f;
+            top: 50%; left: 37%; box-shadow: 0 -24px 0 #17201f, 0 24px 0 #17201f;
+          }
+          .confluence-card__visual--sound {
+            background: linear-gradient(135deg, #07192a, #123a47 55%, #0b0f18);
+          }
+          .confluence-card__visual--sound::before {
+            left: 8%; right: 8%; top: 50%; height: 96px; transform: translateY(-50%);
+            background: repeating-linear-gradient(90deg, #f2bc55 0 7px, transparent 7px 15px);
+            clip-path: polygon(0 45%,5% 25%,10% 67%,15% 11%,20% 80%,25% 39%,30% 57%,35% 19%,40% 87%,45% 46%,50% 7%,55% 71%,60% 35%,65% 63%,70% 20%,75% 82%,80% 40%,85% 62%,90% 29%,95% 72%,100% 48%,100% 52%,95% 76%,90% 33%,85% 66%,80% 44%,75% 86%,70% 24%,65% 67%,60% 39%,55% 75%,50% 11%,45% 50%,40% 91%,35% 23%,30% 61%,25% 43%,20% 84%,15% 15%,10% 71%,5% 29%,0 55%);
+          }
+          .confluence-card__visual--sound::after {
+            width: 180px; height: 180px; border-radius: 50%; border: 1px solid rgba(104,215,229,.35);
+            right: -35px; top: -70px; box-shadow: 0 0 0 32px rgba(239,90,124,.07);
+          }
+          .confluence-card__stamp {
+            position: absolute;
+            left: 20px; bottom: 18px;
+            font: 500 10px/1 var(--mono);
+            letter-spacing: .16em;
+            color: rgba(255,255,255,.85);
+            text-transform: uppercase;
+          }
+          .confluence-card__body {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: clamp(24px, 3vw, 36px);
+          }
+          .confluence-card__meta {
+            margin: 0 0 18px;
+            font: 500 10px/1.2 var(--mono);
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--terra);
+          }
+          .confluence-card h3 {
+            margin: 0;
+            font: 500 clamp(30px, 3vw, 45px)/1.02 var(--serif);
+            letter-spacing: -.035em;
+          }
+          .confluence-card p {
+            margin: 20px 0 28px;
+            color: #59605c;
+            line-height: 1.62;
+          }
+          .confluence-card__cta {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+            font: 600 11px/1 var(--mono);
+            letter-spacing: .11em;
+            text-transform: uppercase;
+          }
+          .confluences-home__all {
+            display: flex;
+            justify-content: center;
+            margin-top: clamp(38px, 5vw, 70px);
+          }
+          .confluences-home__all a {
+            display: inline-flex;
+            gap: 14px;
+            align-items: center;
+            padding: 15px 0 10px;
+            border-bottom: 1px solid var(--ink);
+            font: 600 11px/1 var(--mono);
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            text-decoration: none;
+          }
+          @media (max-width: 900px) {
+            .confluences-home__head { grid-template-columns: 1fr; }
+            .confluences-grid { grid-template-columns: 1fr; }
+            .confluence-card { min-height: 0; }
+          }
+          @media (max-width: 520px) {
+            .confluences-home { padding-left: 18px; padding-right: 18px; }
+            .confluence-card__visual { height: 175px; }
+          }
+          '''.strip() + "\n"
+
+          editorial_css = r'''
+          :root {
+            --paper:#eee8dc; --paper2:#f8f3ea; --ink:#17201f; --muted:#68706b;
+            --line:rgba(23,32,31,.17); --terra:#b66b49;
+            --serif:"Bodoni Moda",serif; --sans:"DM Sans",sans-serif; --mono:"IBM Plex Mono",monospace;
+          }
+          *{box-sizing:border-box} html{background:var(--paper);scroll-behavior:smooth}
+          body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+          a{color:inherit} .grain{position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.13;mix-blend-mode:multiply;background-image:radial-gradient(circle at 20% 20%,rgba(23,32,31,.08) 0 1px,transparent 1.4px),radial-gradient(circle at 80% 30%,rgba(117,86,53,.07) 0 1px,transparent 1.5px);background-size:9px 9px,13px 13px}
+          .editorial-top{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;min-height:72px;padding:0 clamp(20px,4vw,64px);border-bottom:1px solid var(--line);background:rgba(238,232,220,.91);backdrop-filter:blur(16px)}
+          .editorial-brand{font:600 12px/1 var(--mono);letter-spacing:.13em;text-decoration:none}.editorial-nav{display:flex;gap:18px;align-items:center}.editorial-nav a{font:500 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:none}.editorial-nav .lang{padding:7px 9px;border:1px solid var(--line)}
+          .collection-hero,.article-hero{max-width:1320px;margin:0 auto;padding:clamp(80px,11vw,160px) clamp(22px,5vw,72px) clamp(58px,7vw,96px)}
+          .eyebrow{margin:0 0 16px;font:500 10px/1.2 var(--mono);letter-spacing:.19em;text-transform:uppercase;color:var(--terra)}
+          .collection-hero h1,.article-hero h1{margin:0;max-width:1050px;font:500 clamp(55px,9vw,125px)/.87 var(--serif);letter-spacing:-.055em}
+          .collection-hero p,.article-deck{max-width:770px;margin:30px 0 0;font-size:clamp(18px,2vw,25px);line-height:1.55;color:#4f5752}
+          .collection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;max-width:1320px;margin:0 auto;padding:0 clamp(22px,5vw,72px) clamp(90px,12vw,170px)}
+          .essay-card{display:flex;flex-direction:column;min-height:540px;border:1px solid var(--line);background:rgba(248,243,234,.72);text-decoration:none;transition:.3s ease;overflow:hidden}.essay-card:hover{transform:translateY(-6px);box-shadow:0 22px 50px rgba(23,32,31,.1)}
+          .essay-card__visual,.article-visual{position:relative;overflow:hidden;background:#17201f}.essay-card__visual{height:210px;border-bottom:1px solid var(--line)}.article-visual{height:min(48vw,520px);min-height:300px;margin:0 clamp(22px,5vw,72px);max-width:1176px;margin-left:auto;margin-right:auto;border:1px solid var(--line)}
+          .visual-tagore{background:linear-gradient(135deg,#b66b49 0 31%,transparent 31%),linear-gradient(315deg,#1e2c29 0 46%,#eee8dc 46% 58%,#243430 58%)}
+          .visual-tagore:before{content:"";position:absolute;width:42%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(248,243,234,.55);right:-7%;top:-35%}.visual-tagore:after{content:"INDIA  ⇄  SCOTLAND";position:absolute;left:7%;bottom:11%;font:500 11px/1 var(--mono);letter-spacing:.18em;color:#fff}
+          .visual-ai{background:repeating-linear-gradient(90deg,transparent 0 29px,rgba(238,232,220,.08) 29px 30px),repeating-linear-gradient(0deg,transparent 0 29px,rgba(238,232,220,.08) 29px 30px),linear-gradient(135deg,#101716,#34413d)}
+          .visual-ai:before{content:"";position:absolute;width:30%;height:66%;top:17%;left:35%;background:#f2eadc;box-shadow:20px 16px 0 #b66b49,-18px -14px 0 rgba(248,243,234,.12);transform:rotate(-4deg)}.visual-ai:after{content:"2016  →  2026";position:absolute;left:7%;bottom:11%;font:500 11px/1 var(--mono);letter-spacing:.18em;color:#fff}
+          .visual-sound{background:linear-gradient(135deg,#07192a,#123a47 55%,#0b0f18)}.visual-sound:before{content:"";position:absolute;left:7%;right:7%;top:50%;height:110px;transform:translateY(-50%);background:repeating-linear-gradient(90deg,#f2bc55 0 8px,transparent 8px 17px);clip-path:polygon(0 45%,5% 25%,10% 67%,15% 11%,20% 80%,25% 39%,30% 57%,35% 19%,40% 87%,45% 46%,50% 7%,55% 71%,60% 35%,65% 63%,70% 20%,75% 82%,80% 40%,85% 62%,90% 29%,95% 72%,100% 48%,100% 52%,95% 76%,90% 33%,85% 66%,80% 44%,75% 86%,70% 24%,65% 67%,60% 39%,55% 75%,50% 11%,45% 50%,40% 91%,35% 23%,30% 61%,25% 43%,20% 84%,15% 15%,10% 71%,5% 29%,0 55%)}.visual-sound:after{content:"NO IMAGE / FULL SCENE";position:absolute;left:7%;bottom:11%;font:500 11px/1 var(--mono);letter-spacing:.18em;color:#fff}
+          .essay-card__body{display:flex;flex:1;flex-direction:column;padding:30px}.essay-card__meta{margin:0 0 18px;font:500 10px/1.2 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--terra)}.essay-card h2{margin:0;font:500 clamp(30px,3.2vw,45px)/1.02 var(--serif);letter-spacing:-.035em}.essay-card p{margin:20px 0 28px;color:#59605c;line-height:1.65}.essay-card__cta{margin-top:auto;padding-top:18px;border-top:1px solid var(--line);font:600 10px/1 var(--mono);letter-spacing:.13em;text-transform:uppercase}
+          .article-hero{padding-bottom:44px}.article-hero h1{font-size:clamp(52px,8vw,112px)}.article-meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:28px;font:500 10px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#69706c}
+          .article-body{max-width:790px;margin:0 auto;padding:clamp(60px,8vw,105px) 24px clamp(80px,10vw,140px)}.article-body .lead{font:500 clamp(25px,3.2vw,38px)/1.3 var(--serif);letter-spacing:-.025em;color:#26302d}.article-body p{font-size:18px;line-height:1.78;margin:0 0 27px;color:#313a36}.article-body h2{margin:64px 0 22px;font:500 clamp(34px,4vw,52px)/1.05 var(--serif);letter-spacing:-.035em}.article-body strong{font-weight:650}.article-body em{font-family:var(--serif)}
+          .pullquote{margin:48px -7vw;padding:34px clamp(24px,5vw,58px);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);font:500 clamp(28px,4vw,48px)/1.15 var(--serif);letter-spacing:-.025em}.pullquote small{display:block;margin-top:18px;font:500 9px/1.2 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--terra)}
+          .related{margin:65px 0 0;padding:30px;border:1px solid var(--line);background:var(--paper2)}.related__label{font:500 9px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--terra)}.related h3{margin:12px 0 12px;font:500 32px/1.05 var(--serif)}.related p{font-size:15px;line-height:1.6}.related a{display:inline-block;margin-top:4px;font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:6px}
+          .sources{margin-top:70px;padding-top:30px;border-top:1px solid var(--line)}.sources h2{margin-top:0;font-size:32px}.sources ul{list-style:none;padding:0;margin:0}.sources li{padding:13px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}.sources a{text-decoration:none}.sources a:hover{text-decoration:underline}
+          .article-next{max-width:1176px;margin:0 auto clamp(80px,10vw,140px);padding:0 24px}.article-next a{display:flex;align-items:end;justify-content:space-between;gap:24px;padding:34px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);text-decoration:none}.article-next span{font:500 9px/1 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--terra)}.article-next strong{max-width:820px;font:500 clamp(30px,5vw,66px)/.98 var(--serif);letter-spacing:-.04em}
+          .editorial-footer{display:flex;justify-content:space-between;gap:20px;padding:35px clamp(22px,5vw,72px);border-top:1px solid var(--line);font:500 9px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase}
+          @media(max-width:900px){.collection-grid{grid-template-columns:1fr}.essay-card{min-height:0}.pullquote{margin-left:0;margin-right:0}.editorial-nav a:not(.lang){display:none}}
+          @media(max-width:520px){.collection-hero,.article-hero{padding-left:18px;padding-right:18px}.article-visual{margin-left:18px;margin-right:18px}.article-body{padding-left:18px;padding-right:18px}.editorial-top{padding-left:18px;padding-right:18px}.editorial-brand{font-size:10px}.article-next{padding-left:18px;padding-right:18px}.editorial-footer{flex-direction:column}}
+          '''.strip() + "\n"
+
+          articles = {
+            "why-confluence-of-minds": {
+              "class":"tagore",
+              "en": {
+                "title":"Why Confluence of Minds?",
+                "desc":"The story behind the name: Rabindranath Tagore, Patrick Geddes and the value of putting radically different ways of thinking in the same room.",
+                "kicker":"Origins · Education · Ecology",
+                "deck":"An Indian poet and a Scottish polymath exchanged ideas about education, ecology and how knowledge should meet the world. A century later, their conversation still feels strangely current.",
+                "read":"5 min read",
+                "lead":"The name Confluence of Minds did not begin as a branding exercise. It echoes a real encounter between two people who had almost every reason to think differently — and chose to keep talking.",
+                "body":'''<p><strong>Rabindranath Tagore</strong> was a poet, educator and Nobel laureate from Bengal. <strong>Patrick Geddes</strong> was a Scottish biologist, sociologist and pioneering town planner. They met while Geddes was working in India and exchanged letters from 1918 into 1930.</p>
+                <p>The subjects moved freely: education, science, the environment, rural reconstruction, cities, universities and the relationship between local life and global knowledge. That freedom matters. Neither man seemed particularly interested in respecting the borders between disciplines simply because institutions had drawn them there.</p>
+                <h2>They did not think alike. That was the point.</h2>
+                <p>Geddes liked systems, surveys, diagrams and plans. Tagore was more suspicious of anything that made living things too tidy. He wanted education to remain connected to nature, intuition, culture and the inner development of the student. Their correspondence is interesting precisely because it is not a story of two identical thinkers discovering that they agree.</p>
+                <p>It is a story of <strong>difference producing a third space</strong>.</p>
+                <div class="pullquote">A confluence is not a blend. Two rivers keep their origins — but create a new current when they meet.<small>Confluence of Minds</small></div>
+                <p>In 2017, Bashabi Fraser, Tapati Mukherjee and Amrit Sen edited a collection of their writings under a title that captures this beautifully: <em>A Confluence of Minds: The Rabindranath Tagore and Patrick Geddes Reader on Education and Environment</em>.</p>
+                <h2>Why the phrase still works</h2>
+                <p>Our own Confluence of Minds is not an academic continuation of Tagore and Geddes. It is a small creative echo of the same instinct: <strong>put things together that normally live in separate folders and see what happens.</strong></p>
+                <p>A science-fiction decision game about Titan can sit beside a psychological novel about algorithmic authorship. A sound-only film can coexist with Japanese cultural exploration, fantasy, climate fiction and experiments made with artificial intelligence. The projects do not need a common visual style or even a common medium. The connection is the collision itself.</p>
+                <p>That is also why the plural matters. Not one mind made larger, but several modes of thought allowed to interfere with one another: scientific and fictional, human and machine, serious and playful, archival and speculative.</p>
+                <p>Tagore and Geddes were thinking about education and environment, not interactive fiction or generative AI. But their exchange carries a useful warning for the present: specialization gives us depth; <strong>confluence gives us unexpected questions.</strong></p>''',
+                "related_title":"Explore the worlds",
+                "related_text":"The name becomes concrete in a collection of stories, games, audio fiction and experiments that deliberately refuse a single format.",
+                "related_href":"/#worlds",
+                "related_cta":"Enter the worlds",
+                "sources":[
+                  ("Bashabi Fraser — books and background on the Tagore–Geddes reader","https://bashabifraser.co.uk/index.php/books"),
+                  ("The Tagore-Geddes Correspondence — Google Books / Visva-Bharati","https://books.google.com/books/about/The_Tagore_Geddes_Correspondence.html?id=SnSaPQAACAAJ")
+                ]
+              },
+              "fr": {
+                "title":"Pourquoi Confluence of Minds ?",
+                "desc":"L’histoire derrière le nom : Rabindranath Tagore, Patrick Geddes et l’intérêt de faire dialoguer des manières de penser radicalement différentes.",
+                "kicker":"Origines · Éducation · Écologie",
+                "deck":"Un poète indien et un polymathe écossais ont échangé sur l’éducation, l’écologie et la manière dont le savoir devrait rencontrer le monde. Un siècle plus tard, leur conversation paraît étrangement actuelle.",
+                "read":"5 min de lecture",
+                "lead":"Le nom Confluence of Minds n’est pas né d’un exercice de branding. Il fait écho à une rencontre réelle entre deux hommes qui avaient presque toutes les raisons de penser différemment — et qui ont choisi de continuer à se parler.",
+                "body":'''<p><strong>Rabindranath Tagore</strong> était poète, éducateur et prix Nobel de littérature, originaire du Bengale. <strong>Patrick Geddes</strong> était biologiste, sociologue et urbaniste écossais. Ils se rencontrent alors que Geddes travaille en Inde et échangent des lettres de 1918 jusqu’aux années 1930.</p>
+                <p>Les sujets circulent librement : éducation, science, environnement, reconstruction rurale, villes, universités, relation entre vie locale et connaissance globale. Cette liberté est essentielle. Aucun des deux ne semble très intéressé par les frontières disciplinaires simplement parce que les institutions les ont dessinées.</p>
+                <h2>Ils ne pensaient pas pareil. C’était précisément l’intérêt.</h2>
+                <p>Geddes aimait les systèmes, les enquêtes, les schémas et les plans. Tagore se méfiait davantage de ce qui rend le vivant trop propre et trop ordonné. Il voulait une éducation reliée à la nature, à l’intuition, à la culture et au développement intérieur de l’élève. Leur correspondance est intéressante parce qu’elle ne raconte pas l’histoire de deux penseurs identiques découvrant qu’ils sont d’accord.</p>
+                <p>Elle raconte comment <strong>la différence peut créer un troisième espace</strong>.</p>
+                <div class="pullquote">Une confluence n’est pas un mélange. Deux rivières gardent leur origine — mais créent un nouveau courant lorsqu’elles se rencontrent.<small>Confluence of Minds</small></div>
+                <p>En 2017, Bashabi Fraser, Tapati Mukherjee et Amrit Sen ont réuni une partie de leurs textes dans un ouvrage dont le titre résume parfaitement cette idée : <em>A Confluence of Minds: The Rabindranath Tagore and Patrick Geddes Reader on Education and Environment</em>.</p>
+                <h2>Pourquoi cette expression fonctionne encore</h2>
+                <p>Notre Confluence of Minds n’est évidemment pas la continuation académique de Tagore et Geddes. C’est plutôt un petit écho créatif du même réflexe : <strong>mettre ensemble des choses qui vivent normalement dans des dossiers séparés et regarder ce qui se passe.</strong></p>
+                <p>Un jeu de décision de science-fiction sur Titan peut côtoyer un thriller psychologique sur l’auteur et les algorithmes. Un film sans images peut vivre à côté d’explorations de la culture japonaise, de fantasy, de fiction climatique ou d’expériences faites avec l’intelligence artificielle. Les projets n’ont pas besoin d’un même style visuel ni même d’un même médium. Le lien, c’est la collision.</p>
+                <p>C’est aussi pour cela que le pluriel compte. Pas un esprit agrandi, mais plusieurs manières de penser qui interfèrent : scientifique et fictionnelle, humaine et machine, sérieuse et ludique, archivistique et spéculative.</p>
+                <p>Tagore et Geddes parlaient d’éducation et d’environnement, pas de fiction interactive ou d’IA générative. Mais leur échange porte une intuition toujours utile : la spécialisation nous donne de la profondeur ; <strong>la confluence nous donne des questions inattendues.</strong></p>''',
+                "related_title":"Explorer les mondes",
+                "related_text":"Le nom devient concret dans une collection de récits, jeux, fictions sonores et expériences qui refusent volontairement un format unique.",
+                "related_href":"/fr/#worlds",
+                "related_cta":"Entrer dans les mondes",
+                "sources":[
+                  ("Bashabi Fraser — ouvrages et contexte sur le reader Tagore–Geddes","https://bashabifraser.co.uk/index.php/books"),
+                  ("The Tagore-Geddes Correspondence — Google Books / Visva-Bharati","https://books.google.com/books/about/The_Tagore_Geddes_Correspondence.html?id=SnSaPQAACAAJ")
+                ]
+              }
+            },
+            "ai-generated-books-before-chatgpt": {
+              "class":"ai",
+              "en": {
+                "title":"AI-generated books before ChatGPT",
+                "desc":"From code-generated novels to personalized fiction: why a machine-made book imagined in Authentiques Victimes in 2016 feels much less fictional in 2026.",
+                "kicker":"Authorship · AI · Literature",
+                "deck":"In 2016, Authentiques Victimes imagined kiosks producing books on demand from profiles, keywords and styles. The strange part is not that the idea came true. It is what happened to the idea of an author.",
+                "read":"6 min read",
+                "lead":"Before ChatGPT became a verb, machines were already writing. The difference is that almost nobody expected automated literature to become a normal consumer interaction quite this quickly.",
+                "body":'''<p><em>Authentiques Victimes</em> began in 2016. Inside the novel were yellow <strong>ROBOTIQUES®</strong> kiosks: machines capable of manufacturing books on demand from profiles, keywords and stylistic preferences. At the time, it was deliberately uncanny — a publishing system in which a reader could increasingly request the book they wanted instead of waiting for an author to write it.</p>
+                <p>That idea did not emerge in a vacuum. Computer-generated literature is much older than generative AI. In 2013, <strong>NaNoGenMo — National Novel Generation Month</strong> — began challenging programmers to write code that generates a novel of at least 50,000 words. Its output ranged from procedural experiments to surreal machine literature.</p>
+                <p>But those systems mostly produced artifacts. Large language models changed the relationship: the reader can now become prompter, editor, commissioner and sometimes co-author, all inside the same conversation.</p>
+                <h2>The uncomfortable part is not quality</h2>
+                <p>A 2026 study by Sydney Sears and Deena Skolnick Weisberg found that participants rated AI-generated short stories as more absorbing and higher quality than the human-written stories used in the experiment. At the same time, the exact same kind of evaluation improved when people believed a story had been written by a human. In follow-up studies, participants were no better than chance at reliably identifying which stories were machine-generated.</p>
+                <div class="pullquote">The question is moving from “Can a machine write?” to “What do we mean when we say somebody wrote this?”<small>Confluence of Minds</small></div>
+                <p>That gap between <strong>perceived quality</strong> and <strong>perceived authenticity</strong> is more interesting than a simple human-versus-machine contest. We may enjoy a text and still care deeply about who — or what — made it.</p>
+                <p>Research on real-world AI fiction use is already pointing toward another shift: people use conversational models not only to request finished stories, but to repeatedly extend, remix and personalize narrative worlds. The boundary between reader and writer becomes less stable.</p>
+                <h2>A fiction that had to be rewritten by reality</h2>
+                <p><em>Authentiques Victimes</em> was fully rewritten in 2026, ten years after it began. That creates an odd loop. A novel that imagined industrialized, personalized machine writing now exists in a world where the underlying mechanism has become ordinary enough to fit inside a browser tab.</p>
+                <p>The interesting question for the book was never simply whether software could produce sentences. It was about authorship, imitation, memory and the possibility that an original text might already exist under someone else’s name.</p>
+                <p>Generative AI has not resolved those questions. It has made them less hypothetical.</p>''',
+                "related_title":"Authentiques Victimes",
+                "related_text":"A psychological science-fiction thriller begun in 2016 and entirely rewritten in 2026 — after part of its premise stopped feeling like science fiction.",
+                "related_href":"/authentiques-victimes/",
+                "related_cta":"Enter Authentiques Victimes",
+                "sources":[
+                  ("NaNoGenMo — National Novel Generation Month","https://nanogenmo.github.io/"),
+                  ("Sears & Weisberg — Bot or not? AI and human-written stories (2026)","https://sciety.org/articles/activity/10.31234/osf.io/jkh6p_v5"),
+                  ("Gupta, Antoniak & Walsh — AI Fiction in the Wild (2026)","https://arxiv.org/abs/2606.22748")
+                ]
+              },
+              "fr": {
+                "title":"Des livres générés par IA avant ChatGPT",
+                "desc":"Du roman généré par code à la fiction personnalisée : pourquoi la machine à livres imaginée dans Authentiques Victimes en 2016 paraît beaucoup moins fictive en 2026.",
+                "kicker":"Auteur · IA · Littérature",
+                "deck":"En 2016, Authentiques Victimes imaginait des bornes produisant des livres à la demande à partir de profils, mots-clés et styles. Le plus étrange n’est pas que l’idée soit devenue plausible. C’est ce qui est arrivé à la notion d’auteur.",
+                "read":"6 min de lecture",
+                "lead":"Avant que ChatGPT devienne un réflexe quotidien, des machines écrivaient déjà. Ce que presque personne n’avait anticipé, c’est la vitesse à laquelle la littérature automatisée deviendrait une interaction grand public presque banale.",
+                "body":'''<p><em>Authentiques Victimes</em> a commencé en 2016. Dans le roman apparaissaient des bornes jaunes <strong>ROBOTIQUES®</strong> : des machines capables de fabriquer des livres à la demande à partir de profils, de mots-clés et de préférences stylistiques. L’idée devait être légèrement inquiétante : un système éditorial où le lecteur peut de plus en plus demander le livre qu’il souhaite au lieu d’attendre qu’un auteur l’écrive.</p>
+                <p>Cette idée ne sortait pas de nulle part. La littérature générée par ordinateur est bien plus ancienne que l’IA générative actuelle. Dès 2013, <strong>NaNoGenMo — National Novel Generation Month</strong> — proposait aux programmeurs d’écrire du code capable de générer un roman d’au moins 50 000 mots. Les résultats allaient de l’expérience procédurale à une littérature machine franchement surréaliste.</p>
+                <p>Mais ces systèmes produisaient surtout des objets finis. Les grands modèles de langage ont changé la relation : le lecteur peut désormais être à la fois commanditaire, prompteur, éditeur et parfois co-auteur, dans une seule conversation.</p>
+                <h2>Le point inconfortable n’est plus la qualité</h2>
+                <p>Une étude publiée en 2026 par Sydney Sears et Deena Skolnick Weisberg a montré que les participants jugeaient les nouvelles générées par IA plus absorbantes et de meilleure qualité que les textes humains utilisés dans l’expérience. Dans le même temps, les évaluations s’amélioraient lorsqu’ils croyaient qu’un texte avait été écrit par un humain. Dans les expériences suivantes, les participants ne parvenaient pas de manière fiable à distinguer l’origine humaine ou machine des textes.</p>
+                <div class="pullquote">La question glisse de « Une machine peut-elle écrire ? » vers « Qu’est-ce qu’on veut dire quand on affirme que quelqu’un a écrit ceci ? »<small>Confluence of Minds</small></div>
+                <p>L’écart entre <strong>qualité perçue</strong> et <strong>authenticité perçue</strong> est plus intéressant qu’un simple match humain contre machine. Nous pouvons apprécier un texte tout en accordant énormément d’importance à celui — ou à ce qui — l’a produit.</p>
+                <p>Les recherches sur les usages réels de la fiction générée pointent déjà vers autre chose : les utilisateurs ne demandent pas seulement une histoire terminée. Ils prolongent, remixent et personnalisent des mondes narratifs dans la durée. La frontière entre lecteur et auteur devient instable.</p>
+                <h2>Une fiction que le réel a obligée à se relire</h2>
+                <p><em>Authentiques Victimes</em> a été entièrement réécrit en 2026, dix ans après son commencement. Cela crée une boucle étrange. Un roman qui imaginait l’écriture machine industrialisée et personnalisée existe désormais dans un monde où le mécanisme de base tient dans un onglet de navigateur.</p>
+                <p>La question intéressante du livre n’a jamais été seulement de savoir si un logiciel pouvait produire des phrases. Elle touche à l’auteur, à l’imitation, à la mémoire et à la possibilité qu’un texte original existe déjà sous le nom de quelqu’un d’autre.</p>
+                <p>L’IA générative n’a pas résolu ces questions. Elle les a simplement rendues beaucoup moins hypothétiques.</p>''',
+                "related_title":"Authentiques Victimes",
+                "related_text":"Un thriller psychologique de science-fiction commencé en 2016 et entièrement réécrit en 2026 — après qu’une partie de son postulat a cessé de ressembler à de la science-fiction.",
+                "related_href":"/authentiques-victimes/",
+                "related_cta":"Entrer dans Authentiques Victimes",
+                "sources":[
+                  ("NaNoGenMo — National Novel Generation Month","https://nanogenmo.github.io/"),
+                  ("Sears & Weisberg — Bot or not? AI and human-written stories (2026)","https://sciety.org/articles/activity/10.31234/osf.io/jkh6p_v5"),
+                  ("Gupta, Antoniak & Walsh — AI Fiction in the Wild (2026)","https://arxiv.org/abs/2606.22748")
+                ]
+              }
+            },
+            "can-a-film-exist-without-images": {
+              "class":"sound",
+              "en": {
+                "title":"Can a movie exist without images?",
+                "desc":"From radio drama to binaural theatre and SILMEA: what happens when cinema loses the screen but keeps space, rhythm, editing and imagination?",
+                "kicker":"Sound · Cinema · Imagination",
+                "deck":"Take the image away from a film and something surprising happens: the scene does not necessarily disappear. Sometimes it moves into the listener’s head.",
+                "read":"5 min read",
+                "lead":"Strictly speaking, cinema is an art of moving images. But storytelling has never been particularly obedient to definitions. Sound can create rooms, distances, cuts, bodies, weather and entire worlds without showing a single frame.",
+                "body":'''<p>Radio drama proved long ago that an audience can see with its ears. What changed with spatial audio, headphones and contemporary sound design is the degree of physical presence. The listener is no longer simply hearing a story from somewhere outside it; sound can place the listener <strong>inside the scene</strong>.</p>
+                <p>Radio France has explicitly used the expression <strong>“cinéma sonore”</strong> — cinema for the ears — for immersive 3D sound sessions in Studio 105. Elsewhere, companies such as <strong>DARKFIELD</strong> build experiences in complete darkness using binaural or 360-degree sound, turning absence of light into part of the staging.</p>
+                <h2>What is left when the screen goes black?</h2>
+                <p>More than dialogue. A door closing behind the listener establishes geography. A voice moving from the left ear to the right creates blocking. Silence can become a cut. Distance becomes framing. A change in acoustic texture can do the work of a location change.</p>
+                <div class="pullquote">Remove the image and the audience does not stop visualising. You simply lose control of the camera.<small>Confluence of Minds</small></div>
+                <p>That loss of control is the interesting part. In conventional cinema, the director decides what the spectator sees. In sound-only fiction, the production supplies constraints — voices, rhythm, acoustic space, music, detail — and the listener completes the image using memory.</p>
+                <h2>SILMEA and the idea of the sound-film</h2>
+                <p><strong>Créations SILMEA</strong> explored this territory by making immersive works conceived as films made entirely from sound. Projects such as <em>Zone Aphotique</em>, <em>Sherlock Holmes</em> and <em>La Traversée</em> were not attempts to make podcasts behave more like cinema. The experiment was closer to the reverse: <strong>how much cinematic language survives when the image is removed?</strong></p>
+                <p>The answer is surprisingly large. Pace, montage, off-screen space, suspense, point of view and scale can all be constructed acoustically. What changes is ownership of the final picture.</p>
+                <p>So can a movie exist without images? If the definition requires projected moving pictures, probably not. If cinema is also a way of directing attention through time, space, rhythm and emotion, the border becomes much more interesting.</p>
+                <p>Perhaps the image has not vanished at all. It has simply been outsourced to the most sophisticated rendering engine in the room: the listener.</p>''',
+                "related_title":"Créations SILMEA",
+                "related_text":"Immersive sound worlds and films without images — an archive of experiments in cinematic storytelling through sound.",
+                "related_href":"https://smartlink.ausha.co/creations-silmea",
+                "related_cta":"Listen to SILMEA",
+                "sources":[
+                  ("Radio France — cinéma sonore and 3D sound in Studio 105","https://www.radiofrance.com/presse/radio-france-partenaire-des-journees-europeennes-du-patrimoine-2018"),
+                  ("DARKFIELD — immersive 360° sound in complete darkness","https://darkfield.com.au/shows/invisible"),
+                  ("Créations SILMEA — listening archive","https://smartlink.ausha.co/creations-silmea")
+                ]
+              },
+              "fr": {
+                "title":"Un film peut-il exister sans images ?",
+                "desc":"Du théâtre radiophonique au binaural et à SILMEA : que reste-t-il du cinéma lorsque l’écran disparaît mais que l’espace, le rythme, le montage et l’imagination demeurent ?",
+                "kicker":"Son · Cinéma · Imagination",
+                "deck":"Retirez l’image d’un film et quelque chose d’étrange se produit : la scène ne disparaît pas forcément. Elle se déplace parfois dans la tête de celui qui écoute.",
+                "read":"5 min de lecture",
+                "lead":"Au sens strict, le cinéma est un art des images en mouvement. Mais les récits ont toujours eu assez peu de respect pour les définitions. Le son peut créer des pièces, des distances, des coupes, des corps, une météo et des mondes entiers sans montrer une seule image.",
+                "body":'''<p>La fiction radiophonique a démontré depuis longtemps que nous pouvions voir avec nos oreilles. Ce que l’audio spatial, le casque et le sound design contemporain ont changé, c’est le degré de présence physique. L’auditeur n’entend plus seulement une histoire située quelque part devant lui : le son peut le placer <strong>à l’intérieur de la scène</strong>.</p>
+                <p>Radio France a explicitement utilisé l’expression <strong>« cinéma sonore »</strong> — du cinéma pour les oreilles — pour des séances immersives en son 3D dans le Studio 105. Ailleurs, des compagnies comme <strong>DARKFIELD</strong> construisent des expériences dans l’obscurité complète en utilisant du son binaural ou à 360 degrés, transformant l’absence de lumière en élément de mise en scène.</p>
+                <h2>Que reste-t-il lorsque l’écran devient noir ?</h2>
+                <p>Beaucoup plus que des dialogues. Une porte qui se ferme derrière l’auditeur crée une géographie. Une voix qui passe de l’oreille gauche à l’oreille droite fabrique un déplacement. Le silence peut devenir une coupe. La distance devient un cadrage. Une modification de texture acoustique peut remplacer un changement de décor.</p>
+                <div class="pullquote">Enlevez l’image et le public ne cesse pas de visualiser. Vous perdez simplement le contrôle de la caméra.<small>Confluence of Minds</small></div>
+                <p>Cette perte de contrôle est précisément ce qui est intéressant. Au cinéma, le réalisateur choisit ce que voit le spectateur. Dans une fiction uniquement sonore, la production fournit des contraintes — voix, rythme, espace acoustique, musique, détails — puis l’auditeur termine l’image avec sa propre mémoire.</p>
+                <h2>SILMEA et l’idée du film sonore</h2>
+                <p><strong>Créations SILMEA</strong> a exploré ce territoire avec des œuvres immersives pensées comme des films fabriqués entièrement par le son. Des projets comme <em>Zone Aphotique</em>, <em>Sherlock Holmes</em> ou <em>La Traversée</em> ne cherchaient pas simplement à faire ressembler un podcast au cinéma. L’expérience consistait presque à poser la question inverse : <strong>combien de langage cinématographique survit lorsqu’on retire l’image ?</strong></p>
+                <p>La réponse est : beaucoup. Rythme, montage, hors-champ, suspense, point de vue et échelle peuvent tous être construits acoustiquement. Ce qui change, c’est le propriétaire de l’image finale.</p>
+                <p>Alors, un film peut-il exister sans images ? Si sa définition exige des images animées projetées, probablement pas. Si le cinéma est aussi une manière de diriger l’attention dans le temps, l’espace, le rythme et l’émotion, la frontière devient beaucoup plus intéressante.</p>
+                <p>Peut-être que l’image n’a pas disparu. Elle a simplement été confiée au moteur de rendu le plus sophistiqué de la pièce : l’auditeur.</p>''',
+                "related_title":"Créations SILMEA",
+                "related_text":"Des mondes sonores immersifs et des films sans images — une archive d’expériences autour d’un récit cinématographique construit par le son.",
+                "related_href":"https://smartlink.ausha.co/creations-silmea",
+                "related_cta":"Écouter SILMEA",
+                "sources":[
+                  ("Radio France — cinéma sonore et son 3D au Studio 105","https://www.radiofrance.com/presse/radio-france-partenaire-des-journees-europeennes-du-patrimoine-2018"),
+                  ("DARKFIELD — expérience immersive en son 360° dans l’obscurité complète","https://darkfield.com.au/shows/invisible"),
+                  ("Créations SILMEA — archive d’écoute","https://smartlink.ausha.co/creations-silmea")
+                ]
+              }
+            }
+          }
+
+          order = ["why-confluence-of-minds", "ai-generated-books-before-chatgpt", "can-a-film-exist-without-images"]
+
+          def esc(value):
+              return (value.replace('&','&amp;').replace('"','&quot;').replace('<','&lt;').replace('>','&gt;'))
+
+          def article_json(slug, lang, data):
+              url = ROOT + ("" if lang == "en" else "fr/") + "confluences/" + slug + "/"
+              return {
+                "@context":"https://schema.org",
+                "@type":"Article",
+                "headline":data["title"],
+                "description":data["desc"],
+                "datePublished":DATE,
+                "dateModified":DATE,
+                "inLanguage":lang,
+                "mainEntityOfPage":{"@type":"WebPage","@id":url},
+                "author":{"@type":"Person","name":"Thomas Judes"},
+                "publisher":{"@type":"Organization","name":"Confluence of Minds","url":ROOT,"logo":{"@type":"ImageObject","url":ROOT+"assets/confluence-logo.png"}},
+                "image":ROOT+"assets/confluence-of-minds-social-preview-v2.jpg"
+              }
+
+          def article_page(slug, lang, article, cls, next_slug):
+              prefix = "" if lang == "en" else "fr/"
+              url = ROOT + prefix + "confluences/" + slug + "/"
+              alt_url = ROOT + ("fr/" if lang == "en" else "") + "confluences/" + slug + "/"
+              index_url = "/confluences/" if lang == "en" else "/fr/confluences/"
+              home_url = "/" if lang == "en" else "/fr/"
+              alt_label = "FR" if lang == "en" else "EN"
+              sources = "".join(f'<li><a href="{href}" target="_blank" rel="noopener noreferrer">{label} ↗</a></li>' for label, href in article["sources"])
+              next_article = articles[next_slug][lang]
+              next_href = index_url + next_slug + "/"
+              schema = json.dumps(article_json(slug, lang, article), ensure_ascii=False, indent=2)
+              return f'''<!doctype html>
+          <html lang="{lang}">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>{esc(article['title'])} | Confluence of Minds</title>
+            <meta name="description" content="{esc(article['desc'])}" />
+            <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+            <link rel="canonical" href="{url}" />
+            <link rel="alternate" hreflang="en" href="{ROOT}confluences/{slug}/" />
+            <link rel="alternate" hreflang="fr" href="{ROOT}fr/confluences/{slug}/" />
+            <link rel="alternate" hreflang="x-default" href="{ROOT}confluences/{slug}/" />
+            <meta property="og:site_name" content="Confluence of Minds" />
+            <meta property="og:type" content="article" />
+            <meta property="og:url" content="{url}" />
+            <meta property="og:title" content="{esc(article['title'])}" />
+            <meta property="og:description" content="{esc(article['desc'])}" />
+            <meta property="og:image" content="{ROOT}assets/confluence-of-minds-social-preview-v2.jpg" />
+            <meta property="article:published_time" content="{DATE}" />
+            <meta property="article:modified_time" content="{DATE}" />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="{esc(article['title'])}" />
+            <meta name="twitter:description" content="{esc(article['desc'])}" />
+            <meta name="twitter:image" content="{ROOT}assets/confluence-of-minds-social-preview-v2.jpg" />
+            <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+            <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+            <link rel="stylesheet" href="/confluences.css?v=20260808-v1" />
+            <script type="application/ld+json">{schema}</script>
+          </head>
+          <body>
+            <div class="grain" aria-hidden="true"></div>
+            <header class="editorial-top">
+              <a class="editorial-brand" href="{home_url}">CONFLUENCE OF MINDS</a>
+              <nav class="editorial-nav" aria-label="Editorial navigation">
+                <a href="{index_url}">Confluences</a>
+                <a class="lang" href="{alt_url}">{alt_label}</a>
+              </nav>
+            </header>
+            <main>
+              <header class="article-hero">
+                <p class="eyebrow">CONFLUENCE 00{order.index(slug)+1} · {article['kicker']}</p>
+                <h1>{article['title']}</h1>
+                <p class="article-deck">{article['deck']}</p>
+                <div class="article-meta"><span>Thomas Judes</span><span>{DATE}</span><span>{article['read']}</span></div>
+              </header>
+              <div class="article-visual visual-{cls}" role="img" aria-label="Abstract editorial illustration"></div>
+              <article class="article-body">
+                <p class="lead">{article['lead']}</p>
+                {article['body']}
+                <aside class="related">
+                  <span class="related__label">{'Related world' if lang=='en' else 'Univers associé'}</span>
+                  <h3>{article['related_title']}</h3>
+                  <p>{article['related_text']}</p>
+                  <a href="{article['related_href']}"{' target="_blank" rel="noopener noreferrer"' if article['related_href'].startswith('http') else ''}>{article['related_cta']} ↗</a>
+                </aside>
+                <section class="sources">
+                  <h2>{'Sources & further reading' if lang=='en' else 'Sources & pour aller plus loin'}</h2>
+                  <ul>{sources}</ul>
+                </section>
+              </article>
+              <div class="article-next">
+                <a href="{next_href}"><span>{'Next confluence' if lang=='en' else 'Confluence suivante'}</span><strong>{next_article['title']}</strong><b>→</b></a>
+              </div>
+            </main>
+            <footer class="editorial-footer"><span>© 2026 Confluence of Minds</span><span>{'Ideas · origins · experiments · unexpected connections' if lang=='en' else 'Idées · origines · expériences · connexions inattendues'}</span></footer>
+          </body>
+          </html>'''
+
+          def collection_page(lang):
+              prefix = "" if lang == "en" else "fr/"
+              url = ROOT + prefix + "confluences/"
+              alt = ROOT + ("fr/" if lang == "en" else "") + "confluences/"
+              home_url = "/" if lang == "en" else "/fr/"
+              alt_label = "FR" if lang == "en" else "EN"
+              title = "Confluences — Ideas behind the worlds" if lang == "en" else "Confluences — Les idées derrière les mondes"
+              desc = "Short essays connecting the ideas behind Confluence of Minds to science, culture, technology and other creative experiments." if lang == "en" else "Des essais courts qui relient les idées derrière Confluence of Minds à la science, la culture, la technologie et d’autres expériences créatives."
+              heading = "Ideas meet worlds." if lang == "en" else "Les idées rencontrent les mondes."
+              intro = "Short essays on origins, science, culture, technology and the unexpected connections behind our projects. No publishing schedule — only ideas worth opening." if lang == "en" else "Des essais courts sur les origines, la science, la culture, la technologie et les connexions inattendues derrière nos projets. Pas de calendrier éditorial — seulement des idées qui valent la peine d’être ouvertes."
+              cards = []
+              itemlist = []
+              for pos, slug in enumerate(order, 1):
+                  a = articles[slug][lang]
+                  href = f"/{prefix}confluences/{slug}/"
+                  cards.append(f'''<a class="essay-card" href="{href}">
+                    <div class="essay-card__visual visual-{articles[slug]['class']}"></div>
+                    <div class="essay-card__body"><p class="essay-card__meta">CONFLUENCE 00{pos} · {a['kicker']}</p><h2>{a['title']}</h2><p>{a['deck']}</p><span class="essay-card__cta">{'Read the essay' if lang=='en' else 'Lire l’article'} →</span></div>
+                  </a>''')
+                  itemlist.append({"@type":"ListItem","position":pos,"url":ROOT+prefix+"confluences/"+slug+"/","name":a["title"]})
+              schema = json.dumps({"@context":"https://schema.org","@type":"CollectionPage","name":title,"url":url,"description":desc,"inLanguage":lang,"mainEntity":{"@type":"ItemList","itemListElement":itemlist}}, ensure_ascii=False, indent=2)
+              return f'''<!doctype html>
+          <html lang="{lang}"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>{title} | Confluence of Minds</title><meta name="description" content="{esc(desc)}" /><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
+            <link rel="canonical" href="{url}" /><link rel="alternate" hreflang="en" href="{ROOT}confluences/" /><link rel="alternate" hreflang="fr" href="{ROOT}fr/confluences/" /><link rel="alternate" hreflang="x-default" href="{ROOT}confluences/" />
+            <meta property="og:site_name" content="Confluence of Minds" /><meta property="og:type" content="website" /><meta property="og:url" content="{url}" /><meta property="og:title" content="{esc(title)}" /><meta property="og:description" content="{esc(desc)}" /><meta property="og:image" content="{ROOT}assets/confluence-of-minds-social-preview-v2.jpg" />
+            <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="{esc(title)}" /><meta name="twitter:description" content="{esc(desc)}" /><meta name="twitter:image" content="{ROOT}assets/confluence-of-minds-social-preview-v2.jpg" />
+            <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" /><link rel="stylesheet" href="/confluences.css?v=20260808-v1" />
+            <script type="application/ld+json">{schema}</script></head>
+          <body><div class="grain" aria-hidden="true"></div><header class="editorial-top"><a class="editorial-brand" href="{home_url}">CONFLUENCE OF MINDS</a><nav class="editorial-nav"><a href="{home_url}#worlds">{'Worlds' if lang=='en' else 'Univers'}</a><a class="lang" href="{alt}">{alt_label}</a></nav></header>
+          <main><section class="collection-hero"><p class="eyebrow">CONFLUENCES · EDITORIAL FIELD NOTES</p><h1>{heading}</h1><p>{intro}</p></section><section class="collection-grid">{''.join(cards)}</section></main>
+          <footer class="editorial-footer"><span>© 2026 Confluence of Minds</span><span>{'Ideas · origins · experiments · unexpected connections' if lang=='en' else 'Idées · origines · expériences · connexions inattendues'}</span></footer></body></html>'''
+
+          # Write styles and editorial pages.
+          Path('confluences-home.css').write_text(home_css, encoding='utf-8')
+          Path('confluences.css').write_text(editorial_css, encoding='utf-8')
+          Path('confluences').mkdir(exist_ok=True)
+          Path('fr/confluences').mkdir(parents=True, exist_ok=True)
+          Path('confluences/index.html').write_text(collection_page('en'), encoding='utf-8')
+          Path('fr/confluences/index.html').write_text(collection_page('fr'), encoding='utf-8')
+          for i, slug in enumerate(order):
+              next_slug = order[(i+1)%len(order)]
+              Path('confluences', slug).mkdir(parents=True, exist_ok=True)
+              Path('fr/confluences', slug).mkdir(parents=True, exist_ok=True)
+              Path('confluences', slug, 'index.html').write_text(article_page(slug,'en',articles[slug]['en'],articles[slug]['class'],next_slug), encoding='utf-8')
+              Path('fr/confluences', slug, 'index.html').write_text(article_page(slug,'fr',articles[slug]['fr'],articles[slug]['class'],next_slug), encoding='utf-8')
+
+          # Homepage blocks.
+          def home_block(lang):
+              fr = lang == 'fr'
+              prefix = '/fr' if fr else ''
+              cards = [
+                ("tagore", "CONFLUENCE 001 · " + ("Origines" if fr else "Origins"), "Pourquoi Confluence of Minds ?" if fr else "Why Confluence of Minds?", "Tagore, Geddes et l’étrange origine d’un nom devenu univers créatif." if fr else "Tagore, Geddes and the strange origin of a name that became a creative universe.", "why-confluence-of-minds"),
+                ("ai", "CONFLUENCE 002 · IA + LITTÉRATURE" if fr else "CONFLUENCE 002 · AI + LITERATURE", "Des livres générés par IA avant ChatGPT" if fr else "AI-generated books before ChatGPT", "En 2016, Authentiques Victimes imaginait déjà la littérature personnalisée par machine." if fr else "In 2016, Authentiques Victimes was already imagining personalized machine-made literature.", "ai-generated-books-before-chatgpt"),
+                ("sound", "CONFLUENCE 003 · SON + CINÉMA" if fr else "CONFLUENCE 003 · SOUND + CINEMA", "Un film peut-il exister sans images ?" if fr else "Can a movie exist without images?", "SILMEA, Radio France et les expériences où l’image se déplace dans la tête de l’auditeur." if fr else "SILMEA, Radio France and experiments where the image moves into the listener’s head.", "can-a-film-exist-without-images"),
+              ]
+              html_cards = []
+              for cls, meta, title, desc, slug in cards:
+                  html_cards.append(f'''<a class="confluence-card" href="{prefix}/confluences/{slug}/"><div class="confluence-card__visual confluence-card__visual--{cls}"><span class="confluence-card__stamp">{meta}</span></div><div class="confluence-card__body"><p class="confluence-card__meta">{meta}</p><h3>{title}</h3><p>{desc}</p><span class="confluence-card__cta">{'Lire' if fr else 'Read'} <b>↗</b></span></div></a>''')
+              return f'''    <!-- CONFLUENCES HOME START -->
+              <section id="confluences" class="confluences-home" aria-labelledby="confluences-title">
+                <div class="confluences-home__head"><div><p class="confluences-home__label">{'Idées sous les mondes' if fr else 'Ideas beneath the worlds'}</p><h2 id="confluences-title">Confluences</h2></div><p class="confluences-home__intro">{'Des essais courts sur les origines, la science, la culture, la technologie et les connexions inattendues derrière nos projets.' if fr else 'Short essays on origins, science, culture, technology and the unexpected connections behind our projects.'}</p></div>
+                <div class="confluences-grid">{''.join(html_cards)}</div>
+                <div class="confluences-home__all"><a href="{prefix}/confluences/">{'Explorer toutes les Confluences' if fr else 'Explore all Confluences'} <span>→</span></a></div>
+              </section>
+              <!-- CONFLUENCES HOME END -->'''
+
+          def patch_home(path, lang):
+              html = Path(path).read_text(encoding='utf-8')
+              # Stylesheet.
+              if 'confluences-home.css' not in html:
+                  html = html.replace('</head>', '  <link rel="stylesheet" href="/confluences-home.css?v=20260808-v1" />\n</head>', 1)
+              # Nav item.
+              if 'href="#confluences"' not in html:
+                  html = html.replace('<a href="#about">', '<a href="#confluences">Confluences</a>\n      <a href="#about">', 1)
+              # Replace/add block directly after the About section, before closing main.
+              block = home_block(lang)
+              pattern = r'\s*<!-- CONFLUENCES HOME START -->.*?<!-- CONFLUENCES HOME END -->'
+              if re.search(pattern, html, flags=re.S):
+                  html = re.sub(pattern, '\n' + block, html, count=1, flags=re.S)
+              else:
+                  marker = '\n  </main>\n\n  <footer'
+                  if marker not in html:
+                      raise SystemExit(f'Could not find homepage insertion point in {path}')
+                  html = html.replace(marker, '\n' + block + marker, 1)
+              Path(path).write_text(html, encoding='utf-8')
+
+          patch_home('index.html','en')
+          patch_home('fr/index.html','fr')
+
+          # Sitemap: preserve existing URLs, add the editorial layer.
+          sitemap_path = Path('sitemap.xml')
+          tree = ET.parse(sitemap_path)
+          root = tree.getroot()
+          ns = {'sm':'http://www.sitemaps.org/schemas/sitemap/0.9'}
+          existing = {el.text for el in root.findall('sm:url/sm:loc', ns)}
+          urls = [ROOT+'confluences/', ROOT+'fr/confluences/']
+          for slug in order:
+              urls += [ROOT+'confluences/'+slug+'/', ROOT+'fr/confluences/'+slug+'/']
+          ET.register_namespace('', 'http://www.sitemaps.org/schemas/sitemap/0.9')
+          for url in urls:
+              if url in existing: continue
+              u = ET.SubElement(root, '{http://www.sitemaps.org/schemas/sitemap/0.9}url')
+              ET.SubElement(u, '{http://www.sitemaps.org/schemas/sitemap/0.9}loc').text = url
+              ET.SubElement(u, '{http://www.sitemaps.org/schemas/sitemap/0.9}lastmod').text = DATE
+          tree.write(sitemap_path, encoding='utf-8', xml_declaration=True)
+
+          # Validate JSON-LD and key architecture.
+          pages = [Path('confluences/index.html'), Path('fr/confluences/index.html')]
+          for slug in order:
+              pages += [Path('confluences',slug,'index.html'), Path('fr/confluences',slug,'index.html')]
+          for p in pages:
+              text = p.read_text(encoding='utf-8')
+              assert '<link rel="canonical"' in text and 'hreflang="fr"' in text and 'hreflang="en"' in text
+              for raw in re.findall(r'<script type="application/ld\+json">(.*?)</script>', text, flags=re.S):
+                  json.loads(raw)
+          ET.parse('sitemap.xml')
+          root_home = Path('index.html').read_text(encoding='utf-8')
+          fr_home = Path('fr/index.html').read_text(encoding='utf-8')
+          assert root_home.count('CONFLUENCES HOME START') == 1
+          assert fr_home.count('CONFLUENCES HOME START') == 1
+          assert '/confluences/why-confluence-of-minds/' in root_home
+          assert '/fr/confluences/why-confluence-of-minds/' in fr_home
+          assert 'https://nanogenmo.github.io/' in Path('confluences/ai-generated-books-before-chatgpt/index.html').read_text(encoding='utf-8')
+          PY
+
+      - name: Commit Confluences editorial layer
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html fr/index.html sitemap.xml confluences-home.css confluences.css confluences fr/confluences
+          if git diff --cached --quiet; then
+            echo "No changes needed."
+            exit 0
+          fi
+          git commit -m "Launch Confluences editorial section with three essays"
+          git push
