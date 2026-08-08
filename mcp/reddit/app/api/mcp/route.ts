@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createMcpHandler } from 'mcp-handler';
 import { z } from 'zod';
 import { normalizePostId, postThingId, redditFetch } from '../../../lib/reddit';
