@@ -1,0 +1,409 @@
+name: SEO and search discoverability migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/seo-discoverability-20260808.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Improve crawlability, bilingual indexing and machine-readable metadata
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import re
+          import xml.etree.ElementTree as ET
+
+          ROOT = "https://confluenceofminds.com/"
+          TODAY = "2026-08-08"
+          EN_TITLE = "Confluence of Minds — Stories, Games, Audio Fiction & Creative Experiments"
+          EN_DESC = "Confluence of Minds is an independent creative universe of science-fiction games, speculative stories, audio fiction, AI experiments and visual worlds."
+          FR_TITLE = "Confluence of Minds — Récits, jeux, fiction sonore et expériences créatives"
+          FR_DESC = "Confluence of Minds est un univers créatif indépendant mêlant jeux de science-fiction, récits spéculatifs, fiction sonore, expériences IA et mondes visuels."
+
+          worlds_en = [
+              ("VideoGame", "Incident on Titan", "A science-fiction command game set on Titan.", ROOT + "titan/"),
+              ("CreativeWork", "Anjin of the Shogun", "A cultural series exploring the world behind Shōgun.", None),
+              ("CreativeWork", "Chronicles of Kashgar", "A high-fantasy initiation in Kashgar.", None),
+              ("CreativeWork", "Shattered Dragons", "Speculative fantasy about dragons born from ancient human experiments.", None),
+              ("Book", "À la recherche de Katephomi Kitembe", "A climate anticipation adventure inside an unstable game-world.", "https://books.apple.com/fr/book/a-la-recherche-de-katephomi-kitembe/id6442944248?l=fr"),
+              ("Book", "Authentiques Victimes", "A psychological science-fiction thriller about authorship, memory and algorithms.", ROOT + "authentiques-victimes/"),
+              ("CreativeWork", "AI’s Got Talent", "An online talent show for AI creations.", "https://aitalent.show/"),
+              ("CreativeWork", "We Can / But We Can’t", "A visual series about human power and collective paralysis.", None),
+              ("CreativeWork", "Créations SILMEA", "Immersive films made entirely from sound.", "https://smartlink.ausha.co/creations-silmea"),
+              ("CreativeWork", "Guess the Book", "A visual guessing game built around books hidden inside images.", "https://www.instagram.com/confluenceofminds/"),
+          ]
+          worlds_fr = [
+              ("VideoGame", "Incident on Titan", "Un jeu de commandement de science-fiction situé sur Titan.", ROOT + "titan/"),
+              ("CreativeWork", "Anjin of the Shogun", "Une série culturelle autour du monde derrière Shōgun.", None),
+              ("CreativeWork", "Chronicles of Kashgar", "Une initiation de fantasy au cœur de Kashgar.", None),
+              ("CreativeWork", "Shattered Dragons", "Une fantasy spéculative sur des dragons nés d’antiques expériences humaines.", None),
+              ("Book", "À la recherche de Katephomi Kitembe", "Une aventure d’anticipation climatique dans un monde-jeu instable.", "https://books.apple.com/fr/book/a-la-recherche-de-katephomi-kitembe/id6442944248?l=fr"),
+              ("Book", "Authentiques Victimes", "Un thriller psychologique de science-fiction sur l’auteur, la mémoire et les algorithmes.", ROOT + "authentiques-victimes/"),
+              ("CreativeWork", "AI’s Got Talent", "Le concours en ligne des créations par intelligence artificielle.", "https://aitalent.show/"),
+              ("CreativeWork", "We Can / But We Can’t", "Une série visuelle sur la puissance humaine et la paralysie collective.", None),
+              ("CreativeWork", "Créations SILMEA", "Des films immersifs entièrement conçus par le son.", "https://smartlink.ausha.co/creations-silmea"),
+              ("CreativeWork", "Guess the Book", "Un jeu visuel autour de livres cachés dans des images.", "https://www.instagram.com/confluenceofminds/"),
+          ]
+
+          def graph(language, page_url, page_title, page_desc, worlds):
+              items = []
+              for pos, (kind, name, desc, url) in enumerate(worlds, 1):
+                  item = {"@type": kind, "name": name, "description": desc}
+                  if url:
+                      item["url"] = url
+                  items.append({"@type": "ListItem", "position": pos, "item": item})
+              return {
+                  "@context": "https://schema.org",
+                  "@graph": [
+                      {
+                          "@type": "Organization",
+                          "@id": ROOT + "#organization",
+                          "name": "Confluence of Minds",
+                          "url": ROOT,
+                          "logo": {
+                              "@type": "ImageObject",
+                              "url": ROOT + "assets/confluence-logo.png"
+                          },
+                          "sameAs": ["https://www.instagram.com/confluenceofminds/"]
+                      },
+                      {
+                          "@type": "WebSite",
+                          "@id": ROOT + "#website",
+                          "url": ROOT,
+                          "name": "Confluence of Minds",
+                          "description": EN_DESC,
+                          "inLanguage": ["en", "fr"],
+                          "publisher": {"@id": ROOT + "#organization"}
+                      },
+                      {
+                          "@type": "WebPage",
+                          "@id": page_url + "#webpage",
+                          "url": page_url,
+                          "name": page_title,
+                          "description": page_desc,
+                          "inLanguage": language,
+                          "isPartOf": {"@id": ROOT + "#website"},
+                          "about": {"@id": ROOT + "#organization"}
+                      },
+                      {
+                          "@type": "ItemList",
+                          "name": "Worlds of Confluence of Minds" if language == "en" else "Univers de Confluence of Minds",
+                          "itemListElement": items
+                      }
+                  ]
+              }
+
+          def seo_block(language, page_url, title, desc, worlds):
+              data = json.dumps(graph(language, page_url, title, desc, worlds), ensure_ascii=False, indent=2)
+              return f'''  <!-- SEO DISCOVERABILITY START -->
+              <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+              <link rel="alternate" hreflang="en" href="{ROOT}" />
+              <link rel="alternate" hreflang="fr" href="{ROOT}fr/" />
+              <link rel="alternate" hreflang="x-default" href="{ROOT}" />
+              <script type="application/ld+json">
+              {data}
+              </script>
+              <!-- SEO DISCOVERABILITY END -->'''
+
+          def replace_seo_block(html, block):
+              pattern = r'\s*<!-- SEO DISCOVERABILITY START -->.*?<!-- SEO DISCOVERABILITY END -->'
+              if re.search(pattern, html, flags=re.S):
+                  return re.sub(pattern, '\n' + block, html, count=1, flags=re.S)
+              marker = '  <!-- End social sharing metadata -->'
+              if marker not in html:
+                  raise SystemExit('Social metadata marker missing from index.html')
+              return html.replace(marker, block + '\n' + marker, 1)
+
+          def set_meta(html, attr, key, value):
+              pattern = rf'(<meta\s+{attr}="{re.escape(key)}"\s+content=")[^"]*("\s*/?>)'
+              updated, count = re.subn(pattern, lambda m: m.group(1) + value + m.group(2), html, count=1)
+              if count != 1:
+                  raise SystemExit(f'Meta tag not found: {attr}={key}')
+              return updated
+
+          # Homepage: stronger semantic metadata, no visual changes.
+          index_path = Path('index.html')
+          index = index_path.read_text(encoding='utf-8')
+          index = set_meta(index, 'name', 'description', EN_DESC)
+          index = set_meta(index, 'property', 'og:title', EN_TITLE)
+          index = set_meta(index, 'property', 'og:description', EN_DESC)
+          index = set_meta(index, 'name', 'twitter:title', EN_TITLE)
+          index = set_meta(index, 'name', 'twitter:description', EN_DESC)
+          index, n = re.subn(r'<title>[^<]*</title>', f'<title>{EN_TITLE}</title>', index, count=1)
+          if n != 1:
+              raise SystemExit('Homepage title not found')
+          index = replace_seo_block(index, seo_block('en', ROOT, EN_TITLE, EN_DESC, worlds_en))
+          index_path.write_text(index, encoding='utf-8')
+
+          # Keep project routes absolute when the same JS is used from /fr/.
+          script_path = Path('script.js')
+          script = script_path.read_text(encoding='utf-8')
+          script = script.replace("'Incident on Titan': './titan/',", "'Incident on Titan': '/titan/',")
+          if "'Authentiques Victimes':" not in script:
+              script = script.replace(
+                  "'Incident on Titan': '/titan/',",
+                  "'Incident on Titan': '/titan/',\n  'Authentiques Victimes': '/authentiques-victimes/',",
+                  1,
+              )
+          script_path.write_text(script, encoding='utf-8')
+
+          # Language selector: / = English/x-default, /fr/ = stable French URL.
+          i18n_path = Path('i18n.js')
+          i18n = i18n_path.read_text(encoding='utf-8')
+          old_click = "button.addEventListener('click', () => applyLanguage(button.dataset.language, true));"
+          new_click = """button.addEventListener('click', () => {
+                const lang = button.dataset.language === 'fr' ? 'fr' : 'en';
+                const targetPath = lang === 'fr' ? '/fr/' : '/';
+                const currentPath = window.location.pathname.replace(/index\\.html$/, '');
+                if (currentPath === targetPath) {
+                  applyLanguage(lang, true);
+                  return;
+                }
+                try { localStorage.setItem('confluence-language', lang); } catch (_) {}
+                window.location.assign(`${targetPath}${window.location.hash || ''}`);
+              });"""
+          if old_click in i18n:
+              i18n = i18n.replace(old_click, new_click, 1)
+          elif "const targetPath = lang === 'fr' ? '/fr/' : '/';" not in i18n:
+              raise SystemExit('Could not patch language switcher safely')
+
+          needle = """  function initialLanguage() {
+              const queryLanguage = new URLSearchParams(window.location.search).get('lang');"""
+          replacement = """  function initialLanguage() {
+              const pathLanguage = window.location.pathname.replace(/index\\.html$/, '') === '/fr/' ? 'fr' : null;
+              if (pathLanguage) return pathLanguage;
+
+              const queryLanguage = new URLSearchParams(window.location.search).get('lang');"""
+          if needle in i18n:
+              i18n = i18n.replace(needle, replacement, 1)
+          elif "const pathLanguage = window.location.pathname" not in i18n:
+              raise SystemExit('Could not patch initial language safely')
+          i18n_path.write_text(i18n, encoding='utf-8')
+
+          # French homepage: static French HTML for crawlers + same visual/runtime as the root page.
+          fr = index
+          fr = fr.replace('<html lang="en">', '<html lang="fr">', 1)
+          fr = fr.replace('<link rel="canonical" href="https://confluenceofminds.com/" />', '<link rel="canonical" href="https://confluenceofminds.com/fr/" />', 1)
+          fr = set_meta(fr, 'name', 'description', FR_DESC)
+          fr = set_meta(fr, 'property', 'og:url', ROOT + 'fr/')
+          fr = set_meta(fr, 'property', 'og:title', FR_TITLE)
+          fr = set_meta(fr, 'property', 'og:description', FR_DESC)
+          fr = set_meta(fr, 'name', 'twitter:title', FR_TITLE)
+          fr = set_meta(fr, 'name', 'twitter:description', FR_DESC)
+          fr = fr.replace('<meta property="og:locale" content="en_US" />', '<meta property="og:locale" content="fr_FR" />', 1)
+          fr = fr.replace('<meta property="og:locale:alternate" content="fr_FR" />', '<meta property="og:locale:alternate" content="en_US" />', 1)
+          fr, n = re.subn(r'<title>[^<]*</title>', f'<title>{FR_TITLE}</title>', fr, count=1)
+          if n != 1:
+              raise SystemExit('French title not found')
+          fr = replace_seo_block(fr, seo_block('fr', ROOT + 'fr/', FR_TITLE, FR_DESC, worlds_fr))
+
+          translations = {
+              'aria-label="Confluence of Minds — home"': 'aria-label="Confluence of Minds — accueil"',
+              'aria-label="Main navigation"': 'aria-label="Navigation principale"',
+              '>Worlds</a>': '>Univers</a>',
+              '>About</a>': '>À propos</a>',
+              'aria-label="Confluence of Minds on Instagram"': 'aria-label="Confluence of Minds sur Instagram"',
+              'Stories · games · experiments · impossible worlds': 'Récits · jeux · expériences · mondes impossibles',
+              'Too many ideas<br />for one world.': 'Trop d’idées<br />pour un seul monde.',
+              'A growing creative universe of speculative stories, interactive experiences, audio fiction and visual worlds.': 'Un univers créatif en expansion, fait de récits spéculatifs, d’expériences interactives, de fictions sonores et de mondes visuels.',
+              'Explore the worlds <span aria-hidden="true">↓</span>': 'Explorer les univers <span aria-hidden="true">↓</span>',
+              '<span>Scroll to enter</span>': '<span>Descendre pour entrer</span>',
+              'Choose an entrance': 'Choisissez une porte',
+              '<h2 id="worlds-title">Worlds</h2>': '<h2 id="worlds-title">Univers</h2>',
+              'A science-fiction game.': 'Un jeu de science-fiction.',
+              'Enter Titan <span aria-hidden="true">↗</span>': 'Entrer sur Titan <span aria-hidden="true">↗</span>',
+              'Japanese culture series': 'Série culture japonaise',
+              'The culture behind <em>Shōgun</em>.': 'Les cultures et les codes derrière <em>Shōgun</em>.',
+              'Explore the culture <span>↗</span>': 'Explorer la culture <span>↗</span>',
+              'High fantasy novel': 'Roman de fantasy',
+              '<span>Book</span>': '<span>Livre</span>',
+              'A high-fantasy initiation in Kashgar.': 'Une initiation de fantasy au cœur de Kashgar.',
+              'Speculative fantasy': 'Fantasy spéculative',
+              'In development': 'En développement',
+              'Dragons born from ancient human experiments.': 'Des dragons nés d’antiques expériences humaines.',
+              'Wake the dragons <span>↗</span>': 'Réveiller les dragons <span>↗</span>',
+              'Climate anticipation adventure': 'Aventure d’anticipation climatique',
+              'A climate adventure inside an unstable game-world.': 'Une aventure climatique dans un monde-jeu instable.',
+              'Psychological SF thriller': 'Thriller psychologique SF',
+              'A psychological thriller about authorship and algorithms.': 'Un thriller psychologique sur l’auteur et les algorithmes.',
+              'Online talent show': 'Concours en ligne',
+              'The online talent show for AI creations.': 'Le concours en ligne des créations par intelligence artificielle.',
+              'Militant visual series': 'Série visuelle engagée',
+              'Human power. Collective paralysis.': 'Puissance humaine. Paralysie collective.',
+              'Face the contradictions <span>↗</span>': 'Affronter nos contradictions <span>↗</span>',
+              'Audio fiction studio': 'Studio de fiction sonore',
+              '<span>Listen</span>': '<span>Écouter</span>',
+              'Immersive films made entirely from sound.': 'Des films immersifs entièrement conçus par le son.',
+              'Visual guessing game': 'Jeu visuel',
+              'Find the books hidden inside the image.': 'Retrouvez les livres cachés dans l’image.',
+              'See the challenges <span>↗</span>': 'Voir les défis <span>↗</span>',
+              'Different doors. One universe.': 'Des portes différentes. Un même univers.',
+              'Come for one world.<br />Get lost in a universe.': 'Venez pour un monde.<br />Perdez-vous dans un univers.',
+              'Confluence of Minds brings together stories, games, visual series and sound worlds that were never meant to look alike. Each one opens its own door; together, they form a territory still expanding.': 'Confluence of Minds rassemble des récits, des jeux, des séries visuelles et des mondes sonores qui n’étaient pas faits pour se ressembler. Chacun ouvre sa propre porte ; ensemble, ils dessinent un territoire en expansion.',
+              'Stories · games · sound · experiments': 'Récits · jeux · son · expériences',
+              '<span>PORTAL STATUS</span>': '<span>ÉTAT DU PORTAIL</span>',
+              '<strong data-toast-message>This world will be connected next.</strong>': '<strong data-toast-message>Cet univers sera bientôt relié.</strong>',
+          }
+          for old, new in translations.items():
+              fr = fr.replace(old, new)
+
+          # Assets/scripts are one directory higher from /fr/.
+          fr = re.sub(r'(src|href)="assets/', r'\1="/assets/', fr)
+          for filename in ['styles.css', 'native-media-v4.css', 'i18n.css', 'video-lightbox-v1.css']:
+              fr = fr.replace(f'href="{filename}', f'href="/{filename}')
+          for filename in ['script.js', 'native-media-v4.js', 'i18n.js', 'video-lightbox-v1.js']:
+              fr = fr.replace(f'src="{filename}', f'src="/{filename}')
+
+          fr_dir = Path('fr')
+          fr_dir.mkdir(exist_ok=True)
+          (fr_dir / 'index.html').write_text(fr, encoding='utf-8')
+
+          # Titan: canonical URL, rich social preview and machine-readable game entity.
+          titan_path = Path('titan/index.html')
+          titan = titan_path.read_text(encoding='utf-8')
+          titan_desc = 'Incident on Titan is an interactive science-fiction command game set on Titan, with decisions scored by Sybille AI.'
+          titan_title = 'Incident on Titan — Interactive Science-Fiction Game | Confluence of Minds'
+          titan = re.sub(r'<meta name="description" content="[^"]*">', f'<meta name="description" content="{titan_desc}">', titan, count=1)
+          titan = re.sub(r'<title>[^<]*</title>', f'<title>{titan_title}</title>', titan, count=1)
+          titan_json = json.dumps({
+              '@context': 'https://schema.org',
+              '@type': 'VideoGame',
+              'name': 'Incident on Titan',
+              'url': ROOT + 'titan/',
+              'description': titan_desc,
+              'genre': ['Science fiction', 'Interactive fiction', 'Strategy'],
+              'inLanguage': ['en', 'fr'],
+              'image': ROOT + 'assets/titan-poster-mobile.jpg',
+              'publisher': {'@type': 'Organization', 'name': 'Confluence of Minds', 'url': ROOT}
+          }, ensure_ascii=False, indent=2)
+          titan_block = f'''  <!-- SEARCH DISCOVERABILITY START -->
+            <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+            <link rel="canonical" href="{ROOT}titan/">
+            <meta property="og:site_name" content="Confluence of Minds">
+            <meta property="og:type" content="website">
+            <meta property="og:url" content="{ROOT}titan/">
+            <meta property="og:title" content="{titan_title}">
+            <meta property="og:description" content="{titan_desc}">
+            <meta property="og:image" content="{ROOT}assets/titan-poster-mobile.jpg">
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:title" content="{titan_title}">
+            <meta name="twitter:description" content="{titan_desc}">
+            <meta name="twitter:image" content="{ROOT}assets/titan-poster-mobile.jpg">
+            <script type="application/ld+json">
+            {titan_json}
+            </script>
+            <!-- SEARCH DISCOVERABILITY END -->'''
+          titan_pattern = r'\s*<!-- SEARCH DISCOVERABILITY START -->.*?<!-- SEARCH DISCOVERABILITY END -->'
+          if re.search(titan_pattern, titan, flags=re.S):
+              titan = re.sub(titan_pattern, '\n' + titan_block, titan, count=1, flags=re.S)
+          else:
+              titan = titan.replace('  <title>', titan_block + '\n  <title>', 1)
+          titan_path.write_text(titan, encoding='utf-8')
+
+          # Authentiques Victimes: expose the book, author and chronology to search/LLM crawlers.
+          av_path = Path('authentiques-victimes/index.html')
+          av = av_path.read_text(encoding='utf-8')
+          av_json = json.dumps({
+              '@context': 'https://schema.org',
+              '@type': 'Book',
+              'name': 'Authentiques Victimes',
+              'url': ROOT + 'authentiques-victimes/',
+              'image': ROOT + 'authentiques-victimes/assets/av-hero-hq.webp',
+              'description': 'Un thriller psychologique de science-fiction sur l’écriture, la mémoire, l’authenticité et les algorithmes.',
+              'inLanguage': 'fr',
+              'genre': ['Thriller psychologique', 'Science-fiction'],
+              'dateCreated': '2016',
+              'datePublished': '2018',
+              'dateModified': '2026',
+              'author': {'@type': 'Person', 'name': 'Thomas Judes'},
+              'publisher': {'@type': 'Organization', 'name': 'Confluence of Minds', 'url': ROOT}
+          }, ensure_ascii=False, indent=2)
+          av_block = f'''  <!-- SEARCH DISCOVERABILITY START -->
+            <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+            <meta name="twitter:title" content="Authentiques Victimes — Thomas Judes" />
+            <meta name="twitter:description" content="Le roman que le réel a rattrapé. Commencé en 2016, entièrement réécrit en 2026." />
+            <meta name="twitter:image" content="{ROOT}authentiques-victimes/assets/av-hero-hq.webp" />
+            <script type="application/ld+json">
+            {av_json}
+            </script>
+            <!-- SEARCH DISCOVERABILITY END -->'''
+          av_pattern = r'\s*<!-- SEARCH DISCOVERABILITY START -->.*?<!-- SEARCH DISCOVERABILITY END -->'
+          if re.search(av_pattern, av, flags=re.S):
+              av = re.sub(av_pattern, '\n' + av_block, av, count=1, flags=re.S)
+          else:
+              av = av.replace('  <meta property="og:site_name"', av_block + '\n  <meta property="og:site_name"', 1)
+          av_path.write_text(av, encoding='utf-8')
+
+          # Explicit crawler policy. OAI-SearchBot is named for clarity; wildcard keeps all public crawlers allowed as before.
+          Path('robots.txt').write_text(f'''User-agent: *
+          Allow: /
+
+          User-agent: OAI-SearchBot
+          Allow: /
+
+          Sitemap: {ROOT}sitemap.xml
+          ''', encoding='utf-8')
+
+          Path('sitemap.xml').write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url>
+              <loc>{ROOT}</loc>
+              <lastmod>{TODAY}</lastmod>
+            </url>
+            <url>
+              <loc>{ROOT}fr/</loc>
+              <lastmod>{TODAY}</lastmod>
+            </url>
+            <url>
+              <loc>{ROOT}titan/</loc>
+              <lastmod>{TODAY}</lastmod>
+            </url>
+            <url>
+              <loc>{ROOT}authentiques-victimes/</loc>
+              <lastmod>{TODAY}</lastmod>
+            </url>
+          </urlset>
+          ''', encoding='utf-8')
+
+          # Validation before publishing.
+          ET.parse('sitemap.xml')
+          assert 'OAI-SearchBot' in Path('robots.txt').read_text(encoding='utf-8')
+          assert '<link rel="alternate" hreflang="fr" href="https://confluenceofminds.com/fr/" />' in index
+          assert '<html lang="fr">' in fr
+          assert '<link rel="canonical" href="https://confluenceofminds.com/fr/" />' in fr
+          assert 'Trop d’idées<br />pour un seul monde.' in fr
+          assert 'src="assets/' not in fr and 'href="styles.css' not in fr
+          assert "'Authentiques Victimes': '/authentiques-victimes/'" in script
+          assert 'https://confluenceofminds.com/titan/' in titan
+          assert '"@type": "Book"' in av
+
+          # Check all JSON-LD blocks we added are valid JSON.
+          for page in [index, fr, titan, av]:
+              for raw in re.findall(r'<script type="application/ld\+json">\s*(.*?)\s*</script>', page, flags=re.S):
+                  json.loads(raw)
+          PY
+
+      - name: Commit verified discoverability changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html i18n.js script.js fr/index.html titan/index.html authentiques-victimes/index.html robots.txt sitemap.xml
+          if git diff --cached --quiet; then
+            echo "No discoverability changes needed."
+            exit 0
+          fi
+          git commit -m "Improve SEO, bilingual indexing and AI search discoverability"
+          git push
