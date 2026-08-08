@@ -1,0 +1,26 @@
+{
+  "version": "2026-08-08",
+  "purpose": "Machine-readable log linking CoM publications to worlds, editorial angles, formats and Buffer IDs so performance can be learned over time.",
+  "rules": [
+    "Every future autonomous CoM Instagram publication must append one entry after Buffer confirms creation.",
+    "Use the exact Buffer post ID returned by Buffer.",
+    "world_id must match data/com-content-map.json when the publication maps to an existing world; use brand-general only for umbrella-brand posts.",
+    "content_mode is one of news, evergreen, confluence-launch, archive-remix or brand.",
+    "asset_type is one of reel-video, image, carousel or other.",
+    "Never overwrite past entries; append new entries and preserve history."
+  ],
+  "entries": [
+    {
+      "buffer_post_id": "6a75ea2c8363eb694995a5b6",
+      "published_at": "2026-08-07T14:23:34.574Z",
+      "world_id": "brand-general",
+      "content_mode": "brand",
+      "angle": "new website / portfolio relaunch",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": null,
+      "source_event": null,
+      "notes": "Pre-autonomous-editor baseline post announcing the refreshed Confluence of Minds website."
+    }
+  ]
+}
