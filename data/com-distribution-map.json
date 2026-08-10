@@ -1,9 +1,15 @@
 {
-  "version": "2026-08-08",
-  "purpose": "Lightweight map for distributing Confluence of Minds content inside existing communities without turning the project into a cross-posting machine. This map guides discovery and contribution style; it is not a publishing schedule.",
+  "version": "2026-08-10",
+  "purpose": "Lightweight map for distributing Confluence of Minds content inside existing communities without turning the project into a cross-posting machine. French-speaking audiences are the default priority because the current CoM books are primarily in French.",
+  "language_strategy": {
+    "default": "french_first",
+    "rule": "Search French-speaking communities first. Use English-speaking communities only when no strong French opportunity exists or when the asset itself is language-independent and the international audience is clearly more relevant.",
+    "reason": "The current Confluence of Minds books are primarily in French, so reader acquisition should prioritize people who can actually read the works being distributed."
+  },
   "principles": [
     "Distribute the question, idea or useful observation before the work itself.",
-    "Prefer joining an existing relevant conversation over creating a promotional thread.",
+    "Prefer French-speaking communities and discussions by default.",
+    "Prefer joining an existing relevant conversation over creating a promotional thread, except when the community explicitly provides a creator/self-promotion thread.",
     "Only mention a CoM world or Confluence when it genuinely adds context or value.",
     "Never mass-post the same comment or link across multiple communities.",
     "Before contributing, check the current community rules, self-promotion policy and thread context.",
@@ -12,24 +18,75 @@
     "Prefer one strong community opportunity over ten weak ones."
   ],
   "default_workflow": {
-    "discover": "Find a current discussion, question or request for recommendations that strongly overlaps a CoM theme.",
-    "qualify": "Check recency, relevance, community rules, contribution value and self-promotion risk.",
-    "contribute": "Write a native reply that answers the discussion first. Mention/link CoM only if it materially enriches the answer.",
+    "discover": "Find a current French-language discussion, question, recommendation request, creator thread or topic that strongly overlaps a CoM theme.",
+    "qualify": "Check recency, relevance, language, community rules, contribution value and self-promotion risk.",
+    "contribute": "Write a native French reply that answers the discussion first. Mention/link CoM only if it materially enriches the answer or the thread explicitly invites creator promotion.",
+    "fallback": "If no strong French opportunity exists, search English-speaking communities only for language-independent themes such as Titan science, AI creativity, sound design or speculative biology.",
     "limit": "Default to at most one external-community contribution per editorial cycle unless two clearly independent, high-value opportunities exist."
   },
+  "priority_french_communities": [
+    {
+      "community": "r/Livres",
+      "fit": ["books", "reading", "French-language literature", "recommendations", "author discussions"],
+      "rules_note": "Commercial/promotional posts are prohibited outside the dedicated Monday self-promotion thread. Use ordinary discussions for contribution only, not promotion.",
+      "best_use": "French books, reading recommendations, literary questions, and the Monday self-promotion thread when a CoM book genuinely fits."
+    },
+    {
+      "community": "r/ecriture",
+      "fit": ["writing", "publishing", "authors", "AI and writing", "fantasy writing", "worldbuilding"],
+      "rules_note": "The community currently has dedicated creator-promotion and AI megathreads. Prefer those when directly relevant and otherwise contribute to writing discussions without forcing a link.",
+      "best_use": "Authentiques Victimes, Chronicles of Kashgar, Shattered Dragons, Katephomi Kitembe, writing process and AI/authorship questions."
+    },
+    {
+      "community": "r/ScienceFiction_FR",
+      "fit": ["science fiction", "SFFF", "fantasy", "fantastique", "books", "cinema", "series", "science and technology"],
+      "rules_note": "French-language information is the community norm. Check current rules before any project mention.",
+      "best_use": "Incident on Titan, Shattered Dragons, Authentiques Victimes, Katephomi Kitembe and broader Confluences around speculative fiction."
+    },
+    {
+      "community": "r/Science_Friction",
+      "fit": ["science fiction", "hard SF", "literature", "cinema", "games"],
+      "rules_note": "Use for genuine SF/hard-SF discussion; verify current self-promotion rules before linking.",
+      "best_use": "Incident on Titan, scientifically grounded speculative fiction and Titan-related science discussions."
+    },
+    {
+      "community": "r/SubVousEtesLeHeros",
+      "fit": ["interactive fiction", "gamebooks", "choose-your-own-adventure"],
+      "rules_note": "Niche fit is strong but current activity/rules must be checked before posting.",
+      "best_use": "À la recherche de Katephomi Kitembe and interactive narrative experiments."
+    },
+    {
+      "community": "r/artificielle",
+      "fit": ["AI", "LLMs", "generative AI", "societal impact of AI"],
+      "rules_note": "Use for substantive AI discussion, not generic creative-project promotion.",
+      "best_use": "Authentiques Victimes, AI's Got Talent, authorship, machine creativity and AI-generated literature."
+    },
+    {
+      "community": "r/AudioTech",
+      "fit": ["audio", "sound technology", "audiophile", "spatial audio"],
+      "rules_note": "Use only when the discussion is genuinely about sound technology or immersive audio; check current rules before mentioning SILMEA.",
+      "best_use": "SILMEA, binaural sound and spatial-audio Confluences."
+    },
+    {
+      "community": "r/france",
+      "fit": ["culture", "science", "technology", "ecology", "writing"],
+      "rules_note": "Large generalist community with anti-spam rules and participation restrictions for new/low-karma accounts. Treat as opportunistic, not a primary promotion channel.",
+      "best_use": "Only unusually strong current French cultural/scientific discussions where the contribution stands on its own."
+    }
+  ],
   "platforms": {
     "reddit": {
       "priority": "high",
-      "status": "not_connected_to_chatgpt",
-      "best_use": "Existing threads where people are already discussing the exact scientific, cultural, creative or narrative question touched by a CoM world.",
-      "publication_style": "Answer-first, link-second. Avoid standalone self-promotional submissions by default.",
-      "automation_level_now": "Discovery, scoring and drafting can be automated. Posting still requires a Reddit-capable connection or manual posting.",
-      "notes": "Use a dedicated human-looking CoM/Thomas account, not a disposable bot identity. Build normal participation history rather than appearing only when promoting a link."
+      "status": "manual_posting_after_api_access_denial",
+      "best_use": "Existing French-language threads where people are already discussing the exact scientific, cultural, creative or narrative question touched by a CoM world, plus explicit creator/self-promotion threads when available.",
+      "publication_style": "Answer-first, link-second. In explicit self-promotion threads, be transparent and concise.",
+      "automation_level_now": "Discovery, scoring and drafting are automated. Posting remains manual copy/paste.",
+      "notes": "Use u/ConfluenceOfMinds as a genuine participant. Build normal French-language participation history rather than appearing only when promoting a link."
     },
     "specialist_forums_and_communities": {
       "priority": "medium",
       "status": "discover_case_by_case",
-      "best_use": "Niche communities for interactive fiction, audio drama, speculative biology, worldbuilding, historical Japan or AI creativity.",
+      "best_use": "French-language niche communities for interactive fiction, audio drama, speculative biology, worldbuilding, historical Japan or AI creativity.",
       "publication_style": "Native contribution or project share only when community norms explicitly support it.",
       "automation_level_now": "Discovery and drafting only unless a legitimate write integration is available."
     }
@@ -37,73 +94,83 @@
   "worlds": [
     {
       "world_id": "incident-on-titan",
-      "audience_territories": ["space exploration", "Titan and Saturn science", "astrobiology", "hard science fiction", "interactive fiction", "space game design"],
-      "conversation_hooks": ["Could humans fly on Titan?", "Why explore Titan rather than another moon?", "What makes Titan scientifically strange?", "How much realism should a science-fiction game preserve?", "What would actually fail first in a Titan mission?"],
-      "discovery_queries": ["Titan mission discussion", "Titan atmosphere humans", "Saturn moon exploration", "hard sci fi Titan", "interactive fiction space science"],
-      "contribution_rule": "Lead with the science or design answer. Mention Incident on Titan only after providing useful context."
+      "french_priority": ["r/ScienceFiction_FR", "r/Science_Friction", "r/france"],
+      "audience_territories": ["exploration spatiale", "Titan et Saturne", "astrobiologie", "hard science-fiction", "fiction interactive", "game design spatial"],
+      "conversation_hooks": ["Pourrait-on réellement voler sur Titan ?", "Pourquoi explorer Titan plutôt qu'une autre lune ?", "Qu'est-ce qui rend Titan scientifiquement si étrange ?", "Jusqu'où une fiction scientifique doit-elle rester réaliste ?"],
+      "discovery_queries": ["Titan mission discussion français", "Titan Saturne science fiction français", "astrobiologie Titan français", "hard SF Titan Reddit français"],
+      "contribution_rule": "Répondre d'abord par la science ou le design. Mentionner Incident on Titan seulement après avoir apporté une vraie valeur."
     },
     {
       "world_id": "anjin-of-the-shogun",
-      "audience_territories": ["historical Japan", "Shogun adaptations", "samurai history", "Japanese material culture", "historical fiction"],
-      "conversation_hooks": ["What did Shogun simplify or make people curious about?", "Who was the historical Anjin?", "Which details of Edo-period culture are most misunderstood?", "When does historical adaptation become its own fiction?"],
-      "discovery_queries": ["Shogun historical accuracy discussion", "William Adams Anjin", "samurai culture question", "historical Japan adaptation"],
-      "contribution_rule": "Answer the historical/cultural question first. Avoid presenting CoM as an authority on Japan."
+      "french_priority": ["r/Livres", "r/france"],
+      "audience_territories": ["Japon historique", "Shogun", "samouraïs", "William Adams", "fiction historique", "culture japonaise"],
+      "conversation_hooks": ["Qu'est-ce que Shogun donne envie d'explorer au-delà de la série ?", "Qui était réellement l'Anjin ?", "Quand une adaptation historique devient-elle une fiction autonome ?"],
+      "discovery_queries": ["Shogun Japon historique Reddit français", "William Adams Anjin français", "roman historique Japon Reddit français"],
+      "contribution_rule": "Répondre d'abord à la question historique/culturelle et ne jamais présenter CoM comme une autorité sur le Japon."
     },
     {
       "world_id": "chronicles-of-kashgar",
-      "audience_territories": ["fantasy worldbuilding", "Silk Road history", "Central Asian settings", "crossroads cities", "fantasy literature"],
-      "conversation_hooks": ["Why are crossroads cities so powerful in fantasy?", "How can Silk Road history inspire worldbuilding without copying it?", "What makes a fictional city feel culturally layered?"],
-      "discovery_queries": ["Silk Road fantasy worldbuilding", "Kashgar fiction discussion", "Central Asia fantasy setting", "worldbuilding crossroads city"],
-      "contribution_rule": "Provide the worldbuilding/history insight first; mention Chronicles of Kashgar only as an example of applying the idea."
+      "french_priority": ["r/ecriture", "r/Livres", "r/ScienceFiction_FR"],
+      "audience_territories": ["fantasy", "worldbuilding", "Route de la Soie", "Asie centrale", "villes-carrefours"],
+      "conversation_hooks": ["Pourquoi les villes-carrefours fonctionnent-elles si bien en fantasy ?", "Comment s'inspirer de la Route de la Soie sans simplement la copier ?", "Comment donner plusieurs couches culturelles à une ville fictive ?"],
+      "discovery_queries": ["worldbuilding fantasy français Reddit", "Route de la Soie fantasy français", "écriture fantasy univers Reddit français"],
+      "contribution_rule": "Apporter d'abord un insight de worldbuilding ou d'histoire."
     },
     {
       "world_id": "shattered-dragons",
-      "audience_territories": ["dragons", "fantasy worldbuilding", "speculative biology", "creature design", "synthetic biology and de-extinction"],
-      "conversation_hooks": ["Could any dragon trait be biologically plausible?", "Why do dragon myths recur across cultures?", "How would engineered dragons actually work?", "What makes creature design feel internally coherent?"],
-      "discovery_queries": ["dragon biology discussion", "speculative evolution dragons", "fantasy creature design", "de extinction fiction", "worldbuilding dragons"],
-      "contribution_rule": "Make the biological/worldbuilding thought interesting on its own before mentioning Shattered Dragons."
+      "french_priority": ["r/ecriture", "r/ScienceFiction_FR", "r/Livres"],
+      "audience_territories": ["dragons", "fantasy", "biologie spéculative", "créature design", "biotechnologies"],
+      "conversation_hooks": ["Un dragon pourrait-il être biologiquement plausible ?", "Pourquoi les mythes de dragons réapparaissent-ils partout ?", "Comment concevoir une créature fantastique cohérente ?"],
+      "discovery_queries": ["dragons fantasy écriture français Reddit", "biologie spéculative dragon français", "worldbuilding créatures fantasy français"],
+      "contribution_rule": "L'idée biologique ou de worldbuilding doit être intéressante même sans le projet."
     },
     {
       "world_id": "katephomi-kitembe",
-      "audience_territories": ["climate fiction", "interactive literature", "gamebooks", "environmental storytelling", "experimental fiction"],
-      "conversation_hooks": ["Can climate fiction remain adventurous rather than didactic?", "What happens when a novel behaves like a game?", "How can environmental stakes become mechanics rather than exposition?"],
-      "discovery_queries": ["climate fiction recommendations", "interactive novel discussion", "gamebook contemporary fiction", "environmental storytelling"],
-      "contribution_rule": "Discuss narrative form and climate storytelling first; mention the book only when it directly answers the thread."
+      "french_priority": ["r/SubVousEtesLeHeros", "r/ecriture", "r/Livres", "r/ScienceFiction_FR"],
+      "audience_territories": ["fiction climatique", "littérature interactive", "livres-jeux", "narration environnementale"],
+      "conversation_hooks": ["Une fiction climatique peut-elle rester aventureuse sans devenir didactique ?", "Que se passe-t-il quand un roman se comporte comme un jeu ?"],
+      "discovery_queries": ["fiction interactive français Reddit", "livre jeu français Reddit", "climate fiction français Reddit"],
+      "contribution_rule": "Discuter d'abord de la forme narrative ou de la climate fiction ; recommander le livre seulement quand il répond vraiment à la demande."
     },
     {
       "world_id": "authentiques-victimes",
-      "audience_territories": ["AI writing", "authors and publishing", "generative literature", "AI copyright", "machine creativity", "speculative fiction"],
-      "conversation_hooks": ["What does authorship mean with generative AI?", "Can readers identify AI-written fiction?", "What changes when the reader becomes the commissioner or editor?", "Were people imagining machine-written books before ChatGPT?"],
-      "discovery_queries": ["AI writing authorship discussion", "AI generated books publishing", "AI fiction readers", "AI copyright writers", "generative literature"],
-      "contribution_rule": "Engage the authorship/publishing question substantively; use Authentiques Victimes as a historical/creative example, not as the thesis."
+      "french_priority": ["r/ecriture", "r/artificielle", "r/Livres", "r/ScienceFiction_FR"],
+      "audience_territories": ["écriture IA", "auteurs", "édition", "littérature générative", "copyright IA", "créativité machine"],
+      "conversation_hooks": ["Que signifie encore être auteur avec l'IA générative ?", "Les lecteurs savent-ils reconnaître une fiction écrite par IA ?", "Que change le fait que le lecteur puisse devenir commanditaire ou éditeur ?"],
+      "discovery_queries": ["IA écriture auteurs Reddit français", "livres générés IA français", "IA littérature Reddit français", "auteur intelligence artificielle français"],
+      "contribution_rule": "Engager substantiellement la question de l'auteur ou de l'édition ; Authentiques Victimes n'arrive qu'en exemple."
     },
     {
       "world_id": "ai-got-talent",
-      "audience_territories": ["AI art", "AI music", "AI video", "creative tools", "generative media", "creative competitions"],
-      "conversation_hooks": ["Can AI-generated work be judged like human performance?", "What makes an AI creation surprising rather than merely competent?", "Should creative AI competitions judge prompts, outputs or systems?"],
-      "discovery_queries": ["AI art competition discussion", "AI music creativity", "AI video creators", "generative media judging", "AI talent contest"],
-      "contribution_rule": "Start from the judging/creativity problem; mention AI's Got Talent as an experiment around that question."
+      "french_priority": ["r/artificielle", "r/ChatGPT_FR", "r/actutech"],
+      "audience_territories": ["art IA", "musique IA", "vidéo IA", "créativité générative", "compétitions créatives"],
+      "conversation_hooks": ["Peut-on juger une création IA comme une performance humaine ?", "Qu'est-ce qui rend une création IA réellement surprenante ?", "Faut-il juger le prompt, le résultat ou le système ?"],
+      "discovery_queries": ["créativité IA Reddit français", "art IA concours français", "musique IA français Reddit", "vidéo générative IA français"],
+      "contribution_rule": "Commencer par le problème de jugement/créativité, pas par la promotion d'AI's Got Talent."
     },
     {
       "world_id": "silmea",
-      "audience_territories": ["audio drama", "spatial audio", "binaural sound", "sound design", "immersive storytelling", "podcast fiction"],
-      "conversation_hooks": ["Can a film exist without images?", "What makes binaural fiction genuinely immersive?", "Why does removing images sometimes increase visual imagination?", "Where does audio drama end and cinema begin?"],
-      "discovery_queries": ["audio drama immersive discussion", "binaural fiction", "spatial audio storytelling", "sound cinema", "podcast fiction recommendations"],
-      "contribution_rule": "Talk craft and listening experience first; link SILMEA only when someone is explicitly interested in comparable work."
+      "french_priority": ["r/AudioTech", "r/ecriture", "r/france"],
+      "audience_territories": ["fiction audio", "son spatial", "binaural", "sound design", "cinéma sonore", "podcast fiction"],
+      "conversation_hooks": ["Un film peut-il exister sans images ?", "Qu'est-ce qui rend une fiction binaurale réellement immersive ?", "Pourquoi supprimer l'image peut-il augmenter l'imagination visuelle ?"],
+      "discovery_queries": ["fiction audio français Reddit", "binaural français Reddit", "podcast fiction français", "son spatial narration français"],
+      "contribution_rule": "Parler d'abord du craft et de l'expérience d'écoute ; SILMEA seulement si la personne cherche réellement des œuvres comparables."
     },
     {
       "world_id": "snow-white-queen-of-ashes",
-      "audience_territories": ["fairy-tale retellings", "Snow White", "public-domain storytelling", "dark fantasy", "ecological fiction"],
-      "conversation_hooks": ["Why can fairy tales survive endless retellings?", "When does a retelling become a genuinely new story?", "Can ecological themes enter a fairy tale without becoming a lecture?"],
-      "discovery_queries": ["Snow White retelling discussion", "fairy tale adaptations", "public domain retellings", "eco fantasy fairy tale"],
-      "contribution_rule": "Discuss the retelling question first; mention Queen of Ashes as one interpretation only when relevant."
+      "french_priority": ["r/ecriture", "r/Livres", "r/ScienceFiction_FR"],
+      "audience_territories": ["réécritures de contes", "Blanche-Neige", "domaine public", "dark fantasy", "fiction écologique"],
+      "conversation_hooks": ["Pourquoi les contes survivent-ils à autant de réécritures ?", "Quand une réécriture devient-elle une histoire réellement nouvelle ?"],
+      "discovery_queries": ["réécriture conte français Reddit", "Blanche Neige adaptation français Reddit", "fantasy écologique français"],
+      "contribution_rule": "Discuter d'abord de la réécriture ; Queen of Ashes comme une interprétation parmi d'autres."
     },
     {
       "world_id": "we-can-but-we-cant",
-      "audience_territories": ["collective action", "climate communication", "behavioral contradictions", "visual activism", "systems thinking"],
-      "conversation_hooks": ["Why do societies solve technically harder problems but fail on obvious collective ones?", "What makes climate communication provoke action rather than agreement?", "Is inaction a knowledge problem or a coordination problem?"],
-      "discovery_queries": ["collective action climate discussion", "climate communication behavior", "coordination problem sustainability", "systems change inaction"],
-      "contribution_rule": "Contribute analysis rather than moralizing. Do not revive old statistics without current verification."
+      "french_priority": ["r/france"],
+      "audience_territories": ["action collective", "communication climatique", "contradictions comportementales", "systèmes"],
+      "conversation_hooks": ["Pourquoi réussit-on des problèmes techniquement plus difficiles mais pas certains problèmes collectifs évidents ?", "L'inaction est-elle un problème de connaissance ou de coordination ?"],
+      "discovery_queries": ["action collective climat Reddit français", "communication climat français Reddit", "coordination transition écologique Reddit français"],
+      "contribution_rule": "Apporter de l'analyse plutôt que moraliser ; vérifier les données récentes avant toute affirmation."
     }
   ]
 }
