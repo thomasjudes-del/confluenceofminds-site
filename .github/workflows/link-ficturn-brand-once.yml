@@ -1,0 +1,34 @@
+name: Link FICTURN to Confluence of Minds metadata
+on:
+  push:
+    paths:
+      - '.github/workflows/link-ficturn-brand-once.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add FICTURN entity association to homepage metadata
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='Confluence of Minds is an independent creative universe of science-fiction games, speculative stories, audio fiction, AI experiments and visual worlds.'
+          new='Confluence of Minds is an independent creative universe of stories, games, audio fiction, AI experiments and visual worlds, including FICTURN — short fiction read directly inside ChatGPT.'
+          if old not in s:
+              raise SystemExit('Expected homepage description not found')
+          s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/link-ficturn-brand-once.yml
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/link-ficturn-brand-once.yml
+          git commit -m "Link FICTURN to Confluence of Minds metadata [skip ci]" || exit 0
+          git push
