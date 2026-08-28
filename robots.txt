@@ -4,4 +4,13 @@ Allow: /
 User-agent: OAI-SearchBot
 Allow: /
 
+User-agent: GPTBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
 Sitemap: https://confluenceofminds.com/sitemap.xml
