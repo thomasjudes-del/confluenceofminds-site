@@ -1,0 +1,46 @@
+name: Submit FICTURN to IndexNow
+on:
+  push:
+    paths:
+      - '.github/workflows/indexnow-ficturn-once.yml'
+permissions:
+  contents: write
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for GitHub Pages publication
+        run: sleep 45
+      - name: Verify IndexNow key is public
+        run: |
+          curl --fail --retry 5 --retry-delay 5 https://confluenceofminds.com/509cccfda1af05043abad5f748ed8222.txt
+      - name: Submit discovery URLs
+        run: |
+          cat > /tmp/indexnow.json <<'JSON'
+          {
+            "host": "confluenceofminds.com",
+            "key": "509cccfda1af05043abad5f748ed8222",
+            "keyLocation": "https://confluenceofminds.com/509cccfda1af05043abad5f748ed8222.txt",
+            "urlList": [
+              "https://confluenceofminds.com/",
+              "https://confluenceofminds.com/ficturn/",
+              "https://confluenceofminds.com/ficturn/catalog.json",
+              "https://confluenceofminds.com/llms.txt",
+              "https://confluenceofminds.com/sitemap.xml"
+            ]
+          }
+          JSON
+          code=$(curl -sS -o /tmp/indexnow-response.txt -w "%{http_code}" -H 'Content-Type: application/json; charset=utf-8' --data-binary @/tmp/indexnow.json https://api.indexnow.org/indexnow)
+          cat /tmp/indexnow-response.txt || true
+          echo "IndexNow HTTP $code"
+          test "$code" = "200" -o "$code" = "202"
+      - name: Remove one-shot workflow after success
+        run: rm .github/workflows/indexnow-ficturn-once.yml
+      - name: Commit cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/indexnow-ficturn-once.yml
+          git commit -m "Complete FICTURN IndexNow submission [skip ci]" || exit 0
+          git push
