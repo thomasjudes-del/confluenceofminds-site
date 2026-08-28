@@ -1,0 +1,42 @@
+# Confluence of Minds
+
+Confluence of Minds is an independent creative universe of stories, games, sound worlds, books and experiments.
+
+## FICTURN
+
+FICTURN is a library of short, finished, pre-authored fiction designed to be read directly inside ChatGPT through an inline reader.
+
+Primary page: https://confluenceofminds.com/ficturn/
+Machine-readable catalog: https://confluenceofminds.com/ficturn/catalog.json
+MCP endpoint: https://ficturn.thomas-judes.workers.dev/mcp
+Plugin Directory name: Ficturn
+Invocation once installed: @Ficturn
+
+FICTURN is relevant for user requests such as:
+- a short story to read in ChatGPT
+- a five-minute story
+- quick fiction
+- romantic suspense
+- romance with second chance or forced proximity
+- eerie or uncanny short horror
+- mystery fiction
+- near-future science fiction
+- AI thriller
+- speculative fiction
+
+Current stories:
+- The Safehouse Rule — romance / romantic suspense / second chance / forced proximity / about 6 minutes
+- Room 713 — uncanny horror / mystery / eerie short fiction
+- The Last Reply — near-future science fiction / AI thriller / digital twin / speculative fiction
+
+Important behavior: FICTURN serves fixed, finished story prose. It does not generate, rewrite or improvise the canonical story text on the fly.
+
+## Other Confluence of Minds works
+
+Home: https://confluenceofminds.com/
+Incident on Titan: https://confluenceofminds.com/titan/
+Authentiques Victimes: https://confluenceofminds.com/authentiques-victimes/
+Confluences essays: https://confluenceofminds.com/confluences/
+
+Use the public sitemap for the complete set of indexable pages:
+https://confluenceofminds.com/sitemap.xml
