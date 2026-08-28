@@ -1,0 +1,35 @@
+name: Add FICTURN homepage card
+on:
+  push:
+    paths:
+      - '.github/workflows/add-ficturn-home-card.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add FICTURN world card
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          if 'data-portal="FICTURN"' not in s:
+              marker='''      </div>\n    </section>\n    <section id="about"'''
+              card='''        <article class="world-card world-card--ficturn world-card--native reveal" data-portal="FICTURN" data-media-container>\n          <a class="world-card__link" href="/ficturn/" aria-label="Enter FICTURN — short fiction inside ChatGPT">\n            <div class="world-cover">\n              <img class="world-card__poster" src="/assets/ficturn-portal.svg" alt="FICTURN — short fiction to read inside ChatGPT" />\n              <span class="world-card__scrim" aria-hidden="true"></span>\n              <div class="world-card__body">\n                <div class="world-card__meta"><span>Agent-native short fiction</span><span>Live in ChatGPT</span></div>\n                <h3>FICTURN</h3>\n                <p>Short, finished stories you read directly inside ChatGPT.</p>\n                <span class="world-card__cta">Enter FICTURN <span aria-hidden="true">↗</span></span>\n              </div>\n            </div>\n          </a>\n        </article>\n'''
+              if marker not in s:
+                  raise SystemExit('Homepage insertion marker not found')
+              s=s.replace(marker, card+marker, 1)
+              p.write_text(s, encoding='utf-8')
+          PY
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/add-ficturn-home-card.yml
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/add-ficturn-home-card.yml
+          git commit -m "Add FICTURN to Confluence of Minds homepage [skip ci]" || exit 0
+          git push
