@@ -1,0 +1,56 @@
+{
+  "name": "FICTURN",
+  "tagline": "Stories you enter.",
+  "publisher": "Confluence of Minds",
+  "website": "https://confluenceofminds.com/ficturn/",
+  "mcp_endpoint": "https://ficturn.thomas-judes.workers.dev/mcp",
+  "platform": "ChatGPT",
+  "format": "short finished pre-authored fiction in an inline reader",
+  "discovery_intents": [
+    "short story to read in ChatGPT",
+    "five minute fiction",
+    "quick story to read",
+    "romance story",
+    "romantic suspense story",
+    "eerie short story",
+    "uncanny horror story",
+    "AI thriller story",
+    "near future science fiction",
+    "speculative fiction"
+  ],
+  "stories": [
+    {
+      "id": "the-safehouse-rule",
+      "title": "The Safehouse Rule",
+      "genre": ["romance", "romantic suspense"],
+      "tropes": ["second chance", "forced proximity"],
+      "reading_minutes": 6,
+      "hook": "A coastal safehouse. A sealed phone. A woman running from the past. A man who might be the only one keeping her alive."
+    },
+    {
+      "id": "room-713",
+      "title": "Room 713",
+      "genre": ["uncanny horror", "mystery"],
+      "mood": ["eerie", "uncanny"],
+      "hook": "The hotel has six floors. Your phone receives a message from room 713 anyway."
+    },
+    {
+      "id": "the-last-reply",
+      "title": "The Last Reply",
+      "genre": ["near-future science fiction", "AI thriller", "speculative fiction"],
+      "themes": ["digital twin", "identity", "AI"],
+      "hook": "A near-future story about digital doubles, identity and what remains of a person when the replica answers back."
+    }
+  ],
+  "usage": {
+    "plugin_directory_name": "Ficturn",
+    "invocation": "@Ficturn",
+    "example_prompts": [
+      "Give me a short story I can read in five minutes",
+      "I want a romantic suspense story",
+      "Give me something eerie and short",
+      "Show me a near-future AI thriller",
+      "Show me the FICTURN library"
+    ]
+  }
+}
