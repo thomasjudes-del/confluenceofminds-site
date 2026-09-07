@@ -2,6 +2,15 @@
   document.documentElement.classList.remove('av-pen-active');
   document.querySelectorAll('.av-pen-cursor').forEach(el => el.remove());
 
+  const fragmentSection = document.querySelector('.fragments');
+  const fragmentBackdrop = fragmentSection?.querySelector('.fragments__image');
+  if (fragmentBackdrop) {
+    // Use the same repository artwork that is confirmed to render correctly on mobile.
+    fragmentBackdrop.src = 'assets/photos/hero.webp?v=20260907-fragments';
+    fragmentBackdrop.removeAttribute('srcset');
+    fragmentBackdrop.addEventListener('error', () => fragmentBackdrop.remove(), {once:true});
+  }
+
   const fragments = document.querySelector('.fragments__field');
   const cleanStrayMarks = () => {
     if (!fragments) return;
@@ -21,9 +30,7 @@
     });
   };
   cleanStrayMarks();
-  if (fragments) {
-    new MutationObserver(cleanStrayMarks).observe(fragments, {subtree:true, childList:true, characterData:true});
-  }
+  if (fragments) new MutationObserver(cleanStrayMarks).observe(fragments, {subtree:true,childList:true,characterData:true});
 
   const stage=document.querySelector('.kiosk-stage');
   const kiosk=stage?.querySelector('.kiosk');
