@@ -1,18 +1,28 @@
 (() => {
-  // The stray "?" was the browser fallback for the custom fountain-pen cursor.
-  // Remove that cursor layer entirely and restore the native pointer.
   document.documentElement.classList.remove('av-pen-active');
   document.querySelectorAll('.av-pen-cursor').forEach(el => el.remove());
-  const cursorFix = document.createElement('style');
-  cursorFix.textContent = '.fragments .fragment,.fragments a,.fragments button{cursor:auto!important}.fragments a,.fragments button{cursor:pointer!important}';
-  document.head.appendChild(cursorFix);
 
   const fragments = document.querySelector('.fragments__field');
-  if (fragments) {
-    fragments.querySelectorAll('img,span,i').forEach(el => {
-      const t=(el.textContent||'').trim(), a=(el.getAttribute('alt')||'').trim();
-      if(['?','❓','�'].includes(t)||['?','❓','�'].includes(a)) el.remove();
+  const cleanStrayMarks = () => {
+    if (!fragments) return;
+    const walker = document.createTreeWalker(fragments, NodeFilter.SHOW_TEXT);
+    const doomed = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const t = (node.nodeValue || '').trim();
+      if (['?', '❓', '�', '□'].includes(t)) doomed.push(node);
+    }
+    doomed.forEach(node => node.remove());
+    fragments.querySelectorAll('*').forEach(el => {
+      const own = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE).map(n => (n.nodeValue || '').trim()).join('');
+      const alt = (el.getAttribute?.('alt') || '').trim();
+      const title = (el.getAttribute?.('title') || '').trim();
+      if (['?', '❓', '�', '□'].includes(own) || ['?', '❓', '�', '□'].includes(alt) || ['?', '❓', '�', '□'].includes(title)) el.remove();
     });
+  };
+  cleanStrayMarks();
+  if (fragments) {
+    new MutationObserver(cleanStrayMarks).observe(fragments, {subtree:true, childList:true, characterData:true});
   }
 
   const stage=document.querySelector('.kiosk-stage');
