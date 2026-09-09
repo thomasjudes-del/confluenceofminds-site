@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050b0a">
+  <meta name="description" content="SYLVUMA is a living artwork passed from human to human.">
+  <meta property="og:title" content="A living branch reached you">
+  <meta property="og:description" content="One more human keeps it growing.">
+  <title>SYLVUMA</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <canvas id="world" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">SYLVUMA</div>
+    <button id="aboutBtn" class="quiet" type="button">What is this?</button>
+  </header>
+
+  <main class="shell">
+    <section id="start" class="panel active" aria-live="polite">
+      <p class="kicker">A living artwork, passed human to human</p>
+      <h1>A branch reached you.</h1>
+      <p class="lead">Touch once. Watch it grow. Pass it on.</p>
+
+      <div class="choices" aria-label="Choose how the branch grows">
+        <button class="choice" data-growth="bend" type="button" aria-label="Bend">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 50 C18 28 42 38 48 14"/></svg>
+        </button>
+        <button class="choice" data-growth="fork" type="button" aria-label="Fork">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 54 C32 38 31 29 30 18 M30 31 C21 26 18 20 17 13 M30 27 C41 24 45 18 47 11"/></svg>
+        </button>
+        <button class="choice" data-growth="bloom" type="button" aria-label="Bloom">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 53 C31 40 31 31 32 22"/><circle cx="32" cy="17" r="5"/><circle cx="24" cy="20" r="4"/><circle cx="40" cy="20" r="4"/><circle cx="27" cy="12" r="4"/><circle cx="37" cy="12" r="4"/></svg>
+        </button>
+      </div>
+      <p class="micro">No account. No download. One gesture.</p>
+    </section>
+
+    <section id="made" class="panel" aria-live="polite">
+      <p class="kicker">You changed it</p>
+      <h2 id="nodeLabel">Node #18421</h2>
+      <p class="lead short">Your branch is glowing.</p>
+
+      <div class="life">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <div>
+          <strong>One more human keeps it alive.</strong>
+          <span id="timer">23:59:59</span>
+        </div>
+      </div>
+
+      <button id="shareBtn" class="primary" type="button">Pass it on</button>
+      <button id="copyBtn" class="quiet secondary" type="button">Copy branch link</button>
+
+      <div class="stats">
+        <div><b id="worldCount">18,421</b><span>humans</span></div>
+        <div><b id="generation">1</b><span>generation</span></div>
+        <div><b>alive</b><span>status</span></div>
+      </div>
+    </section>
+  </main>
+
+  <aside id="about" class="about" aria-hidden="true">
+    <button id="closeAbout" class="close" type="button" aria-label="Close">×</button>
+    <p class="kicker">SYLVUMA</p>
+    <h2>Nothing grows alone.</h2>
+    <p>Every person adds one living gesture. No one can erase another person's trace. Dormant branches remain in the world and can be awakened again.</p>
+    <p class="micro">An experiment by Confluence of Minds.</p>
+  </aside>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
