@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020712">
+<meta name="robots" content="noindex,nofollow">
+<title>RALUVAAA · Wish World Test</title>
+<style>html,body{margin:0;width:100%;height:100%;background:#020712;color:#dce8f7;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{display:grid;place-items:center}.load{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.65}</style>
+</head>
+<body><div class="load">Opening RALUVAAA…</div>
+<script>
+(async()=>{
+  try{
+    const r=await fetch('./app.html.gz',{cache:'no-store'});
+    if(!r.ok) throw new Error('asset '+r.status);
+    if(!('DecompressionStream' in window)) throw new Error('browser');
+    const html=await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text();
+    document.open();document.write(html);document.close();
+  }catch(e){document.body.innerHTML='<div style="max-width:420px;padding:28px;line-height:1.6"><strong>RALUVAAA could not open this test build.</strong><br><span style="opacity:.7">Please refresh in a recent browser.</span></div>';console.error(e)}
+})();
+</script></body></html>
