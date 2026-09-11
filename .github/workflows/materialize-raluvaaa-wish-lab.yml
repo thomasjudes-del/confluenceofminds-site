@@ -3,7 +3,7 @@ name: Materialize RALUVAAA wish lab
 on:
   push:
     paths:
-      - 'raluvaaa-wish-lab/app.html.gz'
+      - 'raluvaaa-wish-lab/app-b64/*.txt'
       - '.github/workflows/materialize-raluvaaa-wish-lab.yml'
   workflow_dispatch:
 
@@ -19,15 +19,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gzip -dc raluvaaa-wish-lab/app.html.gz > raluvaaa-wish-lab/index.html
+          cat raluvaaa-wish-lab/app-b64/*.txt | tr -d '\r\n ' | base64 --decode > /tmp/raluvaaa-app.html.gz
+          gzip -t /tmp/raluvaaa-app.html.gz
+          gzip -dc /tmp/raluvaaa-app.html.gz > raluvaaa-wish-lab/index.html
           cat > raluvaaa-wish-lab/sw.js <<'EOF'
-          const CACHE='raluvaaa-wish-test-v3';
+          const CACHE='raluvaaa-wish-test-v4';
           const ASSETS=['./','./index.html','./manifest.webmanifest'];
           self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
           self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
           self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request)))})
           EOF
           test -s raluvaaa-wish-lab/index.html
+          grep -q '<!doctype html>' raluvaaa-wish-lab/index.html
 
       - name: Commit materialized build
         shell: bash
