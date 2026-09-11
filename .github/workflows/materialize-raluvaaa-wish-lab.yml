@@ -1,0 +1,42 @@
+name: Materialize RALUVAAA wish lab
+
+on:
+  push:
+    paths:
+      - 'raluvaaa-wish-lab/app.html.gz'
+      - '.github/workflows/materialize-raluvaaa-wish-lab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize HTML build
+        shell: bash
+        run: |
+          set -euo pipefail
+          gzip -dc raluvaaa-wish-lab/app.html.gz > raluvaaa-wish-lab/index.html
+          cat > raluvaaa-wish-lab/sw.js <<'EOF'
+          const CACHE='raluvaaa-wish-test-v3';
+          const ASSETS=['./','./index.html','./manifest.webmanifest'];
+          self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
+          self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
+          self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request)))})
+          EOF
+          test -s raluvaaa-wish-lab/index.html
+
+      - name: Commit materialized build
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add raluvaaa-wish-lab/index.html raluvaaa-wish-lab/sw.js
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Materialize RALUVAAA wish lab HTML"
+          git push
