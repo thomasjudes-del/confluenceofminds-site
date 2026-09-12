@@ -5,9 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#020610">
 <meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>RALUVAAA · Wish World</title>
-<link rel="stylesheet" href="ui.css?v=5">
-<link rel="stylesheet" href="ui-v2.css?v=5">
+<link rel="stylesheet" href="ui.css?build=v15-20260912-1518">
+<link rel="stylesheet" href="ui-v2.css?build=v15-20260912-1518">
 </head>
 <body>
 <iframe id="engine" src="about:blank" title="RALUVAAA living world" allow="clipboard-write; web-share"></iframe>
@@ -50,18 +53,16 @@
 
 <script>
 (function(){
-  const marker='raluvaaaWishClassicV03Fresh';
-  if(!localStorage.getItem(marker)){
-    localStorage.removeItem('raluvaaaWishClassicV1');
-    localStorage.setItem(marker,'1');
-  }
+  const BUILD='v15-20260912-1518';
+  window.RALUVAAA_BUILD=BUILD;
+  if('caches' in window){caches.keys().then(keys=>Promise.all(keys.filter(k=>/raluvaaa/i.test(k)).map(k=>caches.delete(k)))).catch(()=>{});}
+  if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.filter(r=>r.scope.includes('/raluvaaa-wish-classic/')).forEach(r=>r.unregister())).catch(()=>{});}
 })();
 </script>
-<script src="seed.js?v=5"></script>
-<script src="app.js?v=5"></script>
-<script src="ux-v2.js?v=5"></script>
-<script src="patch-v2.js?v=2"></script>
-<script src="patch-v3.js?v=1"></script>
-<script>document.getElementById('engine').src='engine-v03.html?v=6';</script>
+<script src="seed.js?build=v15-20260912-1518"></script>
+<script src="app-v15.js?build=v15-20260912-1518"></script>
+<script src="ux-v2.js?build=v15-20260912-1518"></script>
+<script src="renderer-v15.js?build=v15-20260912-1518"></script>
+<script>document.getElementById('engine').src='engine-v03.html?build=v15-20260912-1518';</script>
 </body>
 </html>
