@@ -9,8 +9,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>RALUVAAA · Wish World</title>
-<link rel="stylesheet" href="ui.css?build=v15-20260912-1518">
-<link rel="stylesheet" href="ui-v2.css?build=v15-20260912-1518">
+<link rel="stylesheet" href="ui.css?build=v16-20260912-1537">
+<link rel="stylesheet" href="ui-v2.css?build=v16-20260912-1537">
+<link rel="stylesheet" href="ui-v16.css?build=v16-20260912-1537">
 </head>
 <body>
 <iframe id="engine" src="about:blank" title="RALUVAAA living world" allow="clipboard-write; web-share"></iframe>
@@ -28,7 +29,12 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5.5l5-2 7 2.5 5-2v14.5l-5 2-7-2.5-5 2z"/><path d="M8.5 3.5v14.5M15.5 6v14.5"/></svg>
   </button>
   <button id="quickRelease" class="quickbtn createWishIcon" title="Release a wish" aria-label="Release a wish" data-tooltip="Release a wish">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" opacity=".36"/><circle cx="12" cy="12" r="5" opacity=".22"/><path d="M12 8v8M8 12h8"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle class="wish-ring r1" cx="12" cy="12" r="8"/>
+      <circle class="wish-ring r2" cx="12" cy="12" r="5.2"/>
+      <circle class="wish-core" cx="12" cy="12" r="1.25"/>
+      <path class="wish-petal" d="M12 4.8v4M12 15.2v4M4.8 12h4M15.2 12h4M6.9 6.9l2.8 2.8M14.3 14.3l2.8 2.8M17.1 6.9l-2.8 2.8M9.7 14.3l-2.8 2.8"/>
+    </svg>
   </button>
 </div>
 
@@ -53,16 +59,16 @@
 
 <script>
 (function(){
-  const BUILD='v15-20260912-1518';
+  const BUILD='v16-20260912-1537';
   window.RALUVAAA_BUILD=BUILD;
   if('caches' in window){caches.keys().then(keys=>Promise.all(keys.filter(k=>/raluvaaa/i.test(k)).map(k=>caches.delete(k)))).catch(()=>{});}
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.filter(r=>r.scope.includes('/raluvaaa-wish-classic/')).forEach(r=>r.unregister())).catch(()=>{});}
 })();
 </script>
-<script src="seed.js?build=v15-20260912-1518"></script>
-<script src="app-v15.js?build=v15-20260912-1518"></script>
-<script src="ux-v2.js?build=v15-20260912-1518"></script>
-<script src="renderer-v15.js?build=v15-20260912-1518"></script>
-<script>document.getElementById('engine').src='engine-v03.html?build=v15-20260912-1518';</script>
+<script src="seed.js?build=v16-20260912-1537"></script>
+<script src="app-v16.js?build=v16-20260912-1537"></script>
+<script src="ux-v2.js?build=v16-20260912-1537"></script>
+<script src="renderer-v16.js?build=v16-20260912-1537"></script>
+<script>document.getElementById('engine').src='engine-v03.html?build=v16-20260912-1537';</script>
 </body>
 </html>
