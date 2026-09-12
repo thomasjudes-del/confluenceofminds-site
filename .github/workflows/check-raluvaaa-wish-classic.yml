@@ -17,13 +17,17 @@ jobs:
           node --check raluvaaa-wish-classic/app.js
           node --check raluvaaa-wish-classic/seed.js
           node --check raluvaaa-wish-classic/ux-v2.js
-      - name: Validate host and exact historical renderer
+      - name: Validate host and historical renderer iteration
         run: |
           test -s raluvaaa-wish-classic/index.html
           test -s raluvaaa-wish-classic/engine-v03.html
           grep -q 'RALUVAAA · Living artwork' raluvaaa-wish-classic/engine-v03.html
           grep -q 'a living map of <b>human intentions</b>' raluvaaa-wish-classic/index.html
-          grep -q 'engine-v03.html?v=3' raluvaaa-wish-classic/index.html
-          grep -q '3 wishes entrusted to you' raluvaaa-wish-classic/index.html
+          grep -q 'engine-v03.html?v=4' raluvaaa-wish-classic/index.html
+          grep -q 'Entrusted to you' raluvaaa-wish-classic/index.html
+          grep -q 'slots.length!==1' raluvaaa-wish-classic/app.js
+          grep -q 'setEncouraged' raluvaaa-wish-classic/app.js
+          grep -q 'r<5\*3600000' raluvaaa-wish-classic/app.js
+          grep -q 'node-tone' raluvaaa-wish-classic/engine-v03.html
           grep -q 'quickMyWorld' raluvaaa-wish-classic/index.html
           grep -q 'quickRelease' raluvaaa-wish-classic/index.html
