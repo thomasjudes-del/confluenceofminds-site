@@ -2,29 +2,64 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#020610">
 <meta name="robots" content="noindex,nofollow">
-<title>RALUVAAA · visual baseline</title>
-<style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020610}
-iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#020610}
-</style>
+<title>RALUVAAA · Wish World</title>
+<link rel="stylesheet" href="ui.css?v=2">
+<link rel="stylesheet" href="ui-v2.css?v=2">
 </head>
 <body>
-<iframe id="raluvaaa" title="RALUVAAA" allow="clipboard-write; web-share" referrerpolicy="no-referrer"></iframe>
+<iframe id="engine" src="about:blank" title="RALUVAAA living world" allow="clipboard-write; web-share"></iframe>
+
+<section id="brand" class="glass">
+  <div class="logo">RALUVAAA</div>
+  <div class="tag">a living map of <b>human intentions</b></div>
+  <div class="pulse-head"><span>WORLD PULSE · TEST</span><button id="pulseMore">24H</button></div>
+  <div id="stats" class="stats"></div>
+  <div id="pulseNews" class="pulse-news"></div>
+</section>
+
+<div id="quickActions" aria-label="Wish actions">
+  <button id="quickMyWorld" class="quickbtn" title="My world" aria-label="My world">
+    <svg viewBox="0 0 24 24"><circle cx="7" cy="9" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/><path d="M8.8 8.6l6.2-1.2M8.2 10.5l4.6 5M16.2 8.7l-1.5 6.3"/></svg>
+  </button>
+  <button id="quickRelease" class="quickbtn" title="Release a wish" aria-label="Release a wish">
+    <svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/><path d="M18.5 4.5l.6 1.5 1.4.6-1.4.6-.6 1.5-.6-1.5-1.4-.6 1.4-.6z"/></svg>
+  </button>
+</div>
+
+<section id="entrusted" class="glass">
+  <div class="entrusted-head">
+    <strong>3 wishes entrusted to you</strong>
+    <button id="entrustedCollapse" aria-label="Collapse entrusted wishes" aria-expanded="true">
+      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+  </div>
+  <div id="entrustedGrid" class="entrusted-grid"></div>
+</section>
+
+<nav id="dock" aria-hidden="true">
+  <button id="myWorldBtn" class="soft">My world</button>
+  <button id="createBtn" class="soft primary">+ Release a wish</button>
+</nav>
+
+<section id="detail" class="glass hidden" aria-live="polite"></section>
+<div id="toastWrap"></div>
+<div id="overlay"></div>
+
 <script>
 (function(){
-  const target='https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/raluvaaa/preview/v03/index.html';
-  function load(){
-    const u=new URL(target);
-    u.search=location.search;
-    u.hash=location.hash;
-    document.getElementById('raluvaaa').src=u.toString();
+  const marker='raluvaaaWishClassicV03Fresh';
+  if(!localStorage.getItem(marker)){
+    localStorage.removeItem('raluvaaaWishClassicV1');
+    localStorage.setItem(marker,'1');
   }
-  load();
-  addEventListener('hashchange',load);
 })();
 </script>
+<script src="seed.js?v=2"></script>
+<script src="app.js?v=2"></script>
+<script src="ux-v2.js?v=2"></script>
+<script>document.getElementById('engine').src='engine-v03.html?v=3';</script>
 </body>
 </html>
