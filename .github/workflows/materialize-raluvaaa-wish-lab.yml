@@ -17,6 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validate organic renderer
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check raluvaaa-wish-lab/visual-v2.js
+          test -s raluvaaa-wish-lab/visual-v2.css
+
       - name: Materialize HTML build
         shell: bash
         run: |
