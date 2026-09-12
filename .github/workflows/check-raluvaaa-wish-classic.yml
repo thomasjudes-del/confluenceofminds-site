@@ -18,15 +18,18 @@ jobs:
           node --check raluvaaa-wish-classic/seed.js
           node --check raluvaaa-wish-classic/ux-v2.js
           node --check raluvaaa-wish-classic/patch-v2.js
+          node --check raluvaaa-wish-classic/patch-v3.js
       - name: Validate host and historical renderer iteration
         run: |
           test -s raluvaaa-wish-classic/index.html
           test -s raluvaaa-wish-classic/engine-v03.html
           test -s raluvaaa-wish-classic/patch-v2.js
+          test -s raluvaaa-wish-classic/patch-v3.js
           grep -q 'RALUVAAA · Living artwork' raluvaaa-wish-classic/engine-v03.html
           grep -q 'a living map of <b>human intentions</b>' raluvaaa-wish-classic/index.html
-          grep -q 'engine-v03.html?v=5' raluvaaa-wish-classic/index.html
-          grep -q 'patch-v2.js?v=1' raluvaaa-wish-classic/index.html
+          grep -q 'engine-v03.html?v=6' raluvaaa-wish-classic/index.html
+          grep -q 'patch-v2.js?v=2' raluvaaa-wish-classic/index.html
+          grep -q 'patch-v3.js?v=1' raluvaaa-wish-classic/index.html
           grep -q 'Entrusted to you' raluvaaa-wish-classic/index.html
           grep -q 'slots.length!==3' raluvaaa-wish-classic/patch-v2.js
           grep -q 'Flag as inappropriate' raluvaaa-wish-classic/patch-v2.js
