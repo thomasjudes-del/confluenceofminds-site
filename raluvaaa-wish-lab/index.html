@@ -28,6 +28,7 @@ button,input,textarea{font:inherit}button{color:inherit}.hidden{display:none!imp
 .mobile-only{display:none}
 @media(max-width:760px){#brand{left:12px;top:12px;width:auto;right:72px;padding:13px 15px;border-radius:20px}.logo{font-size:17px;letter-spacing:.23em}.tag{font-size:10px}.pulse-title,.stats,.pulse-news{display:none}#controls{right:12px;top:12px;gap:7px}.circle{width:45px;height:45px;border-radius:16px}#controls .desktop-extra{display:none}#entrusted{left:10px;right:10px;bottom:84px;width:auto;padding:11px;border-radius:20px}.entrusted-head{margin-bottom:8px}.entrusted-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.entrusted-item{padding:8px;border-radius:13px}.entrusted-item .t{font-size:10px}.entrusted-item .m{font-size:9px;display:block}.entrusted-item .m span:first-child{display:none}#bottomDock{bottom:18px;width:calc(100vw - 24px);justify-content:center}.primary{padding:12px 16px}.secondary{padding:11px 13px}#detail{left:10px;right:10px;bottom:10px;width:auto;max-height:76vh;border-radius:24px;padding:17px}.wishtext{font-size:22px}.actions{grid-template-columns:repeat(3,1fr);gap:6px}.action{min-height:55px;padding:9px 5px;font-size:9px}.mobile-only{display:block}.sheet{top:auto;bottom:8px;transform:translateX(-50%);border-radius:26px;width:calc(100vw - 16px);max-height:86vh;padding:19px}.sheet h2{font-size:24px}#onboard .sheet{top:50%;bottom:auto;transform:translate(-50%,-50%);width:calc(100vw - 24px);padding:24px}.onboardcopy{font-size:22px}#toastWrap{bottom:150px;max-width:88vw;text-align:center}}
 </style>
+<link rel="stylesheet" href="visual-v2.css?v=2">
 </head>
 <body>
 <canvas id="world" aria-label="Living map of human intentions"></canvas><div id="veil"></div>
@@ -132,5 +133,6 @@ document.getElementById('createBtn').onclick=showCreate;document.getElementById(
 if(location.hash.startsWith('#wish=')){setTimeout(()=>focusWish(decodeURIComponent(location.hash.slice(6))),450)}
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});onboard();
 </script>
+<script src="visual-v2.js?v=2"></script>
 </body>
 </html>
