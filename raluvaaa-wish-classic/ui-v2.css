@@ -6,6 +6,9 @@
 .quickbtn{position:relative;width:43px;height:43px;border:1px solid rgba(184,214,255,.14);border-radius:12px;background:rgba(3,10,20,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;place-items:center;cursor:pointer;padding:0}
 .quickbtn:active{transform:scale(.97)}
 .quickbtn svg{width:19px;height:19px;stroke:#eaf5ff;fill:none;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+.quickbtn.createWishIcon svg circle{transform-origin:12px 12px;animation:wishPulse 3.4s ease-out infinite}
+.quickbtn.createWishIcon svg circle:nth-child(2){animation-delay:.75s}
+@keyframes wishPulse{0%,45%{opacity:.32;transform:scale(.82)}85%,100%{opacity:.06;transform:scale(1.18)}}
 .quickbtn::after{content:attr(data-tooltip);position:absolute;right:52px;top:50%;transform:translateY(-50%) translateX(4px);padding:6px 8px;border:1px solid rgba(184,214,255,.13);border-radius:8px;background:rgba(3,10,20,.95);box-shadow:0 8px 28px rgba(0,0,0,.28);color:#edf6ff;font-size:9px;letter-spacing:.04em;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s ease,transform .12s ease}
 .quickbtn:hover::after,.quickbtn:focus-visible::after,.quickbtn.tip-visible::after{opacity:1;transform:translateY(-50%) translateX(0)}
 
@@ -21,11 +24,14 @@
 .entrusted-grid{display:grid;grid-template-columns:1fr;gap:4px;margin-top:7px}
 .entrusted-item{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;padding:9px 10px;border-radius:10px}
 .entrusted-item .t{font-size:11px;line-height:1.38;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.entrusted-item .m{margin:0;display:block;white-space:nowrap;font-size:12px;font-weight:720;letter-spacing:.035em;color:rgba(235,242,250,.86)}
-.entrusted-item.urgent .m{color:#ff7d7d;text-shadow:0 0 12px rgba(255,90,90,.18)}
+.entrusted-item .m{margin:0;display:block;white-space:nowrap;font-size:12px;font-weight:720;letter-spacing:.035em;color:rgba(235,242,250,.86);font-variant-numeric:tabular-nums}
+.entrusted-item.urgent .m{color:#ff7373;text-shadow:0 0 10px rgba(255,90,90,.14)}
 
 .action.active{background:rgba(228,238,241,.92)!important;border-color:rgba(238,247,250,.96)!important;color:#07111b!important;font-weight:700}
 .action.active .ico{color:#07111b!important}
+.action.done,.action:disabled{cursor:default!important;color:rgba(220,229,239,.42)!important;background:rgba(145,158,173,.07)!important;border-color:rgba(181,195,211,.08)!important;box-shadow:none!important}
+.action.done .ico,.action:disabled .ico{color:rgba(220,229,239,.38)!important;filter:none!important}
+.action.done:hover,.action:disabled:hover{background:rgba(145,158,173,.07)!important;border-color:rgba(181,195,211,.08)!important}
 
 @media(max-width:760px){
   #quickActions{right:10px;top:318px}
