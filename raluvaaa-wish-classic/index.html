@@ -9,9 +9,10 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>RALUVAAA · Wish World</title>
-<link rel="stylesheet" href="ui.css?build=v16-20260912-1537">
-<link rel="stylesheet" href="ui-v2.css?build=v16-20260912-1537">
-<link rel="stylesheet" href="ui-v16.css?build=v16-20260912-1537">
+<link rel="stylesheet" href="ui.css?build=v17-20260912-1545">
+<link rel="stylesheet" href="ui-v2.css?build=v17-20260912-1545">
+<link rel="stylesheet" href="ui-v16.css?build=v17-20260912-1545">
+<link rel="stylesheet" href="ui-v17.css?build=v17-20260912-1545">
 </head>
 <body>
 <iframe id="engine" src="about:blank" title="RALUVAAA living world" allow="clipboard-write; web-share"></iframe>
@@ -25,6 +26,9 @@
 </section>
 
 <div id="quickActions" aria-label="Wish actions">
+  <button id="quickPulse" class="quickbtn pulseIcon" title="World Pulse" aria-label="World Pulse" data-tooltip="World Pulse">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none"/><path d="M4 12h3l1.6-3.5 2.5 7 2.2-5 1.5 2.5H20" fill="none"/></svg>
+  </button>
   <button id="quickMyWorld" class="quickbtn" title="My world" aria-label="My world" data-tooltip="My world">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5.5l5-2 7 2.5 5-2v14.5l-5 2-7-2.5-5 2z"/><path d="M8.5 3.5v14.5M15.5 6v14.5"/></svg>
   </button>
@@ -41,6 +45,7 @@
 <section id="entrusted" class="glass">
   <div class="entrusted-head">
     <strong>Entrusted to you</strong>
+    <div id="entrustedQuick" aria-label="Quick entrusted wish navigation"></div>
     <button id="entrustedCollapse" aria-label="Collapse entrusted wishes" aria-expanded="true">
       <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </button>
@@ -59,16 +64,17 @@
 
 <script>
 (function(){
-  const BUILD='v16-20260912-1537';
+  const BUILD='v17-20260912-1545';
   window.RALUVAAA_BUILD=BUILD;
   if('caches' in window){caches.keys().then(keys=>Promise.all(keys.filter(k=>/raluvaaa/i.test(k)).map(k=>caches.delete(k)))).catch(()=>{});}
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.filter(r=>r.scope.includes('/raluvaaa-wish-classic/')).forEach(r=>r.unregister())).catch(()=>{});}
 })();
 </script>
-<script src="seed.js?build=v16-20260912-1537"></script>
-<script src="app-v16.js?build=v16-20260912-1537"></script>
-<script src="ux-v2.js?build=v16-20260912-1537"></script>
-<script src="renderer-v16.js?build=v16-20260912-1537"></script>
-<script>document.getElementById('engine').src='engine-v03.html?build=v16-20260912-1537';</script>
+<script src="seed.js?build=v17-20260912-1545"></script>
+<script src="app-v16.js?build=v17-20260912-1545"></script>
+<script src="ux-v2.js?build=v17-20260912-1545"></script>
+<script src="renderer-v17.js?build=v17-20260912-1545"></script>
+<script src="ux-v17.js?build=v17-20260912-1545"></script>
+<script>document.getElementById('engine').src='engine-v03.html?build=v17-20260912-1545';</script>
 </body>
 </html>
