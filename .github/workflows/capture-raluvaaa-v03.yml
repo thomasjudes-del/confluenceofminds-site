@@ -1,0 +1,40 @@
+name: Capture exact RALUVAAA v03 engine
+
+on:
+  push:
+    paths:
+      - '.github/workflows/capture-raluvaaa-v03.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch deployed v03 source
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            'https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/raluvaaa/preview/v03/index.html' \
+            --output raluvaaa-wish-classic/engine-v03.html
+          test "$(wc -c < raluvaaa-wish-classic/engine-v03.html)" -gt 1000
+          grep -q 'RALUVAAA' raluvaaa-wish-classic/engine-v03.html
+
+      - name: Commit captured source
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add raluvaaa-wish-classic/engine-v03.html
+          if git diff --cached --quiet; then
+            echo 'No change to commit.'
+            exit 0
+          fi
+          git commit -m 'Capture exact deployed RALUVAAA v03 engine'
+          git push
