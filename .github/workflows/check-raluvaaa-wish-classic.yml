@@ -1,4 +1,4 @@
-name: Check RALUVAAA classic Wish build
+name: Check RALUVAAA v03 Wish build
 
 on:
   push:
@@ -16,10 +16,14 @@ jobs:
         run: |
           node --check raluvaaa-wish-classic/app.js
           node --check raluvaaa-wish-classic/seed.js
-      - name: Validate host and exact engine
+          node --check raluvaaa-wish-classic/ux-v2.js
+      - name: Validate host and exact historical renderer
         run: |
           test -s raluvaaa-wish-classic/index.html
-          test -s raluvaaa-wish-classic/engine.html
-          grep -q 'RALUVAAA V0.5 Demo' raluvaaa-wish-classic/engine.html
+          test -s raluvaaa-wish-classic/engine-v03.html
+          grep -q 'RALUVAAA · Living artwork' raluvaaa-wish-classic/engine-v03.html
           grep -q 'a living map of <b>human intentions</b>' raluvaaa-wish-classic/index.html
-          grep -q 'engine.html?v=1' raluvaaa-wish-classic/index.html
+          grep -q 'engine-v03.html?v=3' raluvaaa-wish-classic/index.html
+          grep -q '3 wishes entrusted to you' raluvaaa-wish-classic/index.html
+          grep -q 'quickMyWorld' raluvaaa-wish-classic/index.html
+          grep -q 'quickRelease' raluvaaa-wish-classic/index.html
