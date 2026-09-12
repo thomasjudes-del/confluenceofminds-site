@@ -11,15 +11,30 @@
       collapse.setAttribute('aria-expanded',String(!entrusted.classList.contains('collapsed')));
     });
   }
-  if(myWorld){
-    myWorld.addEventListener('click',()=>document.getElementById('myWorldBtn')?.click());
-  }
-  if(release){
-    release.addEventListener('click',()=>document.getElementById('createBtn')?.click());
+
+  function bindAction(button,targetId){
+    if(!button)return;
+    let timer=null,longPress=false;
+    button.addEventListener('touchstart',()=>{
+      longPress=false;
+      clearTimeout(timer);
+      timer=setTimeout(()=>{
+        longPress=true;
+        button.classList.add('tip-visible');
+        setTimeout(()=>button.classList.remove('tip-visible'),1600);
+      },520);
+    },{passive:true});
+    button.addEventListener('touchend',()=>clearTimeout(timer),{passive:true});
+    button.addEventListener('touchcancel',()=>clearTimeout(timer),{passive:true});
+    button.addEventListener('click',e=>{
+      if(longPress){e.preventDefault();longPress=false;return;}
+      document.getElementById(targetId)?.click();
+    });
   }
 
-  /* Keep the entrusted wishes as readable full-width rows. Clicking a row
-     still uses the existing product behavior: focus the wish and open its detail. */
+  bindAction(myWorld,'myWorldBtn');
+  bindAction(release,'createBtn');
+
   const grid=document.getElementById('entrustedGrid');
   if(grid){
     const polish=()=>{
