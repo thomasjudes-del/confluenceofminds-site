@@ -1,0 +1,25 @@
+name: Check RALUVAAA classic Wish build
+
+on:
+  push:
+    paths:
+      - 'raluvaaa-wish-classic/**'
+      - '.github/workflows/check-raluvaaa-wish-classic.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript
+        run: |
+          node --check raluvaaa-wish-classic/app.js
+          node --check raluvaaa-wish-classic/seed.js
+      - name: Validate host and exact engine
+        run: |
+          test -s raluvaaa-wish-classic/index.html
+          test -s raluvaaa-wish-classic/engine.html
+          grep -q 'RALUVAAA V0.5 Demo' raluvaaa-wish-classic/engine.html
+          grep -q 'a living map of <b>human intentions</b>' raluvaaa-wish-classic/index.html
+          grep -q 'engine.html?v=1' raluvaaa-wish-classic/index.html
