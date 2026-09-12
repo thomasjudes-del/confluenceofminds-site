@@ -1,0 +1,27 @@
+/* RALUVAAA V17: persistent focus/navigation cues without changing V03 geometry. */
+#quickActions .pulseIcon svg{width:20px;height:20px}
+#quickActions .pulseIcon circle,#quickActions .pulseIcon path{stroke:rgba(235,244,248,.88)}
+
+.locate-wish{flex:0 0 34px;width:34px;height:34px;margin-left:auto;border:1px solid rgba(181,215,255,.12);border-radius:10px;background:rgba(255,255,255,.018);display:grid;place-items:center;cursor:pointer;color:rgba(232,243,248,.78)}
+.locate-wish:hover{border-color:rgba(150,218,225,.26);background:rgba(130,220,225,.035)}
+.locate-wish svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round}
+.detail-top>.close{flex:0 0 28px}
+
+#entrustedQuick{display:none;align-items:center;gap:7px;margin-left:auto;margin-right:4px}
+#entrusted.collapsed #entrustedQuick{display:flex}
+.entrusted-jump{width:27px;height:27px;border:1px solid rgba(181,215,255,.10);border-radius:999px;background:rgba(255,255,255,.015);padding:0;display:grid;place-items:center;cursor:pointer}
+.entrusted-jump span{width:6px;height:6px;border-radius:50%;background:rgba(222,232,241,.64);box-shadow:0 0 7px rgba(222,232,241,.08)}
+.entrusted-jump.urgent span{background:#ef7f7f;box-shadow:0 0 8px rgba(239,127,127,.22)}
+.entrusted-jump.long span{background:#79a98a;box-shadow:0 0 8px rgba(121,169,138,.16)}
+.entrusted-jump:hover{border-color:rgba(149,218,225,.26)}
+#entrusted.collapsed .entrusted-head{margin-bottom:0}
+
+/* Keep actions compact enough that the selected wish remains visible above the mobile sheet. */
+@media(max-width:760px){
+  #detail{max-height:61vh}
+  .detail-top{gap:7px}
+  .locate-wish{width:32px;height:32px;flex-basis:32px}
+  #entrusted.collapsed{min-width:0;left:10px;right:10px;width:auto}
+  #entrusted.collapsed .entrusted-head strong{font-size:9px}
+  .entrusted-jump{width:25px;height:25px}
+}
