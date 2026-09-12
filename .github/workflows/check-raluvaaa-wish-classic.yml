@@ -14,31 +14,35 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate JavaScript
         run: |
-          node --check raluvaaa-wish-classic/app-v15.js
+          node --check raluvaaa-wish-classic/app-v16.js
           node --check raluvaaa-wish-classic/seed.js
           node --check raluvaaa-wish-classic/ux-v2.js
-          node --check raluvaaa-wish-classic/renderer-v15.js
-      - name: Validate consolidated runtime and cache busting
+          node --check raluvaaa-wish-classic/renderer-v16.js
+      - name: Validate V16 runtime and cache busting
         run: |
           test -s raluvaaa-wish-classic/index.html
           test -s raluvaaa-wish-classic/engine-v03.html
-          test -s raluvaaa-wish-classic/app-v15.js
-          test -s raluvaaa-wish-classic/renderer-v15.js
+          test -s raluvaaa-wish-classic/app-v16.js
+          test -s raluvaaa-wish-classic/renderer-v16.js
+          test -s raluvaaa-wish-classic/ui-v16.css
           grep -q 'RALUVAAA · Living artwork' raluvaaa-wish-classic/engine-v03.html
           grep -q 'a living map of <b>human intentions</b>' raluvaaa-wish-classic/index.html
-          grep -q 'app-v15.js?build=v15-20260912-1518' raluvaaa-wish-classic/index.html
-          grep -q 'renderer-v15.js?build=v15-20260912-1518' raluvaaa-wish-classic/index.html
-          grep -q 'engine-v03.html?build=v15-20260912-1518' raluvaaa-wish-classic/index.html
+          grep -q 'app-v16.js?build=v16-20260912-1537' raluvaaa-wish-classic/index.html
+          grep -q 'renderer-v16.js?build=v16-20260912-1537' raluvaaa-wish-classic/index.html
+          grep -q 'ui-v16.css?build=v16-20260912-1537' raluvaaa-wish-classic/index.html
+          grep -q 'engine-v03.html?build=v16-20260912-1537' raluvaaa-wish-classic/index.html
           grep -q 'Entrusted to you' raluvaaa-wish-classic/index.html
-          grep -q 'slots.length!==3' raluvaaa-wish-classic/app-v15.js
-          grep -q "return h+'h '+String(mm).padStart(2,'0')+'m'" raluvaaa-wish-classic/app-v15.js
-          grep -q 'raluvaaa-world-blank' raluvaaa-wish-classic/app-v15.js
-          grep -q 'Flag as inappropriate' raluvaaa-wish-classic/app-v15.js
-          grep -q 'Helped' raluvaaa-wish-classic/app-v15.js
-          grep -q 'Connected' raluvaaa-wish-classic/app-v15.js
-          grep -q 'raluvaaa-cycle-my-wish' raluvaaa-wish-classic/app-v15.js
-          grep -q 'lensPlus' raluvaaa-wish-classic/renderer-v15.js
-          grep -q '__raluvaaaFocusPing' raluvaaa-wish-classic/renderer-v15.js
-          grep -q 'createLinearGradient' raluvaaa-wish-classic/renderer-v15.js
-          ! grep -q 'patch-v2.js' raluvaaa-wish-classic/index.html
-          ! grep -q 'patch-v3.js' raluvaaa-wish-classic/index.html
+          grep -q "return d+'d '+hh+'h'" raluvaaa-wish-classic/app-v16.js
+          grep -q "return r<DAY?'urgent':r>10\*DAY?'long':'mid'" raluvaaa-wish-classic/app-v16.js
+          grep -q 'raluvaaa-world-blank' raluvaaa-wish-classic/app-v16.js
+          grep -q 'No account needed in this prototype' raluvaaa-wish-classic/app-v16.js
+          grep -q 'Help applied' raluvaaa-wish-classic/app-v16.js
+          grep -q 'Sub-wishes created' raluvaaa-wish-classic/app-v16.js
+          grep -q 'Routes' raluvaaa-wish-classic/app-v16.js
+          grep -q 'setVisualState' raluvaaa-wish-classic/app-v16.js
+          grep -q 'encouragementLevel' raluvaaa-wish-classic/renderer-v16.js
+          grep -q 'drawFlow' raluvaaa-wish-classic/renderer-v16.js
+          grep -q "world.selected?.id===n.id" raluvaaa-wish-classic/renderer-v16.js
+          grep -q 'lensPlus' raluvaaa-wish-classic/renderer-v16.js
+          ! grep -q 'app-v15.js' raluvaaa-wish-classic/index.html
+          ! grep -q 'renderer-v15.js' raluvaaa-wish-classic/index.html
