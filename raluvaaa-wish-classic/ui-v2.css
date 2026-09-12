@@ -1,0 +1,36 @@
+/* RALUVAAA Wish UX layer. The canvas renderer lives untouched in engine-v03.html. */
+#veil{display:none!important}
+#dock{display:none!important}
+
+#quickActions{position:fixed;z-index:14;right:16px;top:371px;display:grid;gap:7px}
+.quickbtn{width:43px;height:43px;border:1px solid rgba(184,214,255,.14);border-radius:12px;background:rgba(3,10,20,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;place-items:center;cursor:pointer;padding:0}
+.quickbtn:active{transform:scale(.97)}
+.quickbtn svg{width:19px;height:19px;stroke:#eaf5ff;fill:none;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+
+#entrusted{left:50%;right:auto;transform:translateX(-50%);bottom:max(16px,env(safe-area-inset-bottom));width:min(660px,calc(100vw - 32px));padding:10px 11px;border-radius:17px;transition:width .18s ease,padding .18s ease}
+.entrusted-head{margin:0;gap:10px}
+.entrusted-head strong{font-size:10px;letter-spacing:.13em}
+#entrustedCollapse{margin-left:auto;width:28px;height:28px;border:0;background:transparent;color:rgba(225,236,250,.66);cursor:pointer;display:grid;place-items:center;padding:0}
+#entrustedCollapse svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
+#entrusted.collapsed #entrustedCollapse svg{transform:rotate(180deg)}
+#entrusted.collapsed .entrusted-grid{display:none}
+#entrusted.collapsed{width:auto;min-width:250px}
+
+.entrusted-grid{display:grid;grid-template-columns:1fr;gap:4px;margin-top:7px}
+.entrusted-item{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:7px 9px;border-radius:10px}
+.entrusted-item .t{font-size:10px;line-height:1.32;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entrusted-item .m{margin:0;display:block;white-space:nowrap;font-size:9px;color:rgba(219,230,246,.48)}
+.entrusted-item .m span:first-child{display:none}
+.entrusted-item.urgent .m{color:rgba(255,228,181,.75)}
+
+@media(max-width:760px){
+  #quickActions{right:10px;top:318px}
+  #entrusted{left:10px;right:10px;transform:none;bottom:max(10px,env(safe-area-inset-bottom));width:auto;padding:9px 10px}
+  #entrusted.collapsed{left:auto;right:10px;width:auto;min-width:238px}
+  .entrusted-head strong{font-size:9px;letter-spacing:.12em}
+  .entrusted-grid{gap:3px;margin-top:6px}
+  .entrusted-item{padding:7px 8px;gap:9px}
+  .entrusted-item .t{font-size:10px}
+  .entrusted-item .m{font-size:8px}
+  #detail{bottom:10px}
+}
