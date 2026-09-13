@@ -1,0 +1,25 @@
+/* RALUVAAA V20: final demo polish. Preserve the map while actions stay legible. */
+#langSwitch{position:absolute;right:10px;top:9px;display:flex;gap:2px;padding:2px;border:1px solid rgba(184,214,255,.09);border-radius:999px;background:rgba(2,8,17,.34)}
+#langSwitch button{height:20px;min-width:25px;padding:0 6px;border:0;border-radius:999px;background:transparent;color:rgba(220,231,244,.42);font-size:7.5px;font-weight:650;letter-spacing:.08em;cursor:pointer}
+#langSwitch button.on{background:rgba(229,238,241,.10);color:rgba(241,247,250,.88)}
+#brand{padding-right:74px}
+
+#detail{transition:max-height .18s ease,transform .18s ease,opacity .16s ease}
+#detail .action{transition:background .14s ease,border-color .14s ease,transform .12s ease,box-shadow .14s ease}
+#detail .action:active{transform:scale(.965)}
+#detail.action-flash{box-shadow:0 18px 70px rgba(0,0,0,.38),0 0 0 1px rgba(215,235,230,.05)}
+
+#entrusted.detail-open:not(.collapsed){opacity:.68}
+
+@media(max-width:760px){
+  #brand{padding-right:70px}
+  #langSwitch{right:8px;top:8px}
+  #langSwitch button{height:19px;min-width:23px;font-size:7px}
+
+  /* Keep the world as the dominant surface. */
+  #detail{max-height:35vh}
+  #detail .actions{gap:3px}
+  #detail .action{min-height:43px;font-size:7px}
+  #detail .action .ico{font-size:12px}
+  #entrusted.detail-open:not(.collapsed){opacity:.36;pointer-events:none}
+}
