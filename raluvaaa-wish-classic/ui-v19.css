@@ -1,0 +1,37 @@
+/* RALUVAAA V19: keep wish actions available without turning the map into a full-screen mobile sheet. */
+#detail .test-note{display:none!important}
+#detail .report-row{justify-content:flex-end;margin-top:3px}
+#detail .report-row .soft{flex:0 0 auto;height:25px;padding:0 2px;border:0;background:transparent;color:rgba(219,230,246,.42);font-size:8px;letter-spacing:.06em}
+#detail .report-row .soft:hover{border:0;background:transparent;color:rgba(237,244,250,.70)}
+#detail .eyebrow.compact-hidden{display:none}
+#detail .eyebrow.simulated-label{font-size:8px;letter-spacing:.12em;color:rgba(219,230,246,.46)}
+
+@media(max-width:760px){
+  #detail{left:8px;right:8px;bottom:8px;width:auto;max-height:38vh;padding:10px 11px 8px;border-radius:16px;overflow:auto}
+  .detail-top{gap:5px;align-items:flex-start}
+  .detail-top>div:first-child{min-width:0;flex:1}
+  .wishtext{margin:2px 0 4px;font-size:18px;line-height:1.14}
+  .meta{font-size:8.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .state{margin-top:4px;font-size:7.5px;line-height:1.15;letter-spacing:.09em}
+  .locate-wish{width:28px;height:28px;flex-basis:28px;border-radius:9px;margin-left:2px}
+  .locate-wish svg{width:15px;height:15px}
+  .detail-top>.close{width:24px;height:28px;flex:0 0 24px;padding:0;font-size:20px;line-height:1}
+
+  /* Six primary actions stay visible at once. No second navigation layer. */
+  .actions{grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:8px}
+  .action{min-width:0;min-height:45px;padding:4px 1px;border-radius:9px;font-size:7.2px;line-height:1.05;letter-spacing:.025em;white-space:nowrap;overflow:hidden}
+  .action .ico{font-size:13px;line-height:1;margin-bottom:3px}
+
+  .owner{margin-top:6px;padding-top:6px}
+  .owner h4{display:none}
+  .owner .row{gap:4px;margin-top:0}
+  .owner .soft{height:30px;padding:0 8px;border-radius:9px;font-size:8px}
+  #detail .report-row{height:20px;margin-top:1px}
+  #detail .report-row .soft{height:20px;font-size:7.3px}
+}
+
+@media(max-width:370px){
+  .action{font-size:6.6px;letter-spacing:0}
+  .action .ico{font-size:12px}
+  .wishtext{font-size:17px}
+}
