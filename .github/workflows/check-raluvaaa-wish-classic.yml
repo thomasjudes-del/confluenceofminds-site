@@ -17,37 +17,43 @@ jobs:
           node --check raluvaaa-wish-classic/app-v16.js
           node --check raluvaaa-wish-classic/seed.js
           node --check raluvaaa-wish-classic/ux-v2.js
-          node --check raluvaaa-wish-classic/renderer-v18.js
           node --check raluvaaa-wish-classic/renderer-v19.js
           node --check raluvaaa-wish-classic/renderer-v20.js
+          node --check raluvaaa-wish-classic/renderer-v21.js
           node --check raluvaaa-wish-classic/ux-v17.js
           node --check raluvaaa-wish-classic/ux-v19.js
           node --check raluvaaa-wish-classic/ux-v20.js
-      - name: Validate V20 runtime and cache busting
+      - name: Validate V21 runtime and sumptuous-world contract
         run: |
           test -s raluvaaa-wish-classic/index.html
           test -s raluvaaa-wish-classic/engine-v03.html
           test -s raluvaaa-wish-classic/app-v16.js
-          test -s raluvaaa-wish-classic/renderer-v18.js
           test -s raluvaaa-wish-classic/renderer-v19.js
           test -s raluvaaa-wish-classic/renderer-v20.js
+          test -s raluvaaa-wish-classic/renderer-v21.js
           test -s raluvaaa-wish-classic/ux-v17.js
           test -s raluvaaa-wish-classic/ux-v19.js
           test -s raluvaaa-wish-classic/ux-v20.js
           test -s raluvaaa-wish-classic/ui-v17.css
           test -s raluvaaa-wish-classic/ui-v19.css
           test -s raluvaaa-wish-classic/ui-v20.css
+          test -s raluvaaa-wish-classic/ui-v21.css
+          test -s raluvaaa-wish-classic/BRIEF_SUMPTUOUS_WORLD_V21.md
           grep -q 'RALUVAAA · Living artwork' raluvaaa-wish-classic/engine-v03.html
           grep -q 'a living map of <b>human intentions</b>' raluvaaa-wish-classic/index.html
-          grep -q 'renderer-v18.js?build=v20-20260913-1135' raluvaaa-wish-classic/index.html
-          grep -q 'renderer-v19.js?build=v20-20260913-1135' raluvaaa-wish-classic/index.html
-          grep -q 'renderer-v20.js?build=v20-20260913-1135' raluvaaa-wish-classic/index.html
-          grep -q 'ux-v17.js?build=v20-20260913-1135' raluvaaa-wish-classic/index.html
-          grep -q 'ux-v19.js?build=v20-20260913-1135' raluvaaa-wish-classic/index.html
-          grep -q 'ux-v20.js?build=v20-20260913-1135' raluvaaa-wish-classic/index.html
-          grep -q 'ui-v20.css?build=v20-20260913-1135' raluvaaa-wish-classic/index.html
-          grep -q 'engine-v03.html?build=v20-20260913-1135' raluvaaa-wish-classic/index.html
-          grep -q 'setManualEncouraged' raluvaaa-wish-classic/renderer-v18.js
+          grep -q 'renderer-v21.js?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          grep -q 'renderer-v19.js?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          grep -q 'renderer-v20.js?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          grep -q 'ux-v17.js?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          grep -q 'ux-v19.js?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          grep -q 'ux-v20.js?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          grep -q 'ui-v21.css?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          grep -q 'engine-v03.html?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          ! grep -q 'renderer-v18.js?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
+          grep -q 'targetGrowth=vw>1180?12000' raluvaaa-wish-classic/renderer-v21.js
+          grep -q 'targetRoots=vw>1180?15' raluvaaa-wish-classic/renderer-v21.js
+          grep -q '.minimap{display:block!important' raluvaaa-wish-classic/renderer-v21.js
+          grep -q 'setManualEncouraged' raluvaaa-wish-classic/renderer-v21.js
           grep -q 'drawLabels=function(){}' raluvaaa-wish-classic/renderer-v19.js
           grep -q 'actionEffect' raluvaaa-wish-classic/renderer-v20.js
           grep -q 'raluvaaaLanguage' raluvaaa-wish-classic/ux-v20.js
