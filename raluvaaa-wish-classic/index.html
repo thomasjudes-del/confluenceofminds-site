@@ -9,10 +9,11 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>RALUVAAA · Wish World</title>
-<link rel="stylesheet" href="ui.css?build=v18-20260913-0928">
-<link rel="stylesheet" href="ui-v2.css?build=v18-20260913-0928">
-<link rel="stylesheet" href="ui-v16.css?build=v18-20260913-0928">
-<link rel="stylesheet" href="ui-v17.css?build=v18-20260913-0928">
+<link rel="stylesheet" href="ui.css?build=v19-20260913-1035">
+<link rel="stylesheet" href="ui-v2.css?build=v19-20260913-1035">
+<link rel="stylesheet" href="ui-v16.css?build=v19-20260913-1035">
+<link rel="stylesheet" href="ui-v17.css?build=v19-20260913-1035">
+<link rel="stylesheet" href="ui-v19.css?build=v19-20260913-1035">
 </head>
 <body>
 <iframe id="engine" src="about:blank" title="RALUVAAA living world" allow="clipboard-write; web-share"></iframe>
@@ -64,17 +65,19 @@
 
 <script>
 (function(){
-  const BUILD='v18-20260913-0928';
+  const BUILD='v19-20260913-1035';
   window.RALUVAAA_BUILD=BUILD;
   if('caches' in window){caches.keys().then(keys=>Promise.all(keys.filter(k=>/raluvaaa/i.test(k)).map(k=>caches.delete(k)))).catch(()=>{});}
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.filter(r=>r.scope.includes('/raluvaaa-wish-classic/')).forEach(r=>r.unregister())).catch(()=>{});}
 })();
 </script>
-<script src="seed.js?build=v18-20260913-0928"></script>
-<script src="app-v16.js?build=v18-20260913-0928"></script>
-<script src="ux-v2.js?build=v18-20260913-0928"></script>
-<script src="renderer-v18.js?build=v18-20260913-0928"></script>
-<script src="ux-v17.js?build=v18-20260913-0928"></script>
-<script>document.getElementById('engine').src='engine-v03.html?build=v18-20260913-0928';</script>
+<script src="seed.js?build=v19-20260913-1035"></script>
+<script src="app-v16.js?build=v19-20260913-1035"></script>
+<script src="ux-v2.js?build=v19-20260913-1035"></script>
+<script src="renderer-v18.js?build=v19-20260913-1035"></script>
+<script src="renderer-v19.js?build=v19-20260913-1035"></script>
+<script src="ux-v17.js?build=v19-20260913-1035"></script>
+<script src="ux-v19.js?build=v19-20260913-1035"></script>
+<script>document.getElementById('engine').src='engine-v03.html?build=v19-20260913-1035';</script>
 </body>
 </html>
