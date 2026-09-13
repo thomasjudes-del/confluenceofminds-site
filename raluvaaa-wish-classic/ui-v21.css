@@ -1,0 +1,28 @@
+/* RALUVAAA V21 — product UI should frame the organism, not flatten it. */
+:root{--panel:rgba(3,9,18,.52);--line:rgba(184,214,255,.11)}
+
+#brand,#entrusted,#detail{background:linear-gradient(180deg,rgba(7,16,29,.58),rgba(3,9,18,.44));backdrop-filter:blur(14px) saturate(132%);-webkit-backdrop-filter:blur(14px) saturate(132%);box-shadow:0 16px 54px rgba(0,0,0,.23)}
+#brand{width:232px;border-color:rgba(184,214,255,.10)}
+#entrusted{border-color:rgba(184,214,255,.10);background:linear-gradient(180deg,rgba(6,14,27,.57),rgba(2,8,17,.43))}
+#detail{background:linear-gradient(180deg,rgba(6,14,27,.76),rgba(2,8,17,.69));border-color:rgba(184,214,255,.13)}
+
+#quickActions .quickbtn{background:rgba(3,10,20,.56);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-color:rgba(184,214,255,.12)}
+#quickActions .quickbtn:hover{background:rgba(14,31,50,.62);border-color:rgba(137,218,240,.26)}
+
+/* Desktop: keep entrusted present but quieter and narrower than the artwork. */
+@media(min-width:761px){
+  #entrusted{left:50%;transform:translateX(-50%);bottom:18px;width:min(720px,48vw);padding:10px 12px}
+  .entrusted-grid{gap:6px}
+  .entrusted-item{background:rgba(255,255,255,.016);padding:7px 9px}
+  .entrusted-item .t{font-size:9.5px}
+  .entrusted-item .m{font-size:8.5px;margin-top:5px}
+  #brand .stats{opacity:.84}
+  #brand .pulse-news{opacity:.78}
+}
+
+/* The map keeps maximum visual area on phones too. */
+@media(max-width:760px){
+  #brand{background:linear-gradient(180deg,rgba(7,16,29,.60),rgba(3,9,18,.46))}
+  #entrusted{background:linear-gradient(180deg,rgba(6,14,27,.62),rgba(2,8,17,.48))}
+  #detail{max-height:35vh}
+}
