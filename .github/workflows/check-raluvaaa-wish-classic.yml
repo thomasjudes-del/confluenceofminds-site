@@ -50,8 +50,9 @@ jobs:
           grep -q 'ui-v21.css?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
           grep -q 'engine-v03.html?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
           ! grep -q 'renderer-v18.js?build=v21-20260913-2346' raluvaaa-wish-classic/index.html
-          grep -q 'targetGrowth=vw>1180?12000' raluvaaa-wish-classic/renderer-v21.js
+          grep -q 'targetGrowth=vw>1180?14000' raluvaaa-wish-classic/renderer-v21.js
           grep -q 'targetRoots=vw>1180?15' raluvaaa-wish-classic/renderer-v21.js
+          grep -q 'buildAmbient(targetGrowth)' raluvaaa-wish-classic/renderer-v21.js
           grep -q '.minimap{display:block!important' raluvaaa-wish-classic/renderer-v21.js
           grep -q 'setManualEncouraged' raluvaaa-wish-classic/renderer-v21.js
           grep -q 'drawLabels=function(){}' raluvaaa-wish-classic/renderer-v19.js
