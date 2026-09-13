@@ -192,5 +192,7 @@
     doc.body.appendChild(script);
   }
 
-  frame.addEventListener('load',()=>setTimeout(inject,0));
+  /* Synchronous load listener is intentional: app-v16 posts engine-ready first, then this
+     enriches the world before that queued postMessage is delivered and mapped to 100 wishes. */
+  frame.addEventListener('load',inject);
 })();
