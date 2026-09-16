@@ -121,13 +121,13 @@ Do not promote V23 to the official route.
 
 ## MANUAL-MVP-V24
 
-Status: CURRENT WORKING PREVIEW FOR SEMANTIC/WORKFLOW VALIDATION.
+Status: SUPERSEDED WORKING PREVIEW, retained for comparison.
 
 Preview:
 
 `https://confluenceofminds.com/raluvaaa/mvp-v24/`
 
-Current complete preview head:
+Complete preview head:
 
 `9728c3c641527ed0ae17b11d2c68fdb938ade01d`
 
@@ -139,35 +139,55 @@ Architecture:
 
 `VISUAL-V03-LOCKED + coherent semantic simulation + manual Wisher/Helper workflows + local event log`
 
-V24 deliberately contains no LLM and no MCP.
+V24 established the manual event model but exposed workflow gaps found during real testing: revisiting an already split node could not add one branch, correction was confused with abandonment, Reattach was selector-only, Bloom generated decorative branch geometry, and helper branch suggestions / lineage focus were absent.
 
-Manual Wisher actions:
+## MANUAL-MVP-V25
 
-- CREATE
-- EVOLVE
-- SPLIT
-- BLOOM
-- ABANDON
-- REATTACH
-- SHARE
+Status: CURRENT WORKING PREVIEW FOR MANUAL WORKFLOW VALIDATION. Dedicated CI: PASSED.
 
-Manual Helper actions:
+Preview:
 
-- ENCOURAGE
-- HELP
-- CONNECT
-- SHARE
+`https://confluenceofminds.com/raluvaaa/mvp-v25/`
 
-The simulation starts from about 100 independent root wishes and generates coherent semantic histories with real changed text for evolutions, recursive splits, bloom, abandoned branches, help traces and a small number of warps.
+Validated implementation head before this registry update:
 
-The official `/raluvaaa/` route remains on V22 until V24 is semantically and visually reviewed.
+`f90215660f5d9d9cb8952674727e1859177a783b`
+
+Contract:
+
+`raluvaaa/MANUAL_MVP_V25.md`
+
+Architecture:
+
+`VISUAL-V03-LOCKED + semantic wish histories + manual Wisher/Helper workflows + local event log`
+
+V25 deliberately contains no LLM and no MCP.
+
+Key V25 workflow changes:
+
+- first SPLIT creates at least two branches;
+- revisiting an already split node exposes ADD BRANCH and allows one or more additional children while preserving existing branches;
+- one semantic state has at most one direct EVOLVE continuation;
+- BLOOM is terminal and renders flowering at the same endpoint, with no generated child branch;
+- ABANDON preserves a real historical path;
+- REMOVE MISTAKE is explicitly different from ABANDON and can rewrite local sandbox events to remove an accidental node/subtree;
+- REATTACH works both through a fallback parent selector and direct node drag/drop inside the owner's lineage;
+- LINEAGE FOCUS hides unrelated lineages while retaining relevant connected warps/endpoints;
+- a genuine local ENCOURAGE is deliberately much more visible while the real-user population is tiny;
+- HELP remains a concrete contribution;
+- SUGGEST A BRANCH records a human helper's proposed micro-step without changing another person's lineage;
+- CONNECT remains a cross-lineage warp rather than a parent-child relation.
+
+Dedicated validation checks JavaScript syntax, V03 visual lock, the semantic event contract and that Bloom no longer calls the growth primitive to create fake descendants.
+
+The official `/raluvaaa/` route intentionally remains on V22 until the V25 manual workflow is reviewed in-browser and judged ready to replace the semantic/product layer.
 
 ## Future layers, not current MVP
 
 ### OPTIONAL LLM ASSISTANCE
 
-May later propose structure/evolution/splits, always requiring human confirmation. Not implemented in V24.
+May later propose structure/evolution/splits, always requiring human confirmation. Not implemented in V25.
 
 ### MCP / EXTERNAL LLM INTERFACE
 
-May later expose the same event model to ChatGPT/Claude/other clients for read/update/exploration. Not implemented in V24.
+May later expose the same event model to ChatGPT/Claude/other clients for read/update/exploration. Not implemented in V25.
