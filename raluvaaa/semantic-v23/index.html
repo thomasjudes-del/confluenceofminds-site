@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#020610">
+<meta name="robots" content="noindex,nofollow">
+<title>RALUVAAA · Semantic V23</title>
+<style>
+:root{color-scheme:dark;--panel:rgba(3,9,18,.72);--line:rgba(184,214,255,.14);--ink:#edf6ff;--muted:rgba(219,230,246,.62)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020610;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#engine{position:fixed;inset:0;width:100%;height:100%;border:0;background:#020610}
+.glass{border:1px solid var(--line);background:linear-gradient(180deg,rgba(7,16,29,.78),rgba(3,9,18,.66));backdrop-filter:blur(15px) saturate(125%);box-shadow:0 14px 45px rgba(0,0,0,.28)}
+#info{position:fixed;z-index:20;left:16px;top:16px;width:255px;border-radius:16px;padding:13px 14px;pointer-events:none}.logo{font-size:17px;letter-spacing:.27em;font-weight:560}.sub{margin-top:4px;font-size:9px;letter-spacing:.14em;color:rgba(219,230,246,.53)}.stats{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin-top:12px;font-size:10px;color:var(--muted)}.stats b{color:#edf6ff;font-weight:620}.note{margin-top:10px;padding-top:9px;border-top:1px solid rgba(184,214,255,.08);font-size:9px;line-height:1.45;color:rgba(219,230,246,.48)}
+#legend{position:fixed;z-index:20;left:16px;bottom:16px;border-radius:14px;padding:9px 11px;display:flex;gap:13px;font-size:9px;color:rgba(225,236,250,.64);pointer-events:none}.key{display:flex;gap:6px;align-items:center}.dot{width:7px;height:7px;border-radius:50%;background:#dff8ff;box-shadow:0 0 9px rgba(140,231,255,.65)}.bud{width:9px;height:5px;border-radius:60% 40%;background:#a7e6cf}.flower{font-size:13px;line-height:1;color:#ffe9bd}.warp{width:18px;height:0;border-top:1px dashed rgba(180,229,255,.8)}
+#detail{position:fixed;z-index:30;right:16px;bottom:16px;width:min(390px,calc(100vw - 32px));max-height:68vh;overflow:auto;border-radius:18px;padding:15px}.hidden{display:none!important}.head{display:flex;justify-content:space-between;gap:12px}.eyebrow{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(219,230,246,.52)}.wish{margin:7px 0 8px;font-family:Georgia,"Times New Roman",serif;font-size:21px;line-height:1.25}.meta{font-size:10px;line-height:1.5;color:rgba(219,230,246,.58)}.close{border:0;background:transparent;color:rgba(230,240,253,.6);font-size:22px;cursor:pointer}.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}.chip{border:1px solid rgba(181,215,255,.12);border-radius:999px;padding:5px 8px;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:rgba(231,240,252,.72);background:rgba(255,255,255,.025)}.history{margin-top:11px;padding-top:10px;border-top:1px solid rgba(181,215,255,.09);font-size:10px;line-height:1.55;color:rgba(219,230,246,.58)}
+@media(max-width:760px){#info{left:10px;top:10px;width:205px;padding:10px}.stats{display:none}#legend{left:10px;right:10px;bottom:10px;justify-content:space-between;gap:4px;font-size:8px}#detail{left:10px;right:10px;bottom:58px;width:auto;max-height:42vh}.wish{font-size:18px}}
+</style>
+</head>
+<body>
+<iframe id="engine" src="about:blank" title="RALUVAAA semantic world"></iframe>
+<section id="info" class="glass"><div class="logo">RALUVAAA</div><div class="sub">SEMANTIC V23 · SIMULATED</div><div id="stats" class="stats"></div><div class="note">Visual language: locked V03. Topology: 100 independent root wishes with coherent histories. No thematic, geographic or profile clustering.</div></section>
+<section id="legend" class="glass"><span class="key"><i class="dot"></i>wish / sub-wish</span><span class="key"><i class="bud"></i>help</span><span class="key"><i class="flower">✦</i>bloom</span><span class="key"><i class="warp"></i>connect</span></section>
+<section id="detail" class="glass hidden"></section>
+<script src="../v22/seed.js"></script>
+<script>
+(function(){
+'use strict';
+const frame=document.getElementById('engine'),detail=document.getElementById('detail'),stats=document.getElementById('stats');
+const seedTexts=(window.RALUVAAA_SEED_WISHES||[]).slice(0,100),locs=window.RALUVAAA_SEED_LOCS||[];
+let semantic=[];
+function esc(s){return String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]))}
+function closeDetail(){detail.classList.add('hidden');try{frame.contentWindow.postMessage({type:'rv23-clear'},location.origin)}catch(_){}}
+function renderStats(s){stats.innerHTML=[['Root wishes',s.roots],['Wish states',s.semantic],['Blooms',s.blooms],['Let go',s.letgo],['Help traces',s.helps],['Warps',s.warps]].map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join('')}
+function openMeta(m){
+ const root=semantic.find(x=>x.semanticId===m.lineageId&&x.kind==='create')||semantic.find(x=>x.lineageId===m.lineageId&&x.kind==='create');
+ const parent=m.parentSemanticId?semantic.find(x=>x.semanticId===m.parentSemanticId):null;
+ const chips=[m.kind,m.state,m.helpCount?`${m.helpCount} help`:null,m.encouragements?`${m.encouragements} encourage`:null,m.warpCount?`${m.warpCount} connect`:null].filter(Boolean);
+ detail.innerHTML=`<div class="head"><div><div class="eyebrow">${m.kind==='create'?'ORIGIN':'LINEAGE'} · SIMULATED</div><div class="wish">${esc(m.text)}</div><div class="meta">${esc(m.loc||'Somewhere in the world')}<br>Lineage origin: ${esc(root?.text||m.text)}${parent?`<br>From: ${esc(parent.text)}`:''}</div></div><button id="close" class="close">×</button></div><div class="chips">${chips.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div><div class="history">This point belongs to one wish lineage. Splits remain descendants of the same original intention. Pivots continue the same wish. Help nourishes this point but cannot declare Bloom. Connections are warps to independent lineages.</div>`;
+ detail.classList.remove('hidden');document.getElementById('close').onclick=closeDetail;
+}
+window.addEventListener('message',e=>{
+ if(e.origin!==location.origin)return;
+ if(e.data?.type==='rv23-ready'){semantic=e.data.semantic||[];renderStats(e.data.stats||{});}
+ if(e.data?.type==='rv23-select'){openMeta(e.data.meta);}
+ if(e.data?.type==='rv23-blank')detail.classList.add('hidden');
+});
+frame.addEventListener('load',()=>{
+ const doc=frame.contentDocument;if(!doc)return;
+ const style=doc.createElement('style');
+ style.textContent='.top-left,.top-center,.bottom-left,.bottom-right,.node-card,.scale,.lod{display:none!important}.minimap{display:block!important}.side{display:grid!important}';
+ doc.head.appendChild(style);
+ const payload=JSON.stringify({texts:seedTexts,locs});
+ const script=doc.createElement('script');
+ script.textContent=`(function(){
+ 'use strict';
+ const payload=${payload};
+ const metaByNode=new Map(),semantic=[],warps=[],zonePositions=[[-420,-20],[-900,420],[80,-540],[800,-220],[640,520],[-120,650]];
+ const visualZones=[];let selectedLineage=null;
+ function H(s){return hash('semantic-v23|'+s)}
+ function Rfor(s){return rng(H(s))}
+ function makeZone(i){const p=zonePositions[i],z={id:'vz'+i,index:i,label:'',x:p[0],y:p[1],hue:hues[i%hues.length],nodeId:null};world.roots.push(z);visualZones.push(z);return z}
+ function addSemanticNode(root,x,y,angle,id,text,loc,kind,lineageId,parentSemanticId,generation){
+   const n=addNode({id:'sv'+world.next++,root,parentId:null,x,y,angle,generation:generation||0,created:world.clock,lastActive:world.clock,children:[],mutation:kind,rootNode:false,semantic:true,semanticId:id,lineageId});
+   world.tips.push(n);const m={nodeId:n.id,semanticId:id,text,loc,kind,lineageId,parentSemanticId,state:'alive',helpCount:0,encouragements:0,warpCount:0};metaByNode.set(n.id,m);semantic.push(m);return n;
+ }
+ function growSemantic(parent,type,id,text,loc,kind,lineageId,parentSemanticId,seed){
+   world.clock+=.11;const out=grow(parent,type,Rfor(seed||id),false);out.node.semantic=true;out.node.semanticId=id;out.node.lineageId=lineageId;out.edge.semanticLineageId=lineageId;out.edge.semantic=true;const m={nodeId:out.node.id,semanticId:id,text,loc,kind,lineageId,parentSemanticId,state:'alive',helpCount:0,encouragements:0,warpCount:0};metaByNode.set(out.node.id,m);semantic.push(m);return out.node;
+ }
+ function splitTexts(text){
+   const t=text.toLowerCase();
+   if(t.includes('half marathon'))return['Run 5 km without stopping','Choose a training plan','Register for a first race'];
+   if(t.includes('sail'))return['Learn the basic knots and safety rules','Take a beginner sailing course','Crew on a short supervised trip'];
+   if(t.includes('forest'))return['Choose native species for the site','Prepare a first small planting area','Plant and protect the first trees'];
+   if(t.includes('book'))return['Write the first ten pages','Protect two writing sessions each week','Finish a complete rough draft'];
+   if(t.includes('swim'))return['Become comfortable in deep water','Learn a relaxed breathing rhythm','Swim 500 metres continuously'];
+   if(t.includes('bicycle')||t.includes('cycle'))return['Prepare the bike and repair kit','Build distance gradually','Complete the first long day'];
+   if(t.includes('garden'))return['Choose what the space should grow','Prepare one small bed first','Keep a simple weekly care rhythm'];
+   if(t.includes('language'))return['Learn a first useful vocabulary','Practise with another person','Hold a ten minute conversation'];
+   if(t.includes('music')||t.includes('piano')||t.includes('cello')||t.includes('sing'))return['Choose one piece to begin with','Practise a little every week','Play it once for another person'];
+   if(t.includes('film')||t.includes('documentary')||t.includes('animation'))return['Make a tiny first version','Find the people or material needed','Finish and show a complete cut'];
+   if(t.includes('repair')||t.includes('restore')||t.includes('fix'))return['Learn the first repair safely','Find one real object to practise on','Complete one repair without replacing it'];
+   if(t.includes('run'))return['Build a regular weekly rhythm','Reach the first distance milestone','Choose a real event or route'];
+   if(t.includes('learn'))return['Find a first way to practise','Repeat it often enough to become comfortable','Use the skill in a real situation'];
+   if(t.includes('create')||t.includes('build')||t.includes('make'))return['Make the smallest real prototype','Ask someone to react to it','Build a version worth keeping'];
+   return['Choose the first concrete step','Make space for it in real life','Try a small version before going further'];
+ }
+ function addHelp(node,m,count,seed){
+   const R=Rfor(seed);for(let k=0;k<count;k++){
+     const a=node.angle+(k-(count-1)/2)*.62+(R()-.5)*.25,len=15+R()*22,e=edgeGeom(node.x,node.y,a,len,(R()-.5)*.45);e.id='h'+world.next++;e.root=node.root;e.parentId=node.id;e.hue=(node.root.hue+18+(R()-.5)*28+360)%360;e.generation=node.generation+1;e.created=world.clock;e.lastActive=world.clock;e.mine=false;e.type='help';e.seed=H(seed+'|'+k);e.micro=[];e.semanticLineageId=m.lineageId;e.helpEdge=true;addEdge(e);
+     const hn=addNode({id:'hn'+world.next++,root:node.root,parentId:node.id,edgeId:e.id,x:e.x1,y:e.y1,angle:a,generation:node.generation+1,created:world.clock,lastActive:world.clock,children:[],mutation:'help',rootNode:false,decorative:true});
+     const pn=world.nodes.find(v=>v.id===node.id);if(pn)pn.children.push(hn.id);
+   }m.helpCount+=count;
+ }
+ function addBloom(node,m,seed){
+   const R=Rfor(seed);m.state='bloom';
+   for(let k=0;k<4;k++){const ghost={...node,id:node.id+'b'+k,angle:node.angle+(k-1.5)*.78+(R()-.5)*.18,generation:node.generation};world.clock+=.035;const out=grow(ghost,'bloom',R,false);out.node.decorative=true;out.edge.semanticLineageId=m.lineageId;out.edge.bloomPetal=true;}
+ }
+ function letGo(node,m){m.state='letgo';node.lastActive=world.clock-120;const e=world.edges.find(x=>x.id===node.edgeId);if(e)e.lastActive=world.clock-120;}
+ function addWarp(a,b,seed){const R=Rfor(seed),ang=Math.atan2(b.y-a.y,b.x-a.x),len=Math.hypot(b.x-a.x,b.y-a.y),e=edgeGeom(a.x,a.y,ang,len,(R()-.5)*.55);e.id='warp'+world.next++;e.root=a.root;e.parentId=a.id;e.hue=a.root.hue;e.hue2=b.root.hue;e.generation=Math.max(a.generation,b.generation)+1;e.created=world.clock;e.lastActive=world.clock;e.mine=false;e.type='warp';e.seed=H(seed);e.micro=[];e.semanticWarp=true;e.aNode=a.id;e.bNode=b.id;addEdge(e);warps.push(e);const ma=metaByNode.get(a.id),mb=metaByNode.get(b.id);if(ma)ma.warpCount++;if(mb)mb.warpCount++;}
+ function resetSemantic(){
+   world.roots=[];world.nodes=[];world.edges=[];world.tips=[];world.clock=0;world.next=1;world.humans=0;world.history=[];world.selected=null;anim=null;metaByNode.clear();semantic.length=0;warps.length=0;
+   for(let i=0;i<6;i++)makeZone(i);
+   const heads=[];
+   payload.texts.forEach((text,i)=>{
+     const zone=visualZones[(H('zone'+i)%visualZones.length)],R=Rfor('root'+i),a=R()*TAU,rad=120+R()*430;
+     const x=zone.x+Math.cos(a)*rad,y=zone.y+Math.sin(a)*rad,angle=a+(R()-.5)*1.2,loc=payload.locs[(i*7+3)%payload.locs.length]||'Somewhere in the world',lineageId='L'+(i+1),rootId='W'+(i+1);
+     world.clock+=.025;let cur=addSemanticNode(zone,x,y,angle,rootId,text,loc,'create',lineageId,null,0),curMeta=metaByNode.get(cur.id);curMeta.encouragements=H('enc'+i)%9;
+     const profile=H('profile'+i)%100;
+     if(profile>=18){cur=growSemantic(cur,'bend',rootId+'P1',text,loc,'pivot',lineageId,rootId,'p1'+i);curMeta=metaByNode.get(cur.id)}
+     if(profile>=72){cur=growSemantic(cur,'bend',rootId+'P2',text,loc,'pivot',lineageId,curMeta.semanticId,'p2'+i);curMeta=metaByNode.get(cur.id)}
+     const shouldSplit=profile>=34 || (i%7===0);
+     if(shouldSplit){
+       const parts=splitTexts(text),children=[];
+       for(let j=0;j<parts.length;j++){const child=growSemantic(cur,'split',rootId+'S'+(j+1),parts[j],loc,'split',lineageId,curMeta.semanticId,'s'+i+'|'+j);children.push(child)}
+       if(children.length){
+         const bloomIndex=H('bloom'+i)%children.length,helpIndex=H('help'+i)%children.length;
+         if(profile>=48 || i%11===0){const m=metaByNode.get(children[helpIndex].id);addHelp(children[helpIndex],m,1+(H('hc'+i)%3),'help'+i)}
+         if(profile>=58 || i%13===0)addBloom(children[bloomIndex],metaByNode.get(children[bloomIndex].id),'bloom'+i);
+         if(profile>=66 || i%17===0){const target=children[(bloomIndex+1)%children.length],tm=metaByNode.get(target.id),subs=splitTexts(tm.text).slice(0,2);for(let k=0;k<subs.length;k++){const g=growSemantic(target,'split',rootId+'S'+(((bloomIndex+1)%children.length)+1)+'G'+(k+1),subs[k],loc,'split',lineageId,tm.semanticId,'g'+i+'|'+k);if(k===0&&profile>=82)addBloom(g,metaByNode.get(g.id),'gb'+i)}}
+         if(profile>=88){const target=children[(helpIndex+1)%children.length],tm=metaByNode.get(target.id);letGo(target,tm)}
+       }
+     }else if(profile>=25&&profile<34){addHelp(cur,curMeta,1+(H('hcroot'+i)%2),'helproot'+i)}
+     if(profile>=92)addBloom(cur,curMeta,'rootb'+i);
+     heads.push(cur);
+   });
+   const nodes=semantic.map(m=>world.nodes.find(n=>n.id===m.nodeId)).filter(Boolean);for(let k=0;k<10;k++){const a=nodes[H('wa'+k)%nodes.length],b=nodes[H('wb'+k*13)%nodes.length];if(a&&b&&a.lineageId!==b.lineageId)addWarp(a,b,'warp'+k)}
+   for(const m of semantic){const n=world.nodes.find(x=>x.id===m.nodeId);if(!n)continue;const q=H('age'+m.semanticId)%100;if(m.state==='alive'&&q<10){n.lastActive=world.clock-(35+(q%12));const e=world.edges.find(x=>x.id===n.edgeId);if(e)e.lastActive=n.lastActive}}
+   camera.fit();camera.zoom*=.94;world.selected=null;updateStats();
+ }
+ const baseDrawEdge=drawEdge;
+ drawEdge=function(e,progress=1){
+   if(e.semanticWarp){if(!inView((e.x0+e.x1)/2,(e.y0+e.y1)/2,220/camera.zoom))return;ctx.save();ctx.setLineDash([9/Math.max(.55,camera.zoom),12/Math.max(.55,camera.zoom)]);const active=!selectedLineage||metaByNode.get(e.aNode)?.lineageId===selectedLineage||metaByNode.get(e.bNode)?.lineageId===selectedLineage;ctx.strokeStyle='hsla('+e.hue+',92%,78%,'+(active?.48:.13)+')';ctx.lineWidth=(active?1.15:.7)/Math.max(.5,camera.zoom);pathEdge(e,1);ctx.stroke();ctx.strokeStyle='hsla('+e.hue2+',92%,80%,'+(active?.31:.08)+')';ctx.lineDashOffset=10;pathEdge(e,1,1.1/Math.max(.6,camera.zoom));ctx.stroke();ctx.restore();return;}
+   baseDrawEdge(e,progress);
+   if(selectedLineage&&e.semanticLineageId===selectedLineage){ctx.save();ctx.strokeStyle='rgba(201,245,255,.21)';ctx.lineWidth=2.2/Math.max(.5,camera.zoom);pathEdge(e,progress);ctx.stroke();ctx.restore();}
+ };
+ const baseDrawNode=drawNode;
+ drawNode=function(n){baseDrawNode(n);const m=metaByNode.get(n.id);if(!m||!inView(n.x,n.y,40))return;const z=Math.max(.5,camera.zoom);ctx.save();if(m.state==='bloom'){ctx.strokeStyle='rgba(255,235,194,.65)';ctx.lineWidth=.8/z;ctx.beginPath();ctx.arc(n.x,n.y,5.8/z,0,TAU);ctx.stroke()}else if(m.helpCount){ctx.strokeStyle='rgba(174,232,206,.46)';ctx.lineWidth=.7/z;ctx.beginPath();ctx.arc(n.x,n.y,4.8/z,0,TAU);ctx.stroke()}ctx.restore();};
+ drawLabels=function(){};
+ function hitSemantic(sx,sy){let best=null,bd=Infinity;for(const [id,m] of metaByNode){const n=world.nodes.find(x=>x.id===id);if(!n||!inView(n.x,n.y,35))continue;const s=camera.worldToScreen(n.x,n.y),d=Math.hypot(s.x-sx,s.y-sy);if(d<13&&d<bd){best={n,m};bd=d}}return best}
+ canvas.addEventListener('click',ev=>{if(moved)return;const hit=hitSemantic(ev.clientX,ev.clientY);if(hit){selectedLineage=hit.m.lineageId;world.selected=hit.n;parent.postMessage({type:'rv23-select',meta:hit.m},location.origin);ev.stopImmediatePropagation()}else{selectedLineage=null;world.selected=null;parent.postMessage({type:'rv23-blank'},location.origin)}},true);
+ window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='rv23-clear'){selectedLineage=null;world.selected=null}});
+ resetSemantic();
+ const s={roots:payload.texts.length,semantic:semantic.length,blooms:semantic.filter(x=>x.state==='bloom').length,letgo:semantic.filter(x=>x.state==='letgo').length,helps:semantic.reduce((a,x)=>a+x.helpCount,0),warps:warps.length};
+ parent.postMessage({type:'rv23-ready',semantic,stats:s},location.origin);
+})();`;
+ doc.body.appendChild(script);
+});
+frame.src='../v22/engine-v03-locked.html?semantic=v23';
+})();
+</script>
+</body>
+</html>
