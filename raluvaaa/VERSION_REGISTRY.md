@@ -141,7 +141,7 @@ Architecture:
 
 V24 established the manual event model but exposed workflow gaps found during real testing: revisiting an already split node could not add one branch, correction was confused with abandonment, Reattach was selector-only, Bloom generated decorative branch geometry, and helper branch suggestions / lineage focus were absent.
 
-## MANUAL-MVP-V25
+## MANUAL-MVP-V25 / V25.1
 
 Status: CURRENT WORKING PREVIEW FOR MANUAL WORKFLOW VALIDATION. Dedicated CI: PASSED.
 
@@ -149,9 +149,9 @@ Preview:
 
 `https://confluenceofminds.com/raluvaaa/mvp-v25/`
 
-Validated implementation head before this registry update:
+V25.1 validated implementation head before this registry update:
 
-`f90215660f5d9d9cb8952674727e1859177a783b`
+`b2245e0bba1391d8737922b5aae60f59ef433684`
 
 Contract:
 
@@ -175,10 +175,22 @@ Key V25 workflow changes:
 - LINEAGE FOCUS hides unrelated lineages while retaining relevant connected warps/endpoints;
 - a genuine local ENCOURAGE is deliberately much more visible while the real-user population is tiny;
 - HELP remains a concrete contribution;
-- SUGGEST A BRANCH records a human helper's proposed micro-step without changing another person's lineage;
-- CONNECT remains a cross-lineage warp rather than a parent-child relation.
+- SUGGEST A BRANCH records a human helper's proposed micro-step without changing another person's lineage.
 
-Dedicated validation checks JavaScript syntax, V03 visual lock, the semantic event contract and that Bloom no longer calls the growth primitive to create fake descendants.
+V25.1 hardening after live testing:
+
+- ENCOURAGE is idempotent per local human/session and wish, so repeated clicks cannot manufacture unlimited encouragements;
+- public encouragement counts are not shown in the wish detail;
+- CONNECT is now a proposal first, represented by `connect_proposed`;
+- each relevant wisher controls consent for their own wish through `connect_accept` or `connect_decline`;
+- the durable `connect` event and visual warp are materialized only after all required consents exist;
+- owned wishes may also initiate a connection proposal;
+- a private Inbox surface now holds connection approvals and is the future home for HELP offers and branch suggestions;
+- Entrusted wishes, Inbox, My world and Release a wish moved into a compact collapsible side rail/drawer;
+- permanent bottom navigation was removed to protect map visibility, especially on mobile;
+- redundant renderer plus/minus navigation controls are hidden, leaving wheel, trackpad, pinch and pan as the primary navigation mechanisms.
+
+Dedicated validation checks JavaScript syntax, V03 visual lock, the semantic event contract, connection consent primitives, single-encouragement protection, side-rail navigation and that Bloom no longer calls the growth primitive to create fake descendants.
 
 The official `/raluvaaa/` route intentionally remains on V22 until the V25 manual workflow is reviewed in-browser and judged ready to replace the semantic/product layer.
 
