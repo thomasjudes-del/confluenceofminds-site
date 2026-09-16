@@ -1,0 +1,50 @@
+name: Check RALUVAAA Manual MVP V26
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/mvp-v26/**'
+      - 'raluvaaa/MANUAL_MVP_V26.md'
+      - '.github/workflows/check-raluvaaa-mvp-v26.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/mvp-v26/app.js
+          node --check raluvaaa/mvp-v26/qa-browser.cjs
+          grep -q 'engine-v03-locked.html' raluvaaa/mvp-v26/index.html
+          grep -q "raluvaaaManualMvpV26" raluvaaa/mvp-v26/app.js
+          grep -q "connect_proposed" raluvaaa/mvp-v26/app.js
+          grep -q "help_proposed" raluvaaa/mvp-v26/app.js
+          grep -q "suggest_proposed" raluvaaa/mvp-v26/app.js
+          grep -q "proposal_response" raluvaaa/mvp-v26/app.js
+          grep -q "oneEncourage" raluvaaa/mvp-v26/app.js
+          grep -q "focusLineage" raluvaaa/mvp-v26/app.js
+          grep -q "data-persona" raluvaaa/mvp-v26/index.html
+          ! grep -q 'renderer-v18' raluvaaa/mvp-v26/index.html
+          ! grep -q 'renderer-v19' raluvaaa/mvp-v26/index.html
+          ! grep -q 'renderer-v20' raluvaaa/mvp-v26/index.html
+          ! grep -q 'renderer-v21' raluvaaa/mvp-v26/index.html
+      - name: Install Chromium QA runner
+        run: |
+          mkdir -p /tmp/rv26-playwright
+          cd /tmp/rv26-playwright
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run browser workflow QA
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/rv26-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          node raluvaaa/mvp-v26/qa-browser.cjs
