@@ -1,0 +1,28 @@
+/* RALUVAAA V16: temporal cues, test-mode hierarchy and refined create cue. */
+.entrusted-item .m{transition:color .18s ease,text-shadow .18s ease}
+.entrusted-item.urgent .m{color:#ef7f7f!important;text-shadow:0 0 10px rgba(239,127,127,.10)!important}
+.entrusted-item.mid .m{color:rgba(220,229,239,.68)!important;text-shadow:none!important}
+.entrusted-item.long .m{color:#79a98a!important;text-shadow:0 0 10px rgba(92,151,111,.08)!important}
+
+.quickbtn.createWishIcon svg{width:21px;height:21px;overflow:visible}
+.quickbtn.createWishIcon .wish-core{fill:rgba(239,244,233,.82);stroke:none}
+.quickbtn.createWishIcon .wish-petal{stroke:rgba(237,244,238,.88);stroke-width:1.25;fill:none;stroke-linecap:round}
+.quickbtn.createWishIcon .wish-ring{stroke:rgba(223,237,230,.22);stroke-width:.9;fill:none;transform-origin:12px 12px;animation:wishBloom 3.8s ease-out infinite}
+.quickbtn.createWishIcon .wish-ring.r2{animation-delay:1.05s}
+@keyframes wishBloom{0%,38%{opacity:.38;transform:scale(.55)}82%,100%{opacity:.02;transform:scale(1.28)}}
+
+.test-note{margin:8px 0 0;color:rgba(215,225,238,.46);font-size:9px;line-height:1.4;letter-spacing:.02em}
+.my-tree{display:grid;gap:6px;margin-top:7px}
+.my-tree .entrusted-item.child{margin-left:16px!important;width:calc(100% - 16px)!important;border-color:rgba(178,200,225,.08);background:rgba(8,16,30,.42)}
+.my-tree .entrusted-item.child .t:before{content:'↳ ';color:rgba(211,225,240,.38)}
+.contrib-list{display:grid;gap:5px;margin-top:7px}
+.contrib-row{padding:8px 10px;border:1px solid rgba(181,202,229,.08);border-radius:10px;background:rgba(5,12,24,.38);font-size:10px;color:rgba(226,235,246,.68)}
+.contrib-row b{color:rgba(239,244,250,.86);font-weight:650}
+
+.action.done,.action:disabled{opacity:.72}
+.action.active{box-shadow:0 0 0 1px rgba(234,244,241,.08),0 6px 22px rgba(228,241,233,.05)!important}
+
+@media(max-width:760px){
+  .entrusted-item .m{min-width:72px;text-align:right}
+  .my-tree .entrusted-item.child{margin-left:11px!important;width:calc(100% - 11px)!important}
+}

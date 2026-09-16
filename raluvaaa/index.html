@@ -2,21 +2,86 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#020610">
 <meta name="robots" content="noindex,nofollow">
-<title>RALUVAAA</title>
-<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020610}iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#020610}</style>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>RALUVAAA · Living map of human intentions</title>
+<link rel="stylesheet" href="v22/ui.css?build=v22-20260916-product-on-v03">
+<link rel="stylesheet" href="v22/ui-v2.css?build=v22-20260916-product-on-v03">
+<link rel="stylesheet" href="v22/ui-v16.css?build=v22-20260916-product-on-v03">
+<link rel="stylesheet" href="v22/ui-v17.css?build=v22-20260916-product-on-v03">
+<link rel="stylesheet" href="v22/ui-v19.css?build=v22-20260916-product-on-v03">
+<link rel="stylesheet" href="v22/ui-v20.css?build=v22-20260916-product-on-v03">
 </head>
 <body>
-<iframe id="raluvaaa" title="RALUVAAA" allow="clipboard-write; web-share" referrerpolicy="no-referrer"></iframe>
+<iframe id="engine" src="about:blank" title="RALUVAAA living world" allow="clipboard-write; web-share"></iframe>
+
+<section id="brand" class="glass">
+  <div class="logo">RALUVAAA</div>
+  <div class="tag">a living map of <b>human intentions</b></div>
+  <div class="pulse-head"><span>WORLD PULSE · TEST</span><button id="pulseMore">24H</button></div>
+  <div id="stats" class="stats"></div>
+  <div id="pulseNews" class="pulse-news"></div>
+</section>
+
+<div id="quickActions" aria-label="Wish actions">
+  <button id="quickPulse" class="quickbtn pulseIcon" title="World Pulse" aria-label="World Pulse" data-tooltip="World Pulse">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none"/><path d="M4 12h3l1.6-3.5 2.5 7 2.2-5 1.5 2.5H20" fill="none"/></svg>
+  </button>
+  <button id="quickMyWorld" class="quickbtn" title="My world" aria-label="My world" data-tooltip="My world">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5.5l5-2 7 2.5 5-2v14.5l-5 2-7-2.5-5 2z"/><path d="M8.5 3.5v14.5M15.5 6v14.5"/></svg>
+  </button>
+  <button id="quickRelease" class="quickbtn createWishIcon" title="Release a wish" aria-label="Release a wish" data-tooltip="Release a wish">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle class="wish-ring r1" cx="12" cy="12" r="8"/>
+      <circle class="wish-ring r2" cx="12" cy="12" r="5.2"/>
+      <circle class="wish-core" cx="12" cy="12" r="1.25"/>
+      <path class="wish-petal" d="M12 4.8v4M12 15.2v4M4.8 12h4M15.2 12h4M6.9 6.9l2.8 2.8M14.3 14.3l2.8 2.8M17.1 6.9l-2.8 2.8M9.7 14.3l-2.8 2.8"/>
+    </svg>
+  </button>
+</div>
+
+<section id="entrusted" class="glass">
+  <div class="entrusted-head">
+    <strong>Entrusted to you</strong>
+    <div id="entrustedQuick" aria-label="Quick entrusted wish navigation"></div>
+    <button id="entrustedCollapse" aria-label="Collapse entrusted wishes" aria-expanded="true">
+      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+  </div>
+  <div id="entrustedGrid" class="entrusted-grid"></div>
+</section>
+
+<nav id="dock" aria-hidden="true">
+  <button id="myWorldBtn" class="soft">My world</button>
+  <button id="createBtn" class="soft primary">+ Release a wish</button>
+</nav>
+
+<section id="detail" class="glass hidden" aria-live="polite"></section>
+<div id="toastWrap"></div>
+<div id="overlay"></div>
+
 <script>
 (function(){
-  const target='https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/raluvaaa/preview/v03/index.html';
-  function load(){const u=new URL(target);u.search=location.search;u.hash=location.hash;document.getElementById('raluvaaa').src=u.toString();}
-  load();
-  addEventListener('hashchange',load);
+  const BUILD='v22-20260916-product-on-v03';
+  window.RALUVAAA_BUILD=BUILD;
+  window.RALUVAAA_VISUAL_BASELINE='v03-locked-17714b';
+  window.RALUVAAA_PRODUCT_BASELINE='v20-63f1793';
+  if('caches' in window){caches.keys().then(keys=>Promise.all(keys.filter(k=>/raluvaaa/i.test(k)).map(k=>caches.delete(k)))).catch(()=>{});}
+  if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.filter(r=>r.scope.includes('/raluvaaa/')).forEach(r=>r.unregister())).catch(()=>{});}
 })();
 </script>
+<script src="v22/seed.js?build=v22-20260916-product-on-v03"></script>
+<script src="v22/app-v16.js?build=v22-20260916-product-on-v03"></script>
+<script src="v22/ux-v2.js?build=v22-20260916-product-on-v03"></script>
+<script src="v22/ux-v17.js?build=v22-20260916-product-on-v03"></script>
+<script src="v22/ux-v19.js?build=v22-20260916-product-on-v03"></script>
+<script src="v22/ux-v20.js?build=v22-20260916-product-on-v03"></script>
+<script src="v22/visual-lock-adapter.js?build=v22-20260916-product-on-v03"></script>
+<!-- Deliberately NO V18/V19/V20/V21 renderer overrides. -->
+<script>document.getElementById('engine').src='v22/engine-v03-locked.html?build=v03-locked-17714b';</script>
 </body>
 </html>
