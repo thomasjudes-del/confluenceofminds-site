@@ -16,6 +16,7 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
     assert.equal(await page.evaluate(()=>window.__RV26_TEST__.persona),actor);
   }
   async function open(id){await page.evaluate(id=>window.__RV26_TEST__.open(id),id);await page.waitForSelector('#drawer:not(.hidden)');await page.waitForTimeout(120)}
+  async function clickAction(name){const target=page.locator(`[data-act="${name}"]`).first();if(!(await target.isVisible())){const summary=page.locator('details.more > summary');assert(await summary.count(),`missing More menu for ${name}`);await summary.click()}await target.click()}
   async function brightCount(){return page.evaluate(()=>{const f=document.getElementById('engine'),c=f.contentDocument.querySelector('canvas'),x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data;let n=0;for(let i=0;i<d.length;i+=32){if(d[i]+d[i+1]+d[i+2]>90)n++}return n})}
   async function createWish(text){await page.locator('#createBtn').click();await page.fill('#wishInput',text);await page.locator('#confirm').click();await page.waitForFunction(text=>window.__RV26_TEST__.state().events.some(e=>e.type==='create'&&e.text===text),text);return page.evaluate(text=>window.__RV26_TEST__.state().events.find(e=>e.type==='create'&&e.text===text).semanticId,text)}
 
@@ -32,7 +33,7 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
 
   await open('qa-a-e1');
   const before=await brightCount();
-  await page.locator('[data-act="focus"]').first().click();
+  await clickAction('focus');
   await page.waitForFunction(()=>document.body.dataset.focusLineage==='qa-a-lineage');
   await page.waitForTimeout(350);
   const after=await brightCount();
@@ -41,32 +42,32 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   await page.waitForFunction(()=>!document.body.dataset.focusLineage);
 
   await open('qa-a-s1');
-  await page.locator('[data-act="evolve"]').click();
+  await clickAction('evolve');
   await page.fill('#evolveInput','I booked my first beginner sailing lesson.');
   await page.locator('#confirm').click();
   await page.waitForFunction(()=>window.__RV26_TEST__.state().events.some(e=>e.type==='evolve'&&e.text==='I booked my first beginner sailing lesson.'));
 
   await open('qa-a-s2');
-  await page.locator('[data-act="split"]').click();
+  await clickAction('split');
   await page.fill('#branchInput','Practise a bowline\nPractise a figure-eight knot');
   await page.locator('#confirm').click();
   await page.waitForFunction(()=>window.__RV26_TEST__.state().events.filter(e=>e.type==='split').length>=3);
   await open('qa-a-s2');
   assert(await page.locator('[data-act="branch"]').isVisible());
-  await page.locator('[data-act="branch"]').click();
+  await clickAction('branch');
   await page.fill('#branchInput','Practise tying knots with gloves');
   await page.locator('#confirm').click();
   await page.waitForFunction(()=>window.__RV26_TEST__.state().events.some(e=>e.type==='branch_add'&&!e.proposalId));
   const branchId=await page.evaluate(()=>window.__RV26_TEST__.state().events.filter(e=>e.type==='branch_add'&&!e.proposalId).slice(-1)[0].children[0].semanticId);
   await open(branchId);
-  await page.locator('[data-act="reattach"]').click();
+  await clickAction('reattach');
   await page.selectOption('#parentSelect','qa-a-s1');
   await page.locator('#confirm').click();
   await page.waitForFunction(id=>window.__RV26_TEST__.state().events.some(e=>e.type==='reparent'&&e.semanticId===id),branchId);
 
   page.once('dialog',d=>d.accept());
   await open('qa-a-s3');
-  await page.locator('[data-act="bloom"]').click();
+  await clickAction('bloom');
   await page.waitForFunction(()=>window.__RV26_TEST__.state().events.some(e=>e.type==='bloom'&&e.semanticId==='qa-a-s3'));
   await open('qa-a-s3');
   assert.equal(await page.locator('[data-act="evolve"]').count(),0);
@@ -75,41 +76,41 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   const abandonedId=await createWish('QA wish to abandon intentionally');
   await open(abandonedId);
   page.once('dialog',d=>d.accept());
-  await page.locator('[data-act="abandon"]').click();
+  await clickAction('abandon');
   await page.waitForFunction(id=>window.__RV26_TEST__.state().events.some(e=>e.type==='abandon'&&e.semanticId===id),abandonedId);
 
   const mistakeId=await createWish('QA accidental wish to remove');
   await open(mistakeId);
   page.once('dialog',d=>d.accept());
-  await page.locator('[data-act="remove"]').click();
+  await clickAction('remove');
   await page.waitForFunction(id=>!window.__RV26_TEST__.state().events.some(e=>e.type==='create'&&e.semanticId===id),mistakeId);
 
   await open('qa-a-root');
-  await page.locator('[data-act="share"]').click();
+  await clickAction('share');
   await page.waitForTimeout(100);
   const clip=await page.evaluate(()=>navigator.clipboard.readText());
   assert(clip.includes('#wish=qa-a-root'));
 
   await go('A');
   await open('qa-b-root');
-  await page.locator('[data-act="encourage"]').click();
+  await clickAction('encourage');
   await page.waitForFunction(()=>window.__RV26_TEST__.state().events.some(e=>e.type==='encourage'&&e.semanticId==='qa-b-root'&&e.actorId==='A'));
   await open('qa-b-root');
   assert(await page.locator('[data-act="encourage"]').isDisabled());
 
-  await page.locator('[data-act="help"]').click();
+  await clickAction('help');
   await page.fill('#helpInput','I can lend you tools for the first planting day.');
   await page.locator('#confirm').click();
   await page.waitForFunction(()=>window.__RV26_TEST__.state().events.some(e=>e.type==='help_proposed'&&e.actorId==='A'));
 
   await open('qa-b-root');
-  await page.locator('[data-act="suggest"]').click();
+  await clickAction('suggest');
   await page.fill('#suggestInput','Ask the first three neighbours\nChoose one tiny plot');
   await page.locator('#confirm').click();
   await page.waitForFunction(()=>window.__RV26_TEST__.state().events.some(e=>e.type==='suggest_proposed'&&e.actorId==='A'));
 
   await open('qa-a-root');
-  await page.locator('[data-act="connect"]').click();
+  await clickAction('connect');
   await page.evaluate(()=>window.__RV26_TEST__.open('qa-b-root'));
   await page.waitForSelector('#confirm');
   await page.locator('#confirm').click();
