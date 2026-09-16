@@ -28,14 +28,26 @@ jobs:
           grep -q "type:'bloom'" raluvaaa/mvp-v25/app.js
           grep -q "type:'abandon'" raluvaaa/mvp-v25/app.js
           grep -q "type:'encourage'" raluvaaa/mvp-v25/app.js
+          grep -q "function isEncouraged" raluvaaa/mvp-v25/app.js
+          grep -q "alreadyEncouraged" raluvaaa/mvp-v25/app.js
           grep -q "type:'help'" raluvaaa/mvp-v25/app.js
           grep -q "type:'suggest_split'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'connect_proposed'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'connect_accept'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'connect_decline'" raluvaaa/mvp-v25/app.js
           grep -q "type:'connect'" raluvaaa/mvp-v25/app.js
+          grep -q "function materializeProposal" raluvaaa/mvp-v25/app.js
           grep -q "type:'reparent'" raluvaaa/mvp-v25/app.js
           grep -q "rv25-reparent-request" raluvaaa/mvp-v25/engine-runtime.js
           grep -q "function removeMistake" raluvaaa/mvp-v25/app.js
           grep -q "function addBloom(node,m){" raluvaaa/mvp-v25/engine-runtime.js
           ! grep -q "grow(ghost,'bloom'" raluvaaa/mvp-v25/engine-runtime.js
+          grep -q 'id="rail"' raluvaaa/mvp-v25/index.html
+          grep -q 'id="drawer"' raluvaaa/mvp-v25/index.html
+          grep -q 'id="inboxBtn"' raluvaaa/mvp-v25/index.html
+          grep -q '\.side{display:none!important}' raluvaaa/mvp-v25/app.js
+          ! grep -q 'id="entrusted"' raluvaaa/mvp-v25/index.html
+          ! grep -q 'id="actions"' raluvaaa/mvp-v25/index.html
           ! grep -q 'renderer-v18' raluvaaa/mvp-v25/index.html
           ! grep -q 'renderer-v19' raluvaaa/mvp-v25/index.html
           ! grep -q 'renderer-v20' raluvaaa/mvp-v25/index.html
