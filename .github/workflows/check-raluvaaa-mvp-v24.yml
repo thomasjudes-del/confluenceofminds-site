@@ -1,0 +1,37 @@
+name: Check RALUVAAA Manual MVP V24
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/mvp-v24/**'
+      - 'raluvaaa/MANUAL_MVP_V24.md'
+      - '.github/workflows/check-raluvaaa-mvp-v24.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check raluvaaa/mvp-v24/app.js
+          node --check raluvaaa/mvp-v24/engine-runtime.js
+      - name: Check visual lock and manual grammar
+        run: |
+          grep -q 'engine-v03-locked.html' raluvaaa/mvp-v24/index.html
+          grep -q "type:'evolve'" raluvaaa/mvp-v24/app.js
+          grep -q "type:'split'" raluvaaa/mvp-v24/app.js
+          grep -q "type:'bloom'" raluvaaa/mvp-v24/app.js
+          grep -q "type:'abandon'" raluvaaa/mvp-v24/app.js
+          grep -q "type:'encourage'" raluvaaa/mvp-v24/app.js
+          grep -q "type:'help'" raluvaaa/mvp-v24/app.js
+          grep -q "type:'connect'" raluvaaa/mvp-v24/app.js
+          grep -q "type:'reparent'" raluvaaa/mvp-v24/app.js
+          ! grep -q 'renderer-v18' raluvaaa/mvp-v24/index.html
+          ! grep -q 'renderer-v19' raluvaaa/mvp-v24/index.html
+          ! grep -q 'renderer-v20' raluvaaa/mvp-v24/index.html
+          ! grep -q 'renderer-v21' raluvaaa/mvp-v24/index.html
