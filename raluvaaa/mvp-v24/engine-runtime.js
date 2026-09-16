@@ -1,0 +1,114 @@
+(function(){
+'use strict';
+const metaByNode=new Map(),metaBySemantic=new Map(),semantic=[],warps=[],zones=[];
+let payload={texts:[],locs:[]},selectedSemanticId=null,selectedLineage=null,ancestorIds=new Set();
+const zonePositions=[[-420,-20],[-900,420],[80,-540],[800,-220],[640,520],[-120,650]];
+
+function H(s){return hash('raluvaaa-v24|'+String(s))}
+function Rfor(s){return rng(H(s))}
+function nodeBySemantic(id){const m=metaBySemantic.get(id);return m?world.nodes.find(n=>n.id===m.nodeId)||null:null}
+function cloneMeta(m){return{nodeId:m.nodeId,semanticId:m.semanticId,text:m.text,loc:m.loc,kind:m.kind,lineageId:m.lineageId,parentSemanticId:m.parentSemanticId,state:m.state,helpCount:m.helpCount||0,encouragements:m.encouragements||0,warpCount:m.warpCount||0,owner:!!m.owner,simulated:!!m.simulated,created:m.created||0}}
+function registerMeta(node,m){m.nodeId=node.id;metaByNode.set(node.id,m);metaBySemantic.set(m.semanticId,m);semantic.push(m);return m}
+function makeZone(i){const p=zonePositions[i],z={id:'zone'+i,index:i,label:'',x:p[0],y:p[1],hue:hues[i%hues.length],nodeId:null};world.roots.push(z);zones.push(z);return z}
+function clearWorld(){world.roots=[];world.nodes=[];world.edges=[];world.tips=[];world.clock=0;world.next=1;world.humans=0;world.history=[];world.selected=null;anim=null;metaByNode.clear();metaBySemantic.clear();semantic.length=0;warps.length=0;zones.length=0;selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();for(let i=0;i<6;i++)makeZone(i)}
+
+function addSemanticRoot(opts){
+ const R=Rfor(opts.seed||opts.semanticId),zone=zones[(H('zone|'+opts.semanticId)%zones.length)],a=R()*TAU,rad=120+R()*430;
+ const x=zone.x+Math.cos(a)*rad,y=zone.y+Math.sin(a)*rad,angle=a+(R()-.5)*.7;
+ const n=addNode({id:'sv'+world.next++,root:zone,parentId:null,x,y,angle,generation:0,created:world.clock,lastActive:world.clock,children:[],mutation:'create',rootNode:false,semantic:true,semanticId:opts.semanticId,lineageId:opts.lineageId,owner:!!opts.owner});
+ world.tips.push(n);
+ registerMeta(n,{semanticId:opts.semanticId,text:opts.text,loc:opts.loc||'Somewhere in the world',kind:'create',lineageId:opts.lineageId,parentSemanticId:null,state:'alive',helpCount:0,encouragements:0,warpCount:0,owner:!!opts.owner,simulated:!!opts.simulated,created:world.clock});
+ return n;
+}
+function growSemantic(parent,type,opts){
+ if(!parent)return null;world.clock+=.11;const out=grow(parent,type,Rfor(opts.seed||opts.semanticId),false);out.node.semantic=true;out.node.semanticId=opts.semanticId;out.node.lineageId=opts.lineageId;out.node.owner=!!opts.owner;out.edge.semantic=true;out.edge.semanticLineageId=opts.lineageId;out.edge.semanticParentId=opts.parentSemanticId;out.edge.semanticChildId=opts.semanticId;
+ registerMeta(out.node,{semanticId:opts.semanticId,text:opts.text,loc:opts.loc||'Somewhere in the world',kind:opts.kind,lineageId:opts.lineageId,parentSemanticId:opts.parentSemanticId,state:'alive',helpCount:0,encouragements:0,warpCount:0,owner:!!opts.owner,simulated:!!opts.simulated,created:world.clock});
+ return out.node;
+}
+function stripWish(text){return String(text||'').replace(/^I (?:want to|wish I could|would like to)\s+/i,'').replace(/[.!?]+$/,'')}
+function profile(text){
+ const t=String(text||'').toLowerCase(),base=stripWish(text);
+ if(/sail|boat/.test(t))return{evolve:'I have decided to start with a beginner course on calm water.',splits:['Find a beginner-friendly sailing course','Learn the essential knots and safety rules','Complete a first supervised trip'],nested:['Compare two realistic beginner courses','Book one first session']};
+ if(/half marathon|run|running/.test(t))return{evolve:'I am starting by building a regular running rhythm.',splits:['Run 5 km comfortably','Choose a realistic training plan','Register for a first race'],nested:['Run twice each week for one month','Complete one 5 km run without stopping']};
+ if(/language|sign language|speak/.test(t))return{evolve:'I have chosen one small conversation goal to work toward first.',splits:['Learn a first useful vocabulary','Practise regularly with another person','Hold a ten minute conversation'],nested:['Choose the first 50 useful words','Use them in one real conversation']};
+ if(/forest|garden|orchard|wetland|butterfl|mushroom|tree|flowers/.test(t))return{evolve:'I have chosen one small area to begin with instead of the whole project.',splits:['Understand what belongs on the site','Prepare one first small area','Establish the first living plants'],nested:['Choose suitable native species','Prepare the first planting day']};
+ if(/book|write|archive|recipe|letter|voices|story/.test(t))return{evolve:'I am starting with one small piece instead of trying to finish the whole thing.',splits:['Create the first complete piece','Protect a regular time to continue','Share a first version with one trusted person'],nested:['Finish the first small section','Review it once before continuing']};
+ if(/swim|surf|waves/.test(t))return{evolve:'I have decided to begin in a setting where I feel safe and can practise slowly.',splits:['Become comfortable with the basics','Practise breathing and movement regularly','Complete a first independent session'],nested:['Book one beginner session','Repeat the basics three times']};
+ if(/bicycle|bike|cycle/.test(t))return{evolve:'I am starting with shorter rides and a reliable bike before going farther.',splits:['Prepare the bike and repair kit','Build distance gradually','Complete the first long ride'],nested:['Check the bike completely','Practise one roadside repair']};
+ if(/music|cello|piano|sing|choir|dance/.test(t))return{evolve:'I have chosen one small piece or routine to practise first.',splits:['Choose one first piece or routine','Practise a little every week','Perform it once for another person'],nested:['Learn the first short section','Repeat it until it feels natural']};
+ if(/film|documentary|animation|art|drawing|game/.test(t))return{evolve:'I am making a tiny first version before attempting the full idea.',splits:['Make the smallest real prototype','Find the material or people needed','Finish one version worth showing'],nested:['Create the first rough version','Show it to one person and adjust it']};
+ if(/repair|restore|woodwork|table|chair|treehouse|lamp|electronics|build/.test(t))return{evolve:'I have chosen one small real object to make or repair first.',splits:['Learn the first technique safely','Prepare the tools and materials','Complete one usable result'],nested:['Practise the key technique once','Use it on the real object']};
+ if(/climate|energy|rainwater|roof|waste|car|food/.test(t))return{evolve:'I have chosen one measurable change to try first.',splits:['Understand the current situation','Make one small practical change','See whether it works in real life'],nested:['Measure one simple baseline','Test one change for a few weeks']};
+ if(/mother|father|brother|grand|family/.test(t))return{evolve:'I have chosen one concrete moment to make this intention real.',splits:['Prepare what I want to say or do','Create one real opportunity','Follow through after the first moment'],nested:['Choose the first person or story','Set aside one uninterrupted moment']};
+ if(/neighbour|street|festival|dinner|library|community|teenager|workplace|repair day|tool library/.test(t))return{evolve:'I am starting with a very small group instead of trying to organise everyone.',splits:['Find two or three people who care','Test the idea once on a small scale','Decide what should continue'],nested:['Invite the first few people','Set one simple date or place']};
+ if(/walk|train|desert|japan|northern lights|visit|cross a country|sea from my front door/.test(t))return{evolve:'I have chosen a first realistic version of the journey.',splits:['Choose the first route or destination','Prepare the practical basics','Complete the first meaningful leg'],nested:['Sketch one realistic route','Commit to the first date or stage']};
+ if(/learn|understand|identify|recognise|photograph|astronomy|navigate/.test(t))return{evolve:'I have chosen one concrete skill to practise first.',splits:['Find a first way to practise','Repeat it often enough to become comfortable','Use the skill in a real situation'],nested:['Choose one beginner exercise','Try it without assistance once']};
+ return{evolve:'I have chosen one smaller real version of this wish to try first.',splits:[`Define one concrete version of: ${base}`,`Try one small real-world step toward: ${base}`,`Decide what should happen next`],nested:['Make the first step small enough to start','Try it once and keep what works']};
+}
+function addHelp(node,m,count,seed){
+ if(!node||!m)return;const R=Rfor(seed);for(let k=0;k<count;k++){const a=node.angle+(k-(count-1)/2)*.65+(R()-.5)*.28,len=14+R()*22,e=edgeGeom(node.x,node.y,a,len,(R()-.5)*.42);e.id='help'+world.next++;e.root=node.root;e.parentId=node.id;e.hue=158+(R()-.5)*22;e.generation=node.generation+1;e.created=world.clock;e.lastActive=world.clock;e.mine=false;e.type='help';e.seed=H(seed+'|'+k);e.micro=[];e.helpEdge=true;e.semanticLineageId=m.lineageId;e.semanticOwnerId=m.semanticId;addEdge(e);const hn=addNode({id:'helpn'+world.next++,root:node.root,parentId:node.id,edgeId:e.id,x:e.x1,y:e.y1,angle:a,generation:node.generation+1,created:world.clock,lastActive:world.clock,children:[],mutation:'help',rootNode:false,decorative:true});const pn=world.nodes.find(v=>v.id===node.id);if(pn)pn.children.push(hn.id)}m.helpCount=(m.helpCount||0)+count;
+}
+function addBloom(node,m,seed){
+ if(!node||!m||m.state==='bloom')return;m.state='bloom';const R=Rfor(seed);for(let k=0;k<5;k++){const ghost={...node,id:node.id+'flower'+k,angle:node.angle+(k-2)*.66+(R()-.5)*.17,generation:node.generation};world.clock+=.025;const out=grow(ghost,'bloom',R,false);out.node.decorative=true;out.edge.bloomPetal=true;out.edge.semanticLineageId=m.lineageId;out.edge.semanticOwnerId=m.semanticId}}
+function abandon(node,m){if(!node||!m)return;m.state='abandoned';node.lastActive=world.clock-130;const e=world.edges.find(x=>x.id===node.edgeId);if(e)e.lastActive=world.clock-130}
+function addWarp(a,b,seed){
+ if(!a||!b)return null;const ma=metaByNode.get(a.id),mb=metaByNode.get(b.id);if(!ma||!mb||ma.lineageId===mb.lineageId)return null;const R=Rfor(seed),ang=Math.atan2(b.y-a.y,b.x-a.x),len=Math.hypot(b.x-a.x,b.y-a.y),curve=(R()-.5)*.55,e=edgeGeom(a.x,a.y,ang,len,curve);e.id='warp'+world.next++;e.root=a.root;e.parentId=a.id;e.hue=a.root.hue;e.hue2=b.root.hue;e.generation=Math.max(a.generation,b.generation)+1;e.created=world.clock;e.lastActive=world.clock;e.mine=false;e.type='warp';e.seed=H(seed);e.micro=[];e.semanticWarp=true;e.aSemanticId=ma.semanticId;e.bSemanticId=mb.semanticId;e.warpCurve=curve;addEdge(e);warps.push(e);ma.warpCount=(ma.warpCount||0)+1;mb.warpCount=(mb.warpCount||0)+1;return e}
+function refreshWarp(e){const a=nodeBySemantic(e.aSemanticId),b=nodeBySemantic(e.bSemanticId);if(!a||!b)return;const ang=Math.atan2(b.y-a.y,b.x-a.x),len=Math.hypot(b.x-a.x,b.y-a.y),g=edgeGeom(a.x,a.y,ang,len,e.warpCurve||0);e.x0=g.x0;e.y0=g.y0;e.cx=g.cx;e.cy=g.cy;e.x1=g.x1;e.y1=g.y1}
+
+function buildSimulated(){
+ const roots=[];payload.texts.slice(0,100).forEach((text,i)=>{
+   const loc=payload.locs[(i*7+3)%Math.max(1,payload.locs.length)]||'Somewhere in the world',lineageId='sim-lineage-'+(i+1),rootId='sim-'+(i+1),p=profile(text),h=H('history|'+i)%100;
+   const root=addSemanticRoot({semanticId:rootId,lineageId,text,loc,owner:false,simulated:true,seed:'simroot|'+i});roots.push(root);let current=root,mainMeta=metaByNode.get(root.id),children=[];
+   if(h<72){const id=rootId+'-e1';current=growSemantic(root,'bend',{semanticId:id,lineageId,parentSemanticId:rootId,text:p.evolve,loc,kind:'evolve',owner:false,simulated:true,seed:'evolve|'+i});mainMeta=metaByNode.get(current.id)}
+   if((H('split|'+i)%100)<58){const count=2+(H('split-count|'+i)%2);for(let k=0;k<count;k++){const id=rootId+'-s'+(k+1),n=growSemantic(current,'split',{semanticId:id,lineageId,parentSemanticId:mainMeta.semanticId,text:p.splits[k%p.splits.length],loc,kind:'split',owner:false,simulated:true,seed:'split|'+i+'|'+k});children.push(n)} }
+   if(children.length&&(H('nested|'+i)%100)<26){const parent=children[0],pm=metaByNode.get(parent.id);for(let k=0;k<2;k++)growSemantic(parent,'split',{semanticId:rootId+'-n'+(k+1),lineageId,parentSemanticId:pm.semanticId,text:p.nested[k],loc,kind:'split',owner:false,simulated:true,seed:'nested|'+i+'|'+k})}
+   const candidates=semantic.filter(m=>m.lineageId===lineageId&&m.kind!=='create');
+   if(candidates.length&&(H('bloom|'+i)%100)<34){const m=candidates[H('bloom-target|'+i)%candidates.length],n=nodeBySemantic(m.semanticId);addBloom(n,m,'bloom|'+i)}
+   if(candidates.length>1&&(H('abandon|'+i)%100)<14){const alive=candidates.filter(m=>m.state==='alive');if(alive.length){const m=alive[H('abandon-target|'+i)%alive.length];abandon(nodeBySemantic(m.semanticId),m)}}
+   if((H('help|'+i)%100)<34){const lineageNodes=semantic.filter(m=>m.lineageId===lineageId&&m.state!=='abandoned'),m=lineageNodes[H('help-target|'+i)%lineageNodes.length];addHelp(nodeBySemantic(m.semanticId),m,1+(H('help-count|'+i)%3),'help|'+i)}
+   if((H('enc|'+i)%100)<40){const lineageNodes=semantic.filter(m=>m.lineageId===lineageId),m=lineageNodes[H('enc-target|'+i)%lineageNodes.length];m.encouragements=1+(H('enc-count|'+i)%5)}
+ });
+ for(let i=0;i<9;i++){const a=roots[(H('warp-a|'+i)%roots.length)],b=roots[(H('warp-b|'+i+41)%roots.length)];if(a&&b&&metaByNode.get(a.id)?.lineageId!==metaByNode.get(b.id)?.lineageId)addWarp(a,b,'simwarp|'+i)}
+}
+
+function addLocalCreate(ev){const n=addSemanticRoot({semanticId:ev.semanticId,lineageId:ev.lineageId,text:ev.text,loc:ev.loc||'Local test',owner:true,simulated:false,seed:ev.seed||ev.semanticId});n.mine=true;return n}
+function applyEvent(ev){
+ if(!ev||!ev.type)return null;
+ if(ev.type==='create')return addLocalCreate(ev);
+ if(ev.type==='evolve'){const p=nodeBySemantic(ev.parentSemanticId),pm=metaBySemantic.get(ev.parentSemanticId);if(!p||!pm||String(ev.text||'').trim()===String(pm.text||'').trim())return null;const n=growSemantic(p,'bend',{semanticId:ev.semanticId,lineageId:ev.lineageId,parentSemanticId:ev.parentSemanticId,text:ev.text,loc:ev.loc||pm.loc,kind:'evolve',owner:true,simulated:false,seed:ev.seed||ev.semanticId});n.mine=true;return n}
+ if(ev.type==='split'){const p=nodeBySemantic(ev.parentSemanticId),pm=metaBySemantic.get(ev.parentSemanticId);if(!p||!pm)return null;let last=null;for(const c of ev.children||[]){if(!String(c.text||'').trim())continue;last=growSemantic(p,'split',{semanticId:c.semanticId,lineageId:ev.lineageId,parentSemanticId:ev.parentSemanticId,text:c.text,loc:c.loc||pm.loc,kind:'split',owner:true,simulated:false,seed:c.seed||c.semanticId});if(last)last.mine=true}return last}
+ if(ev.type==='bloom'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner){addBloom(n,m,ev.seed||ev.semanticId);return n}return null}
+ if(ev.type==='abandon'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner){abandon(n,m);return n}return null}
+ if(ev.type==='encourage'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m){m.encouragements=(m.encouragements||0)+1;if(n)n.lastActive=world.clock;return n}return null}
+ if(ev.type==='help'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m){addHelp(n,m,1,ev.seed||ev.semanticId);return n}return null}
+ if(ev.type==='connect'){const a=nodeBySemantic(ev.aSemanticId),b=nodeBySemantic(ev.bSemanticId);return addWarp(a,b,ev.seed||ev.aSemanticId+'|'+ev.bSemanticId)}
+ if(ev.type==='reparent')return reparent(ev.semanticId,ev.newParentSemanticId,ev.seed||ev.semanticId+'|'+ev.newParentSemanticId);
+ return null;
+}
+function descendantsOf(id){const out=new Set([id]);let changed=true;while(changed){changed=false;for(const m of semantic){if(m.parentSemanticId&&out.has(m.parentSemanticId)&&!out.has(m.semanticId)){out.add(m.semanticId);changed=true}}}return out}
+function reparent(semanticId,newParentSemanticId,seed){
+ const m=metaBySemantic.get(semanticId),p=metaBySemantic.get(newParentSemanticId),n=nodeBySemantic(semanticId),pn=nodeBySemantic(newParentSemanticId);if(!m||!p||!n||!pn||!m.owner||m.kind==='create'||m.lineageId!==p.lineageId||semanticId===newParentSemanticId)return null;const desc=descendantsOf(semanticId);if(desc.has(newParentSemanticId))return null;
+ const old=world.edges.find(e=>e.semanticChildId===semanticId&&!e.semanticHidden);if(old)old.semanticHidden=true;
+ const R=Rfor(seed),a=pn.angle+(R()<.5?-1:1)*(.62+R()*.48),len=78+R()*46,g=edgeGeom(pn.x,pn.y,a,len,(R()-.5)*.30),dx=g.x1-n.x,dy=g.y1-n.y;
+ for(const id of desc){const dn=nodeBySemantic(id);if(dn){dn.x+=dx;dn.y+=dy}}
+ for(const e of world.edges){if(e.semanticWarp)continue;const child=e.semanticChildId,owner=e.semanticOwnerId;if((child&&desc.has(child))||(owner&&desc.has(owner))){e.x0+=dx;e.y0+=dy;e.cx+=dx;e.cy+=dy;e.x1+=dx;e.y1+=dy}}
+ const e=edgeGeom(pn.x,pn.y,a,len,(R()-.5)*.30);e.id='reattach'+world.next++;e.root=pn.root;e.parentId=pn.id;e.hue=(pn.root.hue+n.generation*1.2)%360;e.generation=pn.generation+1;e.created=world.clock;e.lastActive=world.clock;e.mine=true;e.type='split';e.seed=H(seed);e.micro=[];e.semantic=true;e.semanticLineageId=m.lineageId;e.semanticParentId=newParentSemanticId;e.semanticChildId=semanticId;addEdge(e);m.parentSemanticId=newParentSemanticId;n.parentId=pn.id;n.angle=a;for(const w of warps)refreshWarp(w);return n;
+}
+
+function computeAncestors(id){const set=new Set();let m=metaBySemantic.get(id),guard=0;while(m&&guard++<100){set.add(m.semanticId);m=m.parentSemanticId?metaBySemantic.get(m.parentSemanticId):null}return set}
+function selectSemantic(id,focus=false){const m=metaBySemantic.get(id),n=nodeBySemantic(id);if(!m||!n)return;selectedSemanticId=id;selectedLineage=m.lineageId;ancestorIds=computeAncestors(id);world.selected=n;if(focus)camera.focus(n,false);parent.postMessage({type:'rv24-select',meta:cloneMeta(m),lineage:semantic.filter(x=>x.lineageId===m.lineageId).map(cloneMeta)},location.origin)}
+function snapshot(){const blooms=semantic.filter(m=>m.state==='bloom').length,abandoned=semantic.filter(m=>m.state==='abandoned').length,helps=semantic.reduce((s,m)=>s+(m.helpCount||0),0),roots=semantic.filter(m=>m.kind==='create').length,localRoots=semantic.filter(m=>m.kind==='create'&&m.owner).length;parent.postMessage({type:'rv24-snapshot',semantic:semantic.map(cloneMeta),stats:{roots,states:semantic.length,blooms,abandoned,helps,warps:warps.length,localRoots}},location.origin)}
+function init(data){payload={texts:Array.isArray(data.texts)?data.texts:[],locs:Array.isArray(data.locs)?data.locs:[]};clearWorld();buildSimulated();for(const ev of data.events||[])applyEvent(ev);drawLabels=function(){};camera.fit();camera.zoom=Math.max(.16,camera.zoom*.91);updateStats();snapshot();parent.postMessage({type:'rv24-ready'},location.origin)}
+
+const baseDrawEdge=drawEdge;baseDrawEdge.__rv24=true;drawEdge=function(e,progress=1){
+ if(e.semanticHidden)return;
+ if(e.semanticWarp){if(!inView((e.x0+e.x1)/2,(e.y0+e.y1)/2,300/camera.zoom))return;ctx.save();ctx.setLineDash([8/Math.max(.5,camera.zoom),10/Math.max(.5,camera.zoom)]);const active=selectedLineage&&((metaBySemantic.get(e.aSemanticId)?.lineageId===selectedLineage)||(metaBySemantic.get(e.bSemanticId)?.lineageId===selectedLineage));ctx.strokeStyle=active?'rgba(196,240,255,.62)':'rgba(170,214,235,.22)';ctx.lineWidth=(active?1.05:.65)/Math.max(.45,camera.zoom);pathEdge(e,1);ctx.stroke();ctx.restore();return}
+ baseDrawEdge(e,progress);
+ if(selectedSemanticId&&e.semanticChildId&&ancestorIds.has(e.semanticChildId)){ctx.save();ctx.strokeStyle='rgba(212,246,255,.34)';ctx.lineWidth=2.1/Math.max(.48,camera.zoom);ctx.shadowColor='rgba(140,230,255,.65)';ctx.shadowBlur=9/Math.max(.5,camera.zoom);pathEdge(e,progress);ctx.stroke();ctx.restore()}
+};
+const baseDrawNode=drawNode;drawNode=function(n){baseDrawNode(n);const m=metaByNode.get(n.id);if(!m)return;const z=Math.max(.5,camera.zoom);ctx.save();if(m.kind==='create'){ctx.strokeStyle=`hsla(${n.root.hue},92%,82%,.34)`;ctx.lineWidth=.7/z;ctx.beginPath();ctx.arc(n.x,n.y,4.8/z,0,TAU);ctx.stroke()}if(m.state==='bloom'){for(let k=0;k<5;k++){const a=k*TAU/5,rr=5.4/z;ctx.fillStyle=`hsla(${n.root.hue+8},82%,85%,.72)`;ctx.beginPath();ctx.ellipse(n.x+Math.cos(a)*rr,n.y+Math.sin(a)*rr,2.2/z,1.25/z,a,0,TAU);ctx.fill()}ctx.fillStyle='rgba(255,242,204,.9)';ctx.beginPath();ctx.arc(n.x,n.y,1.4/z,0,TAU);ctx.fill()}if((m.encouragements||0)>0&&m.state!=='abandoned'){ctx.strokeStyle=`rgba(220,244,255,${Math.min(.28,.07+m.encouragements*.025)})`;ctx.lineWidth=.65/z;ctx.beginPath();ctx.arc(n.x,n.y,(7+Math.min(10,m.encouragements))/z,0,TAU);ctx.stroke()}ctx.restore()};
+
+canvas.addEventListener('click',ev=>{let best=null,bd=18;for(const m of semantic){const n=nodeBySemantic(m.semanticId);if(!n)continue;const s=camera.worldToScreen(n.x,n.y),d=Math.hypot(s.x-ev.clientX,s.y-ev.clientY);if(d<bd){best=m;bd=d}}if(best)selectSemantic(best.semanticId,false);else{selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();world.selected=null;parent.postMessage({type:'rv24-blank'},location.origin)}},true);
+window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='rv24-init')init(e.data);if(e.data?.type==='rv24-event'){const n=applyEvent(e.data.event);updateStats();snapshot();const id=e.data.focusSemanticId||(n&&metaByNode.get(n.id)?.semanticId);if(id)selectSemantic(id,true)}if(e.data?.type==='rv24-focus'&&e.data.semanticId)selectSemantic(e.data.semanticId,true);if(e.data?.type==='rv24-clear'){selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();world.selected=null}});
+parent.postMessage({type:'rv24-runtime-ready'},location.origin);
+})();
