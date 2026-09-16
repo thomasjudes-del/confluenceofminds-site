@@ -1,0 +1,42 @@
+name: Check RALUVAAA Manual MVP V25
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/mvp-v25/**'
+      - 'raluvaaa/MANUAL_MVP_V25.md'
+      - '.github/workflows/check-raluvaaa-mvp-v25.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check raluvaaa/mvp-v25/app.js
+          node --check raluvaaa/mvp-v25/engine-runtime.js
+      - name: Check semantic contract and visual lock
+        run: |
+          grep -q 'engine-v03-locked.html' raluvaaa/mvp-v25/index.html
+          grep -q "type:'evolve'" raluvaaa/mvp-v25/app.js
+          grep -q "type:append?'branch_add':'split'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'bloom'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'abandon'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'encourage'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'help'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'suggest_split'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'connect'" raluvaaa/mvp-v25/app.js
+          grep -q "type:'reparent'" raluvaaa/mvp-v25/app.js
+          grep -q "rv25-reparent-request" raluvaaa/mvp-v25/engine-runtime.js
+          grep -q "function removeMistake" raluvaaa/mvp-v25/app.js
+          grep -q "function addBloom(node,m){" raluvaaa/mvp-v25/engine-runtime.js
+          ! grep -q "grow(ghost,'bloom'" raluvaaa/mvp-v25/engine-runtime.js
+          ! grep -q 'renderer-v18' raluvaaa/mvp-v25/index.html
+          ! grep -q 'renderer-v19' raluvaaa/mvp-v25/index.html
+          ! grep -q 'renderer-v20' raluvaaa/mvp-v25/index.html
+          ! grep -q 'renderer-v21' raluvaaa/mvp-v25/index.html
