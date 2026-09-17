@@ -27,6 +27,7 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   assert(await page.locator('#rail').isVisible());
   assert(await page.locator('#qaStrip').isVisible());
   await page.locator('#entrustedBtn').click();
+  await page.waitForSelector('#drawer:not(.hidden)');
   assert.equal(await page.locator('#drawerBody [data-open]').count(),3);
   await page.locator('#drawerClose').click();
   await page.locator('[data-lang="en"]').click();
@@ -124,6 +125,7 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   await go('B');
   assert((await page.locator('#inboxBadge').textContent())!=='0');
   await page.locator('#inboxBtn').click();
+  await page.waitForSelector('#drawer:not(.hidden)');
   const pendingIds=await page.evaluate(()=>{const s=window.__RV26_TEST__.state();return s.events.filter(e=>['connect_proposed','help_proposed','suggest_proposed'].includes(e.type)).filter(p=>(p.requiredActors||[]).includes('B')&&!s.events.some(r=>r.type==='proposal_response'&&r.proposalId===p.proposalId&&r.actorId==='B')).map(p=>p.proposalId)});
   assert(pendingIds.length>=3);
   for(const pid of pendingIds){const btn=page.locator(`[data-accept="${pid}"]`);assert(await btn.count(),`missing accept button for ${pid}`);await btn.click();await page.waitForFunction(pid=>window.__RV26_TEST__.state().events.some(e=>e.type==='proposal_response'&&e.proposalId===pid&&e.actorId==='B'&&e.decision==='accept'),pid);await page.waitForTimeout(120)}
@@ -134,7 +136,7 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   assert(await page.evaluate(()=>window.__RV26_TEST__.state().events.some(e=>e.type==='branch_add'&&e.proposalId)),'accepted suggestion did not materialize');
 
   await page.locator('#myWorldBtn').click();
-  assert(await page.locator('#drawer').isVisible());
+  await page.waitForSelector('#drawer:not(.hidden)');
   assert((await page.locator('#drawerBody').innerText()).includes('shared neighbourhood garden'));
 
   page.once('dialog',d=>d.accept());
@@ -143,7 +145,7 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
     page.locator('#qaReset').click()
   ]);
   await ready();
-  assert((await page.locator('.sub').innerText()).includes('V26'));
+  assert((await page.locator('.sub').innerText()).includes('ALPHA V0'));
   assert.equal(await page.evaluate(()=>window.__RV26_TEST__.state().version),26);
   assert.equal(await page.evaluate(()=>window.__RV26_TEST__.state().events.length),6);
 
@@ -155,10 +157,11 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   assert(layout.rail.right<=391&&layout.rail.left>330,'mobile side rail is not compact/right aligned');
   assert(layout.brand.bottom<90,'mobile brand too tall');
   await page.locator('#entrustedBtn').click();
+  await page.waitForSelector('#drawer:not(.hidden)');
   const drawerBox=await page.locator('#drawer').boundingBox();
   assert(drawerBox.height>700,'mobile drawer should use vertical space rather than a bottom bar');
 
   assert.deepEqual(errors,[],`browser errors: ${errors.join('\n')}`);
   await browser.close();
-  console.log('RALUVAAA V26 browser QA passed');
+  console.log('RALUVAAA Alpha V0 browser QA passed');
 })().catch(async e=>{console.error(e);process.exit(1)});
