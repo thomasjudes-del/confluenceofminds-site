@@ -1,0 +1,11 @@
+name = "raluvaaa-alpha-api-ci"
+main = "worker.mjs"
+compatibility_date = "2026-09-01"
+
+[vars]
+ALLOWED_ORIGINS = "http://127.0.0.1:8787,http://localhost:8787"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "raluvaaa-alpha"
+database_id = "00000000-0000-0000-0000-000000000000"
