@@ -10,6 +10,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,6 +20,7 @@ jobs:
         run: |
           node --check raluvaaa/alpha-api/worker.mjs
           node --check raluvaaa/alpha-api/client.mjs
+          node --check raluvaaa/alpha-api/qa-shared.mjs
           grep -q "owner_required" raluvaaa/alpha-api/worker.mjs
           grep -q "proposal_consents" raluvaaa/alpha-api/worker.mjs
           grep -q "public_payload_json" raluvaaa/alpha-api/worker.mjs
@@ -38,3 +40,13 @@ jobs:
           assert not missing, f'missing tables: {sorted(missing)}'
           print('RALUVAAA shared alpha D1 schema passed')
           PY
+      - name: Run real two-client Worker + D1 QA locally
+        working-directory: raluvaaa/alpha-api
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install wrangler@4 >/dev/null 2>&1
+          npx wrangler d1 execute raluvaaa-alpha --local --file=schema.sql --config=wrangler.ci.toml >/tmp/raluvaaa-d1.log 2>&1
+          npx wrangler dev --local --config=wrangler.ci.toml --ip 127.0.0.1 --port 8787 >/tmp/raluvaaa-worker.log 2>&1 &
+          WORKER_PID=$!
+          trap 'kill $WORKER_PID || true' EXIT
+          node qa-shared.mjs
