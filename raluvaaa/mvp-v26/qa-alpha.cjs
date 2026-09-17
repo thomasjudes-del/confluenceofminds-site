@@ -40,6 +40,15 @@ const H=3600000;
   assert.equal((await page.locator('#drawerTitle').innerText()).trim(),'Mes wishes');
   await page.locator('#drawerClose').click();
   assert(await page.locator('#qaStrip').isVisible(),'QA persona controls should remain available in qa mode');
+
+  await page.locator('#createBtn').click();
+  await page.locator('#wishInput').fill('I want to make one real thing this week.');
+  await page.locator('#locInput').fill('Nantes, France');
+  await page.locator('#confirm').click();
+  await page.waitForFunction(()=>document.querySelectorAll('#ritualLayer .rv-ring').length>0,null,{timeout:5000});
+  assert(await page.locator('#overlay').evaluate(el=>!el.textContent.trim()),'creation modal should clear before the creation ritual');
+  assert(await page.locator('#ritualLayer .rv-seed').count()>0,'creation should visibly emerge as a seed ritual');
+
   await page.setViewportSize({width:390,height:844});
   await page.waitForTimeout(100);
   assert(await page.locator('#rail').isVisible());
