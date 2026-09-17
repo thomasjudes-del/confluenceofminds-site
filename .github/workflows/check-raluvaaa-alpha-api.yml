@@ -1,0 +1,38 @@
+name: Check RALUVAAA Shared Alpha API
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/alpha-api/**'
+      - '.github/workflows/check-raluvaaa-alpha-api.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Worker syntax and invariants
+        run: |
+          node --check raluvaaa/alpha-api/worker.mjs
+          grep -q "owner_required" raluvaaa/alpha-api/worker.mjs
+          grep -q "proposal_consents" raluvaaa/alpha-api/worker.mjs
+          grep -q "public_payload_json" raluvaaa/alpha-api/worker.mjs
+          grep -q "already_encouraged" raluvaaa/alpha-api/worker.mjs
+      - name: Validate D1 schema with SQLite
+        run: |
+          python3 - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          schema = Path('raluvaaa/alpha-api/schema.sql').read_text()
+          db = sqlite3.connect(':memory:')
+          db.executescript(schema)
+          names = {r[0] for r in db.execute("select name from sqlite_master where type='table'")}
+          expected = {'actors','sessions','wishes','wish_events','encouragements','proposals','proposal_consents','notifications','reports'}
+          missing = expected - names
+          assert not missing, f'missing tables: {sorted(missing)}'
+          print('RALUVAAA shared alpha D1 schema passed')
+          PY
