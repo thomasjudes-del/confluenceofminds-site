@@ -11,6 +11,8 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
   async function ready(){
     await page.waitForFunction(()=>window.__RV26_TEST__&&window.__RV26_TEST__.semantic().length>100,null,{timeout:30000});
+    await page.waitForFunction(()=>{try{return JSON.parse(localStorage.getItem('raluvaaaEntrustedV26PolicyV2')||'null')?.entries?.length===3&&document.querySelectorAll('[data-panel][data-alpha-wrapped="1"]').length===3}catch{return false}},null,{timeout:15000});
+    await page.waitForTimeout(80);
   }
   async function go(actor='A'){
     await page.goto(BASE+'?actor='+actor+'&qa=1',{waitUntil:'domcontentloaded',timeout:30000});
