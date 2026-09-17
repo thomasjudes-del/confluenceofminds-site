@@ -2,13 +2,13 @@
 'use strict';
 
 const STORE='raluvaaaManualMvpV26';
-const POLICY='raluvaaaEntrustedV26PolicyV1';
+const POLICY='raluvaaaEntrustedV26PolicyV2';
 const params=new URLSearchParams(location.search);
-const HOUR=3600000;
+const HOUR=3600000,MIN=60000;
 const bands=[
-  {name:'short',min:3*HOUR,max:8*HOUR,color:'#ff7b7b',soft:'rgba(255,123,123,.22)'},
-  {name:'medium',min:18*HOUR,max:30*HOUR,color:'#f6c56f',soft:'rgba(246,197,111,.20)'},
-  {name:'long',min:60*HOUR,max:84*HOUR,color:'#78e2b3',soft:'rgba(120,226,179,.20)'}
+  {name:'short',min:35*MIN,max:175*MIN,color:'#ff7b7b',soft:'rgba(255,123,123,.22)'},
+  {name:'medium',min:10*HOUR,max:23.5*HOUR,color:'#f6c56f',soft:'rgba(246,197,111,.20)'},
+  {name:'long',min:36*HOUR,max:71.5*HOUR,color:'#78e2b3',soft:'rgba(120,226,179,.20)'}
 ];
 let roots=[];
 let timer=null;
@@ -26,11 +26,11 @@ function sameIds(a,b){return Array.isArray(a)&&Array.isArray(b)&&a.length===3&&b
 function sameEntrusted(a,b){return sameIds(a,b)&&a.every((x,i)=>Math.abs(x.expires-b[i].expires)<1000)}
 function reloadPreservingActor(){const u=new URL(location.href);u.searchParams.delete('reset');u.searchParams.set('ep','1');u.hash='';location.replace(u.href)}
 
-function initialisePolicy(state){const now=Date.now();const current=(state.entrusted||[]).slice(0,3);if(current.length!==3)return null;const salt=`${Math.floor(now/(6*HOUR))}|${params.get('actor')||'A'}`;return{version:1,entries:current.map((x,i)=>({semanticId:x.semanticId,band:bands[i].name,assignedAt:now,expires:now+randMs(bands[i],i,salt)}))}}
+function initialisePolicy(state){const now=Date.now();const current=(state.entrusted||[]).slice(0,3);if(current.length!==3)return null;const salt=`${Math.floor(now/(3*HOUR))}|${params.get('actor')||'A'}`;return{version:2,entries:current.map((x,i)=>({semanticId:x.semanticId,band:bands[i].name,assignedAt:now,expires:now+randMs(bands[i],i,salt)}))}}
 function syncPolicy(){
   const state=read(STORE);if(!state||state.version!==26||!Array.isArray(state.entrusted)||state.entrusted.length!==3||!validRoots().length)return;
   let policy=read(POLICY);const now=Date.now();
-  if(!policy||policy.version!==1||!Array.isArray(policy.entries)||policy.entries.length!==3){
+  if(!policy||policy.version!==2||!Array.isArray(policy.entries)||policy.entries.length!==3){
     policy=initialisePolicy(state);if(!policy)return;write(POLICY,policy);state.entrusted=policy.entries.map(x=>({semanticId:x.semanticId,expires:x.expires}));write(STORE,state);scheduleNext(policy);decorateEntrusted();return;
   }
   let changed=false;const ids=policy.entries.map(x=>x.semanticId);
@@ -46,15 +46,16 @@ function syncPolicy(){
   scheduleNext(policy);decorateEntrusted();
 }
 function scheduleNext(policy){clearTimeout(timer);const next=Math.min(...policy.entries.map(x=>x.expires));const delay=Math.max(1000,Math.min(2147480000,next-Date.now()+350));timer=setTimeout(syncPolicy,delay)}
-function remaining(ms){const m=Math.max(0,Math.floor(ms/60000)),h=Math.floor(m/60),mm=m%60;if(h<24)return `${h}h${String(mm).padStart(2,'0')}`;const d=Math.floor(h/24),hh=h%24;return `${d}j ${hh}h`}
+function pad(n){return String(Math.max(0,n|0)).padStart(2,'0')}
+function remaining(ms){const total=Math.max(0,Math.floor(ms/1000)),s=total%60,m=Math.floor(total/60)%60,h=Math.floor(total/3600)%24,d=Math.floor(total/86400);return d?`${d}j ${pad(h)}:${pad(m)}:${pad(s)}`:`${pad(Math.floor(total/3600))}:${pad(m)}:${pad(s)}`}
 function bandFor(name){return bands.find(x=>x.name===name)||bands[1]}
 function decorateEntrusted(){
   const policy=read(POLICY);if(!policy?.entries)return;
   const title=document.getElementById('drawerTitle');if(!title||!/^Wishes confiés$|^Entrusted wishes$/i.test(title.textContent.trim()))return;
   const map=new Map(policy.entries.map(x=>[x.semanticId,x]));
   document.querySelectorAll('#drawerBody [data-open]').forEach(item=>{
-    const e=map.get(item.dataset.open);if(!e)return;const b=bandFor(e.band);item.style.borderColor=b.soft;item.style.boxShadow=`inset 2px 0 0 ${b.color}`;if(item.dataset.entrustedBand!==e.band)item.dataset.entrustedBand=e.band;
-    const meta=item.querySelector('.m'),label=remaining(e.expires-Date.now());if(meta&&meta.textContent!==label)meta.textContent=label;
+    const e=map.get(item.dataset.open);if(!e)return;const b=bandFor(e.band);item.style.borderColor=b.soft;item.style.boxShadow=`inset 3px 0 0 ${b.color}`;if(item.dataset.entrustedBand!==e.band)item.dataset.entrustedBand=e.band;
+    const meta=item.querySelector('.m'),label=remaining(e.expires-Date.now());if(meta){if(meta.textContent!==label)meta.textContent=label;meta.style.fontFamily='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';meta.style.fontSize='12px';meta.style.fontWeight='720';meta.style.letterSpacing='.04em';meta.style.color=b.color;meta.style.fontVariantNumeric='tabular-nums'}
     const st=item.querySelector('.state');if(st){if(st.textContent!=='●')st.textContent='●';st.style.color=b.color;if(st.title!==e.band)st.title=e.band}
   });
 }
@@ -76,7 +77,7 @@ function installEngineGuard(){
 const observer=new MutationObserver(()=>queueMicrotask(decorate));
 observer.observe(document.documentElement,{subtree:true,childList:true});
 document.addEventListener('click',e=>{if(e.target.closest?.('[data-lang],[data-panel],#drawerClose,#myWorldBtn,#entrustedBtn'))setTimeout(decorate,0)},true);
-setInterval(decorateEntrusted,30000);
+setInterval(decorateEntrusted,1000);
 
 window.addEventListener('message',e=>{
   if(e.origin!==location.origin)return;
