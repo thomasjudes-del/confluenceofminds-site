@@ -8,9 +8,9 @@ const H=3600000;
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
-  await page.goto(BASE+'?actor=A&qa=1',{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>window.__RV26_TEST__&&window.__RV26_TEST__.semantic().length>100);
-  await page.waitForFunction(()=>{try{return JSON.parse(localStorage.getItem('raluvaaaEntrustedV26PolicyV1')||'null')?.entries?.length===3}catch{return false}});
+  await page.goto(BASE+'?actor=A&qa=1',{waitUntil:'domcontentloaded',timeout:30000});
+  await page.waitForFunction(()=>window.__RV26_TEST__&&window.__RV26_TEST__.semantic().length>100,null,{timeout:30000});
+  await page.waitForFunction(()=>{try{return JSON.parse(localStorage.getItem('raluvaaaEntrustedV26PolicyV1')||'null')?.entries?.length===3}catch{return false}},null,{timeout:15000});
   const data=await page.evaluate(()=>({
     policy:JSON.parse(localStorage.getItem('raluvaaaEntrustedV26PolicyV1')),
     state:JSON.parse(localStorage.getItem('raluvaaaManualMvpV26'))
@@ -30,6 +30,7 @@ const H=3600000;
   assert.equal(await page.locator('#drawerBody [data-entrusted-band="long"]').count(),1);
   await page.locator('#drawerClose').click();
   await page.locator('#myWorldBtn').click();
+  await page.waitForTimeout(50);
   assert.equal((await page.locator('#drawerTitle').innerText()).trim(),'Mes wishes');
   await page.locator('#drawerClose').click();
   await page.setViewportSize({width:390,height:844});
