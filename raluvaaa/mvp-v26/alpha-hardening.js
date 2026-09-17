@@ -22,7 +22,8 @@ function hash(s){let h=2166136261>>>0;for(const ch of String(s)){h^=ch.charCodeA
 function randMs(band,slot,salt){const span=band.max-band.min;return band.min+(hash(`${salt}|${slot}`)%Math.max(1,span))}
 function validRoots(){return roots.filter(x=>x&&x.simulated&&x.kind==='create').map(x=>x.semanticId)}
 function chooseReplacement(ids,slot,salt){const all=validRoots();if(!all.length)return ids[slot];const blocked=new Set(ids.filter((_,i)=>i!==slot));let idx=hash(`${salt}|replacement|${slot}`)%all.length;for(let i=0;i<all.length;i++){const id=all[(idx+i)%all.length];if(!blocked.has(id))return id}return all[idx]}
-function sameEntrusted(a,b){if(!Array.isArray(a)||!Array.isArray(b)||a.length!==3||b.length!==3)return false;return a.every((x,i)=>x.semanticId===b[i].semanticId&&Math.abs(x.expires-b[i].expires)<1000)}
+function sameIds(a,b){return Array.isArray(a)&&Array.isArray(b)&&a.length===3&&b.length===3&&a.every((x,i)=>x.semanticId===b[i].semanticId)}
+function sameEntrusted(a,b){return sameIds(a,b)&&a.every((x,i)=>Math.abs(x.expires-b[i].expires)<1000)}
 function reloadPreservingActor(){const u=new URL(location.href);u.searchParams.delete('reset');u.searchParams.set('ep','1');u.hash='';location.replace(u.href)}
 
 function initialisePolicy(state){const now=Date.now();const current=(state.entrusted||[]).slice(0,3);if(current.length!==3)return null;const salt=`${Math.floor(now/(6*HOUR))}|${params.get('actor')||'A'}`;return{version:1,entries:current.map((x,i)=>({semanticId:x.semanticId,band:bands[i].name,assignedAt:now,expires:now+randMs(bands[i],i,salt)}))}}
@@ -30,7 +31,7 @@ function syncPolicy(){
   const state=read(STORE);if(!state||state.version!==26||!Array.isArray(state.entrusted)||state.entrusted.length!==3||!validRoots().length)return;
   let policy=read(POLICY);const now=Date.now();
   if(!policy||policy.version!==1||!Array.isArray(policy.entries)||policy.entries.length!==3){
-    policy=initialisePolicy(state);if(!policy)return;write(POLICY,policy);state.entrusted=policy.entries.map(x=>({semanticId:x.semanticId,expires:x.expires}));write(STORE,state);reloadPreservingActor();return;
+    policy=initialisePolicy(state);if(!policy)return;write(POLICY,policy);state.entrusted=policy.entries.map(x=>({semanticId:x.semanticId,expires:x.expires}));write(STORE,state);scheduleNext(policy);decorateEntrusted();return;
   }
   let changed=false;const ids=policy.entries.map(x=>x.semanticId);
   for(let i=0;i<3;i++){
@@ -40,7 +41,8 @@ function syncPolicy(){
     }
   }
   const desired=policy.entries.map(x=>({semanticId:x.semanticId,expires:x.expires}));
-  if(changed||!sameEntrusted(state.entrusted,desired)){write(POLICY,policy);state.entrusted=desired;write(STORE,state);reloadPreservingActor();return}
+  const idsChanged=!sameIds(state.entrusted,desired);
+  if(changed||!sameEntrusted(state.entrusted,desired)){write(POLICY,policy);state.entrusted=desired;write(STORE,state);if(changed||idsChanged){reloadPreservingActor();return}}
   scheduleNext(policy);decorateEntrusted();
 }
 function scheduleNext(policy){clearTimeout(timer);const next=Math.min(...policy.entries.map(x=>x.expires));const delay=Math.max(1000,Math.min(2147480000,next-Date.now()+350));timer=setTimeout(syncPolicy,delay)}
