@@ -19,16 +19,13 @@ if(params.get('reset')==='1') localStorage.removeItem(POLICY);
 function read(key){try{return JSON.parse(localStorage.getItem(key)||'null')}catch{return null}}
 function write(key,value){localStorage.setItem(key,JSON.stringify(value))}
 function hash(s){let h=2166136261>>>0;for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
-function randMs(band,slot,salt){const span=band.max-band.min;return band.min+(hash(`${salt}|${slot}`)%Math.max(1,span));}
+function randMs(band,slot,salt){const span=band.max-band.min;return band.min+(hash(`${salt}|${slot}`)%Math.max(1,span))}
 function validRoots(){return roots.filter(x=>x&&x.simulated&&x.kind==='create').map(x=>x.semanticId)}
 function chooseReplacement(ids,slot,salt){const all=validRoots();if(!all.length)return ids[slot];const blocked=new Set(ids.filter((_,i)=>i!==slot));let idx=hash(`${salt}|replacement|${slot}`)%all.length;for(let i=0;i<all.length;i++){const id=all[(idx+i)%all.length];if(!blocked.has(id))return id}return all[idx]}
 function sameEntrusted(a,b){if(!Array.isArray(a)||!Array.isArray(b)||a.length!==3||b.length!==3)return false;return a.every((x,i)=>x.semanticId===b[i].semanticId&&Math.abs(x.expires-b[i].expires)<1000)}
 function reloadPreservingActor(){const u=new URL(location.href);u.searchParams.delete('reset');u.searchParams.set('ep','1');u.hash='';location.replace(u.href)}
 
-function initialisePolicy(state){const now=Date.now();const current=(state.entrusted||[]).slice(0,3);if(current.length!==3)return null;const salt=`${Math.floor(now/(6*HOUR))}|${params.get('actor')||'A'}`;
-  const entries=current.map((x,i)=>({semanticId:x.semanticId,band:bands[i].name,assignedAt:now,expires:now+randMs(bands[i],i,salt)}));
-  return{version:1,entries};
-}
+function initialisePolicy(state){const now=Date.now();const current=(state.entrusted||[]).slice(0,3);if(current.length!==3)return null;const salt=`${Math.floor(now/(6*HOUR))}|${params.get('actor')||'A'}`;return{version:1,entries:current.map((x,i)=>({semanticId:x.semanticId,band:bands[i].name,assignedAt:now,expires:now+randMs(bands[i],i,salt)}))}}
 function syncPolicy(){
   const state=read(STORE);if(!state||state.version!==26||!Array.isArray(state.entrusted)||state.entrusted.length!==3||!validRoots().length)return;
   let policy=read(POLICY);const now=Date.now();
@@ -59,8 +56,9 @@ function decorateEntrusted(){
     const st=item.querySelector('.state');if(st){st.textContent='●';st.style.color=b.color;st.title=e.band}
   });
 }
+function isFrench(){return document.querySelector('[data-lang="fr"]')?.classList.contains('active')??true}
 function renameMyWishes(){
-  const b=document.getElementById('myWorldBtn');if(b){const fr=(document.documentElement.lang||'fr').startsWith('fr')||document.querySelector('[data-lang="fr"]')?.classList.contains('active');const label=fr?'Mes wishes':'My wishes';b.title=label;b.setAttribute('aria-label',label)}
+  const b=document.getElementById('myWorldBtn');if(b){const label=isFrench()?'Mes wishes':'My wishes';if(b.title!==label)b.title=label;if(b.getAttribute('aria-label')!==label)b.setAttribute('aria-label',label)}
   const title=document.getElementById('drawerTitle');if(title&&['Mon monde','My world'].includes(title.textContent.trim()))title.textContent=title.textContent.trim()==='Mon monde'?'Mes wishes':'My wishes';
 }
 function decorate(){renameMyWishes();decorateEntrusted()}
@@ -73,7 +71,9 @@ function installEngineGuard(){
   doc.body.appendChild(s);
 }
 
-const observer=new MutationObserver(decorate);observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','title']});
+const observer=new MutationObserver(()=>queueMicrotask(decorate));
+observer.observe(document.documentElement,{subtree:true,childList:true});
+document.addEventListener('click',e=>{if(e.target.closest?.('[data-lang],[data-panel],#drawerClose,#myWorldBtn,#entrustedBtn'))setTimeout(decorate,0)},true);
 setInterval(decorateEntrusted,30000);
 
 window.addEventListener('message',e=>{
