@@ -4,6 +4,7 @@ const STORE='raluvaaaManualMvpV26';
 const params=new URLSearchParams(location.search);
 const frame=document.getElementById('engine');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const structuralTypes=new Set(['create','evolve','split','branch_add','bloom','abandon']);
 
 function injectChrome(){
   document.title='RALUVAAA · Alpha V0';
@@ -42,7 +43,6 @@ function revealMap(){const d=document.getElementById('drawer');if(d&&!d.classLis
 
 async function ritual(ev){
   if(reduce||!ev)return;
-  const structural=['create','evolve','split','branch_add','bloom','abandon'];if(structural.includes(ev.type))revealMap();
   if(ev.type==='create'){const p=await waitPoint(ev.semanticId);ring(p);ring(p,'r2');ring(p,'r3');seedPulse(p);return}
   if(ev.type==='evolve'){const [a,b]=await Promise.all([waitPoint(ev.parentSemanticId),waitPoint(ev.semanticId)]);path(a,b);ring(b);seedPulse(b);return}
   if(ev.type==='split'||ev.type==='branch_add'){const a=await waitPoint(ev.parentSemanticId);for(const child of ev.children||[]){const b=await waitPoint(child.semanticId);path(a,b);ring(b);seedPulse(b)}return}
@@ -61,6 +61,9 @@ Storage.prototype.setItem=function(key,value){
   if(key!==STORE)return;
   let after=null;try{after=JSON.parse(value||'null')}catch{}
   const oldLen=Array.isArray(before?.events)?before.events.length:0,newEvents=Array.isArray(after?.events)?after.events.slice(oldLen):[];
-  if(newEvents.length){let delay=220;for(const ev of newEvents){setTimeout(()=>ritual(ev),delay);delay+=120}}
+  if(newEvents.length){
+    if(newEvents.some(ev=>structuralTypes.has(ev.type)))revealMap();
+    let delay=220;for(const ev of newEvents){setTimeout(()=>ritual(ev),delay);delay+=120}
+  }
 };
 })();
