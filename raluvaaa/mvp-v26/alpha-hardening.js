@@ -53,9 +53,9 @@ function decorateEntrusted(){
   const title=document.getElementById('drawerTitle');if(!title||!/^Wishes confiés$|^Entrusted wishes$/i.test(title.textContent.trim()))return;
   const map=new Map(policy.entries.map(x=>[x.semanticId,x]));
   document.querySelectorAll('#drawerBody [data-open]').forEach(item=>{
-    const e=map.get(item.dataset.open);if(!e)return;const b=bandFor(e.band);item.style.borderColor=b.soft;item.style.boxShadow=`inset 2px 0 0 ${b.color}`;item.dataset.entrustedBand=e.band;
-    const meta=item.querySelector('.m');if(meta)meta.textContent=remaining(e.expires-Date.now());
-    const st=item.querySelector('.state');if(st){st.textContent='●';st.style.color=b.color;st.title=e.band}
+    const e=map.get(item.dataset.open);if(!e)return;const b=bandFor(e.band);item.style.borderColor=b.soft;item.style.boxShadow=`inset 2px 0 0 ${b.color}`;if(item.dataset.entrustedBand!==e.band)item.dataset.entrustedBand=e.band;
+    const meta=item.querySelector('.m'),label=remaining(e.expires-Date.now());if(meta&&meta.textContent!==label)meta.textContent=label;
+    const st=item.querySelector('.state');if(st){if(st.textContent!=='●')st.textContent='●';st.style.color=b.color;if(st.title!==e.band)st.title=e.band}
   });
 }
 function isFrench(){return document.querySelector('[data-lang="fr"]')?.classList.contains('active')??true}
