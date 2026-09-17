@@ -130,7 +130,10 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   await page.waitForSelector('#drawer:not(.hidden)');
   const pendingIds=await page.evaluate(()=>{const s=window.__RV26_TEST__.state();return s.events.filter(e=>['connect_proposed','help_proposed','suggest_proposed'].includes(e.type)).filter(p=>(p.requiredActors||[]).includes('B')&&!s.events.some(r=>r.type==='proposal_response'&&r.proposalId===p.proposalId&&r.actorId==='B')).map(p=>p.proposalId)});
   assert(pendingIds.length>=3);
-  for(const pid of pendingIds){const btn=page.locator(`[data-accept="${pid}"]`);assert(await btn.count(),`missing accept button for ${pid}`);await btn.click();await page.waitForFunction(pid=>window.__RV26_TEST__.state().events.some(e=>e.type==='proposal_response'&&e.proposalId===pid&&e.actorId==='B'&&e.decision==='accept'),pid);await page.waitForTimeout(120)}
+  for(const pid of pendingIds){
+    if(await page.locator('#drawer').evaluate(el=>el.classList.contains('hidden'))){await page.locator('#inboxBtn').click();await page.waitForSelector('#drawer:not(.hidden)')}
+    const btn=page.locator(`[data-accept="${pid}"]`);assert(await btn.count(),`missing accept button for ${pid}`);await btn.click();await page.waitForFunction(pid=>window.__RV26_TEST__.state().events.some(e=>e.type==='proposal_response'&&e.proposalId===pid&&e.actorId==='B'&&e.decision==='accept'),pid);await page.waitForTimeout(120)
+  }
   const acceptedDebug=await page.evaluate(()=>{const s=window.__RV26_TEST__.state(),p=s.events.filter(e=>e.type==='connect_proposed').slice(-1)[0];return{proposal:p,responses:s.events.filter(e=>e.type==='proposal_response'&&e.proposalId===p.proposalId),connects:s.events.filter(e=>e.type==='connect'),types:s.events.map(e=>e.type)}});
   assert(acceptedDebug.responses.some(r=>r.actorId==='B'&&r.decision==='accept'),`recipient consent missing: ${JSON.stringify(acceptedDebug)}`);
   assert(acceptedDebug.connects.length>0,`accepted CONNECT did not materialize: ${JSON.stringify(acceptedDebug)}`);
