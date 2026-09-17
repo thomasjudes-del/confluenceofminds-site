@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS wishes (
   owner_actor_id TEXT NOT NULL,
   parent_wish_id TEXT,
   root_wish_id TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'create' CHECK (kind IN ('create','evolve','split')),
   text TEXT NOT NULL,
   location_text TEXT,
   state TEXT NOT NULL DEFAULT 'alive' CHECK (state IN ('alive','bloomed','abandoned','removed')),
