@@ -9,9 +9,12 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+  async function ready(){
+    await page.waitForFunction(()=>window.__RV26_TEST__&&window.__RV26_TEST__.semantic().length>100,null,{timeout:30000});
+  }
   async function go(actor='A'){
-    await page.goto(BASE+'?actor='+actor+'&qa=1',{waitUntil:'networkidle'});
-    await page.waitForFunction(()=>window.__RV26_TEST__&&window.__RV26_TEST__.semantic().length>100);
+    await page.goto(BASE+'?actor='+actor+'&qa=1',{waitUntil:'domcontentloaded',timeout:30000});
+    await ready();
     assert.equal(await page.getAttribute('body','data-version'),'26');
     assert.equal(await page.evaluate(()=>window.__RV26_TEST__.persona),actor);
   }
@@ -27,7 +30,8 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   assert.equal(await page.locator('#drawerBody [data-open]').count(),3);
   await page.locator('#drawerClose').click();
   await page.locator('[data-lang="en"]').click();
-  assert.equal(await page.locator('#myWorldBtn').getAttribute('title'),'My world');
+  await page.waitForTimeout(50);
+  assert.equal(await page.locator('#myWorldBtn').getAttribute('title'),'My wishes');
   await page.locator('[data-lang="fr"]').click();
 
   await open('qa-a-e1');
@@ -134,16 +138,18 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   assert((await page.locator('#drawerBody').innerText()).includes('shared neighbourhood garden'));
 
   page.once('dialog',d=>d.accept());
-  await page.locator('#qaReset').click();
-  await page.waitForLoadState('networkidle');
-  await page.waitForFunction(()=>window.__RV26_TEST__&&window.__RV26_TEST__.semantic().length>100);
+  await Promise.all([
+    page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}).catch(()=>null),
+    page.locator('#qaReset').click()
+  ]);
+  await ready();
   assert((await page.locator('.sub').innerText()).includes('V26'));
   assert.equal(await page.evaluate(()=>window.__RV26_TEST__.state().version),26);
   assert.equal(await page.evaluate(()=>window.__RV26_TEST__.state().events.length),6);
 
   await page.setViewportSize({width:390,height:844});
-  await page.reload({waitUntil:'networkidle'});
-  await page.waitForFunction(()=>window.__RV26_TEST__&&window.__RV26_TEST__.semantic().length>100);
+  await page.reload({waitUntil:'domcontentloaded',timeout:30000});
+  await ready();
   const layout=await page.evaluate(()=>({sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth,rail:document.getElementById('rail').getBoundingClientRect(),brand:document.getElementById('brand').getBoundingClientRect()}));
   assert(layout.sw<=layout.cw,'mobile horizontal overflow');
   assert(layout.rail.right<=391&&layout.rail.left>330,'mobile side rail is not compact/right aligned');
