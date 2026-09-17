@@ -24,7 +24,6 @@ function validRoots(){return roots.filter(x=>x&&x.simulated&&x.kind==='create').
 function chooseReplacement(ids,slot,salt){const all=validRoots();if(!all.length)return ids[slot];const blocked=new Set(ids.filter((_,i)=>i!==slot));let idx=hash(`${salt}|replacement|${slot}`)%all.length;for(let i=0;i<all.length;i++){const id=all[(idx+i)%all.length];if(!blocked.has(id))return id}return all[idx]}
 function sameIds(a,b){return Array.isArray(a)&&Array.isArray(b)&&a.length===3&&b.length===3&&a.every((x,i)=>x.semanticId===b[i].semanticId)}
 function sameEntrusted(a,b){return sameIds(a,b)&&a.every((x,i)=>Math.abs(x.expires-b[i].expires)<1000)}
-function reloadPreservingActor(){const u=new URL(location.href);u.searchParams.delete('reset');u.searchParams.set('ep','1');u.hash='';location.replace(u.href)}
 
 function initialisePolicy(state){const now=Date.now();const current=(state.entrusted||[]).slice(0,3);if(current.length!==3)return null;const salt=`${Math.floor(now/(3*HOUR))}|${params.get('actor')||'A'}`;return{version:2,entries:current.map((x,i)=>({semanticId:x.semanticId,band:bands[i].name,assignedAt:now,expires:now+randMs(bands[i],i,salt)}))}}
 function syncPolicy(){
@@ -41,8 +40,7 @@ function syncPolicy(){
     }
   }
   const desired=policy.entries.map(x=>({semanticId:x.semanticId,expires:x.expires}));
-  const idsChanged=!sameIds(state.entrusted,desired);
-  if(changed||!sameEntrusted(state.entrusted,desired)){write(POLICY,policy);state.entrusted=desired;write(STORE,state);if(changed||idsChanged){reloadPreservingActor();return}}
+  if(changed||!sameEntrusted(state.entrusted,desired)){write(POLICY,policy);state.entrusted=desired;write(STORE,state)}
   scheduleNext(policy);decorateEntrusted();
 }
 function scheduleNext(policy){clearTimeout(timer);const next=Math.min(...policy.entries.map(x=>x.expires));const delay=Math.max(1000,Math.min(2147480000,next-Date.now()+350));timer=setTimeout(syncPolicy,delay)}
@@ -52,9 +50,11 @@ function bandFor(name){return bands.find(x=>x.name===name)||bands[1]}
 function decorateEntrusted(){
   const policy=read(POLICY);if(!policy?.entries)return;
   const title=document.getElementById('drawerTitle');if(!title||!/^Wishes confiés$|^Entrusted wishes$/i.test(title.textContent.trim()))return;
-  const map=new Map(policy.entries.map(x=>[x.semanticId,x]));
-  document.querySelectorAll('#drawerBody [data-open]').forEach(item=>{
-    const e=map.get(item.dataset.open);if(!e)return;const b=bandFor(e.band);item.style.borderColor=b.soft;item.style.boxShadow=`inset 3px 0 0 ${b.color}`;if(item.dataset.entrustedBand!==e.band)item.dataset.entrustedBand=e.band;
+  const items=[...document.querySelectorAll('#drawerBody [data-open]')];
+  items.slice(0,3).forEach((item,i)=>{
+    const e=policy.entries[i];if(!e)return;const b=bandFor(e.band),root=roots.find(x=>x.semanticId===e.semanticId);
+    item.dataset.open=e.semanticId;item.style.borderColor=b.soft;item.style.boxShadow=`inset 3px 0 0 ${b.color}`;item.dataset.entrustedBand=e.band;
+    const text=item.querySelector('.t');if(text&&root?.text&&text.textContent!==root.text)text.textContent=root.text;
     const meta=item.querySelector('.m'),label=remaining(e.expires-Date.now());if(meta){if(meta.textContent!==label)meta.textContent=label;meta.style.fontFamily='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';meta.style.fontSize='12px';meta.style.fontWeight='720';meta.style.letterSpacing='.04em';meta.style.color=b.color;meta.style.fontVariantNumeric='tabular-nums'}
     const st=item.querySelector('.state');if(st){if(st.textContent!=='●')st.textContent='●';st.style.color=b.color;if(st.title!==e.band)st.title=e.band}
   });
