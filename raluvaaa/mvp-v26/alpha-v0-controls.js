@@ -7,13 +7,17 @@ function install(){
     if(btn.dataset.alphaWrapped==='1'||typeof btn.onclick!=='function')return;
     const native=btn.onclick;
     btn.onclick=function(ev){
-      // Hidden drawer + stale internal kind can otherwise turn the first tap into a close.
-      if(drawer.classList.contains('hidden')&&typeof close.onclick==='function')close.onclick();
-      return native.call(this,ev);
+      const wasHidden=drawer.classList.contains('hidden');
+      if(wasHidden) close.onclick();
+      native.call(this,ev);
+      if(wasHidden&&drawer.classList.contains('hidden')){
+        close.onclick();
+        native.call(this,ev);
+      }
     };
     btn.dataset.alphaWrapped='1';
   });
   return true;
 }
-let tries=0;const timer=setInterval(()=>{if(install()||++tries>80)clearInterval(timer)},25);
+let tries=0;const timer=setInterval(()=>{if(install()||++tries>120)clearInterval(timer)},25);
 })();
