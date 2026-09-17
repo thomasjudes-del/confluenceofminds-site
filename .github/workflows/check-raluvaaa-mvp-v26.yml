@@ -1,4 +1,4 @@
-name: Check RALUVAAA Manual MVP V26
+name: Check RALUVAAA Alpha V0
 
 on:
   push:
@@ -22,11 +22,15 @@ jobs:
           node --check raluvaaa/mvp-v26/app.js
           node --check raluvaaa/mvp-v26/ui-guard.js
           node --check raluvaaa/mvp-v26/alpha-hardening.js
+          node --check raluvaaa/mvp-v26/alpha-v0-polish.js
           node --check raluvaaa/mvp-v26/diag-base.cjs
           node --check raluvaaa/mvp-v26/qa-browser.cjs
           node --check raluvaaa/mvp-v26/qa-alpha.cjs
           grep -q 'engine-v03-locked.html' raluvaaa/mvp-v26/index.html
           grep -q 'alpha-hardening.js' raluvaaa/mvp-v26/index.html
+          grep -q 'alpha-v0-polish.js' raluvaaa/mvp-v26/index.html
+          grep -q 'ALPHA V0' raluvaaa/mvp-v26/index.html
+          grep -q 'raluvaaaEntrustedV26PolicyV2' raluvaaa/mvp-v26/alpha-hardening.js
           grep -q "raluvaaaManualMvpV26" raluvaaa/mvp-v26/app.js
           grep -q "connect_proposed" raluvaaa/mvp-v26/app.js
           grep -q "help_proposed" raluvaaa/mvp-v26/app.js
