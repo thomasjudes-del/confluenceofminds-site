@@ -143,13 +143,13 @@ V24 established the manual event model but exposed workflow gaps found during re
 
 ## MANUAL-MVP-V25 / V25.1
 
-Status: CURRENT WORKING PREVIEW FOR MANUAL WORKFLOW VALIDATION. Dedicated CI: PASSED.
+Status: SUPERSEDED WORKING PREVIEW, retained as the immediate predecessor of V26.
 
 Preview:
 
 `https://confluenceofminds.com/raluvaaa/mvp-v25/`
 
-V25.1 validated implementation head before this registry update:
+V25.1 validated implementation head:
 
 `b2245e0bba1391d8737922b5aae60f59ef433684`
 
@@ -161,45 +161,100 @@ Architecture:
 
 `VISUAL-V03-LOCKED + semantic wish histories + manual Wisher/Helper workflows + local event log`
 
-V25 deliberately contains no LLM and no MCP.
+Key V25/V25.1 changes included ADD BRANCH after an existing split, terminal BLOOM without fake child growth, ABANDON versus REMOVE MISTAKE, REATTACH including drag/drop, lineage focus, stronger real-user ENCOURAGE, SUGGEST A BRANCH, consent-first CONNECT, and compact side-rail navigation.
 
-Key V25 workflow changes:
+## MANUAL-MVP-V26 PRE-ALPHA
 
-- first SPLIT creates at least two branches;
-- revisiting an already split node exposes ADD BRANCH and allows one or more additional children while preserving existing branches;
-- one semantic state has at most one direct EVOLVE continuation;
-- BLOOM is terminal and renders flowering at the same endpoint, with no generated child branch;
-- ABANDON preserves a real historical path;
-- REMOVE MISTAKE is explicitly different from ABANDON and can rewrite local sandbox events to remove an accidental node/subtree;
-- REATTACH works both through a fallback parent selector and direct node drag/drop inside the owner's lineage;
-- LINEAGE FOCUS hides unrelated lineages while retaining relevant connected warps/endpoints;
-- a genuine local ENCOURAGE is deliberately much more visible while the real-user population is tiny;
-- HELP remains a concrete contribution;
-- SUGGEST A BRANCH records a human helper's proposed micro-step without changing another person's lineage.
+Status: CURRENT TECHNICAL PRE-ALPHA CANDIDATE. Dedicated V26 browser QA: PASSED.
 
-V25.1 hardening after live testing:
+Review URLs:
 
-- ENCOURAGE is idempotent per local human/session and wish, so repeated clicks cannot manufacture unlimited encouragements;
-- public encouragement counts are not shown in the wish detail;
-- CONNECT is now a proposal first, represented by `connect_proposed`;
-- each relevant wisher controls consent for their own wish through `connect_accept` or `connect_decline`;
-- the durable `connect` event and visual warp are materialized only after all required consents exist;
-- owned wishes may also initiate a connection proposal;
-- a private Inbox surface now holds connection approvals and is the future home for HELP offers and branch suggestions;
-- Entrusted wishes, Inbox, My world and Release a wish moved into a compact collapsible side rail/drawer;
-- permanent bottom navigation was removed to protect map visibility, especially on mobile;
-- redundant renderer plus/minus navigation controls are hidden, leaving wheel, trackpad, pinch and pan as the primary navigation mechanisms.
+- Person A: `https://confluenceofminds.com/raluvaaa/mvp-v26/?actor=A`
+- Person B: `https://confluenceofminds.com/raluvaaa/mvp-v26/?actor=B`
 
-Dedicated validation checks JavaScript syntax, V03 visual lock, the semantic event contract, connection consent primitives, single-encouragement protection, side-rail navigation and that Bloom no longer calls the growth primitive to create fake descendants.
+Important: A and B are deterministic personas sharing the same browser-origin local storage. They validate the product state machine, notification semantics and consent logic, but they are not independent real users on a shared backend.
 
-The official `/raluvaaa/` route intentionally remains on V22 until the V25 manual workflow is reviewed in-browser and judged ready to replace the semantic/product layer.
+Technical green baseline:
+
+`1bf0443e26599efc192ccaf26d09b7b364ff3b50`
+
+Restore branch:
+
+`archive/raluvaaa-v26-alpha-candidate`
+
+Architecture:
+
+`VISUAL-V03-LOCKED + semantic manual MVP + local A/B consent sandbox + alpha hardening layer`
+
+V26 dedicated browser QA covers:
+
+- CREATE / EVOLVE / SPLIT / later ADD BRANCH;
+- REATTACH;
+- BLOOM / ABANDON / correction of an accidental item;
+- SHARE;
+- ENCOURAGE limited to one per actor and wish;
+- HELP, SUGGEST A BRANCH and CONNECT as proposals;
+- A -> B notifications and recipient consent before materialisation;
+- lineage focus;
+- reset returning to V26 rather than an older build;
+- FR/EN;
+- desktop and compact mobile technical layout checks.
+
+The previous integration-only Canvas `createRadialGradient` non-finite blocker was hardened without modifying the archived V03 source.
+
+Entrusted wishes are again explicitly temporal and non-personalized, with three distinct bands in the alpha surface:
+
+- short: approximately 3–8 hours, urgent/red;
+- medium: approximately 18–30 hours, intermediate/amber;
+- long: approximately 60–84 hours, calm/green.
+
+Expiry replaces the slot without deleting the wish from the world.
+
+For clearer first-use navigation, the private surface previously called `Mon monde / My world` is presented as `Mes wishes / My wishes` in this sandbox.
+
+Supporting alpha documents live in `raluvaaa/mvp-v26/`, including `QA_MATRIX.md`, `ALPHA_LAUNCH_CHECKLIST.md`, `ALPHA_COMMS_DRAFT.md`, `ALPHA_CONTACT_SHEET.md` and `ALPHA_GATE_GREEN.md`.
+
+The official `/raluvaaa/` route intentionally remains on V22 while Thomas completes manual UX review.
+
+## SHARED-ALPHA BACKEND SCAFFOLD V1
+
+Status: CODE + SCHEMA + BROWSER CLIENT READY AND CI-VALIDATED, NOT DEPLOYED TO CLOUDFLARE YET.
+
+Directory:
+
+`raluvaaa/alpha-api/`
+
+Latest validated code/client head:
+
+`fbbcc50756f591693dfbc6a8c8e8ca4a5f854e28`
+
+Restore branches:
+
+- `archive/raluvaaa-alpha-api-scaffold-v1`
+- `archive/raluvaaa-alpha-api-client-v1`
+
+Stack:
+
+- Cloudflare Worker;
+- D1 schema;
+- lightweight opaque anonymous session identity;
+- shared wishes and wish events;
+- encouragement uniqueness;
+- proposal/consent state;
+- notifications;
+- reports;
+- browser client `RaluvaaaAlphaClient`.
+
+The Worker API is prepared for shared CREATE / EVOLVE / SPLIT / ADD BRANCH / BLOOM / ABANDON / REATTACH, one encouragement per human/wish, consent-based HELP / branch suggestions / CONNECT, inbox/notifications, reports and basic publication-scope filtering.
+
+A true cross-browser alpha cannot be claimed until a real D1 database is created and the Worker is deployed in the project's Cloudflare account. Cloudflare credentials/account access are the current external deployment hard stop.
 
 ## Future layers, not current MVP
 
 ### OPTIONAL LLM ASSISTANCE
 
-May later propose structure/evolution/splits, always requiring human confirmation. Not implemented in V25.
+May later propose structure/evolution/splits, always requiring human confirmation. Not part of V26.
 
 ### MCP / EXTERNAL LLM INTERFACE
 
-May later expose the same event model to ChatGPT/Claude/other clients for read/update/exploration. Not implemented in V25.
+May later expose the same event model to ChatGPT/Claude/other clients for read/update/exploration. Not part of V26.
