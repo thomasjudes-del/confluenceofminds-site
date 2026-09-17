@@ -4,7 +4,8 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
 const H=3600000;
 (async()=>{
   const browser=await chromium.launch({headless:true});
-  const page=await browser.newPage({viewport:{width:1440,height:900}});
+  const context=await browser.newContext({viewport:{width:1440,height:900},locale:'fr-FR'});
+  const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
