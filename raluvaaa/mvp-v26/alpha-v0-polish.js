@@ -30,10 +30,18 @@ function injectChrome(){
 injectChrome();
 const layer=document.getElementById('ritualLayer');
 
-function point(id){
-  try{const w=frame.contentWindow,n=w?.world?.nodes?.find(x=>x.semanticId===id);if(!n||!w?.camera?.worldToScreen)return null;const p=w.camera.worldToScreen(n.x,n.y);if(!Number.isFinite(p?.x)||!Number.isFinite(p?.y))return null;return{x:p.x,y:p.y}}catch{return null}
+function installPointBridge(){
+  try{
+    const w=frame.contentWindow,doc=frame.contentDocument;if(!w||!doc?.body||w.__rv26AlphaPoint)return !!w?.__rv26AlphaPoint;
+    const s=doc.createElement('script');
+    s.textContent=`window.__rv26AlphaPoint=id=>{try{const n=world.nodes.find(x=>x.semanticId===id);if(!n)return null;const p=camera.worldToScreen(n.x,n.y);return Number.isFinite(p.x)&&Number.isFinite(p.y)?{x:p.x,y:p.y}:null}catch{return null}};`;
+    doc.body.appendChild(s);s.remove();return typeof w.__rv26AlphaPoint==='function';
+  }catch{return false}
 }
-function waitPoint(id,tries=14){return new Promise(resolve=>{let n=0;const tick=()=>{const p=point(id);if(p||n++>=tries)return resolve(p);setTimeout(tick,90)};tick()})}
+function point(id){
+  try{installPointBridge();const p=frame.contentWindow?.__rv26AlphaPoint?.(id);return p&&Number.isFinite(p.x)&&Number.isFinite(p.y)?p:null}catch{return null}
+}
+function waitPoint(id,tries=20){return new Promise(resolve=>{let n=0;const tick=()=>{const p=point(id);if(p||n++>=tries)return resolve(p);setTimeout(tick,90)};tick()})}
 function ring(p,delayClass=''){if(!p)return;const e=document.createElement('i');e.className='rv-ring '+delayClass;e.style.left=p.x+'px';e.style.top=p.y+'px';layer.appendChild(e);setTimeout(()=>e.remove(),2100)}
 function seedPulse(p){if(!p)return;const e=document.createElement('i');e.className='rv-seed';e.style.left=p.x+'px';e.style.top=p.y+'px';layer.appendChild(e);setTimeout(()=>e.remove(),2100)}
 function petals(p,count=11){if(!p)return;for(let i=0;i<count;i++){const e=document.createElement('i');e.className='rv-petal';e.style.left=p.x+'px';e.style.top=p.y+'px';e.style.setProperty('--a',(i*360/count)+'deg');layer.appendChild(e);setTimeout(()=>e.remove(),2200)}}
