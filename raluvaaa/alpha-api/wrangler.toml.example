@@ -1,0 +1,14 @@
+name = "raluvaaa-alpha-api"
+main = "worker.mjs"
+compatibility_date = "2026-09-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://confluenceofminds.com,http://localhost:8787,http://127.0.0.1:8787"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "raluvaaa-alpha"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# Optional, recommended before opening beyond a tiny private alpha:
+# wrangler secret put TURNSTILE_SECRET
