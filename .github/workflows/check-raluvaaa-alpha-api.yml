@@ -15,13 +15,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check Worker syntax and invariants
+      - name: Check Worker and client syntax and invariants
         run: |
           node --check raluvaaa/alpha-api/worker.mjs
+          node --check raluvaaa/alpha-api/client.mjs
           grep -q "owner_required" raluvaaa/alpha-api/worker.mjs
           grep -q "proposal_consents" raluvaaa/alpha-api/worker.mjs
           grep -q "public_payload_json" raluvaaa/alpha-api/worker.mjs
           grep -q "already_encouraged" raluvaaa/alpha-api/worker.mjs
+          grep -q "RaluvaaaAlphaClient" raluvaaa/alpha-api/client.mjs
       - name: Validate D1 schema with SQLite
         run: |
           python3 - <<'PY'
