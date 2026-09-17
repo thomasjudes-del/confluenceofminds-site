@@ -63,12 +63,4 @@ Storage.prototype.setItem=function(key,value){
   const oldLen=Array.isArray(before?.events)?before.events.length:0,newEvents=Array.isArray(after?.events)?after.events.slice(oldLen):[];
   if(newEvents.length){let delay=220;for(const ev of newEvents){setTimeout(()=>ritual(ev),delay);delay+=120}}
 };
-
-// A stale drawerKind must never make the first tap on a closed rail panel behave like a close.
-document.addEventListener('click',e=>{
-  const btn=e.target.closest?.('[data-panel]');if(!btn)return;
-  const drawer=document.getElementById('drawer'),wasHidden=drawer?.classList.contains('hidden');
-  if(!wasHidden)return;
-  setTimeout(()=>{if(drawer?.classList.contains('hidden'))btn.click()},0);
-},true);
 })();
