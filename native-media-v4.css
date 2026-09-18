@@ -411,30 +411,24 @@
   background:linear-gradient(180deg,rgba(15,12,33,.06) 12%,rgba(18,11,36,.8) 100%);
 }
 
-/* RALUVAAA V2 animated wish loop */
-.world-card--raluvaaa .world-cover{background:#020610!important}
-.raluva-card-loop{position:absolute;inset:0;z-index:1;overflow:hidden;background:#020610}
-.raluva-card-loop svg{width:100%;height:100%;display:block;transform:scale(1.035)}
-.world-card--raluvaaa .world-card__scrim{background:linear-gradient(180deg,rgba(2,6,16,.82) 0%,rgba(2,6,16,.18) 42%,rgba(2,6,16,.05) 68%,rgba(2,6,16,.38) 100%)!important}
-.rv-path{stroke:#77e7d5;stroke-width:4;opacity:.9;stroke-dasharray:850;stroke-dashoffset:850;filter:drop-shadow(0 0 7px rgba(103,238,216,.65));animation:rvDraw 11s cubic-bezier(.5,.05,.25,1) infinite}
-.rv-p2{animation-delay:.9s}.rv-p3{animation-delay:1.7s}.rv-p4{animation-delay:2.4s}.rv-p5{animation-delay:3.15s}
-.rv-seed{animation:rvSeed 11s ease-in-out infinite}.rv-seed-halo{transform-origin:150px 350px;animation:rvHalo 11s ease-in-out infinite}
-.rv-nodes{opacity:0;animation:rvNodes 11s ease infinite}
-.rv-help-dot{fill:#ffc97d;opacity:0}.rv-help-dot.h1{animation:rvHelp 11s ease 0s infinite}.rv-help-dot.h2{animation:rvHelp 11s ease .35s infinite}.rv-help-dot.h3{animation:rvHelp 11s ease .7s infinite}
-.rv-warp{stroke:#ab8fff;stroke-width:3;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:240;filter:drop-shadow(0 0 7px rgba(171,143,255,.65));animation:rvWarp 11s ease infinite}
-.rv-bloom{opacity:0;transform-box:fill-box;transform-origin:center;animation:rvBloom 11s cubic-bezier(.2,.8,.2,1) infinite}
-.rv-bloom .petal{fill:#ffc978}
-.rv-final-blooms .fb{opacity:0}.rv-final-blooms .f1{animation:rvFinal 11s ease 0s infinite}.rv-final-blooms .f2{animation:rvFinal 11s ease .2s infinite}.rv-final-blooms .f3{animation:rvFinal 11s ease .4s infinite}
-.rv-loop-labels{position:absolute;left:24px;bottom:20px;right:24px;height:22px;z-index:2;font:700 10px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:rgba(226,255,249,.9);text-shadow:0 2px 12px #000;pointer-events:none}
-.rv-loop-labels span{position:absolute;left:0;opacity:0;animation:rvLabel 11s ease infinite}
-.rv-loop-labels .l2{animation-delay:2.2s}.rv-loop-labels .l3{animation-delay:4.5s}.rv-loop-labels .l4{animation-delay:7s}
-@keyframes rvDraw{0%,7%{stroke-dashoffset:850}42%,82%{stroke-dashoffset:0}94%,100%{stroke-dashoffset:-80;opacity:.12}}
-@keyframes rvSeed{0%,100%{r:5;opacity:.35}6%,18%{r:9;opacity:1}35%,88%{r:6;opacity:.8}}
-@keyframes rvHalo{0%,100%{transform:scale(.4);opacity:.15}8%,18%{transform:scale(1.35);opacity:.95}32%,80%{transform:scale(.85);opacity:.35}}
-@keyframes rvNodes{0%,24%{opacity:0}38%,86%{opacity:1}96%,100%{opacity:0}}
-@keyframes rvHelp{0%,43%{opacity:0;transform:scale(.3)}52%,66%{opacity:1;transform:scale(1.25)}75%,100%{opacity:0;transform:scale(.5)}}
-@keyframes rvWarp{0%,52%{stroke-dashoffset:240;opacity:0}62%,84%{stroke-dashoffset:0;opacity:1}95%,100%{opacity:0}}
-@keyframes rvBloom{0%,64%{opacity:0;transform:scale(.2) rotate(-16deg)}74%,90%{opacity:1;transform:scale(1.2) rotate(4deg)}98%,100%{opacity:0;transform:scale(.6)}}
-@keyframes rvFinal{0%,72%{opacity:0}82%,92%{opacity:1}100%{opacity:0}}
-@keyframes rvLabel{0%,4%,26%,100%{opacity:0;transform:translateY(5px)}7%,20%{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.raluva-card-loop *{animation:none!important}.rv-path{stroke-dashoffset:0}.rv-nodes,.rv-bloom,.rv-final-blooms .fb{opacity:1}.rv-loop-labels .l1{opacity:1}}
+
+/* RALUVAAA V3 organic canvas portal */
+.world-card--raluvaaa .world-cover{
+  background:#020610!important;
+}
+.raluva-card-canvas{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  width:100%;
+  height:100%;
+  display:block;
+  background:#020610;
+}
+.world-card--raluvaaa .world-card__scrim{
+  background:
+    linear-gradient(180deg,rgba(2,6,16,.78) 0%,rgba(2,6,16,.22) 36%,rgba(2,6,16,.05) 62%,rgba(2,6,16,.32) 100%)!important;
+}
+.world-card--raluvaaa:hover .raluva-card-canvas{
+  filter:saturate(1.08) brightness(1.04);
+}
