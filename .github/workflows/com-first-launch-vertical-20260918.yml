@@ -9,6 +9,8 @@ jobs:
   transcode:
     runs-on: ubuntu-latest
     steps:
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Download owned Titan teaser
         run: |
           curl -L --fail --retry 3 \
