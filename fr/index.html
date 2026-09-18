@@ -191,7 +191,7 @@
             "@type": "SoftwareApplication",
             "name": "ChatMargin",
             "description": "Une extension Chrome local-first pour organiser notes, prompts, suivis, recherche et workspace autour de ChatGPT.",
-            "url": "https://confluenceofminds.com/fr/chat-margin/"
+            "url": "https://chatmargin.app/"
           }
         }
         }
@@ -339,13 +339,56 @@
           </a>
         </article>
 
+        
         <article class="world-card world-card--raluvaaa world-card--native reveal" data-portal="RALUVAAA" data-media-container>
           <a class="world-card__link" href="/fr/raluvaaa/world/" aria-label="Entrer dans RALUVAAA">
             <div class="world-cover">
-              <iframe class="world-card__live-embed" src="/raluvaaa/v22/engine-v03-locked.html?embed=home" title="" aria-hidden="true" tabindex="-1" loading="lazy"></iframe>
+              <div class="raluva-card-loop" aria-hidden="true">
+                <svg viewBox="0 0 960 540" preserveAspectRatio="xMidYMid slice">
+                  <defs>
+                    <radialGradient id="rvBg" cx="62%" cy="44%" r="76%"><stop offset="0" stop-color="#0c2d34"/><stop offset=".46" stop-color="#061722"/><stop offset="1" stop-color="#020610"/></radialGradient>
+                    <radialGradient id="rvSeed" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ecfff8"/><stop offset=".3" stop-color="#8ff5df"/><stop offset="1" stop-color="#51cabb" stop-opacity="0"/></radialGradient>
+                    <filter id="rvGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  <rect width="960" height="540" fill="url(#rvBg)"/>
+                  <g class="rv-dust"></g>
+                  <circle class="rv-seed-halo" cx="150" cy="350" r="42" fill="url(#rvSeed)"/>
+                  <circle class="rv-seed" cx="150" cy="350" r="7" fill="#eafff8" filter="url(#rvGlow)"/>
+                  <g class="rv-lineage" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path class="rv-path rv-p1" d="M150 350 C210 330 250 300 310 292 S415 270 470 230 S575 200 640 172"/>
+                    <path class="rv-path rv-p2" d="M355 282 C395 330 445 362 510 378 S640 410 705 435"/>
+                    <path class="rv-path rv-p3" d="M470 230 C505 188 548 150 605 130 S690 98 760 84"/>
+                    <path class="rv-path rv-p4" d="M540 208 C585 250 625 276 682 292 S770 302 835 282"/>
+                    <path class="rv-path rv-p5" d="M705 435 C748 396 790 372 838 374"/>
+                  </g>
+                  <g class="rv-nodes" fill="#baffee">
+                    <circle cx="310" cy="292" r="5"/><circle cx="470" cy="230" r="5"/><circle cx="510" cy="378" r="5"/>
+                    <circle cx="640" cy="172" r="5"/><circle cx="605" cy="130" r="5"/><circle cx="682" cy="292" r="5"/>
+                  </g>
+                  <g class="rv-help" filter="url(#rvGlow)">
+                    <circle class="rv-help-dot h1" cx="565" cy="356" r="7"/><circle class="rv-help-dot h2" cx="615" cy="330" r="5"/><circle class="rv-help-dot h3" cx="655" cy="350" r="6"/>
+                  </g>
+                  <path class="rv-warp" d="M682 292 C735 246 778 228 835 214" fill="none"/>
+                  <g class="rv-bloom" transform="translate(838 374)" filter="url(#rvGlow)">
+                    <circle r="8" fill="#ffe6b5"/>
+                    <ellipse class="petal p1" rx="8" ry="25" cy="-28"/><ellipse class="petal p2" rx="8" ry="25" cy="28"/>
+                    <ellipse class="petal p3" rx="25" ry="8" cx="-28"/><ellipse class="petal p4" rx="25" ry="8" cx="28"/>
+                    <ellipse class="petal p5" rx="8" ry="24" transform="rotate(45) translate(0 -28)"/><ellipse class="petal p6" rx="8" ry="24" transform="rotate(-45) translate(0 -28)"/>
+                  </g>
+                  <g class="rv-final-blooms" fill="#ffdca2" filter="url(#rvGlow)">
+                    <circle class="fb f1" cx="760" cy="84" r="10"/><circle class="fb f2" cx="835" cy="282" r="10"/><circle class="fb f3" cx="705" cy="435" r="10"/>
+                  </g>
+                </svg>
+                <div class="rv-loop-labels">
+                  <span class="l1">Fais un vœu</span>
+                  <span class="l2">Découpe-le</span>
+                  <span class="l3">Reçois de l’aide</span>
+                  <span class="l4">Fais-le éclore</span>
+                </div>
+              </div>
               <span class="world-card__scrim" aria-hidden="true"></span>
               <div class="world-card__body">
-                <div class="world-card__meta"><span>Organisme internet vivant</span><span>En cours</span></div>
+                <div class="world-card__meta"><span>Organisme vivant</span><span>En cours</span></div>
                 <h3>RALUVAAA</h3>
                 <p>Une carte vivante des intentions humaines.</p>
                 <span class="world-card__cta">Entrer dans RALUVAAA <span aria-hidden="true">↗</span></span>
@@ -354,16 +397,17 @@
           </a>
         </article>
 
+        
         <article class="world-card world-card--chatmargin world-card--native reveal" data-portal="ChatMargin" data-media-container>
-          <a class="world-card__link" href="/fr/chat-margin/" aria-label="Découvrir ChatMargin">
+          <a class="world-card__link" href="https://chatmargin.app/" target="_blank" rel="noopener" aria-label="Ouvrir ChatMargin">
             <div class="world-cover">
               <img class="world-card__poster world-card__poster--product" src="https://chatmargin.app/assets/chatmargin-hero.png" alt="" aria-hidden="true" loading="lazy" />
               <span class="world-card__scrim" aria-hidden="true"></span>
               <div class="world-card__body">
                 <div class="world-card__meta"><span>Outil local-first</span><span>En ligne</span></div>
                 <h3>ChatMargin</h3>
-                <p>Un espace de travail qui vit à côté de ChatGPT.</p>
-                <span class="world-card__cta">Découvrir ChatMargin <span aria-hidden="true">↗</span></span>
+                <p>L’espace de travail qui vit à côté de ChatGPT.</p>
+                <span class="world-card__cta">Ouvrir ChatMargin <span aria-hidden="true">↗</span></span>
               </div>
             </div>
           </a>
