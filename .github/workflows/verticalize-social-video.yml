@@ -1,0 +1,44 @@
+name: Verticalize Social Video
+
+on:
+  push:
+    paths:
+      - 'data/verticalize-request.json'
+
+permissions:
+  contents: read
+
+jobs:
+  verticalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install media tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg jq
+
+      - name: Read request
+        run: |
+          echo "SOURCE_URL=$(jq -r '.source_url' data/verticalize-request.json)" >> "$GITHUB_ENV"
+          echo "OUTPUT_NAME=$(jq -r '.output_name' data/verticalize-request.json)" >> "$GITHUB_ENV"
+
+      - name: Download source
+        run: |
+          curl -L --fail --retry 3 "$SOURCE_URL" -o source.mp4
+
+      - name: Create 9x16 social master
+        run: |
+          ffmpeg -y -i source.mp4 -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20:10[bg];[0:v]scale=1080:1920:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 20 -c:a aac -b:a 192k -movflags +faststart "$OUTPUT_NAME"
+
+      - name: Validate output
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of json "$OUTPUT_NAME"
+
+      - name: Upload vertical video
+        uses: actions/upload-artifact@v4
+        with:
+          name: verticalized-social-video
+          path: ${{ env.OUTPUT_NAME }}
+          if-no-files-found: error
