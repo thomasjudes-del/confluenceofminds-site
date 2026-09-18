@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-18",
+  "version": "2026-09-18-v2",
   "purpose": "Lightweight editorial map for the autonomous Confluence of Minds news-to-content loop. This file guides discovery but is not a substitute for checking the current repository before publishing.",
   "site": "https://confluenceofminds.com/",
   "repository": "thomasjudes-del/confluenceofminds-site",
@@ -317,12 +317,14 @@
       ],
       "known_destination": "https://confluenceofminds.com/raluvaaa/world/",
       "known_media": [
-        "https://confluenceofminds.com/raluvaaa/v22/engine-v03-locked.html"
+        "https://confluenceofminds.com/raluvaaa/world/",
+        "https://confluenceofminds.com/raluvaaa/"
       ],
       "evergreen_angles": [
-        "What if a wish became a living lineage",
-        "Can an online artwork stay alive only through human attention",
-        "What changes when a social graph maps intentions instead of profiles"
+        "What if a wish became a living lineage?",
+        "Turn one dream into smaller actions, then let other people help it move",
+        "What changes when a social graph maps intentions instead of profiles?",
+        "A wish can split, receive help, connect and bloom without becoming a popularity score"
       ]
     },
     {
@@ -345,7 +347,7 @@
         "personal knowledge management around AI",
         "new patterns in heavy LLM usage"
       ],
-      "known_destination": "https://confluenceofminds.com/chat-margin/",
+      "known_destination": "https://chatmargin.app/",
       "known_media": [
         "https://chatmargin.app/assets/chatmargin-hero.png"
       ],
