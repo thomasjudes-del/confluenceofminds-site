@@ -5,10 +5,14 @@ on:
     paths:
       - '.github/workflows/com-first-launch-vertical-20260918.yml'
 
+permissions:
+  contents: write
+
 jobs:
   transcode:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Download owned Titan teaser
@@ -18,12 +22,14 @@ jobs:
             -o source.mp4
       - name: Build 1080x1920 derivative
         run: |
-          ffmpeg -y -i source.mp4 -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=28[bg];[0:v]scale=1080:1920:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 19 -c:a aac -b:a 192k -movflags +faststart -shortest titan-first-launch-vertical-1080x1920.mp4
+          mkdir -p assets/social/2026-09-18
+          ffmpeg -y -i source.mp4 -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=28[bg];[0:v]scale=1080:1920:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 19 -c:a aac -b:a 192k -movflags +faststart -shortest assets/social/2026-09-18/titan-first-launch-vertical-1080x1920.mp4
       - name: Verify derivative
-        run: ffprobe -v error -show_entries stream=width,height,duration -of default=noprint_wrappers=1 titan-first-launch-vertical-1080x1920.mp4
-      - name: Upload vertical derivative
-        uses: actions/upload-artifact@v4
-        with:
-          name: titan-first-launch-vertical
-          path: titan-first-launch-vertical-1080x1920.mp4
-          retention-days: 3
+        run: ffprobe -v error -show_entries stream=width,height,duration -of default=noprint_wrappers=1 assets/social/2026-09-18/titan-first-launch-vertical-1080x1920.mp4
+      - name: Commit derivative
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/social/2026-09-18/titan-first-launch-vertical-1080x1920.mp4
+          git commit -m 'Add Titan vertical social derivative'
+          git push
