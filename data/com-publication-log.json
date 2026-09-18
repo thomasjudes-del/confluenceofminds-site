@@ -69,6 +69,22 @@
       "scheduled_for": "2026-09-18T12:30:00+02:00",
       "published_at": null,
       "notes": "First autonomous publishing cycle. YouTube Short, 9:16 master, automatic scheduling."
+    },
+    {
+      "experiment_id": "com-titan-2026-09-18-first-cycle",
+      "platform": "facebook",
+      "metricool_post_id": "378106127",
+      "scheduled_for": "2026-09-18T15:15:00+02:00",
+      "published_at": null,
+      "world_id": "incident-on-titan",
+      "content_mode": "archive-remix",
+      "angle": "Titan has rivers, lakes and seas, but not of water",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/titan/",
+      "source_event": null,
+      "creative_master": "assets/social/titan-first-launch-vertical-1080x1920.mp4",
+      "notes": "Facebook Reel expansion of first autonomous publishing cycle via Metricool."
     }
   ]
 }
