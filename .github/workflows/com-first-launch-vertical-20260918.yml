@@ -1,0 +1,27 @@
+name: CoM first launch vertical 2026-09-18
+
+on:
+  push:
+    paths:
+      - '.github/workflows/com-first-launch-vertical-20260918.yml'
+
+jobs:
+  transcode:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download owned Titan teaser
+        run: |
+          curl -L --fail --retry 3 \
+            'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Incident_on_Titan_Teaser_Minimal_Cut_HD_Final.mp4' \
+            -o source.mp4
+      - name: Build 1080x1920 derivative
+        run: |
+          ffmpeg -y -i source.mp4 -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=28[bg];[0:v]scale=1080:1920:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 19 -c:a aac -b:a 192k -movflags +faststart -shortest titan-first-launch-vertical-1080x1920.mp4
+      - name: Verify derivative
+        run: ffprobe -v error -show_entries stream=width,height,duration -of default=noprint_wrappers=1 titan-first-launch-vertical-1080x1920.mp4
+      - name: Upload vertical derivative
+        uses: actions/upload-artifact@v4
+        with:
+          name: titan-first-launch-vertical
+          path: titan-first-launch-vertical-1080x1920.mp4
+          retention-days: 3
