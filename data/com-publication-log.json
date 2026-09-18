@@ -21,6 +21,54 @@
       "confluence_url": null,
       "source_event": null,
       "notes": "Pre-autonomous-editor baseline post announcing the refreshed Confluence of Minds website."
+    },
+    {
+      "experiment_id": "com-titan-2026-09-18-first-cycle",
+      "world_id": "incident-on-titan",
+      "content_mode": "archive-remix",
+      "angle": "Titan has rivers, lakes and seas, but not of water",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/titan/",
+      "source_event": null,
+      "creative_master": "assets/social/titan-first-launch-vertical-1080x1920.mp4",
+      "platform": "instagram",
+      "buffer_post_id": "6aacff60e56454555df41e88",
+      "scheduled_for": "2026-09-18T12:10:00+02:00",
+      "published_at": null,
+      "notes": "First autonomous publishing cycle. Instagram Reel, 9:16 master, automatic scheduling."
+    },
+    {
+      "experiment_id": "com-titan-2026-09-18-first-cycle",
+      "world_id": "incident-on-titan",
+      "content_mode": "archive-remix",
+      "angle": "Titan has rivers, lakes and seas, but not of water",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/titan/",
+      "source_event": null,
+      "creative_master": "assets/social/titan-first-launch-vertical-1080x1920.mp4",
+      "platform": "tiktok",
+      "buffer_post_id": "6aacff620785d24e87398fc1",
+      "scheduled_for": "2026-09-18T12:20:00+02:00",
+      "published_at": null,
+      "notes": "First autonomous publishing cycle. TikTok, 9:16 master, automatic scheduling."
+    },
+    {
+      "experiment_id": "com-titan-2026-09-18-first-cycle",
+      "world_id": "incident-on-titan",
+      "content_mode": "archive-remix",
+      "angle": "Titan has rivers, lakes and seas, but not of water",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/titan/",
+      "source_event": null,
+      "creative_master": "assets/social/titan-first-launch-vertical-1080x1920.mp4",
+      "platform": "youtube",
+      "buffer_post_id": "6aad0b033a7c1be91590311d",
+      "scheduled_for": "2026-09-18T12:30:00+02:00",
+      "published_at": null,
+      "notes": "First autonomous publishing cycle. YouTube Short, 9:16 master, automatic scheduling."
     }
   ]
 }
