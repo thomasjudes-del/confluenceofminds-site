@@ -1,5 +1,5 @@
 {
-  "version": "2026-08-08",
+  "version": "2026-09-19",
   "purpose": "Machine-readable log linking CoM publications to worlds, editorial angles, formats and Buffer IDs so performance can be learned over time.",
   "rules": [
     "Every future autonomous CoM Instagram publication must append one entry after Buffer confirms creation.",
@@ -85,6 +85,70 @@
       "source_event": null,
       "creative_master": "assets/social/titan-first-launch-vertical-1080x1920.mp4",
       "notes": "Facebook Reel expansion of first autonomous publishing cycle via Metricool."
+    },
+    {
+      "experiment_id": "com-silmea-2026-09-19-sound-cinema",
+      "world_id": "silmea",
+      "content_mode": "archive-remix",
+      "angle": "Can a movie exist without images?",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://smartlink.ausha.co/creations-silmea",
+      "source_event": null,
+      "creative_master": "assets/social/2026-09-19/silmea-sound-cinema-vertical-1080x1920.mp4",
+      "platform": "instagram",
+      "buffer_post_id": "6aae83fa1e8bdcdb5245328e",
+      "scheduled_for": "2026-09-19T18:00:00+02:00",
+      "published_at": null,
+      "notes": "Native 9:16 SILMEA experiment with stronger first-second hook and 12s duration."
+    },
+    {
+      "experiment_id": "com-silmea-2026-09-19-sound-cinema",
+      "world_id": "silmea",
+      "content_mode": "archive-remix",
+      "angle": "Can a movie exist without images?",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://smartlink.ausha.co/creations-silmea",
+      "source_event": null,
+      "creative_master": "assets/social/2026-09-19/silmea-sound-cinema-vertical-1080x1920.mp4",
+      "platform": "tiktok",
+      "buffer_post_id": "6aae83fc1e8bdcdb524532bb",
+      "scheduled_for": "2026-09-19T18:10:00+02:00",
+      "published_at": null,
+      "notes": "Native 9:16 SILMEA experiment with platform-specific concise caption."
+    },
+    {
+      "experiment_id": "com-silmea-2026-09-19-sound-cinema",
+      "world_id": "silmea",
+      "content_mode": "archive-remix",
+      "angle": "Can a movie exist without images?",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://smartlink.ausha.co/creations-silmea",
+      "source_event": null,
+      "creative_master": "assets/social/2026-09-19/silmea-sound-cinema-vertical-1080x1920.mp4",
+      "platform": "youtube",
+      "buffer_post_id": "6aae83fe24705c9044a4c0bb",
+      "scheduled_for": "2026-09-19T16:20:00+02:00",
+      "published_at": null,
+      "notes": "YouTube Short using the same 12s vertical master."
+    },
+    {
+      "experiment_id": "com-silmea-2026-09-19-sound-cinema",
+      "world_id": "silmea",
+      "content_mode": "archive-remix",
+      "angle": "Can a movie exist without images?",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://smartlink.ausha.co/creations-silmea",
+      "source_event": null,
+      "creative_master": "assets/social/2026-09-19/silmea-sound-cinema-vertical-1080x1920.mp4",
+      "platform": "facebook",
+      "metricool_post_id": "378574803",
+      "scheduled_for": "2026-09-19T18:20:00+02:00",
+      "published_at": null,
+      "notes": "Facebook Reel scheduled via Metricool from the native 9:16 master."
     }
   ]
 }
