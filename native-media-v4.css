@@ -432,3 +432,71 @@
 .world-card--raluvaaa:hover .raluva-card-canvas{
   filter:saturate(1.08) brightness(1.04);
 }
+
+
+/* Elizabeth raconte: animated audio-story portal */
+.world-card--elisabeth .world-cover{
+  background:#07182e!important;
+}
+.world-card--elisabeth .elisabeth-card__poster{
+  object-fit:cover!important;
+  object-position:center 42%!important;
+  transform:scale(1.035);
+  animation:elisabethBreath 8s ease-in-out infinite alternate;
+  filter:saturate(1.02) contrast(1.02);
+}
+.world-card--elisabeth .world-card__scrim{
+  background:
+    linear-gradient(180deg,rgba(3,10,26,.78) 0%,rgba(3,10,26,.34) 34%,rgba(3,10,26,.06) 62%,rgba(3,10,26,.38) 100%)!important;
+}
+.elisabeth-waveform{
+  position:absolute;
+  z-index:1;
+  left:50%;
+  bottom:14%;
+  width:min(46%,360px);
+  height:24%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  transform:translateX(-50%);
+  pointer-events:none;
+  filter:drop-shadow(0 0 12px rgba(255,218,139,.8));
+  opacity:.9;
+}
+.elisabeth-waveform i{
+  display:block;
+  width:5px;
+  height:28%;
+  min-height:12px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#fff2bf,#e7a94e);
+  transform-origin:center;
+  animation:elisabethWave 1.55s ease-in-out infinite alternate;
+}
+.elisabeth-waveform i:nth-child(2n){animation-delay:-.18s}
+.elisabeth-waveform i:nth-child(3n){animation-delay:-.42s}
+.elisabeth-waveform i:nth-child(4n){animation-delay:-.66s}
+.elisabeth-waveform i:nth-child(5n){animation-delay:-.88s}
+@keyframes elisabethBreath{
+  from{transform:scale(1.035) translate3d(0,0,0)}
+  to{transform:scale(1.075) translate3d(0,-1.2%,0)}
+}
+@keyframes elisabethWave{
+  0%{transform:scaleY(.42);opacity:.68}
+  45%{transform:scaleY(1.35);opacity:1}
+  100%{transform:scaleY(.72);opacity:.82}
+}
+@media (max-width:760px){
+  .elisabeth-waveform{
+    width:42%;
+    bottom:12%;
+    gap:4px;
+  }
+  .elisabeth-waveform i{width:4px}
+}
+@media (prefers-reduced-motion:reduce){
+  .world-card--elisabeth .elisabeth-card__poster,
+  .elisabeth-waveform i{animation:none!important}
+}
