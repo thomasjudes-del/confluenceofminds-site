@@ -27,50 +27,113 @@
         "segment": "brand-general",
         "example": "2026 website relaunch reel",
         "buffer_post_id": "6a75ea2c8363eb694995a5b6",
-        "metrics": {"reach": 131, "views": 146, "reactions": 0, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 0},
+        "metrics": {
+          "reach": 131,
+          "views": 146,
+          "reactions": 0,
+          "comments": 0,
+          "saves": 0,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 0
+        },
         "learning": "Generic umbrella-brand awareness can generate views without generating interaction. Do not assume reach means interest in a specific world."
       },
       {
         "segment": "anjin-of-the-shogun",
         "example": "Kintsugi cultural post",
-        "metrics": {"reach": 39, "views": 150, "reactions": 9, "comments": 1, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 28.2051},
+        "metrics": {
+          "reach": 39,
+          "views": 150,
+          "reactions": 9,
+          "comments": 1,
+          "saves": 1,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 28.2051
+        },
         "learning": "Specific cultural concepts with a clear curiosity hook can outperform generic project promotion on resonance."
       },
       {
         "segment": "anjin-of-the-shogun",
         "example": "Sumi-e cultural post",
-        "metrics": {"reach": 53, "views": 177, "reactions": 9, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 16.9811},
+        "metrics": {
+          "reach": 53,
+          "views": 177,
+          "reactions": 9,
+          "comments": 0,
+          "saves": 0,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 16.9811
+        },
         "learning": "Educational/cultural adjacency around an existing world is a promising editorial mode."
       },
       {
         "segment": "shattered-dragons",
         "example": "Fire dragon speculative-biology fragment",
-        "metrics": {"reach": 22, "views": 40, "reactions": 6, "comments": 1, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 36.3636},
+        "metrics": {
+          "reach": 22,
+          "views": 40,
+          "reactions": 6,
+          "comments": 1,
+          "saves": 1,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 36.3636
+        },
         "learning": "Shattered Dragons historically showed strong resonance inside a small audience; test whether news/biotech adjacency can expand discovery without losing that resonance."
       },
       {
         "segment": "shattered-dragons",
         "example": "Earth dragon fragment",
-        "metrics": {"reach": 33, "views": 60, "reactions": 8, "comments": 0, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 27.2727},
+        "metrics": {
+          "reach": 33,
+          "views": 60,
+          "reactions": 8,
+          "comments": 0,
+          "saves": 1,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 27.2727
+        },
         "learning": "Narrative fragments with a concrete creature/worldbuilding idea can be efficient engagement assets."
       },
       {
         "segment": "we-can-but-we-cant",
         "example": "Fast-fashion / Greta contradiction post",
-        "metrics": {"reach": 41, "views": 102, "reactions": 0, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 0},
+        "metrics": {
+          "reach": 41,
+          "views": 102,
+          "reactions": 0,
+          "comments": 0,
+          "saves": 0,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 0
+        },
         "learning": "Broad contradiction/activism posts can attract some exposure but may fail to generate interaction; use selectively unless new evidence improves performance."
       },
       {
         "segment": "format-meme",
         "example": "Disaster Girl parody reel",
-        "metrics": {"reach": 262, "views": 499, "reactions": 3, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 1.145},
+        "metrics": {
+          "reach": 262,
+          "views": 499,
+          "reactions": 3,
+          "comments": 0,
+          "saves": 0,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 1.145
+        },
         "learning": "Memetic content may produce discovery without meaningful resonance. Treat it as reach-oriented rather than evidence of deep audience fit."
       }
     ]
   },
   "heatmap": {
-    "updated_at": "2026-08-08",
-    "status": "baseline-only",
+    "updated_at": "2026-09-19",
+    "status": "early-autonomous-data",
     "rows": [],
     "note": "The weekly analyst will populate rows by world, content mode and asset type after enough recent autonomous-editor posts exist."
   },
@@ -82,5 +145,33 @@
     "Record both winners and losers so the editor learns what to stop doing.",
     "Feed the strongest and weakest patterns back into the next autonomous-editor selection cycle.",
     "Do not claim website or SEO performance until a web analytics source is actually connected."
+  ],
+  "recent_autonomous_tests": [
+    {
+      "experiment_id": "com-titan-2026-09-18-first-cycle",
+      "measured_at": "2026-09-19T14:40:00+02:00",
+      "world_id": "incident-on-titan",
+      "format": "reel-video",
+      "evidence_confidence": "low",
+      "instagram": {
+        "reach": 88,
+        "views": 99,
+        "likes": 1,
+        "comments": 0,
+        "saves": 0,
+        "shares": 0,
+        "avg_watch_time_sec": 2.508,
+        "view_rate_over_3s_pct": 19.800003
+      },
+      "tiktok": {
+        "views": 83,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "avg_watch_time_sec": 3.47
+      },
+      "classification": "MUTATE",
+      "learning": "One recent cross-platform test is insufficient to judge the world. Discovery is modest and retention is weak relative to the 17.5 s duration, so the next test should shorten the asset and strengthen the first-second hook rather than repeat the same cut."
+    }
   ]
 }
