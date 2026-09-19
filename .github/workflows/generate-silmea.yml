@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pillow
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: python scripts/generate_silmea_vertical.py
       - run: |
           mkdir -p assets/social/2026-09-19
