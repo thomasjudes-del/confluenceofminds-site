@@ -31,11 +31,6 @@ jobs:
           ffmpeg -y -i katephomi-source.mp4 -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=24[bg];[0:v]scale=1080:1920:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 18 -c:a aac -b:a 192k -movflags +faststart -t 24 -shortest out/katephomi-qc-preview-1080x1920.mp4
           ffmpeg -y -i snowwhite-source.mp4 -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=24[bg];[0:v]scale=1080:1920:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 18 -c:a aac -b:a 192k -movflags +faststart -t 24 -shortest out/snowwhite-qc-preview-1080x1920.mp4
 
-      - name: Build contact sheets for QC
-        run: |
-          ffmpeg -y -i out/katephomi-qc-preview-1080x1920.mp4 -vf "fps=1/4,scale=270:-1,tile=4x4:padding=8:margin=8" -frames:v 1 out/katephomi-contact-sheet.jpg
-          ffmpeg -y -i out/snowwhite-qc-preview-1080x1920.mp4 -vf "fps=1/4,scale=270:-1,tile=4x4:padding=8:margin=8" -frames:v 1 out/snowwhite-contact-sheet.jpg
-
       - name: Verify outputs
         run: |
           echo "KATEPHOMI OUT"
