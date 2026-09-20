@@ -1,0 +1,51 @@
+name: CoM QC previews 2026-09-20
+
+on:
+  push:
+    paths:
+      - '.github/workflows/com-qc-previews-20260920.yml'
+  workflow_dispatch:
+
+jobs:
+  previews:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Download owned source teasers
+        run: |
+          curl -L --fail --retry 3 'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4' -o katephomi-source.mp4
+          curl -L --fail --retry 3 'https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Snow_White_Queen_of_Ashes_Cinematic_Teaser_compressed.mp4' -o snowwhite-source.mp4
+
+      - name: Probe sources
+        run: |
+          echo "KATEPHOMI"
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height:format=duration -of default=noprint_wrappers=1 katephomi-source.mp4
+          echo "SNOWWHITE"
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height:format=duration -of default=noprint_wrappers=1 snowwhite-source.mp4
+
+      - name: Build full vertical previews preserving original audio
+        run: |
+          mkdir -p out
+          ffmpeg -y -i katephomi-source.mp4 -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=24[bg];[0:v]scale=1080:1920:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 18 -c:a aac -b:a 192k -movflags +faststart -shortest out/katephomi-qc-preview-1080x1920.mp4
+          ffmpeg -y -i snowwhite-source.mp4 -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=24[bg];[0:v]scale=1080:1920:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]" -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 18 -c:a aac -b:a 192k -movflags +faststart -shortest out/snowwhite-qc-preview-1080x1920.mp4
+
+      - name: Build contact sheets for QC
+        run: |
+          ffmpeg -y -i out/katephomi-qc-preview-1080x1920.mp4 -vf "fps=1/4,scale=270:-1,tile=4x4:padding=8:margin=8" -frames:v 1 out/katephomi-contact-sheet.jpg
+          ffmpeg -y -i out/snowwhite-qc-preview-1080x1920.mp4 -vf "fps=1/4,scale=270:-1,tile=4x4:padding=8:margin=8" -frames:v 1 out/snowwhite-contact-sheet.jpg
+
+      - name: Verify outputs
+        run: |
+          echo "KATEPHOMI OUT"
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height:format=duration -of default=noprint_wrappers=1 out/katephomi-qc-preview-1080x1920.mp4
+          echo "SNOWWHITE OUT"
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height:format=duration -of default=noprint_wrappers=1 out/snowwhite-qc-preview-1080x1920.mp4
+
+      - name: Upload QC previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: com-qc-previews-20260920
+          path: out/*
+          retention-days: 3
