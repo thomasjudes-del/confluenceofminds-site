@@ -74,3 +74,24 @@ for i in range(FPS*D):
     bb=d.textbbox((0,0),footer,font=F3)
     d.text(((W-(bb[2]-bb[0]))/2,H-120),footer,font=F3,fill=(150,175,178,220))
     im.convert("RGB").save(f"{OUT}/f{i:04d}.jpg",quality=92)
+
+def make_overlay(path, lines, label):
+    ov=Image.new("RGBA",(W,H),(0,0,0,0))
+    od=ImageDraw.Draw(ov)
+    od.rounded_rectangle((55,115,1025,620),radius=38,fill=(0,0,0,148),outline=(255,255,255,28),width=2)
+    y=175
+    for idx,line in enumerate(lines):
+        ff=F1 if idx==0 else F2
+        bb=od.textbbox((0,0),line,font=ff)
+        x=(W-(bb[2]-bb[0]))/2
+        od.text((x+3,y+3),line,font=ff,fill=(0,0,0,180))
+        od.text((x,y),line,font=ff,fill=(250,248,242,255))
+        y+=105
+    bb=od.textbbox((0,0),label,font=F3)
+    od.text(((W-(bb[2]-bb[0]))/2,H-150),label,font=F3,fill=(245,245,242,235))
+    ov.save(path)
+
+make_overlay("katephomi-hook.png",["WHAT IF A NOVEL","BEHAVED LIKE A GAME?"],"KATEPHOMI KITEMBE · CONFLUENCE OF MINDS")
+make_overlay("katephomi-outro.png",["READ. CHOOSE.","MOVE THROUGH THE WORLD."],"KATEPHOMI KITEMBE · CONFLUENCE OF MINDS")
+make_overlay("snowwhite-hook.png",["WHY DO FAIRY TALES","SURVIVE EVERY REWRITE?"],"SNOW WHITE & THE QUEEN OF ASHES")
+make_overlay("snowwhite-outro.png",["SAME BONES.","A DIFFERENT WORLD."],"SNOW WHITE & THE QUEEN OF ASHES")
