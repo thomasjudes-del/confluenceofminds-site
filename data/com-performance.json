@@ -132,7 +132,7 @@
     ]
   },
   "heatmap": {
-    "updated_at": "2026-09-19",
+    "updated_at": "2026-09-20",
     "status": "early-autonomous-data",
     "rows": [],
     "note": "The weekly analyst will populate rows by world, content mode and asset type after enough recent autonomous-editor posts exist."
@@ -172,6 +172,37 @@
       },
       "classification": "MUTATE",
       "learning": "One recent cross-platform test is insufficient to judge the world. Discovery is modest and retention is weak relative to the 17.5 s duration, so the next test should shorten the asset and strengthen the first-second hook rather than repeat the same cut."
+    },
+    {
+      "experiment_id": "com-silmea-2026-09-19-sound-cinema",
+      "measured_at": "2026-09-20T12:50:00+02:00",
+      "world_id": "silmea",
+      "format": "reel-video",
+      "evidence_confidence": "low",
+      "instagram": {
+        "reach": 21,
+        "views": 26,
+        "likes": 1,
+        "comments": 0,
+        "saves": 0,
+        "shares": 0,
+        "avg_watch_time_sec": 3.695,
+        "view_rate_over_3s_pct": 35
+      },
+      "tiktok": {
+        "views": 82,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "avg_watch_time_sec": 5.37
+      },
+      "youtube": {
+        "views": 16,
+        "likes": 0,
+        "comments": 0
+      },
+      "classification": "MUTATE",
+      "learning": "The shorter 12 s cut improved early retention versus the 17.5 s Titan test, especially on TikTok, but discovery and interaction remain weak. Continue shortening toward 6-9 s, put the full curiosity hook in the first second, and test concept-first creative rather than trailer-first promotion."
     }
   ]
 }
