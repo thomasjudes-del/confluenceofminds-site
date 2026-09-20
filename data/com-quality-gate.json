@@ -1,0 +1,43 @@
+{
+  "version": "2026-09-20",
+  "purpose": "Hard pre-publication quality gate for Confluence of Minds social content. Technical validity is necessary but never sufficient.",
+  "global_pass_required": true,
+  "rules": {
+    "concept": "The viewer must understand the central idea or intentionally feel the intended mystery without prior knowledge of Confluence.",
+    "world_fidelity": "Read the project/world and its current assets before editing. Preserve its own visual, narrative, sonic and emotional language. No generic cross-world template.",
+    "visual_composition": {
+      "format": "true 9:16, preferably 1080x1920",
+      "distortion": "never stretch",
+      "crop": "crop only when essential content remains intact; otherwise use designed background fill/padding",
+      "safe_area": "Keep essential subject and text away from screen edges, bottom caption zone and right-side interaction rail. Inspect multiple frames."
+    },
+    "typography": "Phone-readable, deliberately positioned, balanced and line-broken. No accidental off-centering, cramped edges or generic subtitle look.",
+    "pacing": "Duration serves the concept. 8 seconds is not a default. Transformation, blooming, explanation or emotional build may require 15-35+ seconds.",
+    "sound": "No silent short-form video unless silence is an explicit artistic choice. Use owned, original or clearly rights-safe music/audio that matches the world and is professionally mixed.",
+    "motion_edit": "Motion, cuts, transitions, reveals and stillness must be intentional and support the concept. Avoid cheap slideshow feeling.",
+    "brand_impact": "Do not publish if the social creative makes the underlying world feel cheaper, flatter or less distinctive.",
+    "mobile_preview": "Before approval, verify dimensions, duration, audio track, first/last frame, text safe zones, clipping and representative frames on a phone-oriented preview.",
+    "rights_facts": "Verify claims and rights for all visual/audio inputs."
+  },
+  "approval_policy": {
+    "autonomous_publish": false,
+    "user_approval_required": true,
+    "daily_review_time": "07:30 Europe/Paris",
+    "max_master_creatives_per_day": 2,
+    "fallback": "NO POST TODAY - quality bar not met"
+  },
+  "world_overrides": {
+    "RALUVAAA": {
+      "must_convey": [
+        "organic collective growth",
+        "living, dormant and revived branches",
+        "wishes/projects branching into a shared organism",
+        "blooming and revival as a beautiful event",
+        "meditative bioluminescent living-system feeling"
+      ],
+      "visual_direction": "Elegant, organic, luminous, immersive, alive. Show growth and blooming, not merely UI.",
+      "sonic_direction": "Atmospheric, organic, planant; lightly japonisant may fit. Never generic corporate, toy-like or crude MIDI.",
+      "pacing": "Give blooming and transformation enough time to be felt; do not compress the concept into a generic 8-second teaser."
+    }
+  }
+}
