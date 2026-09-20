@@ -91,7 +91,7 @@ def make_overlay(path, lines, label):
     od.text(((W-(bb[2]-bb[0]))/2,H-150),label,font=F3,fill=(245,245,242,235))
     ov.save(path)
 
-make_overlay("katephomi-hook.png",["WHAT IF A NOVEL","BEHAVED LIKE A GAME?"],"KATEPHOMI KITEMBE · CONFLUENCE OF MINDS")
+make_overlay("katephomi-hook.png",["THIS NOVEL WON’T","STAY ON THE PAGE."],"KATEPHOMI KITEMBE · CONFLUENCE OF MINDS")
 make_overlay("katephomi-outro.png",["READ. CHOOSE.","MOVE THROUGH THE WORLD."],"KATEPHOMI KITEMBE · CONFLUENCE OF MINDS")
-make_overlay("snowwhite-hook.png",["WHY DO FAIRY TALES","SURVIVE EVERY REWRITE?"],"SNOW WHITE & THE QUEEN OF ASHES")
+make_overlay("snowwhite-hook.png",["THE STORY SURVIVES.","THE WORLD MUTATES."],"SNOW WHITE & THE QUEEN OF ASHES")
 make_overlay("snowwhite-outro.png",["SAME BONES.","A DIFFERENT WORLD."],"SNOW WHITE & THE QUEEN OF ASHES")
