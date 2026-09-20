@@ -1,0 +1,42 @@
+name: Build CoM rolling social queue
+
+on:
+  push:
+    paths:
+      - "scripts/generate_com_queue_20260920.py"
+      - ".github/workflows/build-com-queue-20260920.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: python scripts/generate_com_queue_20260920.py
+      - run: |
+          mkdir -p assets/social/queue/2026-09-20
+
+          ffmpeg -y -framerate 30 -i tmp_raluvaa_queue/f%04d.jpg             -f lavfi -i "sine=frequency=96:sample_rate=48000:duration=8"             -f lavfi -i "sine=frequency=144:sample_rate=48000:duration=8"             -f lavfi -i "anoisesrc=color=pink:amplitude=0.012:duration=8:sample_rate=48000"             -filter_complex "[1:a]volume=0.035[a1];[2:a]volume=0.018[a2];[3:a]lowpass=f=700,volume=0.22[a3];[a1][a2][a3]amix=inputs=3:duration=longest,afade=t=in:st=0:d=.6,afade=t=out:st=7:d=1[a]"             -map 0:v -map "[a]" -c:v libx264 -preset medium -crf 19 -pix_fmt yuv420p             -c:a aac -b:a 160k -movflags +faststart -t 8             assets/social/queue/2026-09-20/raluvaaa-intentions-8s-1080x1920.mp4
+
+          curl -L --fail "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4" -o katephomi-source.mp4
+          ffmpeg -y -stream_loop -1 -i katephomi-source.mp4 -loop 1 -i katephomi-hook.png -loop 1 -i katephomi-outro.png             -filter_complex "[0:v]split=2[bg][fg];[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=22:5,eq=brightness=-0.35:saturation=0.78[bgv];[fg]scale=1000:1500:force_original_aspect_ratio=decrease[fgv];[bgv][fgv]overlay=(W-w)/2:(H-h)/2[base];[base][1:v]overlay=0:0:enable='between(t,0,5)'[v1];[v1][2:v]overlay=0:0:enable='between(t,5,8)'[v]"             -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 19 -pix_fmt yuv420p             -c:a aac -b:a 160k -movflags +faststart -t 8             assets/social/queue/2026-09-20/katephomi-game-novel-8s-1080x1920.mp4
+
+          curl -L --fail "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Snow_White_Queen_of_Ashes_Cinematic_Teaser_compressed.mp4" -o snowwhite-source.mp4
+          ffmpeg -y -stream_loop -1 -i snowwhite-source.mp4 -loop 1 -i snowwhite-hook.png -loop 1 -i snowwhite-outro.png             -filter_complex "[0:v]split=2[bg][fg];[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=22:5,eq=brightness=-0.38:saturation=0.72[bgv];[fg]scale=1000:1500:force_original_aspect_ratio=decrease[fgv];[bgv][fgv]overlay=(W-w)/2:(H-h)/2[base];[base][1:v]overlay=0:0:enable='between(t,0,5)'[v1];[v1][2:v]overlay=0:0:enable='between(t,5,8)'[v]"             -map "[v]" -map 0:a? -c:v libx264 -preset medium -crf 19 -pix_fmt yuv420p             -c:a aac -b:a 160k -movflags +faststart -t 8             assets/social/queue/2026-09-20/snowwhite-rewrite-8s-1080x1920.mp4
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/social/queue/2026-09-20/*.mp4
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add three-day CoM rolling social queue assets"
+          git pull --rebase origin main
+          git push
