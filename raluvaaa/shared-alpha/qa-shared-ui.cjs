@@ -8,6 +8,7 @@ async function ready(page){
   await page.goto(BASE,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,{timeout:20000});
   await page.waitForFunction(()=>window.__RV26_SHARED__&&window.__RALUVAAA_SHARED_DEBUG__,{timeout:10000});
+  await page.waitForFunction(()=>window.__RV26_SHARED__.semantic().length>0,{timeout:10000});
 }
 async function refresh(page){
   await page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh());
