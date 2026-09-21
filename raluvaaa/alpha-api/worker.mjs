@@ -98,7 +98,8 @@ async function getMe(request,env,cors){
   const actorId=await actor(request,env,true);
   const wishes=await env.DB.prepare("SELECT *,0 AS encouragement_count FROM wishes WHERE owner_actor_id=? AND state!='removed' ORDER BY updated_at DESC LIMIT 200").bind(actorId).all();
   const unread=await env.DB.prepare('SELECT COUNT(*) AS n FROM notifications WHERE actor_id=? AND is_read=0').bind(actorId).first();
-  return json({actorId,wishes:(wishes.results||[]).map(r=>publicWish(r,true)),unread:Number(unread?.n||0)},200,cors);
+  const encouraged=await env.DB.prepare('SELECT wish_id FROM encouragements WHERE actor_id=? ORDER BY created_at DESC LIMIT 500').bind(actorId).all();
+  return json({actorId,wishes:(wishes.results||[]).map(r=>publicWish(r,true)),unread:Number(unread?.n||0),encouragedWishIds:(encouraged.results||[]).map(r=>r.wish_id)},200,cors);
 }
 async function getWorld(request,env,cors){
   const actorId=await actor(request,env,false);
@@ -186,7 +187,7 @@ async function maybeMaterialize(env,pid){
 async function notify(env,actorId,kind,objectId,title){return env.DB.prepare('INSERT INTO notifications (id,actor_id,kind,object_id,title,body,is_read,created_at) VALUES (?,?,?,?,?,NULL,0,?)').bind(id('note'),actorId,kind,objectId,title,now()).run()}
 async function getInbox(request,env,cors){
   const actorId=await actor(request,env,true);const notes=await env.DB.prepare('SELECT * FROM notifications WHERE actor_id=? ORDER BY created_at DESC LIMIT 100').bind(actorId).all();const pending=await env.DB.prepare("SELECT p.*,c.decision FROM proposals p JOIN proposal_consents c ON c.proposal_id=p.id WHERE c.actor_id=? AND p.status='pending' AND c.decision IS NULL ORDER BY p.created_at DESC LIMIT 100").bind(actorId).all();
-  return json({notifications:(notes.results||[]).map(n=>({id:n.id,kind:n.kind,objectId:n.object_id,title:n.title,body:n.body,isRead:!!n.is_read,createdAt:n.created_at})),pending:(pending.results||[]).map(p=>({id:p.id,type:p.proposal_type,targetWishId:p.target_wish_id,otherWishId:p.other_wish_id,privatePayload:parseJson(p.private_payload_json),createdAt:p.created_at}))},200,cors);
+  return json({notifications:(notes.results||[]).map(n=>({id:n.id,kind:n.kind,objectId:n.object_id,title:n.title,body:n.body,isRead:!!n.is_read,createdAt:n.created_at})),pending:(pending.results||[]).map(p=>({id:p.id,type:p.proposal_type,proposerActorId:p.proposer_actor_id,targetWishId:p.target_wish_id,otherWishId:p.other_wish_id,privatePayload:parseJson(p.private_payload_json),createdAt:p.created_at}))},200,cors);
 }
 async function readNotification(request,env,cors,nid){const actorId=await actor(request,env,true);const r=await env.DB.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND actor_id=?').bind(nid,actorId).run();if(!r.meta?.changes)fail(404,'notification_not_found','Notification not found');return json({id:nid,isRead:true},200,cors)}
 async function createReport(request,env,cors){const actorId=await actor(request,env,false),p=await body(request),wishId=String(p.wishId||''),reason=cleanText(p.reason,80),details=cleanText(p.details,500);if(!reason)fail(400,'reason_required','Report reason required');const w=await wishById(env,wishId);if(!w)fail(404,'wish_not_found','Wish not found');const rid=id('report');await env.DB.prepare("INSERT INTO reports (id,reporter_actor_id,wish_id,reason,details,status,created_at) VALUES (?,?,?,?,?,'open',?)").bind(rid,actorId,wishId,reason,details||null,now()).run();return json({reportId:rid},201,cors)}
