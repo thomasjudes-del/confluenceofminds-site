@@ -1,23 +1,30 @@
 const assert=require('node:assert/strict');
-const {chromium}=require('playwright');
+const {chromium,firefox}=require('playwright');
 
-const BASE='http://127.0.0.1:4173/raluvaaa/shared-alpha/?api=http://127.0.0.1:8787&sharedqa=1';
+const API='http://127.0.0.1:8787';
+const ORIGIN='http://127.0.0.1:4173';
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const url=room=>ORIGIN+'/raluvaaa/shared-alpha/?api='+encodeURIComponent(API)+'&sharedqa=1&room='+encodeURIComponent(room);
 
-async function ready(page){
-  await page.goto(BASE,{waitUntil:'domcontentloaded'});
+async function ready(page,room){
+  await page.goto(url(room),{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,{timeout:20000});
   await page.waitForFunction(()=>window.__RV26_SHARED__&&window.__RALUVAAA_SHARED_DEBUG__,{timeout:10000});
   await page.waitForFunction(()=>window.__RV26_SHARED__.semantic().length>0,{timeout:10000});
+  assert.equal(await page.evaluate(()=>window.RALUVAAA_ROOM),room);
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.room),room);
+  assert((await page.locator('#sharedRoomBadge').innerText()).includes(room),'room code must be visible');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__?.audio?.loop),true,'ambient soundtrack must loop');
 }
 async function refresh(page){
   await page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh());
   await wait(250);
 }
 async function world(page){return page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.world())}
+async function me(page){return page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.me())}
 async function inbox(page){return page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.inbox())}
 async function openWish(page,id){
-  await page.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),id,{timeout:10000});
+  await page.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),id,{timeout:12000});
   await page.evaluate(id=>window.__RV26_SHARED__.open(id),id);
   await page.waitForSelector('#drawer:not(.hidden) .wish',{timeout:5000});
 }
@@ -42,53 +49,93 @@ async function acceptPending(page,type){
   await page.click(selector);
   return wanted.id;
 }
+async function assertNoOverflow(page,label){
+  const metrics=await page.evaluate(()=>({
+    iw:innerWidth,
+    sw:document.documentElement.scrollWidth,
+    bw:document.body.scrollWidth,
+    rail:document.getElementById('rail')?.getBoundingClientRect(),
+    create:document.getElementById('createBtn')?.getBoundingClientRect()
+  }));
+  assert(metrics.sw<=metrics.iw+1,label+' document horizontal overflow');
+  assert(metrics.bw<=metrics.iw+1,label+' body horizontal overflow');
+  assert(metrics.rail&&metrics.rail.right<=metrics.iw+1&&metrics.rail.left>=-1,label+' rail outside viewport');
+  assert(metrics.create&&metrics.create.width>=36&&metrics.create.height>=36,label+' create target too small');
+}
 
 (async()=>{
-  const browser=await chromium.launch({headless:true});
-  const ctxA=await browser.newContext({viewport:{width:1280,height:800},locale:'fr-FR'});
-  const ctxB=await browser.newContext({viewport:{width:390,height:844},locale:'fr-FR'});
-  const A=await ctxA.newPage(),B=await ctxB.newPage();
-  const errors=[];
-  for(const [label,page] of [['A',A],['B',B]]){
-    page.on('pageerror',e=>errors.push(label+': '+String(e)));
-    page.on('console',m=>{if(m.type()==='error')errors.push(label+': '+m.text())});
+  const chrome=await chromium.launch({headless:true});
+  const ff=await firefox.launch({headless:true});
+  const ctxA=await chrome.newContext({viewport:{width:1365,height:820},locale:'fr-FR'});
+  const ctxB=await ff.newContext({viewport:{width:1280,height:800},locale:'fr-FR'});
+  const ctxM=await chrome.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,locale:'fr-FR'});
+  const ctxIso=await chrome.newContext({viewport:{width:1024,height:720},locale:'fr-FR'});
+  const A=await ctxA.newPage(),B=await ctxB.newPage(),M=await ctxM.newPage(),ISO=await ctxIso.newPage();
+  const pages=[['chrome',A],['firefox',B],['mobile',M],['isolated',ISO]],errors=[];
+  for(const [label,page] of pages){
+    page.on('pageerror',e=>errors.push(label+' pageerror: '+String(e)));
+    page.on('console',m=>{if(m.type()==='error')errors.push(label+' console: '+m.text())});
+    page.on('response',r=>{if(r.status()>=500)errors.push(label+' HTTP '+r.status()+': '+r.url())});
   }
-  await Promise.all([ready(A),ready(B)]);
+
+  const room='QC'+Date.now().toString(36).toUpperCase().slice(-4);
+  const otherRoom='ZZ'+Date.now().toString(36).toUpperCase().slice(-4);
+  await Promise.all([ready(A,room),ready(B,room),ready(M,room),ready(ISO,otherRoom)]);
+  await Promise.all([assertNoOverflow(A,'chrome'),assertNoOverflow(B,'firefox'),assertNoOverflow(M,'mobile')]);
+
   const actorA=await A.evaluate(()=>window.RALUVAAA_ACTOR_ID);
   const actorB=await B.evaluate(()=>window.RALUVAAA_ACTOR_ID);
-  assert(actorA&&actorB&&actorA!==actorB,'two browser contexts must have independent identities');
+  const actorM=await M.evaluate(()=>window.RALUVAAA_ACTOR_ID);
+  assert(actorA&&actorB&&actorM,'all test browsers need identities');
+  assert.equal(new Set([actorA,actorB,actorM]).size,3,'independent browsers must have independent anonymous identities');
 
   const stamp=Date.now().toString(36);
-  const textA='QA shared wish '+stamp+' A';
+  const textA='QA shared wish '+stamp+' alpha';
   const wishA=await createWish(A,textA);
 
-  await refresh(B);
-  assert((await world(B)).wishes.some(w=>w.id===wishA),'B must see A wish');
-  await openWish(B,wishA);
+  // Automatic cross-browser propagation, no manual refresh.
+  await B.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishA,{timeout:9000});
+  await M.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishA,{timeout:9000});
+  await wait(3200);
+  assert(!(await world(ISO)).wishes.some(w=>w.id===wishA),'another room code must not see the wish');
+  assert.equal((await B.evaluate(id=>window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id)?.owner,wishA)),false,'foreign wish must not become owned in Firefox');
 
+  // Reload persistence: same identity, same ownership.
+  await A.reload({waitUntil:'domcontentloaded'});
+  await A.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,{timeout:20000});
+  await A.waitForFunction(id=>window.__RV26_SHARED__?.semantic().some(x=>x.semanticId===id),wishA,{timeout:12000});
+  assert.equal(await A.evaluate(()=>window.RALUVAAA_ACTOR_ID),actorA,'Chrome reload must preserve anonymous identity');
+  assert.equal(await A.evaluate(id=>window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id)?.owner,wishA),true,'Chrome reload must preserve wish ownership');
+
+  // One encouragement per human, and persistence after Firefox reload.
+  await openWish(B,wishA);
   await B.click('[data-act="encourage"]');
   await B.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.me()?.encouragedWishIds?.includes(id),wishA,{timeout:10000});
-  await refresh(B);
+  await B.reload({waitUntil:'domcontentloaded'});
+  await B.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,{timeout:20000});
+  assert.equal(await B.evaluate(()=>window.RALUVAAA_ACTOR_ID),actorB,'Firefox reload must preserve anonymous identity');
   await openWish(B,wishA);
-  assert(await B.locator('[data-act="encourage"]').isDisabled(),'encourage must be one-per-human');
+  assert(await B.locator('[data-act="encourage"]').isDisabled(),'encourage must remain disabled after reload');
 
+  // HELP proposal and consent.
   await B.click('[data-act="help"]');
   await B.fill('#helpInput','I can help with one concrete first step.');
   await B.click('#confirm');
   await acceptPending(A,'help');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===id),wishA,{timeout:10000});
 
-  await refresh(B);
-  await openWish(B,wishA);
+  // Branch suggestion and consent.
+  await refresh(B);await openWish(B,wishA);
   await B.click('[data-act="suggest"]');
   await B.fill('#suggestInput','Choose one tiny first action\nDo that action this week');
   await B.click('#confirm');
   await acceptPending(A,'suggest_branch');
   await A.waitForFunction(()=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.some(w=>w.text==='Choose one tiny first action'),{timeout:10000});
 
-  const textB='QA shared wish '+stamp+' B';
+  // A second human creates a wish, then proposes a connection.
+  const textB='QA shared wish '+stamp+' beta';
   const wishB=await createWish(B,textB);
-  await refresh(B);
+  await A.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishB,{timeout:9000});
   await openWish(B,wishB);
   await B.locator('details.more summary').click();
   await B.click('[data-act="connect"]');
@@ -98,8 +145,8 @@ async function acceptPending(page,type){
   await acceptPending(A,'connect');
   await A.waitForFunction((ids)=>window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='connect'&&((e.wishId===ids[0]&&e.payload?.otherWishId===ids[1])||(e.wishId===ids[1]&&e.payload?.otherWishId===ids[0]))),[wishA,wishB],{timeout:10000});
 
-  await refresh(A);
-  await openWish(A,wishA);
+  // Wisher lifecycle.
+  await refresh(A);await openWish(A,wishA);
   await A.click('[data-act="evolve"]');
   const evolvedText='QA shared evolved '+stamp;
   await A.fill('#evolveInput',evolvedText);
@@ -107,8 +154,7 @@ async function acceptPending(page,type){
   await A.waitForFunction(t=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.some(w=>w.text===t),evolvedText,{timeout:10000});
   const evolved=(await world(A)).wishes.find(w=>w.text===evolvedText).id;
 
-  await refresh(A);
-  await openWish(A,evolved);
+  await refresh(A);await openWish(A,evolved);
   await A.click('[data-act="split"]');
   await A.fill('#branchInput','QA branch one '+stamp+'\nQA branch two '+stamp);
   await A.click('#confirm');
@@ -116,20 +162,31 @@ async function acceptPending(page,type){
   const branches=(await world(A)).wishes.filter(w=>w.text.includes('QA branch')&&w.text.includes(String(stamp)));
   assert.equal(branches.length,2);
 
-  await refresh(A);
-  await openWish(A,branches[0].id);
+  await refresh(A);await openWish(A,branches[0].id);
   A.once('dialog',d=>d.accept());
   await A.click('[data-act="bloom"]');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='bloomed',branches[0].id,{timeout:10000});
 
-  await refresh(A);
-  await openWish(A,branches[1].id);
+  await refresh(A);await openWish(A,branches[1].id);
   await A.locator('details.more summary').click();
   A.once('dialog',d=>d.accept());
   await A.click('[data-act="abandon"]');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='abandoned',branches[1].id,{timeout:10000});
 
-  assert.equal(errors.length,0,'browser console/page errors: '+errors.join(' | '));
-  console.log('RALUVAAA shared Alpha two-browser UI QA passed');
-  await browser.close();
+  // Concurrent independent writes must survive and converge.
+  const concurrentA='QA concurrent '+stamp+' gamma';
+  const concurrentB='QA concurrent '+stamp+' delta';
+  await Promise.all([
+    A.evaluate(t=>window.__RALUVAAA_SHARED_DEBUG__.client.createWish({text:t,locationText:'Nantes, France'}),concurrentA),
+    B.evaluate(t=>window.__RALUVAAA_SHARED_DEBUG__.client.createWish({text:t,locationText:'Nantes, France'}),concurrentB)
+  ]);
+  await M.waitForFunction(([a,b])=>{const w=window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes||[];return w.some(x=>x.text===a)&&w.some(x=>x.text===b)},[concurrentA,concurrentB],{timeout:10000});
+
+  await assertNoOverflow(M,'mobile after shared activity');
+  assert.equal((await me(A)).room,room,'server must echo the expected room');
+  assert.equal(errors.length,0,'browser/runtime errors: '+errors.join(' | '));
+
+  console.log('RALUVAAA Shared Alpha Chrome + Firefox + mobile + room isolation QA passed');
+  await Promise.all([ctxA.close(),ctxB.close(),ctxM.close(),ctxIso.close()]);
+  await Promise.all([chrome.close(),ff.close()]);
 })().catch(err=>{console.error(err);process.exit(1)});
