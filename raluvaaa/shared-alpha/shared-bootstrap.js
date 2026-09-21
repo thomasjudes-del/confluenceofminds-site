@@ -3,7 +3,8 @@
 
 const params=new URLSearchParams(location.search);
 const apiBase=params.get('api')||localStorage.getItem('raluvaaaAlphaApiBaseV1')||window.RALUVAAA_ALPHA_API_BASE||'';
-const STORE=window.RALUVAAA_STORE_KEY||'raluvaaaSharedAlphaV1';
+const room=window.RALUVAAA_ROOM||String(params.get('room')||'ALPHA').toUpperCase();
+const STORE=window.RALUVAAA_STORE_KEY||('raluvaaaSharedAlphaV1:'+room);
 const maps={wish:new Map(),lineage:new Map(),proposal:new Map()};
 let client=null,lastWorld=null,lastMe=null,lastInbox=null,lastFingerprint='',mutating=0,refreshTimer=null,queue=Promise.resolve();
 
@@ -17,6 +18,13 @@ function status(text,error=false){
   box.textContent=text;box.style.borderColor=error?'rgba(255,140,140,.32)':'rgba(184,214,255,.15)';
 }
 function hideStatus(){const b=document.getElementById('sharedStatus');if(b)b.remove()}
+function installRoomBadge(){
+  const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='SHARED ALPHA · '+room;
+  if(document.getElementById('sharedRoomBadge'))return;
+  const style=document.createElement('style');style.textContent='#sharedRoomBadge{position:fixed;z-index:49;left:50%;bottom:10px;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:5px 7px 5px 10px;border:1px solid rgba(184,214,255,.14);border-radius:999px;background:rgba(3,9,18,.82);backdrop-filter:blur(12px);font:7px/1 Inter,system-ui,sans-serif;letter-spacing:.08em;color:rgba(226,238,251,.58)}#sharedRoomBadge b{color:rgba(242,248,255,.88);font-size:8px;letter-spacing:.14em}#sharedRoomBadge button{height:24px;border:1px solid rgba(184,214,255,.12);border-radius:999px;background:rgba(255,255,255,.04);padding:0 8px;color:rgba(237,246,255,.74);font-size:7px;letter-spacing:.05em;text-transform:uppercase}#sharedRoomBadge button:hover{background:rgba(89,206,255,.07)}@media(max-width:820px){#sharedRoomBadge{bottom:7px;max-width:calc(100vw - 20px)}}';document.head.appendChild(style);
+  const el=document.createElement('div');el.id='sharedRoomBadge';el.innerHTML='<span>TEST</span><b>'+room+'</b><button type="button">Copier le lien</button>';document.body.appendChild(el);
+  el.querySelector('button').onclick=async()=>{try{await navigator.clipboard.writeText(location.href);const b=el.querySelector('button'),old=b.textContent;b.textContent='Copié';setTimeout(()=>b.textContent=old,1400)}catch{prompt('Copiez ce lien',location.href)}};
+}
 function seed(s){let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function idOf(id){return maps.wish.get(id)||id}
 function proposalOf(id){return maps.proposal.get(id)||id}
@@ -124,7 +132,7 @@ async function boot(){
   localStorage.setItem('raluvaaaAlphaApiBaseV1',apiBase);
   status('Connecting RALUVAAA shared world…');
   const mod=await import('/raluvaaa/alpha-api/client.mjs');
-  client=new mod.RaluvaaaAlphaClient({baseUrl:apiBase});
+  client=new mod.RaluvaaaAlphaClient({baseUrl:apiBase,room});
   await client.ensureSession();
   window.RALUVAAA_ACTOR_ID=client.actorId;
   window.__RALUVAAA_SHARED_COMMIT__=enqueue;
@@ -136,9 +144,10 @@ async function boot(){
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=shared-alpha-20260921-1');
   await loadScript('../mvp-v26/ambient-audio.js?build=shared-alpha-20260921-1');
   window.__RALUVAAA_SHARED_READY__=true;
-  window.__RALUVAAA_SHARED_DEBUG__={client,refresh:()=>refresh(true),world:()=>lastWorld,me:()=>lastMe,inbox:()=>lastInbox,maps};
+  window.__RALUVAAA_SHARED_DEBUG__={client,room,refresh:()=>refresh(true),world:()=>lastWorld,me:()=>lastMe,inbox:()=>lastInbox,maps};
   hideStatus();
   setInterval(()=>{if(!document.hidden)refresh(false).catch(showError)},2500);
 }
+installRoomBadge();
 boot().catch(showError);
 })();
