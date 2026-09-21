@@ -39,7 +39,7 @@ const H=3600000;
   await page.waitForTimeout(60);
   assert.equal((await page.locator('#drawerTitle').innerText()).trim(),'Mes wishes');
   await page.locator('#drawerClose').click();
-  assert(await page.locator('#qaStrip').isVisible(),'QA persona controls should remain available in qa mode');
+  assert(await page.locator('#qaStrip').isVisible(),'QA persona controls should remain available in qa mode');\n  assert.equal(await page.locator('#musicBtn').count(),1,'temporary ambient music control should exist');\n  assert.equal(await page.locator('#ambientCredit').count(),1,'music attribution should remain visible');\n  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__?.url),'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Immersed.mp3');
 
   await page.locator('#createBtn').click();
   await page.locator('#wishInput').fill('I want to make one real thing this week.');
