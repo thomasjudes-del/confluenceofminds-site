@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-18-v2",
+  "version": "2026-09-21-v3",
   "purpose": "Lightweight editorial map for the autonomous Confluence of Minds news-to-content loop. This file guides discovery but is not a substitute for checking the current repository before publishing.",
   "site": "https://confluenceofminds.com/",
   "repository": "thomasjudes-del/confluenceofminds-site",
@@ -138,8 +138,11 @@
       "themes": [
         "climate fiction",
         "climate anticipation",
-        "game-world",
-        "interactive narrative",
+        "climate catastrophe",
+        "algorithmic forecasting",
+        "video-game world",
+        "GAMANA",
+        "memory",
         "environmental fiction"
       ],
       "news_triggers": [
@@ -152,9 +155,22 @@
         "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4"
       ],
       "evergreen_angles": [
-        "Can climate fiction be adventurous without becoming a lecture",
-        "What changes when a novel behaves like a game"
-      ]
+        "What happens when a forgotten climate model turns out to have been right?",
+        "Can climate fiction remain an adventure rather than become a lecture?",
+        "What does it mean to return to a world you deliberately left behind?"
+      ],
+      "editorial_canon": {
+        "source_basis": "Author manuscript in Confluence RS plus published book description.",
+        "verified_facts": [
+          "Hakim Belfodid and his childhood friend Cassius worked on KB26, a climate-prediction model/protocol.",
+          "The story is framed by a catastrophic climatic event and its consequences.",
+          "GAMANA is a video-game world that is part of the story.",
+          "Katephomi Kitembe is a person Hakim must seek; Hakim later returns to GAMANA with Enée's help."
+        ],
+        "prohibited_inference": [
+          "Do not describe the novel as interactive fiction, interactive literature, a gamebook, or a novel that behaves like a game unless the author explicitly supplies new canonical evidence."
+        ]
+      }
     },
     {
       "id": "authentiques-victimes",
