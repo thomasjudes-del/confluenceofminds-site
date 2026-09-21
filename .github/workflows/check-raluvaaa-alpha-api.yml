@@ -49,4 +49,10 @@ jobs:
           npx wrangler dev --local --config=wrangler.ci.toml --ip 127.0.0.1 --port 8787 >/tmp/raluvaaa-worker.log 2>&1 &
           WORKER_PID=$!
           trap 'kill $WORKER_PID || true' EXIT
-          node qa-shared.mjs
+          if ! node qa-shared.mjs; then
+            echo '--- Worker log ---'
+            cat /tmp/raluvaaa-worker.log || true
+            echo '--- D1 log ---'
+            cat /tmp/raluvaaa-d1.log || true
+            exit 1
+          fi
