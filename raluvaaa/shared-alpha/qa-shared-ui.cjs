@@ -90,6 +90,7 @@ async function acceptPending(page,type){
   const wishB=await createWish(B,textB);
   await refresh(B);
   await openWish(B,wishB);
+  await B.locator('details.more summary').click();
   await B.click('[data-act="connect"]');
   await B.evaluate(id=>window.__RV26_SHARED__.select(id),wishA);
   await B.waitForSelector('#overlay #confirm',{timeout:5000});
