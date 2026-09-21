@@ -1,0 +1,53 @@
+name: Check RALUVAAA Shared Alpha UI
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/shared-alpha/**'
+      - 'raluvaaa/mvp-v26/app.js'
+      - 'raluvaaa/mvp-v26/alpha-hardening.js'
+      - 'raluvaaa/mvp-v26/alpha-v0-polish.js'
+      - 'raluvaaa/mvp-v26/ambient-audio.js'
+      - 'raluvaaa/alpha-api/**'
+      - '.github/workflows/check-raluvaaa-shared-ui.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/shared-alpha/shared-bootstrap.js
+          node --check raluvaaa/shared-alpha/qa-shared-ui.cjs
+          node --check raluvaaa/mvp-v26/app.js
+          node --check raluvaaa/alpha-api/worker.mjs
+          grep -q "RALUVAAA_SHARED" raluvaaa/shared-alpha/index.html
+          grep -q "shared-bootstrap.js" raluvaaa/shared-alpha/index.html
+      - name: Install browser and Worker QA dependencies
+        run: |
+          npm install --no-save playwright@1.55.0 wrangler@4 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run two-browser shared UI QA
+        run: |
+          cd raluvaaa/alpha-api
+          npx wrangler d1 execute raluvaaa-alpha --local --file=schema.sql --config=wrangler.ci.toml >/tmp/raluvaaa-shared-d1.log 2>&1
+          npx wrangler dev --local --config=wrangler.ci.toml --ip 127.0.0.1 --port 8787 >/tmp/raluvaaa-shared-worker.log 2>&1 &
+          WORKER_PID=$!
+          cd "$GITHUB_WORKSPACE"
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-shared-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $WORKER_PID $HTTP_PID || true' EXIT
+          sleep 2
+          if ! node raluvaaa/shared-alpha/qa-shared-ui.cjs; then
+            echo '--- Worker log ---'
+            cat /tmp/raluvaaa-shared-worker.log || true
+            echo '--- Static server log ---'
+            cat /tmp/raluvaaa-shared-http.log || true
+            exit 1
+          fi
