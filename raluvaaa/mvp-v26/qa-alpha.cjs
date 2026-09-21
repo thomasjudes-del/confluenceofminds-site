@@ -31,7 +31,7 @@ const H=3600000;
   assert.equal(await page.locator('#drawerBody [data-entrusted-band="long"]').count(),1);
   const c1=(await page.locator('#drawerBody [data-entrusted-band="short"] .m').innerText()).trim();
   assert(/^\d{2}:\d{2}:\d{2}$/.test(c1),`short countdown format invalid: ${c1}`);
-  await page.waitForTimeout(1150);
+  await page.waitForFunction(prev=>{const el=document.querySelector('#drawerBody [data-entrusted-band="short"] .m');return el&&el.textContent.trim()!==prev},c1,{timeout:3500});
   const c2=(await page.locator('#drawerBody [data-entrusted-band="short"] .m').innerText()).trim();
   assert.notEqual(c1,c2,'entrusted countdown should visibly tick');
   await page.locator('#drawerClose').click();
