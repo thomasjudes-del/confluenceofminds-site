@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-21",
+  "version": "2026-09-21-v2",
   "purpose": "Automatic learning layer for Confluence of Minds content performance. Updated by the weekly performance analyst and read by the autonomous editor before future publishing decisions.",
   "site_analytics": {
     "status": "not_instrumented",
@@ -29,43 +29,106 @@
         "segment": "brand-general",
         "example": "2026 website relaunch reel",
         "buffer_post_id": "6a75ea2c8363eb694995a5b6",
-        "metrics": {"reach": 131, "views": 146, "reactions": 0, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 0},
+        "metrics": {
+          "reach": 131,
+          "views": 146,
+          "reactions": 0,
+          "comments": 0,
+          "saves": 0,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 0
+        },
         "learning": "Generic umbrella-brand awareness can generate views without generating interaction."
       },
       {
         "segment": "anjin-of-the-shogun",
         "example": "Kintsugi cultural post",
-        "metrics": {"reach": 39, "views": 150, "reactions": 9, "comments": 1, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 28.2051},
+        "metrics": {
+          "reach": 39,
+          "views": 150,
+          "reactions": 9,
+          "comments": 1,
+          "saves": 1,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 28.2051
+        },
         "learning": "Specific cultural concepts with a clear curiosity hook can outperform generic project promotion on resonance."
       },
       {
         "segment": "anjin-of-the-shogun",
         "example": "Sumi-e cultural post",
-        "metrics": {"reach": 53, "views": 177, "reactions": 9, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 16.9811},
+        "metrics": {
+          "reach": 53,
+          "views": 177,
+          "reactions": 9,
+          "comments": 0,
+          "saves": 0,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 16.9811
+        },
         "learning": "Educational and cultural adjacency around an existing world is a promising editorial mode."
       },
       {
         "segment": "shattered-dragons",
         "example": "Fire dragon speculative-biology fragment",
-        "metrics": {"reach": 22, "views": 40, "reactions": 6, "comments": 1, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 36.3636},
+        "metrics": {
+          "reach": 22,
+          "views": 40,
+          "reactions": 6,
+          "comments": 1,
+          "saves": 1,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 36.3636
+        },
         "learning": "Shattered Dragons historically showed strong resonance inside a small audience."
       },
       {
         "segment": "shattered-dragons",
         "example": "Earth dragon fragment",
-        "metrics": {"reach": 33, "views": 60, "reactions": 8, "comments": 0, "saves": 1, "shares": 0, "follows": 0, "engagement_rate_pct": 27.2727},
+        "metrics": {
+          "reach": 33,
+          "views": 60,
+          "reactions": 8,
+          "comments": 0,
+          "saves": 1,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 27.2727
+        },
         "learning": "Narrative fragments with a concrete creature or worldbuilding idea can be efficient engagement assets."
       },
       {
         "segment": "we-can-but-we-cant",
         "example": "Fast-fashion / Greta contradiction post",
-        "metrics": {"reach": 41, "views": 102, "reactions": 0, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 0},
+        "metrics": {
+          "reach": 41,
+          "views": 102,
+          "reactions": 0,
+          "comments": 0,
+          "saves": 0,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 0
+        },
         "learning": "Broad contradiction or activism posts can attract some exposure but may fail to generate interaction."
       },
       {
         "segment": "format-meme",
         "example": "Disaster Girl parody reel",
-        "metrics": {"reach": 262, "views": 499, "reactions": 3, "comments": 0, "saves": 0, "shares": 0, "follows": 0, "engagement_rate_pct": 1.145},
+        "metrics": {
+          "reach": 262,
+          "views": 499,
+          "reactions": 3,
+          "comments": 0,
+          "saves": 0,
+          "shares": 0,
+          "follows": 0,
+          "engagement_rate_pct": 1.145
+        },
         "learning": "Memetic content may produce discovery without meaningful resonance."
       }
     ]
@@ -134,10 +197,35 @@
       "world_id": "incident-on-titan",
       "format": "reel-video",
       "evidence_confidence": "low",
-      "instagram": {"reach": 92, "views": 103, "likes": 1, "comments": 0, "saves": 0, "shares": 0, "avg_watch_time_sec": 2.511, "view_rate_over_3s_pct": 20.0},
-      "tiktok": {"views": 83, "reach": 78, "likes": 0, "comments": 0, "shares": 0, "avg_watch_time_sec": 3.47},
-      "youtube": {"views": 180, "likes": 0, "comments": 0},
-      "facebook": {"views": 194, "likes": 4, "avg_watch_time_sec": 4, "followers_acquired_on_day": 1},
+      "instagram": {
+        "reach": 92,
+        "views": 103,
+        "likes": 1,
+        "comments": 0,
+        "saves": 0,
+        "shares": 0,
+        "avg_watch_time_sec": 2.511,
+        "view_rate_over_3s_pct": 20
+      },
+      "tiktok": {
+        "views": 83,
+        "reach": 78,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "avg_watch_time_sec": 3.47
+      },
+      "youtube": {
+        "views": 180,
+        "likes": 0,
+        "comments": 0
+      },
+      "facebook": {
+        "views": 194,
+        "likes": 4,
+        "avg_watch_time_sec": 4,
+        "followers_acquired_on_day": 1
+      },
       "classification": "MUTATE",
       "learning": "Concrete contradiction works better for discovery than the more abstract tests, but the 17.5 s execution loses viewers early. Preserve the premise and rebuild the cut."
     },
@@ -147,10 +235,34 @@
       "world_id": "silmea",
       "format": "reel-video",
       "evidence_confidence": "low",
-      "instagram": {"reach": 21, "views": 26, "likes": 0, "comments": 0, "saves": 1, "shares": 0, "avg_watch_time_sec": 3.695, "view_rate_over_3s_pct": 35.0},
-      "tiktok": {"views": 82, "reach": 71, "likes": 0, "comments": 0, "shares": 0, "avg_watch_time_sec": 5.37},
-      "youtube": {"views": 20, "likes": 0, "comments": 0},
-      "facebook": {"views": 16, "likes": 0, "avg_watch_time_sec": 1},
+      "instagram": {
+        "reach": 21,
+        "views": 26,
+        "likes": 0,
+        "comments": 0,
+        "saves": 1,
+        "shares": 0,
+        "avg_watch_time_sec": 3.695,
+        "view_rate_over_3s_pct": 35
+      },
+      "tiktok": {
+        "views": 82,
+        "reach": 71,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "avg_watch_time_sec": 5.37
+      },
+      "youtube": {
+        "views": 20,
+        "likes": 0,
+        "comments": 0
+      },
+      "facebook": {
+        "views": 16,
+        "likes": 0,
+        "avg_watch_time_sec": 1
+      },
       "classification": "MUTATE",
       "learning": "Shortening improved retention, but the concept and first-frame package did not earn distribution. Rebuild around a direct sensory proof, not another generic question card."
     },
@@ -160,9 +272,24 @@
       "world_id": "raluvaaa",
       "format": "reel-video",
       "evidence_confidence": "low",
-      "instagram": {"metricool_status": "not_yet_ingested", "buffer_snapshot_views": 9, "buffer_snapshot_reach": 6},
-      "tiktok": {"views": 251, "likes": 0, "comments": 0, "shares": 0, "avg_watch_time_sec": 3.71, "duration_sec": 8},
-      "youtube": {"views": 21, "likes": 0, "comments": 0},
+      "instagram": {
+        "metricool_status": "not_yet_ingested",
+        "buffer_snapshot_views": 9,
+        "buffer_snapshot_reach": 6
+      },
+      "tiktok": {
+        "views": 251,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "avg_watch_time_sec": 3.71,
+        "duration_sec": 8
+      },
+      "youtube": {
+        "views": 21,
+        "likes": 0,
+        "comments": 0
+      },
       "classification": "HOLD",
       "learning": "TikTok distribution is roughly 3x the prior two-test baseline and retention as a share of duration is materially better, but there is still zero propagation and cross-platform evidence is incomplete."
     }
@@ -201,7 +328,10 @@
           "confidence": "medium",
           "posts": 3,
           "median_views": 21,
-          "range_views": [20, 180],
+          "range_views": [
+            20,
+            180
+          ],
           "interactions": 0,
           "subscriber_change": 0,
           "learning": "Titan is a clear distribution outlier; concrete science-fact framing currently fits YouTube better than abstract project-premise questions, but retention data is unavailable."
@@ -209,33 +339,38 @@
         "facebook": {
           "confidence": "low",
           "posts": 2,
-          "views": [194, 16],
-          "likes": [4, 0],
-          "avg_watch_time_sec": [4, 1],
+          "views": [
+            194,
+            16
+          ],
+          "likes": [
+            4,
+            0
+          ],
+          "avg_watch_time_sec": [
+            4,
+            1
+          ],
           "followers_acquired": 1,
           "learning": "The concrete Titan fact substantially outperformed the abstract/audio SILMEA concept."
         }
       },
-      "main_family_decisions": [
-        {"family": "12-18 s archive-remix / trailer-first cuts", "decision": "MUTATE", "reason": "Weak early hold and no propagation. Shorter cuts materially improve viewed-duration ratio."},
-        {"family": "6-9 s concept-first cuts", "decision": "HOLD", "reason": "Promising TikTok signal from RALUVAAA, but only one comparable test and zero interactions."},
-        {"family": "concrete factual contradiction / reveal", "decision": "HOLD", "reason": "Best discovery on Titan across YouTube/Facebook/Instagram; needs a shorter execution before scaling."},
-        {"family": "generic question-led hooks", "decision": "MUTATE", "reason": "Current and queued angles overuse Can/What if/Why grammar, which risks making the feed feel templated and automated."}
-      ],
+      "main_family_decisions": [],
       "strongest_patterns": [
-        "Concrete surprising facts distribute better than abstract project explanations on YouTube and Facebook.",
-        "Shortening from 17.5 s to 12 s and 8 s materially improves watch time as a share of video length on TikTok.",
-        "RALUVAAA is the first recent concept to reach roughly 3x the prior TikTok view baseline, but without shares, comments or follows yet."
+        "No reliable creative-family or platform winner can be inferred yet because the measured posts are execution-confounded.",
+        "Hook-language repetition is observable independently of performance: recent and queued copy overuses generic interrogative grammar such as What if / Why / Can.",
+        "The current production system needs an authored visual-and-audio gate before performance interpretation becomes decision-useful."
       ],
       "weakest_patterns": [
-        "No recent post has generated a share or comment across the measured channels.",
-        "Abstract question hooks are becoming repetitive: SILMEA uses Can, RALUVAAA and the queued Katephomi test use What if, and the queued Snow White test uses Why.",
-        "The current creative stream is dominated by archive-remix vertical reframes, which creates a structural risk of template repetition even though the available analytics do not permit direct visual QA."
+        "Recent creative execution was below the intended Confluence quality bar and therefore cannot serve as a clean test of Titan, SILMEA, RALUVAAA or platform fit.",
+        "Repeated short archive reframes and generic hook grammar risk making the feed feel automated rather than authored.",
+        "Measurement remains incomplete because Metricool did not ingest the latest Instagram Reel and YouTube published-video rows were unavailable."
       ],
       "hook_visual_quality_learnings": {
-        "hook": "Use more declarative contradictions, sensory instructions, reveals, fragments and visual-first openings. Generic questions should be a minority, not the default grammar.",
-        "first_frame": "Titan's 20% Instagram 3-second hold and SILMEA's 35% show the opening still needs work. The first frame should carry the idea without needing a title-card setup.",
-        "visual_quality": "No reliable frame-level inspection was available in this review, so no claim is made that recent assets contain generic gradients, crude charts or obvious AI filler. However, repeated archive reframes are a credible consistency risk and should be diluted with native social-first compositions."
+        "hook": "Reduce repetitive What if / Why / Can openings. Prefer project-specific declarative, sensory, narrative or visual-first hooks, but do not claim performance superiority until clean tests exist.",
+        "first_frame": "Treat first-frame quality as a craft requirement rather than a performance conclusion for now. Every proposed post must be visually inspected before approval.",
+        "visual_quality": "The user has explicitly rejected the recent low-quality graphic treatment. Future creatives must be world-specific, visually authored, non-template, and reviewed before being proposed.",
+        "sound": "No silent Reel/TikTok/Short by default. Music/audio must be intentionally selected or original and checked before approval."
       },
       "owned_audience_monetization": {
         "website_clicks": "not measurable",
@@ -250,41 +385,43 @@
         "For SILMEA Instagram, Buffer reported higher reach/views than Metricool. Use Metricool for decisions but keep confidence low until the feeds converge."
       ],
       "next_allocation": {
-        "native_social_first_or_substantially_rebuilt": "50-60%",
-        "archive_remix": "40-50% maximum",
-        "duration": "Prefer 6-9 s for discovery tests; use longer cuts only when the content earns the extra time.",
-        "hook_mix": "At least two thirds declarative, visual-first, fragment, contradiction or reveal openings; at most one third generic question openings.",
-        "platform_bias": {
-          "tiktok": "More 6-9 s concept-first tests with a concrete payoff and explicit shareability.",
-          "youtube": "Favor factual surprise, concrete reveals and searchable concepts over abstract world descriptions.",
-          "facebook": "Keep selective factual/science/culture hooks; do not mirror every creative automatically if fit is weak.",
-          "instagram": "Test short native first frames that combine Titan-level discovery specificity with SILMEA-level retention improvement."
-        }
+        "performance_reallocation": "NONE YET",
+        "production_reallocation": "Shift effort from volume/rapid reframing toward fewer authored, world-specific, music-led or sound-designed creatives with deliberate composition and pacing.",
+        "decision_gate": "No world/platform/family SCALE-MUTATE-HOLD-KILL decisions until there is a sufficient sample of QC-passed, user-approved, comparable posts.",
+        "cadence": "Daily approval pack: maximum 1-2 strong masters; zero is acceptable when the quality bar is not met."
       },
-      "strategic_decision": "No positioning pivot yet. Volume is far too small and there was no comparable previous-week publishing cohort. Make a creative-execution reallocation now, then reconsider positioning only after enough comparable tests accumulate without a true breakout."
+      "strategic_decision": "No positioning pivot and no platform/world reallocation. The immediate change is production quality and approval discipline. Reassess performance only after enough QC-passed comparable experiments accumulate.",
+      "interpretation_status": "execution_confounded",
+      "quality_confound": {
+        "applies_to": "Recent pre-QC posts and queued 8-second cuts from 2026-09-18 to 2026-09-20",
+        "reason": "The execution did not meet the intended Confluence creative bar, including visual composition/graphics and, in some cases, missing or inadequate music/audio. User explicitly rejected this quality level.",
+        "rule": "Keep raw platform metrics as historical observations, but do not use these posts to infer world strength, platform fit, creative-family strength, or positioning. Reassess only from QC-passed, user-approved creatives."
+      }
     }
   ],
   "editor_feedback": {
     "updated_at": "2026-09-21",
-    "amplify": [
-      "6-9 s social-first cuts",
-      "concrete factual contradictions and reveals",
-      "platform-specific packaging instead of identical cross-post framing"
+    "status": "reset_due_to_execution_confounds",
+    "current_priority": [
+      "authored world-specific visual language",
+      "intentional music/audio",
+      "non-template motion and composition",
+      "less repetitive hook grammar",
+      "daily human approval before scheduling"
     ],
-    "mutate": [
-      "17.5 s Titan cut while preserving the fact hook",
-      "SILMEA toward direct sensory proof",
-      "generic What if / Why / Can question grammar",
-      "archive trailer reframes that begin with title-card logic"
+    "do_not_infer_yet": [
+      "Titan vs SILMEA vs RALUVAAA relative strength",
+      "TikTok vs YouTube vs Instagram vs Facebook fit",
+      "duration family winners",
+      "positioning pivot"
     ],
-    "deprioritize": [
-      "long trailer-style cuts without early retention evidence",
-      "abstract project explanation before visual payoff",
-      "repeating the same interrogative hook rhythm across consecutive posts"
-    ],
-    "hold": [
-      "RALUVAAA as a world-level winner until more platforms and propagation signals confirm it",
-      "platform reallocation decisions until more than 2-3 comparable posts exist"
-    ]
-  }
+    "evidence_rule": "Only QC-passed, user-approved creatives count as clean experiments for future family/platform decisions."
+  },
+  "methodology_corrections": [
+    {
+      "date": "2026-09-21",
+      "correction": "Weekly inference reset after user review",
+      "detail": "The 2026-09-21 weekly snapshot keeps raw metrics but its family/platform conclusions are superseded because recent posts were below the intended creative-quality standard. Treat them as execution-confounded."
+    }
+  ]
 }
