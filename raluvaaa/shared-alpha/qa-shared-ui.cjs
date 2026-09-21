@@ -57,7 +57,7 @@ async function acceptPending(page,type){
   const actorB=await B.evaluate(()=>window.RALUVAAA_ACTOR_ID);
   assert(actorA&&actorB&&actorA!==actorB,'two browser contexts must have independent identities');
 
-  const stamp=Date.now();
+  const stamp=Date.now().toString(36);
   const textA='QA shared wish '+stamp+' A';
   const wishA=await createWish(A,textA);
 
