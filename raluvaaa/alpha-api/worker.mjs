@@ -39,7 +39,7 @@ export default {
 
 function corsHeaders(origin,env){
   const allowed=(env.ALLOWED_ORIGINS||'https://confluenceofminds.com,http://localhost:8787,http://127.0.0.1:8787').split(',').map(x=>x.trim()).filter(Boolean);
-  const h={...JSON_HEADERS,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type','vary':'Origin'};
+  const h={...JSON_HEADERS,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type,x-raluvaaa-room','vary':'Origin'};
   if(allowed.includes(origin))h['access-control-allow-origin']=origin;
   return h;
 }
@@ -48,6 +48,7 @@ function fail(status,code,message){const e=new Error(message||code);e.status=sta
 function now(){return Date.now()}
 function id(prefix){return `${prefix}_${crypto.randomUUID()}`}
 function cleanText(v,max){return String(v??'').trim().replace(/\s+/g,' ').slice(0,max)}
+function roomKey(request){const key=String(request.headers.get('x-raluvaaa-room')||'ALPHA').trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,16)||'ALPHA';if(key.length<3)fail(400,'invalid_room','Invalid test room');return key}
 function publicWish(row,isMine=false){return{id:row.id,lineageId:row.lineage_id,parentWishId:row.parent_wish_id,rootWishId:row.root_wish_id,kind:row.kind,text:row.text,locationText:row.location_text,state:row.state,createdAt:row.created_at,updatedAt:row.updated_at,encouragementCount:Number(row.encouragement_count||0),isMine:!!isMine}}
 function parseJson(s,fallback={}){try{return JSON.parse(s||'{}')}catch{return fallback}}
 async function body(request){try{return await request.json()}catch{fail(400,'invalid_json','Invalid JSON body')}}
@@ -95,30 +96,30 @@ async function createSession(request,env,cors){
   return json({actorId,token,claimed:false},201,cors);
 }
 async function getMe(request,env,cors){
-  const actorId=await actor(request,env,true);
-  const wishes=await env.DB.prepare("SELECT *,0 AS encouragement_count FROM wishes WHERE owner_actor_id=? AND state!='removed' ORDER BY updated_at DESC LIMIT 200").bind(actorId).all();
+  const actorId=await actor(request,env,true),room=roomKey(request);
+  const wishes=await env.DB.prepare("SELECT *,0 AS encouragement_count FROM wishes WHERE owner_actor_id=? AND room_key=? AND state!='removed' ORDER BY updated_at DESC LIMIT 200").bind(actorId,room).all();
   const unread=await env.DB.prepare('SELECT COUNT(*) AS n FROM notifications WHERE actor_id=? AND is_read=0').bind(actorId).first();
-  const encouraged=await env.DB.prepare('SELECT wish_id FROM encouragements WHERE actor_id=? ORDER BY created_at DESC LIMIT 500').bind(actorId).all();
-  return json({actorId,wishes:(wishes.results||[]).map(r=>publicWish(r,true)),unread:Number(unread?.n||0),encouragedWishIds:(encouraged.results||[]).map(r=>r.wish_id)},200,cors);
+  const encouraged=await env.DB.prepare('SELECT e.wish_id FROM encouragements e JOIN wishes w ON w.id=e.wish_id WHERE e.actor_id=? AND w.room_key=? ORDER BY e.created_at DESC LIMIT 500').bind(actorId,room).all();
+  return json({actorId,room,wishes:(wishes.results||[]).map(r=>publicWish(r,true)),unread:Number(unread?.n||0),encouragedWishIds:(encouraged.results||[]).map(r=>r.wish_id)},200,cors);
 }
 async function getWorld(request,env,cors){
-  const actorId=await actor(request,env,false);
-  const rows=await env.DB.prepare("SELECT w.*,COUNT(e.actor_id) AS encouragement_count FROM wishes w LEFT JOIN encouragements e ON e.wish_id=w.id WHERE w.is_public=1 AND w.state!='removed' GROUP BY w.id ORDER BY w.created_at DESC LIMIT 600").all();
-  const events=await env.DB.prepare("SELECT id,wish_id,lineage_id,event_type,parent_wish_id,public_payload_json,created_at FROM wish_events WHERE event_type IN ('create','evolve','split','bloom','abandon','help','connect','reparent') ORDER BY created_at ASC LIMIT 3000").all();
-  return json({wishes:(rows.results||[]).map(r=>publicWish(r,actorId&&r.owner_actor_id===actorId)),events:(events.results||[]).map(e=>({id:e.id,wishId:e.wish_id,lineageId:e.lineage_id,type:e.event_type,parentWishId:e.parent_wish_id,payload:parseJson(e.public_payload_json),createdAt:e.created_at}))},200,cors);
+  const actorId=await actor(request,env,false),room=roomKey(request);
+  const rows=await env.DB.prepare("SELECT w.*,COUNT(e.actor_id) AS encouragement_count FROM wishes w LEFT JOIN encouragements e ON e.wish_id=w.id WHERE w.room_key=? AND w.is_public=1 AND w.state!='removed' GROUP BY w.id ORDER BY w.created_at DESC LIMIT 600").bind(room).all();
+  const events=await env.DB.prepare("SELECT we.id,we.wish_id,we.lineage_id,we.event_type,we.parent_wish_id,we.public_payload_json,we.created_at FROM wish_events we JOIN wishes w ON w.id=we.wish_id WHERE w.room_key=? AND we.event_type IN ('create','evolve','split','bloom','abandon','help','connect','reparent') ORDER BY we.created_at ASC LIMIT 3000").bind(room).all();
+  return json({room,wishes:(rows.results||[]).map(r=>publicWish(r,actorId&&r.owner_actor_id===actorId)),events:(events.results||[]).map(e=>({id:e.id,wishId:e.wish_id,lineageId:e.lineage_id,type:e.event_type,parentWishId:e.parent_wish_id,payload:parseJson(e.public_payload_json),createdAt:e.created_at}))},200,cors);
 }
 async function createWish(request,env,cors){
-  const actorId=await actor(request,env,true),p=await body(request);await verifyTurnstile(request,env,p);
+  const actorId=await actor(request,env,true),room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);
   const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION)||null;
   const wid=id('wish'),t=now();
   await env.DB.batch([
-    env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,'create',?,?, 'alive',1,?,?)").bind(wid,wid,actorId,null,wid,text,loc,t,t),
+    env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,?,'create',?,?, 'alive',1,?,?)").bind(wid,wid,actorId,room,null,wid,text,loc,t,t),
     env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'create',NULL,'{}','{}',?)").bind(id('evt'),wid,wid,actorId,t)
   ]);
   return json({wishId:wid,lineageId:wid},201,cors);
 }
 async function addWishEvent(request,env,cors,wishId){
-  const actorId=await actor(request,env,true),p=await body(request),row=await wishById(env,wishId);assertOwner(row,actorId);
+  const actorId=await actor(request,env,true),room=roomKey(request),p=await body(request),row=await wishById(env,wishId);if(!row||row.room_key!==room)fail(404,'wish_not_found','Wish not found');assertOwner(row,actorId);
   const type=String(p.type||'');
   if(type==='evolve')return evolve(env,cors,row,actorId,p);
   if(type==='split'||type==='add_branch')return split(env,cors,row,actorId,p,type);
@@ -131,14 +132,14 @@ async function evolve(env,cors,row,actorId,p){
   assertAlive(row);const text=cleanText(p.text,MAX_WISH);validatePublicText(text);if(text.toLowerCase()===row.text.toLowerCase())fail(409,'same_text','Evolution must change the wish');
   const existing=await env.DB.prepare("SELECT id FROM wishes WHERE parent_wish_id=? AND kind='evolve' AND state!='removed' LIMIT 1").bind(row.id).first();if(existing)fail(409,'already_continued','This state already has a continuation');
   const wid=id('wish'),t=now();await env.DB.batch([
-    env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,'evolve',?,?, 'alive',1,?,?)").bind(wid,row.lineage_id,actorId,row.id,row.root_wish_id,text,row.location_text,t,t),
+    env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,?,'evolve',?,?, 'alive',1,?,?)").bind(wid,row.lineage_id,actorId,row.room_key,row.id,row.root_wish_id,text,row.location_text,t,t),
     env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'evolve',?,?,?,?)").bind(id('evt'),wid,row.lineage_id,actorId,row.id,JSON.stringify({fromWishId:row.id}),JSON.stringify({fromWishId:row.id}),t),
     env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id)
   ]);return json({wishId:wid},201,cors);
 }
 async function split(env,cors,row,actorId,p,type){
   assertAlive(row);const raw=Array.isArray(p.children)?p.children:[];const children=raw.map(x=>cleanText(typeof x==='string'?x:x?.text,MAX_WISH)).filter(Boolean).slice(0,8);if(type==='split'&&children.length<2)fail(400,'need_two_branches','Initial split needs at least two branches');if(type==='add_branch'&&children.length<1)fail(400,'need_branch','Add at least one branch');children.forEach(validatePublicText);
-  const t=now(),created=[],stmts=[];for(const text of children){const wid=id('wish');created.push(wid);stmts.push(env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,'split',?,?, 'alive',1,?,?)").bind(wid,row.lineage_id,actorId,row.id,row.root_wish_id,text,row.location_text,t,t));stmts.push(env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'split',?,?,?,?)").bind(id('evt'),wid,row.lineage_id,actorId,row.id,JSON.stringify({mode:type}),JSON.stringify({mode:type}),t))}stmts.push(env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id));await env.DB.batch(stmts);return json({wishIds:created},201,cors);
+  const t=now(),created=[],stmts=[];for(const text of children){const wid=id('wish');created.push(wid);stmts.push(env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,?,'split',?,?, 'alive',1,?,?)").bind(wid,row.lineage_id,actorId,row.room_key,row.id,row.root_wish_id,text,row.location_text,t,t));stmts.push(env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'split',?,?,?,?)").bind(id('evt'),wid,row.lineage_id,actorId,row.id,JSON.stringify({mode:type}),JSON.stringify({mode:type}),t))}stmts.push(env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id));await env.DB.batch(stmts);return json({wishIds:created},201,cors);
 }
 async function closeWish(env,cors,row,actorId,type){
   assertAlive(row);const state=type==='bloom'?'bloomed':'abandoned',t=now();await env.DB.batch([env.DB.prepare('UPDATE wishes SET state=?,updated_at=? WHERE id=?').bind(state,t,row.id),env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id),env.DB.prepare('INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?,?,?,\'{}\',\'{}\',?)').bind(id('evt'),row.id,row.lineage_id,actorId,type,row.parent_wish_id,t)]);return json({wishId:row.id,state},200,cors);
@@ -152,15 +153,15 @@ async function removeMistake(env,cors,row,actorId){
   const child=await env.DB.prepare("SELECT id FROM wishes WHERE parent_wish_id=? AND state!='removed' LIMIT 1").bind(row.id).first();if(child)fail(409,'has_descendants','Remove descendants first or abandon this path');const enc=await env.DB.prepare('SELECT 1 AS x FROM encouragements WHERE wish_id=? LIMIT 1').bind(row.id).first();if(enc)fail(409,'has_external_activity','A wish with external activity cannot be erased as a mistake');const proposal=await env.DB.prepare("SELECT 1 AS x FROM proposals WHERE (target_wish_id=? OR other_wish_id=?) AND status IN ('pending','accepted') LIMIT 1").bind(row.id,row.id).first();if(proposal)fail(409,'has_external_activity','A wish with proposals or connections cannot be erased as a mistake');const t=now();await env.DB.batch([env.DB.prepare("UPDATE wishes SET state='removed',is_public=0,updated_at=? WHERE id=?").bind(t,row.id),env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'remove_mistake',?,'{}','{}',?)").bind(id('evt'),row.id,row.lineage_id,actorId,row.parent_wish_id,t)]);return json({wishId:row.id,state:'removed'},200,cors);
 }
 async function encourage(request,env,cors,wishId){
-  const actorId=await actor(request,env,true),row=await wishById(env,wishId);if(!row||!row.is_public||row.state==='removed')fail(404,'wish_not_found','Wish not found');if(row.owner_actor_id===actorId)fail(409,'own_wish','Encourage another human\'s wish');
+  const actorId=await actor(request,env,true),room=roomKey(request),row=await wishById(env,wishId);if(!row||row.room_key!==room||!row.is_public||row.state==='removed')fail(404,'wish_not_found','Wish not found');if(row.owner_actor_id===actorId)fail(409,'own_wish','Encourage another human\'s wish');
   const existing=await env.DB.prepare('SELECT 1 AS x FROM encouragements WHERE wish_id=? AND actor_id=? LIMIT 1').bind(wishId,actorId).first();if(existing)fail(409,'already_encouraged','You already encouraged this wish');
   try{await env.DB.prepare('INSERT INTO encouragements (wish_id,actor_id,created_at) VALUES (?,?,?)').bind(wishId,actorId,now()).run()}catch{fail(409,'already_encouraged','You already encouraged this wish')}return json({wishId,encouraged:true},201,cors);
 }
 
 async function createProposal(request,env,cors){
-  const proposer=await actor(request,env,true),p=await body(request);await verifyTurnstile(request,env,p);const type=String(p.type||'');if(!['help','suggest_branch','connect'].includes(type))fail(400,'invalid_proposal','Unsupported proposal type');
-  const target=await wishById(env,String(p.targetWishId||''));if(!target||!target.is_public||target.state!=='alive')fail(404,'target_not_available','Target wish is not available');
-  let other=null;if(type==='connect'){other=await wishById(env,String(p.otherWishId||''));if(!other||!other.is_public||other.state!=='alive')fail(404,'other_not_available','Other wish is not available');if(other.lineage_id===target.lineage_id)fail(409,'same_lineage','Connection must link independent lineages')}
+  const proposer=await actor(request,env,true),room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);const type=String(p.type||'');if(!['help','suggest_branch','connect'].includes(type))fail(400,'invalid_proposal','Unsupported proposal type');
+  const target=await wishById(env,String(p.targetWishId||''));if(!target||target.room_key!==room||!target.is_public||target.state!=='alive')fail(404,'target_not_available','Target wish is not available');
+  let other=null;if(type==='connect'){other=await wishById(env,String(p.otherWishId||''));if(!other||other.room_key!==room||!other.is_public||other.state!=='alive')fail(404,'other_not_available','Other wish is not available');if(other.lineage_id===target.lineage_id)fail(409,'same_lineage','Connection must link independent lineages')}
   const privatePayload={};if(type==='help'){const note=cleanText(p.note,MAX_HELP);if(note.length<2)fail(400,'help_note_required','Describe the concrete help');privatePayload.note=note}if(type==='suggest_branch'){const steps=(Array.isArray(p.steps)?p.steps:[]).map(x=>cleanText(x,MAX_WISH)).filter(Boolean).slice(0,5);if(!steps.length)fail(400,'steps_required','Suggest at least one branch');steps.forEach(validatePublicText);privatePayload.steps=steps}
   const owners=[target.owner_actor_id];if(other)owners.push(other.owner_actor_id);const required=[...new Set(owners)];if(required.length===1&&required[0]===proposer&&type!=='connect')fail(409,'own_wish','Use wisher actions on your own wish');
   const pid=id('prop'),t=now(),stmts=[env.DB.prepare('INSERT INTO proposals (id,proposal_type,proposer_actor_id,target_wish_id,other_wish_id,private_payload_json,status,created_at,updated_at) VALUES (?,?,?,?,?,?,\'pending\',?,?)').bind(pid,type,proposer,target.id,other?.id||null,JSON.stringify(privatePayload),t,t)];
@@ -180,7 +181,7 @@ async function maybeMaterialize(env,pid){
   if(p.proposal_type==='help')await eventInsert(env,{wishId:target.id,lineageId:target.lineage_id,actorId:p.proposer_actor_id,eventType:'help',payload:{proposalId:pid,note:payload.note},publicPayload:{proposalId:pid}});
   if(p.proposal_type==='connect')await eventInsert(env,{wishId:target.id,lineageId:target.lineage_id,actorId:p.proposer_actor_id,eventType:'connect',payload:{proposalId:pid,otherWishId:p.other_wish_id},publicPayload:{proposalId:pid,otherWishId:p.other_wish_id}});
   if(p.proposal_type==='suggest_branch'){
-    const stmts=[];for(const text of payload.steps||[]){const wid=id('wish');stmts.push(env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,'split',?,?, 'alive',1,?,?)").bind(wid,target.lineage_id,target.owner_actor_id,target.id,target.root_wish_id,text,target.location_text,t,t));stmts.push(env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'split',?,?,?,?)").bind(id('evt'),wid,target.lineage_id,target.owner_actor_id,target.id,JSON.stringify({proposalId:pid,suggestedBy:p.proposer_actor_id}),JSON.stringify({proposalId:pid}),t))}if(stmts.length)await env.DB.batch(stmts)
+    const stmts=[];for(const text of payload.steps||[]){const wid=id('wish');stmts.push(env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,?,'split',?,?, 'alive',1,?,?)").bind(wid,target.lineage_id,target.owner_actor_id,target.room_key,target.id,target.root_wish_id,text,target.location_text,t,t));stmts.push(env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'split',?,?,?,?)").bind(id('evt'),wid,target.lineage_id,target.owner_actor_id,target.id,JSON.stringify({proposalId:pid,suggestedBy:p.proposer_actor_id}),JSON.stringify({proposalId:pid}),t))}if(stmts.length)await env.DB.batch(stmts)
   }
   await env.DB.prepare("UPDATE proposals SET status='accepted',updated_at=? WHERE id=?").bind(t,pid).run();await notify(env,p.proposer_actor_id,'proposal_result',pid,'A proposal was accepted');
 }
@@ -190,4 +191,4 @@ async function getInbox(request,env,cors){
   return json({notifications:(notes.results||[]).map(n=>({id:n.id,kind:n.kind,objectId:n.object_id,title:n.title,body:n.body,isRead:!!n.is_read,createdAt:n.created_at})),pending:(pending.results||[]).map(p=>({id:p.id,type:p.proposal_type,proposerActorId:p.proposer_actor_id,targetWishId:p.target_wish_id,otherWishId:p.other_wish_id,privatePayload:parseJson(p.private_payload_json),createdAt:p.created_at}))},200,cors);
 }
 async function readNotification(request,env,cors,nid){const actorId=await actor(request,env,true);const r=await env.DB.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND actor_id=?').bind(nid,actorId).run();if(!r.meta?.changes)fail(404,'notification_not_found','Notification not found');return json({id:nid,isRead:true},200,cors)}
-async function createReport(request,env,cors){const actorId=await actor(request,env,false),p=await body(request),wishId=String(p.wishId||''),reason=cleanText(p.reason,80),details=cleanText(p.details,500);if(!reason)fail(400,'reason_required','Report reason required');const w=await wishById(env,wishId);if(!w)fail(404,'wish_not_found','Wish not found');const rid=id('report');await env.DB.prepare("INSERT INTO reports (id,reporter_actor_id,wish_id,reason,details,status,created_at) VALUES (?,?,?,?,?,'open',?)").bind(rid,actorId,wishId,reason,details||null,now()).run();return json({reportId:rid},201,cors)}
+async function createReport(request,env,cors){const actorId=await actor(request,env,false),room=roomKey(request),p=await body(request),wishId=String(p.wishId||''),reason=cleanText(p.reason,80),details=cleanText(p.details,500);if(!reason)fail(400,'reason_required','Report reason required');const w=await wishById(env,wishId);if(!w||w.room_key!==room)fail(404,'wish_not_found','Wish not found');const rid=id('report');await env.DB.prepare("INSERT INTO reports (id,reporter_actor_id,wish_id,reason,details,status,created_at) VALUES (?,?,?,?,?,'open',?)").bind(rid,actorId,wishId,reason,details||null,now()).run();return json({reportId:rid},201,cors)}
