@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS wishes (
   id TEXT PRIMARY KEY,
   lineage_id TEXT NOT NULL,
   owner_actor_id TEXT NOT NULL,
+  room_key TEXT NOT NULL DEFAULT 'ALPHA',
   parent_wish_id TEXT,
   root_wish_id TEXT NOT NULL,
   kind TEXT NOT NULL DEFAULT 'create' CHECK (kind IN ('create','evolve','split')),
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS wishes (
   FOREIGN KEY (parent_wish_id) REFERENCES wishes(id) ON DELETE SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_wishes_owner ON wishes(owner_actor_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_wishes_room ON wishes(room_key, is_public, state, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_wishes_lineage ON wishes(lineage_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_wishes_public ON wishes(is_public, state, updated_at DESC);
 
