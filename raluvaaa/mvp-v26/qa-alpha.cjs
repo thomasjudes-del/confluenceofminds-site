@@ -43,6 +43,7 @@ const H=3600000;
   assert.equal(await page.locator('#musicBtn').count(),1,'temporary ambient music control should exist');
   assert.equal(await page.locator('#ambientCredit').count(),1,'music attribution should remain visible');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__?.url),'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Immersed.mp3');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__?.audio?.loop),true,'ambient music must loop');
 
   await page.locator('#createBtn').click();
   await page.locator('#wishInput').fill('I want to make one real thing this week.');
