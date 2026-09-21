@@ -4,7 +4,7 @@
 const AUDIO_URL='https://incompetech.com/music/royalty-free/mp3-royaltyfree/Immersed.mp3';
 const STORE='raluvaaaAmbientAudioV1';
 const params=new URLSearchParams(location.search);
-const qa=params.has('qa');
+const qa=params.has('qa')||params.has('sharedqa');
 const audio=new Audio(AUDIO_URL);
 audio.loop=true;
 audio.preload='none';
