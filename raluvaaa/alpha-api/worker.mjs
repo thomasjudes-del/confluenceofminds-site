@@ -9,24 +9,24 @@ export default {
     try{
       const url=new URL(request.url),path=url.pathname.replace(/\/+$/,'')||'/';
       if(path==='/v1/health'&&request.method==='GET')return json({ok:true,service:'raluvaaa-alpha-api',version:1},200,cors);
-      if(path==='/v1/session'&&request.method==='POST')return createSession(request,env,cors);
-      if(path==='/v1/world'&&request.method==='GET')return getWorld(request,env,cors);
-      if(path==='/v1/me'&&request.method==='GET')return getMe(request,env,cors);
-      if(path==='/v1/inbox'&&request.method==='GET')return getInbox(request,env,cors);
-      if(path==='/v1/wishes'&&request.method==='POST')return createWish(request,env,cors);
-      if(path==='/v1/proposals'&&request.method==='POST')return createProposal(request,env,cors);
-      if(path==='/v1/reports'&&request.method==='POST')return createReport(request,env,cors);
+      if(path==='/v1/session'&&request.method==='POST')return await createSession(request,env,cors);
+      if(path==='/v1/world'&&request.method==='GET')return await getWorld(request,env,cors);
+      if(path==='/v1/me'&&request.method==='GET')return await getMe(request,env,cors);
+      if(path==='/v1/inbox'&&request.method==='GET')return await getInbox(request,env,cors);
+      if(path==='/v1/wishes'&&request.method==='POST')return await createWish(request,env,cors);
+      if(path==='/v1/proposals'&&request.method==='POST')return await createProposal(request,env,cors);
+      if(path==='/v1/reports'&&request.method==='POST')return await createReport(request,env,cors);
 
       let m=path.match(/^\/v1\/wishes\/([^/]+)\/events$/);
-      if(m&&request.method==='POST')return addWishEvent(request,env,cors,decodeURIComponent(m[1]));
+      if(m&&request.method==='POST')return await addWishEvent(request,env,cors,decodeURIComponent(m[1]));
       m=path.match(/^\/v1\/wishes\/([^/]+)\/encourage$/);
-      if(m&&request.method==='POST')return encourage(request,env,cors,decodeURIComponent(m[1]));
+      if(m&&request.method==='POST')return await encourage(request,env,cors,decodeURIComponent(m[1]));
       m=path.match(/^\/v1\/proposals\/([^/]+)\/respond$/);
-      if(m&&request.method==='POST')return respondProposal(request,env,cors,decodeURIComponent(m[1]));
+      if(m&&request.method==='POST')return await respondProposal(request,env,cors,decodeURIComponent(m[1]));
       m=path.match(/^\/v1\/proposals\/([^/]+)\/cancel$/);
-      if(m&&request.method==='POST')return cancelProposal(request,env,cors,decodeURIComponent(m[1]));
+      if(m&&request.method==='POST')return await cancelProposal(request,env,cors,decodeURIComponent(m[1]));
       m=path.match(/^\/v1\/notifications\/([^/]+)\/read$/);
-      if(m&&request.method==='POST')return readNotification(request,env,cors,decodeURIComponent(m[1]));
+      if(m&&request.method==='POST')return await readNotification(request,env,cors,decodeURIComponent(m[1]));
 
       return json({error:'not_found'},404,cors);
     }catch(err){
