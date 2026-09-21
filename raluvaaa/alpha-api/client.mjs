@@ -1,16 +1,17 @@
 export class RaluvaaaAlphaClient {
-  constructor({baseUrl,storage=window.localStorage,fetchImpl=window.fetch.bind(window)}={}){
+  constructor({baseUrl,room='ALPHA',storage=window.localStorage,fetchImpl=window.fetch.bind(window)}={}){
     if(!baseUrl)throw new Error('baseUrl required');
     this.baseUrl=baseUrl.replace(/\/+$/,'');
+    this.room=String(room||'ALPHA').trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,16)||'ALPHA';
     this.storage=storage;
     this.fetchImpl=fetchImpl;
-    this.tokenKey='raluvaaaAlphaSessionTokenV1';
-    this.actorKey='raluvaaaAlphaActorIdV1';
+    this.tokenKey='raluvaaaAlphaSessionTokenV1:'+this.room;
+    this.actorKey='raluvaaaAlphaActorIdV1:'+this.room;
   }
   get token(){return this.storage.getItem(this.tokenKey)||''}
   get actorId(){return this.storage.getItem(this.actorKey)||''}
   async request(path,{method='GET',body,auth=true}={}){
-    const headers={'content-type':'application/json'};
+    const headers={'content-type':'application/json','x-raluvaaa-room':this.room};
     if(auth&&this.token)headers.authorization=`Bearer ${this.token}`;
     const r=await this.fetchImpl(`${this.baseUrl}${path}`,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
     const data=await r.json().catch(()=>({}));
