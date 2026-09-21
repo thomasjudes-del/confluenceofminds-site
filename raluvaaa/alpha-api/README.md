@@ -63,3 +63,4 @@ The publication guard is only an alpha-level first filter. It does not guarantee
 ## Current hard stop
 
 The code can live and be checked in GitHub, but creating the real D1 database, setting Worker/Turnstile secrets and deploying it requires access to the project's Cloudflare account. The static Pages repo alone cannot make two independent browsers share wishes or notifications.
+\n\n## QA revalidation\n\nThe shared-alpha Worker + D1 two-client QA was explicitly re-triggered on 2026-09-21 before the private Alpha V0 test.\n
