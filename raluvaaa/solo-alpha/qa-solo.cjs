@@ -97,6 +97,8 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('#myWorldBtn');
   await page.click('#drawerBody [data-open="'+root+'"]');
   assert((await page.locator('#drawerBody .wish').innerText()).includes('apprendre à naviguer'));
+  await page.locator('details.more summary').click();
+  assert.equal(await page.locator('[data-act="connect"]').count(),0,'solo candidate must not expose CONNECT on own wishes');
 
   // CORRECT cancel then confirm. This is not an evolution.
   await page.locator('details.more summary').click();
