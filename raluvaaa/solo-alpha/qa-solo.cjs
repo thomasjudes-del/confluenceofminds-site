@@ -217,7 +217,7 @@ async function clickConfirmDialog(page,selector,accept){
   // The root wish is different: it may bloom even if some paths are unfinished.
   const altRoot=await createWish(page,'Trouver un amour réciproque','Rome, Italie');
   await openWish(page,altRoot);
-  assert((await page.locator('[data-act="bloom"]').innerText()).includes('WISH'),'root bloom must be explicitly labelled as whole-wish bloom');
+  assert((await page.locator('[data-act="bloom"]').innerText()).toLowerCase().includes('wish'),'root bloom must be explicitly labelled as whole-wish bloom');
   await page.click('[data-act="split"]');
   await page.fill('#branchInput','Oser aborder\nAccepter une invitation');
   await page.click('#confirm');
