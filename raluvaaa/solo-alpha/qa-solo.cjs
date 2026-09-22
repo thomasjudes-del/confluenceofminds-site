@@ -169,6 +169,16 @@ async function clickConfirmDialog(page,selector,accept){
   await page.waitForFunction(([id,p])=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.parentSemanticId===p,[b1,b2],{timeout:8000});
   await waitSound(page,'reparent',t);
 
+  // A parent with active descendants cannot be bloomed or abandoned into a contradictory state.
+  await openWish(page,root);
+  await page.click('[data-act="bloom"]');
+  assert((await page.locator('#toast').innerText()).includes('branches actives'),'root bloom must be blocked while descendants are active');
+  assert.equal((await semantic(page)).find(x=>x.semanticId===root).state,'alive');
+  await openWish(page,b2);await page.locator('details.more summary').click();
+  await page.click('[data-act="abandon"]');
+  assert((await page.locator('#toast').innerText()).includes('branches actives'),'branch abandon must be blocked while its descendant is active');
+  assert.equal((await semantic(page)).find(x=>x.semanticId===b2).state,'alive');
+
   // ABANDON cancel then confirm, then RESUME.
   await openWish(page,b3);
   await page.locator('details.more summary').click();
