@@ -1,0 +1,49 @@
+name: Check RALUVAAA Solo RC
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-alpha/**'
+      - 'raluvaaa/mvp-v26/app.js'
+      - 'raluvaaa/mvp-v26/alpha-hardening.js'
+      - 'raluvaaa/mvp-v26/alpha-v0-polish.js'
+      - 'raluvaaa/mvp-v26/ambient-audio.js'
+      - 'raluvaaa/mvp-v26/action-audio.js'
+      - 'raluvaaa/mvp-v25/engine-runtime.js'
+      - '.github/workflows/check-raluvaaa-solo.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/mvp-v26/app.js
+          node --check raluvaaa/mvp-v26/alpha-hardening.js
+          node --check raluvaaa/mvp-v26/alpha-v0-polish.js
+          node --check raluvaaa/mvp-v26/ambient-audio.js
+          node --check raluvaaa/mvp-v26/action-audio.js
+          node --check raluvaaa/solo-alpha/qa-solo.cjs
+          grep -q "RALUVAAA_SOLO" raluvaaa/solo-alpha/index.html
+          grep -q "raluvaaaSoloAlphaV1" raluvaaa/solo-alpha/index.html
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run full solo wisher QA
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-solo-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          if ! node raluvaaa/solo-alpha/qa-solo.cjs; then
+            echo '--- Static server log ---'
+            cat /tmp/raluvaaa-solo-http.log || true
+            exit 1
+          fi
