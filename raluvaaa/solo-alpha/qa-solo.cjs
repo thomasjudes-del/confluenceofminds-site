@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 
-const BASE='http://127.0.0.1:4173/raluvaaa/solo-alpha/?soloqa=1';
+const BASE='http://127.0.0.1:4173/raluvaaa/solo-alpha/?soloqa=1&fresh=1';
 const STORE='raluvaaaSoloAlphaV1';
 const POLICY='raluvaaaEntrustedSoloV1';
 
