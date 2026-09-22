@@ -43,11 +43,6 @@ function buildState(world,me,inbox,actorId){
       events.push({type:'branch_add',actorId:actor,lineageId:w.lineageId,parentSemanticId:w.parentWishId,children:[{semanticId:w.id,text:w.text,loc:w.locationText||'Somewhere',seed:seed(w.id)}],at:w.createdAt});
     }
   }
-  for(const w of wishes){
-    const actor=ownerFor(w,actorId);
-    if(w.state==='bloomed')events.push({type:'bloom',actorId:actor,semanticId:w.id,seed:seed('bloom|'+w.id),at:(w.updatedAt||w.createdAt)+1});
-    if(w.state==='abandoned')events.push({type:'abandon',actorId:actor,semanticId:w.id,at:(w.updatedAt||w.createdAt)+1});
-  }
   const mineEnc=new Set(me.encouragedWishIds||[]);
   for(const w of wishes){
     let n=Number(w.encouragementCount||0);
@@ -55,8 +50,10 @@ function buildState(world,me,inbox,actorId){
     for(let i=0;i<n;i++)events.push({type:'encourage',actorId:'external:enc:'+i+':'+w.id,semanticId:w.id,at:(w.updatedAt||w.createdAt)+3+i});
   }
   for(const e of world.events||[]){
-    if(e.type==='help'&&byWish.has(e.wishId))events.push({type:'help',actorId:'system',proposalId:e.payload?.proposalId||e.id,semanticId:e.wishId,seed:seed(e.id),at:e.createdAt});
-    if(e.type==='connect'&&byWish.has(e.wishId)&&e.payload?.otherWishId)events.push({type:'connect',actorId:'system',proposalId:e.payload?.proposalId||e.id,aSemanticId:e.wishId,bSemanticId:e.payload.otherWishId,seed:seed(e.id),at:e.createdAt});
+    const w=byWish.get(e.wishId);
+    if(['bloom','abandon','resume'].includes(e.type)&&w)events.push({type:e.type,actorId:ownerFor(w,actorId),semanticId:e.wishId,seed:seed(e.id),at:e.createdAt});
+    if(e.type==='help'&&w)events.push({type:'help',actorId:'system',proposalId:e.payload?.proposalId||e.id,semanticId:e.wishId,seed:seed(e.id),at:e.createdAt});
+    if(e.type==='connect'&&w&&e.payload?.otherWishId)events.push({type:'connect',actorId:'system',proposalId:e.payload?.proposalId||e.id,aSemanticId:e.wishId,bSemanticId:e.payload.otherWishId,seed:seed(e.id),at:e.createdAt});
   }
   const seenProposals=new Set();
   const addProposal=(p,role)=>{
