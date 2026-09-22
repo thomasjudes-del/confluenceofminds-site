@@ -103,8 +103,10 @@ async function syncEvent(ev){
     }else if((ev.type==='split'||ev.type==='branch_add')&&!ev.proposalId){
       out=await client.wishEvent(idOf(ev.parentSemanticId),{type:ev.type==='split'?'split':'add_branch',children:(ev.children||[]).map(c=>c.text)});
       (ev.children||[]).forEach((c,i)=>{if(out.wishIds?.[i])maps.wish.set(c.semanticId,out.wishIds[i])});
-    }else if(ev.type==='bloom'||ev.type==='abandon'){
+    }else if(ev.type==='bloom'||ev.type==='abandon'||ev.type==='resume'){
       await client.wishEvent(idOf(ev.semanticId),{type:ev.type});
+    }else if(ev.type==='correct'){
+      await client.wishEvent(idOf(ev.semanticId),{type:'correct',text:ev.text,locationText:ev.loc||''});
     }else if(ev.type==='reparent'){
       await client.wishEvent(idOf(ev.semanticId),{type:'reparent',newParentWishId:idOf(ev.newParentSemanticId)});
     }else if(ev.type==='encourage'){
