@@ -175,7 +175,7 @@ async function assertNoOverflow(page,label){
   assert(localInstant,'immediate create must have a local semantic id');
   const resolvedInstant=await A.evaluate(id=>window.__RALUVAAA_SHARED_SHARE__(id),localInstant);
   assert(resolvedInstant&&resolvedInstant!==localInstant,'share resolver must wait for the server id');
-  assert((await world(A)).wishes.some(w=>w.id===resolvedInstant),'resolved share id must exist in shared world');
+  assert((await A.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.world())).wishes.some(w=>w.id===resolvedInstant),'resolved share id must exist in shared world');
   await A.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishB,{timeout:9000});
   await openWish(B,wishB);
   await B.locator('details.more summary').click();
