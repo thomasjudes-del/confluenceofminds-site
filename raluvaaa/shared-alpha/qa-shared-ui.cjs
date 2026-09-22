@@ -256,6 +256,7 @@ async function assertNoOverflow(page,label){
   await B.locator('details.more summary').click();
   assert(await B.locator('[data-act="connect"]').count(),'CONNECT must remain available on the live owned wish');
   await B.locator('[data-act="connect"]').click();
+  await B.waitForFunction(()=>!document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:3000});
   await B.evaluate(id=>window.__RV26_SHARED__.select(id),wishA);
   await B.waitForSelector('#overlay #cancel',{timeout:5000});
   await B.click('#overlay #cancel');
@@ -266,6 +267,7 @@ async function assertNoOverflow(page,label){
   await B.locator('details.more summary').click();
   assert(await B.locator('[data-act="connect"]').count(),'CONNECT must remain available on the live owned wish');
   await B.locator('[data-act="connect"]').click();
+  await B.waitForFunction(()=>!document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:3000});
   await B.evaluate(id=>window.__RV26_SHARED__.select(id),wishA);
   await B.waitForSelector('#overlay #confirm',{timeout:5000});
   await B.click('#overlay #confirm');
