@@ -58,14 +58,23 @@ function buildState(world,me,inbox,actorId){
     if(e.type==='help'&&byWish.has(e.wishId))events.push({type:'help',actorId:'system',proposalId:e.payload?.proposalId||e.id,semanticId:e.wishId,seed:seed(e.id),at:e.createdAt});
     if(e.type==='connect'&&byWish.has(e.wishId)&&e.payload?.otherWishId)events.push({type:'connect',actorId:'system',proposalId:e.payload?.proposalId||e.id,aSemanticId:e.wishId,bSemanticId:e.payload.otherWishId,seed:seed(e.id),at:e.createdAt});
   }
-  for(const p of inbox.pending||[]){
+  const seenProposals=new Set();
+  const addProposal=(p,role)=>{
+    if(!p||seenProposals.has(p.id))return;
+    seenProposals.add(p.id);
     const proposer=p.proposerActorId||'external:helper:'+p.id;
-    if(p.type==='help')events.push({type:'help_proposed',actorId:proposer,proposalId:p.id,semanticId:p.targetWishId,note:p.privatePayload?.note||'',targetActorId:actorId,requiredActors:[actorId],seed:seed(p.id),at:p.createdAt});
-    if(p.type==='suggest_branch')events.push({type:'suggest_proposed',actorId:proposer,proposalId:p.id,semanticId:p.targetWishId,suggestions:p.privatePayload?.steps||[],targetActorId:actorId,requiredActors:[actorId],seed:seed(p.id),at:p.createdAt});
-    if(p.type==='connect')events.push({type:'connect_proposed',actorId:proposer,proposalId:p.id,aSemanticId:p.targetWishId,bSemanticId:p.otherWishId,requiredActors:[actorId],seed:seed(p.id),at:p.createdAt});
-  }
+    const required=[p.targetOwnerActorId,p.otherOwnerActorId].filter(Boolean);
+    const common={actorId:proposer,proposalId:p.id,requiredActors:[...new Set(required)],serverStatus:p.status||'pending',seed:seed(p.id),at:p.createdAt};
+    if(p.type==='help')events.push({...common,type:'help_proposed',semanticId:p.targetWishId,note:p.privatePayload?.note||'',targetActorId:p.targetOwnerActorId||actorId});
+    if(p.type==='suggest_branch')events.push({...common,type:'suggest_proposed',semanticId:p.targetWishId,suggestions:p.privatePayload?.steps||[],targetActorId:p.targetOwnerActorId||actorId});
+    if(p.type==='connect')events.push({...common,type:'connect_proposed',aSemanticId:p.targetWishId,bSemanticId:p.otherWishId});
+    if(role==='received'&&p.decision)events.push({type:'proposal_response',actorId,proposalId:p.id,decision:p.decision,semanticId:p.targetWishId,aSemanticId:p.targetWishId,bSemanticId:p.otherWishId,at:(p.updatedAt||p.createdAt)+1});
+  };
+  for(const p of inbox.pending||[])addProposal(p,'received');
+  for(const p of inbox.sent||[])addProposal(p,'sent');
+  for(const p of inbox.receivedHistory||[])addProposal(p,'received');
   events.sort((a,b)=>(a.at||0)-(b.at||0));
-  return{version:26,lang:(navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr',entrusted:null,events};
+  return{version:26,lang:(navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr',entrusted:null,notifications:(inbox.notifications||[]).map(x=>({...x})),events};
 }
 function fp(state){return JSON.stringify(state.events.map(e=>[e.type,e.semanticId||'',e.parentSemanticId||'',e.proposalId||'',e.decision||'',e.aSemanticId||'',e.bSemanticId||'',(e.children||[]).map(c=>c.semanticId).join(',')]))}
 
@@ -111,6 +120,8 @@ async function syncEvent(ev){
       out=await client.proposeConnect(idOf(ev.aSemanticId),idOf(ev.bSemanticId));maps.proposal.set(ev.proposalId,out.proposalId);
     }else if(ev.type==='proposal_response'){
       try{await client.respondProposal(proposalOf(ev.proposalId),ev.decision)}catch(e){if(e.code!=='already_decided')throw e}
+    }else if(ev.type==='proposal_cancelled'){
+      await client.cancelProposal(proposalOf(ev.proposalId));
     }
   }finally{
     mutating--;
@@ -137,12 +148,15 @@ async function boot(){
   window.RALUVAAA_ACTOR_ID=client.actorId;
   window.__RALUVAAA_SHARED_COMMIT__=enqueue;
   window.__RALUVAAA_SHARED_REMOVE__=removeShared;
+  window.__RALUVAAA_SHARED_SHARE__=async localId=>{await queue;return idOf(localId)};
+  window.__RALUVAAA_SHARED_MARK_READ__=id=>client.markRead(id);
   const initial=await fetchState();
   lastFingerprint=fp(initial);
   localStorage.setItem(STORE,JSON.stringify(initial));
   await loadScript('../mvp-v26/app.js?build=shared-alpha-20260921-1');
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=shared-alpha-20260921-1');
   await loadScript('../mvp-v26/ambient-audio.js?build=shared-alpha-20260921-1');
+  await loadScript('../mvp-v26/action-audio.js?build=shared-alpha-20260922-1');
   window.__RALUVAAA_SHARED_READY__=true;
   window.__RALUVAAA_SHARED_DEBUG__={client,room,refresh:()=>refresh(true),world:()=>lastWorld,me:()=>lastMe,inbox:()=>lastInbox,maps};
   hideStatus();
