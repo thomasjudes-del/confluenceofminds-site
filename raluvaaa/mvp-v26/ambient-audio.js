@@ -15,7 +15,7 @@ let started=false;
 function installStyle(){
   const style=document.createElement('style');
   style.textContent=`
-    #musicBtn{font-size:15px}.sound-note{position:relative;display:inline-block;line-height:1}.sound-strike{position:absolute;left:50%;top:50%;width:20px;height:1.4px;background:rgba(235,244,255,.92);transform:translate(-50%,-50%) rotate(-42deg);transform-origin:center;opacity:0;transition:opacity .14s ease}#musicBtn.muted{opacity:.62}#musicBtn.muted .sound-strike{opacity:1}
+    #musicBtn{font-size:15px}.sound-note{position:relative;display:grid;place-items:center;width:22px;height:22px;line-height:1}.sound-strike{position:absolute;left:1px;right:1px;top:10px;height:2px;border-radius:2px;background:currentColor;transform:rotate(-42deg);transform-origin:center;opacity:0;pointer-events:none}#musicBtn.muted{opacity:.68}#musicBtn.muted .sound-strike{opacity:1}
     #ambientCredit{position:fixed;z-index:29;left:14px;bottom:10px;max-width:300px;font-size:6.5px;letter-spacing:.025em;color:rgba(219,230,246,.34);pointer-events:auto}
     #ambientCredit a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(219,230,246,.13)}
     #ambientCredit a:hover{color:rgba(236,245,255,.68)}
@@ -55,6 +55,8 @@ function refresh(){
   const btn=document.getElementById('musicBtn');
   if(!btn)return;
   btn.classList.toggle('muted',!enabled);
+  const strike=btn.querySelector('.sound-strike');
+  if(strike)strike.style.opacity=enabled?'0':'1';
   btn.setAttribute('aria-pressed',enabled?'true':'false');
   btn.title=enabled?'Couper la musique · Immersed · Kevin MacLeod · CC BY 4.0':'Activer la musique · Immersed · Kevin MacLeod · CC BY 4.0';
 }
