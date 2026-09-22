@@ -77,7 +77,7 @@ function installEngineGuard(){
   if(engineGuardInstalled)return;const frame=document.getElementById('engine'),doc=frame?.contentDocument;if(!doc)return;
   engineGuardInstalled=true;
   const syncMobileChrome=()=>{const minimap=doc.querySelector('.minimap');if(minimap)minimap.style.display=window.innerWidth<=820?'none':''};
-  syncMobileChrome();window.addEventListener('resize',syncMobileChrome,{passive:true});
+  syncMobileChrome();window.addEventListener('resize',syncMobileChrome,{passive:true});if(window.ResizeObserver)new ResizeObserver(syncMobileChrome).observe(document.documentElement);
   const s=doc.createElement('script');
   s.textContent=`(()=>{if(window.__rv26AlphaGuard)return;window.__rv26AlphaGuard=true;const finite=n=>Number.isFinite(n);function sane(){if(!finite(camera.x))camera.x=0;if(!finite(camera.y))camera.y=0;if(!finite(camera.zoom)||camera.zoom<=0)camera.zoom=.16;}const bg=drawBackground;drawBackground=function(){sane();if(!finite(W)||!finite(H)||W<=0||H<=0)return;return bg()};const rh=rootHalo;rootHalo=function(r){sane();if(!r||!finite(r.x)||!finite(r.y)||!finite(camera.zoom))return;const p=camera.worldToScreen(r.x,r.y);if(!finite(p.x)||!finite(p.y))return;return rh(r)};const dn=drawNode;drawNode=function(n){sane();if(!n||!finite(n.x)||!finite(n.y))return;return dn(n)};const de=drawEdge;drawEdge=function(e,p){sane();if(!e||![e.x0,e.y0,e.cx,e.cy,e.x1,e.y1].every(finite))return;return de(e,p)};const oldFit=camera.fit.bind(camera);camera.fit=function(){try{oldFit()}finally{sane()}};window.addEventListener('error',ev=>{if(String(ev.message||'').includes('createRadialGradient')){sane();ev.preventDefault()}});})();`;
   doc.body.appendChild(s);
