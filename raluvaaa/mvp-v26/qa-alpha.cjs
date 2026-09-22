@@ -50,6 +50,8 @@ const H=3600000;
   assert.notEqual(entrustedAfter.entries[0].semanticId,entrustedBefore.policy.entries[0].semanticId,'expired entrusted slot must not immediately repeat the same wish');
   assert.equal(entrustedAfter.entries[1].semanticId,entrustedBefore.policy.entries[1].semanticId,'unexpired medium entrusted slot must remain stable');
   assert.equal(entrustedAfter.entries[2].semanticId,entrustedBefore.policy.entries[2].semanticId,'unexpired long entrusted slot must remain stable');
+  await page.locator('#entrustedBtn').click();
+  await page.waitForTimeout(150);
   assert.equal(await page.locator('#drawerBody button:has-text("Save")').count(),0,'entrusted mechanic must not expose Save');
   await page.locator('#drawerClose').click();
   await page.locator('#myWorldBtn').click();
