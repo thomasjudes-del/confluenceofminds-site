@@ -83,14 +83,14 @@ async function openWish(page,id){
   const root=await p.evaluate(()=>window.__RV26_SOLO__.semantic().find(x=>x.text==='Trouver un amour réciproque').semanticId);
 
   // Root vs branch Bloom labels + in-sheet navigation.
-  await openWish(page,root);
+  await openWish(p,root);
   assert((await p.locator('[data-act="bloom"]').innerText()).toLowerCase().includes('wish'));
   await p.click('[data-act="split"]');
   await p.fill('#branchInput','Oser aborder\nAccepter une invitation');
   await p.click('#confirm');
   await p.waitForFunction(()=>window.__RV26_SOLO__.semantic().some(x=>x.text==='Oser aborder')&&window.__RV26_SOLO__.semantic().some(x=>x.text==='Accepter une invitation'),{timeout:10000});
   const child=await p.evaluate(()=>window.__RV26_SOLO__.semantic().find(x=>x.text==='Oser aborder').semanticId);
-  await openWish(page,root);
+  await openWish(p,root);
   assert.equal(await p.locator('[data-nav-wish="'+child+'"]').count(),1,'root sheet should expose sub-wishes');
   await p.click('[data-nav-wish="'+child+'"]');
   assert((await p.locator('[data-act="bloom"]').innerText()).toLowerCase().includes('branche'));
