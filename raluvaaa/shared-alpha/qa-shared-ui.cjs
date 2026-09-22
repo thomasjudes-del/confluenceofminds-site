@@ -15,6 +15,7 @@ async function ready(page,room){
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.room),room);
   assert((await page.locator('#sharedRoomBadge').innerText()).includes(room),'room code must be visible');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__?.audio?.loop),true,'ambient soundtrack must loop');
+  assert.equal(await page.evaluate(()=>Object.keys(window.__RALUVAAA_ACTION_AUDIO__?.motifs||{}).length>=12),true,'action sound grammar must load');
 }
 async function refresh(page){
   await page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh());
@@ -124,6 +125,36 @@ async function assertNoOverflow(page,label){
   await acceptPending(A,'help');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===id),wishA,{timeout:10000});
 
+  // Decline path must persist in both people's activity after refresh/reload.
+  await refresh(B);await openWish(B,wishA);
+  await B.click('[data-act="help"]');
+  await B.fill('#helpInput','This second offer should be declined.');
+  await B.click('#confirm');
+  await refresh(A);
+  const declinedHelp=(await inbox(A)).pending.find(p=>p.type==='help');
+  assert(declinedHelp,'decline-path help proposal must arrive');
+  await A.click('#inboxBtn');
+  await A.click('[data-decline="'+declinedHelp.id+'"]');
+  await B.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.sent?.some(p=>p.id===id&&p.status==='declined'),declinedHelp.id,{timeout:10000});
+  await B.reload({waitUntil:'domcontentloaded'});
+  await B.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,{timeout:20000});
+  await B.click('#inboxBtn');
+  assert((await B.locator('#drawerBody').innerText()).includes('Refusé'),'declined proposal history must survive Firefox reload');
+
+  // Helper can cancel a still-pending offer from the UI; recipient must lose the request.
+  await openWish(B,wishA);
+  await B.click('[data-act="help"]');
+  await B.fill('#helpInput','This offer will be cancelled by the helper.');
+  await B.click('#confirm');
+  await B.waitForFunction(()=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.sent?.some(p=>p.type==='help'&&p.status==='pending'),{timeout:10000});
+  await B.click('#inboxBtn');
+  await B.waitForSelector('[data-cancel-proposal]',{timeout:6000});
+  const cancelId=await B.locator('[data-cancel-proposal]').first().getAttribute('data-cancel-proposal');
+  await B.locator('[data-cancel-proposal="'+cancelId+'"]').click();
+  await B.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.sent?.some(p=>p.id===id&&p.status==='cancelled'),cancelId,{timeout:10000});
+  await refresh(A);
+  assert(!(await inbox(A)).pending.some(p=>p.id===cancelId),'cancelled proposal must disappear from recipient requests');
+
   // Branch suggestion and consent.
   await refresh(B);await openWish(B,wishA);
   await B.click('[data-act="suggest"]');
@@ -135,6 +166,16 @@ async function assertNoOverflow(page,label){
   // A second human creates a wish, then proposes a connection.
   const textB='QA shared wish '+stamp+' beta';
   const wishB=await createWish(B,textB);
+
+  // A just-created local semantic id must resolve to the server id before a share link is produced.
+  await A.click('#createBtn');
+  const instantText='QA immediate share '+stamp;
+  await A.fill('#wishInput',instantText);await A.fill('#locInput','Nantes, France');await A.click('#confirm');
+  const localInstant=await A.evaluate(t=>{const es=window.__RV26_SHARED__.state().events.filter(e=>e.type==='create'&&e.text===t);return es.at(-1)?.semanticId||null},instantText);
+  assert(localInstant,'immediate create must have a local semantic id');
+  const resolvedInstant=await A.evaluate(id=>window.__RALUVAAA_SHARED_SHARE__(id),localInstant);
+  assert(resolvedInstant&&resolvedInstant!==localInstant,'share resolver must wait for the server id');
+  assert((await world(A)).wishes.some(w=>w.id===resolvedInstant),'resolved share id must exist in shared world');
   await A.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishB,{timeout:9000});
   await openWish(B,wishB);
   await B.locator('details.more summary').click();
