@@ -10,6 +10,7 @@ on:
       - 'raluvaaa/mvp-v26/ambient-audio.js'
       - 'raluvaaa/mvp-v26/action-audio.js'
       - 'raluvaaa/mvp-v25/engine-runtime.js'
+      - 'raluvaaa/v22/engine-v03-locked.html'
       - '.github/workflows/check-raluvaaa-solo.yml'
   workflow_dispatch:
 
@@ -30,12 +31,13 @@ jobs:
           node --check raluvaaa/mvp-v26/ambient-audio.js
           node --check raluvaaa/mvp-v26/action-audio.js
           node --check raluvaaa/solo-alpha/qa-solo.cjs
+          node --check raluvaaa/solo-alpha/qa-solo-webkit.cjs
           grep -q "RALUVAAA_SOLO" raluvaaa/solo-alpha/index.html
           grep -q "raluvaaaSoloAlphaV1" raluvaaa/solo-alpha/index.html
       - name: Install browser
         run: |
           npm install --no-save playwright@1.55.0 >/dev/null 2>&1
-          npx playwright install --with-deps chromium >/dev/null 2>&1
+          npx playwright install --with-deps chromium webkit >/dev/null 2>&1
       - name: Run full solo wisher QA
         run: |
           python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-solo-http.log 2>&1 &
@@ -43,6 +45,11 @@ jobs:
           trap 'kill $HTTP_PID || true' EXIT
           sleep 2
           if ! node raluvaaa/solo-alpha/qa-solo.cjs; then
+            echo '--- Static server log ---'
+            cat /tmp/raluvaaa-solo-http.log || true
+            exit 1
+          fi
+          if ! node raluvaaa/solo-alpha/qa-solo-webkit.cjs; then
             echo '--- Static server log ---'
             cat /tmp/raluvaaa-solo-http.log || true
             exit 1
