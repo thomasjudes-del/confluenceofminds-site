@@ -37,7 +37,7 @@ async function createWish(page,text,loc){
   const expected=String(text).trim();
   await page.click('#createBtn');
   await page.fill('#wishInput',text);
-  await page.fill('#locInput',loc||'');
+  if(loc!==undefined)await page.fill('#locInput',loc);
   const t=Date.now();
   await page.click('#confirm');
   await page.waitForFunction(text=>window.__RV26_SOLO__.semantic().some(x=>x.text===text),expected,{timeout:10000});
@@ -51,8 +51,9 @@ async function clickConfirmDialog(page,selector,accept){
 }
 (async()=>{
   const browser=await chromium.launch({headless:true});
-  const context=await browser.newContext({viewport:{width:1365,height:820},locale:'fr-FR',permissions:['clipboard-read','clipboard-write']});
+  const context=await browser.newContext({viewport:{width:1365,height:820},locale:'fr-FR',geolocation:{latitude:41.9028,longitude:12.4964},permissions:['clipboard-read','clipboard-write','geolocation']});
   const page=await context.newPage();
+  await page.route('https://nominatim.openstreetmap.org/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({address:{city:'Rome',country:'Italie'}})}));
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
@@ -65,6 +66,10 @@ async function clickConfirmDialog(page,selector,accept){
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.audio.loop),true,'ambient music must loop');
   const motifs=await page.evaluate(()=>Object.keys(window.__RALUVAAA_ACTION_AUDIO__.motifs));
   for(const name of ['create','correct','evolve','split','branch_add','reparent','bloom','abandon','resume','close_lineage','resume_lineage','remove','share'])assert(motifs.includes(name),'missing sound motif '+name);
+
+  assert.equal(await page.locator('#musicBtn .sound-note').count(),1,'music control must use a music-note glyph');
+  assert.equal((await page.locator('#musicBtn').innerText()).trim(),'♪','enabled sound icon must be a note');
+  const mini=await page.evaluate(()=>{const f=document.getElementById('engine').contentWindow,c=f.document.getElementById('mini'),r=c.getBoundingClientRect();if(r.width<2||r.height<2)return{visible:false};const x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data,w=c.width,h=c.height;let bright=0,opaque=0,rowMax=0;for(let y=0;y<h;y++){let row=0;for(let xx=0;xx<w;xx++){const i=(y*w+xx)*4,a=d[i+3];if(a>20)opaque++;if(a>90&&d[i]>220&&d[i+1]>220&&d[i+2]>220){bright++;row++}}rowMax=Math.max(rowMax,row)}return{visible:true,w,h,brightRatio:bright/(w*h),rowBrightRatio:rowMax/w,opaqueRatio:opaque/(w*h)}});assert.equal(mini.visible,true,'desktop minimap should render');assert(mini.brightRatio<.08,'minimap must not contain a large white block: '+JSON.stringify(mini));assert(mini.rowBrightRatio<.35,'minimap must not contain white stripe artifacts: '+JSON.stringify(mini));
 
   // Entrusted wishes remain part of solo discovery but are read-only.
   await page.click('#entrustedBtn');
@@ -81,6 +86,17 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('#myWorldBtn');
   assert((await page.locator('#drawerBody').innerText()).includes('Aucun wish'),'solo My wishes should start empty');
   await page.click('#drawerClose');
+
+  // Location is mandatory and is prefilled from the place where the wish is formulated.
+  await page.click('#createBtn');
+  await page.waitForFunction(()=>document.getElementById('locInput')?.value==='Rome, Italie',{timeout:5000});
+  assert((await page.locator('#locStatus').innerText()).includes('OpenStreetMap'),'geolocated place should show its source');
+  await page.fill('#wishInput','Wish sans lieu interdit');
+  await page.fill('#locInput','');
+  await page.click('#confirm');
+  assert((await page.locator('#toast').innerText()).toLowerCase().includes('lieu'),'creation without location must be rejected');
+  assert(!(await semantic(page)).some(x=>x.text==='Wish sans lieu interdit'),'wish without location must not be created');
+  await page.click('#cancel');
 
   // Cancel CREATE must leave no trace.
   const createSoundBefore=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='create').length);
@@ -155,6 +171,15 @@ async function clickConfirmDialog(page,selector,accept){
   const b1=await idByText(page,'Trouver un club de voile');
   const b2=await idByText(page,'Apprendre les noeuds essentiels');
 
+  // Wish sheet must navigate naturally into children and back to the parent.
+  await openWish(page,evolved);
+  assert.equal(await page.locator('[data-nav-wish="'+b1+'"]').count(),1,'parent sheet must expose its sub-wishes');
+  await page.click('[data-nav-wish="'+b1+'"]');
+  assert.equal((await page.locator('#drawerBody .wish').innerText()).trim(),'Trouver un club de voile');
+  assert.equal(await page.locator('[data-nav-wish="'+evolved+'"]').count(),1,'child sheet must expose its parent');
+  await page.click('[data-nav-wish="'+evolved+'"]');
+  assert.equal((await page.locator('#drawerBody .wish').innerText()).trim(),evolveText);
+
   // ADD BRANCH later.
   await openWish(page,evolved);
   await page.click('[data-act="branch"]');
@@ -183,15 +208,35 @@ async function clickConfirmDialog(page,selector,accept){
   await waitSound(page,'reparent',t);
   await page.waitForSelector('#ritualLayer .rv-seed',{timeout:5000});
 
-  // A parent with active descendants cannot be bloomed or abandoned into a contradictory state.
-  await openWish(page,root);
-  await page.click('[data-act="bloom"]');
-  assert((await page.locator('#toast').innerText()).includes('branches actives'),'root bloom must be blocked while descendants are active');
-  assert.equal((await semantic(page)).find(x=>x.semanticId===root).state,'alive');
+  // A non-root branch with active descendants cannot terminate into a contradictory state.
   await openWish(page,b2);await openMore(page);
   await page.click('[data-act="abandon"]');
   assert((await page.locator('#toast').innerText()).includes('branches actives'),'branch abandon must be blocked while its descendant is active');
   assert.equal((await semantic(page)).find(x=>x.semanticId===b2).state,'alive');
+
+  // The root wish is different: it may bloom even if some paths are unfinished.
+  const altRoot=await createWish(page,'Trouver un amour réciproque','Rome, Italie');
+  await openWish(page,altRoot);
+  assert((await page.locator('[data-act="bloom"]').innerText()).includes('WISH'),'root bloom must be explicitly labelled as whole-wish bloom');
+  await page.click('[data-act="split"]');
+  await page.fill('#branchInput','Oser aborder\nAccepter une invitation');
+  await page.click('#confirm');
+  await page.waitForFunction(()=>window.__RV26_SOLO__.semantic().some(x=>x.text==='Oser aborder')&&window.__RV26_SOLO__.semantic().some(x=>x.text==='Accepter une invitation'),{timeout:8000});
+  const alt1=await idByText(page,'Oser aborder'),alt2=await idByText(page,'Accepter une invitation');
+  await openWish(page,alt1);
+  assert((await page.locator('[data-act="bloom"]').innerText()).toLowerCase().includes('branche'),'sub-wish bloom must be explicitly labelled as branch bloom');
+  await openWish(page,altRoot);
+  const abandonSoundsBeforeRootBloom=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='abandon').length);
+  let rootBloomMessage='';
+  page.once('dialog',d=>{rootBloomMessage=d.message();d.accept()});
+  t=Date.now();await page.click('[data-act="bloom"]');
+  await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.state==='bloom',altRoot,{timeout:8000});
+  await waitSound(page,'bloom',t);
+  assert(rootBloomMessage.includes('branches actives'),'root bloom must warn about unfinished paths');
+  const altStates=await semantic(page);
+  assert.equal(altStates.find(x=>x.semanticId===alt1).state,'abandoned','unfinished path should fade when root wish blooms');
+  assert.equal(altStates.find(x=>x.semanticId===alt2).state,'abandoned','unfinished path should fade when root wish blooms');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='abandon').length),abandonSoundsBeforeRootBloom,'automatic fading after root bloom must stay acoustically quiet');
 
   // ABANDON cancel then confirm, then RESUME.
   await openWish(page,b3);
@@ -271,7 +316,7 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('#modeClose');assert(await page.locator('#modeBar').isHidden());
 
   // Untouched accidental wish can be removed, with sound and visual erasure.
-  const accidental=await createWish(page,'Wish créé par erreur','');
+  const accidental=await createWish(page,'Wish créé par erreur','Nantes, France');
   await openWish(page,accidental);await openMore(page);
   t=Date.now();await clickConfirmDialog(page,'[data-act="remove"]',true);
   await waitSound(page,'remove',t);
@@ -293,6 +338,8 @@ async function clickConfirmDialog(page,selector,accept){
   // The single sound control mutes both ambience and semantic micro-sounds.
   await page.click('#musicBtn');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled),false,'music button must mute ambience');
+  assert.equal((await page.locator('#musicBtn').innerText()).trim(),'♪','muted sound icon must remain a music note, not an X');
+  assert.notEqual(await page.locator('#musicBtn .sound-note').evaluate(el=>getComputedStyle(el,'::after').width),'0px','muted note must show a strike');
   const mutedHistory=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.length);
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.play('correct')),false,'action sound must respect global mute');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.length),mutedHistory,'muted action must not enter sound history');
@@ -303,6 +350,6 @@ async function clickConfirmDialog(page,selector,accept){
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForFunction(id=>window.__RV26_SOLO__&&window.__RV26_SOLO__.semantic().some(x=>x.semanticId===id),root,{timeout:20000});
   assert.deepEqual(errors,[],errors.join('\n'));
-  console.log('RALUVAAA Solo RC full wisher QA passed');
+  console.log('RALUVAAA Solo RC P0 regression QA passed');
   await browser.close();
 })().catch(err=>{console.error(err);process.exit(1)});
