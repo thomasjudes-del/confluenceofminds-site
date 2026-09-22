@@ -110,6 +110,15 @@ async function assertNoOverflow(page,label){
 
   // One encouragement per human, and persistence after Firefox reload.
   await openWish(B,wishA);
+  const foreignDrawer=(await B.locator('#drawerBody').innerText());
+  assert(foreignDrawer.includes('Autre humain'),'real foreign wish must be labelled as another human');
+  assert(!foreignDrawer.includes('Simulé'),'real foreign wish must never be labelled simulated');
+  assert.equal(await B.locator('[data-act="report"]').count(),1,'real foreign wish must expose Report');
+  await B.click('[data-act="report"]');
+  await B.fill('#reportDetails','QA report flow');
+  await B.click('#confirm');
+  await B.waitForFunction(()=>document.getElementById('toast')?.textContent.includes('Signalement'),{timeout:5000});
+  await openWish(B,wishA);
   await B.click('[data-act="encourage"]');
   await B.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.me()?.encouragedWishIds?.includes(id),wishA,{timeout:10000});
   await B.reload({waitUntil:'domcontentloaded'});
@@ -140,6 +149,12 @@ async function assertNoOverflow(page,label){
   await B.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,{timeout:20000});
   await B.click('#inboxBtn');
   assert((await B.locator('#drawerBody').innerText()).includes('Refusé'),'declined proposal history must survive Firefox reload');
+  const resultNote=B.locator('[data-note]').first();
+  if(await resultNote.count()){
+    await resultNote.click();
+    await B.waitForSelector('#drawer:not(.hidden) .wish',{timeout:6000});
+    assert((await B.locator('#drawerBody .wish').innerText()).includes(textA),'proposal-result notification should navigate back to the related wish');
+  }
 
   // Helper can cancel a still-pending offer from the UI; recipient must lose the request.
   await openWish(B,wishA);
@@ -180,6 +195,22 @@ async function assertNoOverflow(page,label){
   await openWish(B,wishB);
   await B.locator('details.more summary').click();
   await B.click('[data-act="connect"]');
+  assert(await B.locator('#modeBar').isVisible(),'CONNECT selection mode should be visible');
+  await B.click('#modeClose');
+  assert(await B.locator('#modeBar').isHidden(),'CONNECT mode close must fully cancel selection');
+
+  await openWish(B,wishB);
+  await B.locator('details.more summary').click();
+  await B.click('[data-act="connect"]');
+  await B.evaluate(id=>window.__RV26_SHARED__.select(id),wishA);
+  await B.waitForSelector('#overlay #cancel',{timeout:5000});
+  await B.click('#overlay #cancel');
+  assert(await B.locator('#modeBar').isHidden(),'CONNECT confirmation cancel must exit mode');
+  assert.equal((await B.locator('#overlay').innerText()).trim(),'','CONNECT cancel must clear modal');
+
+  await openWish(B,wishB);
+  await B.locator('details.more summary').click();
+  await B.click('[data-act="connect"]');
   await B.evaluate(id=>window.__RV26_SHARED__.select(id),wishA);
   await B.waitForSelector('#overlay #confirm',{timeout:5000});
   await B.click('#overlay #confirm');
@@ -213,6 +244,11 @@ async function assertNoOverflow(page,label){
   A.once('dialog',d=>d.accept());
   await A.click('[data-act="abandon"]');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='abandoned',branches[1].id,{timeout:10000});
+  await refresh(A);await openWish(A,branches[1].id);
+  assert.equal(await A.locator('[data-act="resume"]').count(),1,'abandoned wish must expose Resume to its wisher');
+  A.once('dialog',d=>d.accept());
+  await A.click('[data-act="resume"]');
+  await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='alive',branches[1].id,{timeout:10000});
 
   // Concurrent independent writes must survive and converge.
   const concurrentA='QA concurrent '+stamp+' gamma';
