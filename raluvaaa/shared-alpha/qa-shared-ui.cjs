@@ -228,15 +228,22 @@ async function assertNoOverflow(page,label){
   assert((await A.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.world())).wishes.some(w=>w.id===resolvedInstant),'resolved share id must exist in shared world');
   await A.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishB,{timeout:9000});
   await openWish(B,wishB);
-  await B.locator('details.more summary').click();
-  await B.click('[data-act="connect"]');
+  const connectDebug=await B.evaluate(id=>({meta:window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id),drawer:document.getElementById('drawerBody')?.innerText||'',html:document.getElementById('drawerBody')?.innerHTML||''}),wishB);
+  const moreSummary=B.locator('details.more summary');
+  assert(await moreSummary.count(),`own live wish must expose More before CONNECT: ${JSON.stringify(connectDebug)}`);
+  await moreSummary.click();
+  const connectButton=B.locator('[data-act="connect"]');
+  assert(await connectButton.count(),`own live wish must expose CONNECT: ${JSON.stringify(connectDebug)}`);
+  await connectButton.click();
+  await B.waitForFunction(()=>!document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:3000});
   assert(await B.locator('#modeBar').isVisible(),'CONNECT selection mode should be visible');
   await B.click('#modeClose');
   assert(await B.locator('#modeBar').isHidden(),'CONNECT mode close must fully cancel selection');
 
   await openWish(B,wishB);
   await B.locator('details.more summary').click();
-  await B.click('[data-act="connect"]');
+  assert(await B.locator('[data-act="connect"]').count(),'CONNECT must remain available on the live owned wish');
+  await B.locator('[data-act="connect"]').click();
   await B.evaluate(id=>window.__RV26_SHARED__.select(id),wishA);
   await B.waitForSelector('#overlay #cancel',{timeout:5000});
   await B.click('#overlay #cancel');
@@ -245,7 +252,8 @@ async function assertNoOverflow(page,label){
 
   await openWish(B,wishB);
   await B.locator('details.more summary').click();
-  await B.click('[data-act="connect"]');
+  assert(await B.locator('[data-act="connect"]').count(),'CONNECT must remain available on the live owned wish');
+  await B.locator('[data-act="connect"]').click();
   await B.evaluate(id=>window.__RV26_SHARED__.select(id),wishA);
   await B.waitForSelector('#overlay #confirm',{timeout:5000});
   await B.click('#overlay #confirm');
