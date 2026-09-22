@@ -13,7 +13,7 @@ function injectChrome(){
   const style=document.createElement('style');style.textContent=`
   #ritualLayer{position:fixed;inset:0;z-index:62;pointer-events:none;overflow:hidden}
   .rv-ring{position:absolute;width:18px;height:18px;margin:-9px;border:1px solid rgba(185,238,255,.78);border-radius:50%;box-shadow:0 0 20px rgba(99,217,255,.48);animation:rv-ring 1.55s ease-out forwards}
-  .rv-ring.r2{animation-delay:.16s}.rv-ring.r3{animation-delay:.32s}
+  .rv-ring.r2{animation-delay:.16s}.rv-ring.r3{animation-delay:.32s}.rv-ring.soft{opacity:.46;box-shadow:0 0 12px rgba(99,217,255,.22)}.rv-ring.decline{border-color:rgba(210,220,232,.38);box-shadow:0 0 10px rgba(180,195,210,.15)}
   .rv-seed{position:absolute;width:8px;height:8px;margin:-4px;border-radius:50%;background:rgba(239,250,255,.92);box-shadow:0 0 9px rgba(164,235,255,.95),0 0 30px rgba(83,198,255,.55);animation:rv-seed 1.7s ease-out forwards}
   .rv-petal{position:absolute;width:5px;height:13px;margin:-7px -2px;border-radius:70% 70% 55% 55%;transform-origin:2px 28px;background:rgba(238,245,255,.92);box-shadow:0 0 9px rgba(173,226,255,.64);animation:rv-petal 1.9s cubic-bezier(.18,.72,.17,1) forwards}
   .rv-bud{position:absolute;width:6px;height:10px;margin:-5px -3px;border-radius:70% 30% 70% 30%;background:rgba(151,241,202,.88);box-shadow:0 0 9px rgba(103,224,170,.58);animation:rv-bud 1.55s ease-out forwards}
@@ -57,6 +57,10 @@ async function ritual(ev){
   if(ev.type==='bloom'){const p=await waitPoint(ev.semanticId);ring(p);ring(p,'r2');petals(p,13);seedPulse(p);return}
   if(ev.type==='abandon'){const p=await waitPoint(ev.semanticId);ring(p);return}
   if(ev.type==='encourage'){const p=await waitPoint(ev.semanticId);ring(p);ring(p,'r2');return}
+  if(ev.type==='help_proposed'||ev.type==='suggest_proposed'){const p=await waitPoint(ev.semanticId);ring(p,'soft');return}
+  if(ev.type==='connect_proposed'){const [a,b]=await Promise.all([waitPoint(ev.aSemanticId),waitPoint(ev.bSemanticId)]);ring(a,'soft');ring(b,'soft');return}
+  if(ev.type==='proposal_response'){const ids=[ev.semanticId,ev.aSemanticId,ev.bSemanticId].filter(Boolean),cls=ev.decision==='accept'?'soft':'decline';for(const id of ids){const p=await waitPoint(id);ring(p,cls)}return}
+  if(ev.type==='proposal_cancelled'){const ids=[ev.semanticId,ev.aSemanticId,ev.bSemanticId].filter(Boolean);for(const id of ids){const p=await waitPoint(id);ring(p,'decline')}return}
   if(ev.type==='help'){const p=await waitPoint(ev.semanticId);buds(p,6);ring(p);return}
   if(ev.type==='connect'){const [a,b]=await Promise.all([waitPoint(ev.aSemanticId),waitPoint(ev.bSemanticId)]);path(a,b,'connect');ring(a);ring(b);return}
   if(ev.type==='reparent'){const p=await waitPoint(ev.semanticId);ring(p);seedPulse(p)}
