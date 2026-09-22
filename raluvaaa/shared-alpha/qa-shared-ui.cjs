@@ -112,9 +112,16 @@ async function assertNoOverflow(page,label){
   await openWish(B,wishA);
   const foreignDrawer=(await B.locator('#drawerBody').innerText());
   const foreignMeta=await B.evaluate(id=>window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id),wishA);
-  assert(foreignDrawer.includes('Autre humain'),'real foreign wish must be labelled as another human; drawer='+JSON.stringify(foreignDrawer)+' meta='+JSON.stringify(foreignMeta));
-  assert(!foreignDrawer.includes('Simulé'),'real foreign wish must never be labelled simulated; drawer='+JSON.stringify(foreignDrawer)+' meta='+JSON.stringify(foreignMeta));
+  assert(/autre humain/i.test(foreignDrawer),'real foreign wish must be labelled as another human; drawer='+JSON.stringify(foreignDrawer)+' meta='+JSON.stringify(foreignMeta));
+  assert(!/simulé/i.test(foreignDrawer),'real foreign wish must never be labelled simulated; drawer='+JSON.stringify(foreignDrawer)+' meta='+JSON.stringify(foreignMeta));
   assert.equal(await B.locator('[data-act="report"]').count(),1,'real foreign wish must expose Report');
+  const simId=await B.evaluate(()=>window.__RV26_SHARED__.semantic().find(x=>x.simulated&&x.kind==='create')?.semanticId||null);
+  assert(simId,'shared world should contain at least one simulated visual root during private alpha');
+  await openWish(B,simId);
+  const simText=await B.locator('#drawerBody').innerText();
+  assert(/simulé/i.test(simText),'simulated fallback must be explicitly labelled');
+  assert.equal(await B.locator('[data-act="encourage"],[data-act="help"],[data-act="suggest"],[data-act="connect"],[data-act="report"]').count(),0,'simulated wishes must be read-only in Shared Alpha');
+  await openWish(B,wishA);
   await B.click('[data-act="report"]');
   await B.fill('#reportDetails','QA report flow');
   await B.click('#confirm');
