@@ -23,10 +23,10 @@ async function waitSound(page,name,after){
   await page.waitForFunction(({name,after})=>(window.__RALUVAAA_ACTION_AUDIO__?.history||[]).some(x=>x.name===name&&x.at>=after),{name,after},{timeout:5000});
 }
 async function assertNoOverflow(page,label){
-  const m=await page.evaluate(()=>({iw:innerWidth,sw:document.documentElement.scrollWidth,bw:document.body.scrollWidth,drawer:document.getElementById('drawer')?.getBoundingClientRect()}));
+  const m=await page.evaluate(()=>({iw:innerWidth,sw:document.documentElement.scrollWidth,bw:document.body.scrollWidth,drawer:document.getElementById('drawer')?.getBoundingClientRect(),drawerHidden:document.getElementById('drawer')?.classList.contains('hidden')}));
   assert(m.sw<=m.iw+1,label+' document overflow');
   assert(m.bw<=m.iw+1,label+' body overflow');
-  if(m.drawer&&!document.getElementById('drawer').classList.contains('hidden'))assert(m.drawer.left>=-1&&m.drawer.right<=m.iw+1,label+' drawer outside viewport');
+  if(m.drawer&&!m.drawerHidden)assert(m.drawer.left>=-1&&m.drawer.right<=m.iw+1,label+' drawer outside viewport');
 }
 async function createWish(page,text,loc){
   const expected=String(text).trim();
