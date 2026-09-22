@@ -164,7 +164,16 @@ async function correctWish(env,cors,row,actorId,p){
 async function setLineageState(env,cors,row,actorId,targetState){
   if(row.kind!=='create')fail(409,'root_required','Whole-wish close/resume starts from the root wish');
   const rows=await env.DB.prepare("SELECT * FROM wishes WHERE lineage_id=? AND owner_actor_id=? AND state!='removed' ORDER BY created_at ASC").bind(row.lineage_id,actorId).all();
-  const all=rows.results||[],fromState=targetState==='abandoned'?'alive':'abandoned',type=targetState==='abandoned'?'abandon':'resume',targets=all.filter(w=>w.state===fromState);
+  const all=rows.results||[],fromState=targetState==='abandoned'?'alive':'abandoned',type=targetState==='abandoned'?'abandon':'resume';
+  let targets=all.filter(w=>w.state===fromState);
+  if(targetState==='alive'){
+    const eligible=[];
+    for(const w of targets){
+      const last=await env.DB.prepare("SELECT event_type,payload_json FROM wish_events WHERE wish_id=? AND event_type IN ('abandon','resume') ORDER BY created_at DESC LIMIT 1").bind(w.id).first();
+      if(last?.event_type==='abandon'&&parseJson(last.payload_json)?.scope==='lineage')eligible.push(w);
+    }
+    targets=eligible;
+  }
   if(!targets.length)fail(409,targetState==='abandoned'?'lineage_not_alive':'lineage_not_abandoned','No matching lineage states to change');
   const t=now(),stmts=[];
   for(const w of targets){
