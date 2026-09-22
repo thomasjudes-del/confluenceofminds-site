@@ -78,12 +78,40 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   await open('qa-a-s3');
   assert.equal(await page.locator('[data-act="evolve"]').count(),0);
   assert.equal(await page.locator('[data-act="split"]').count(),0);
+  const bloomMore=page.locator('details.more > summary');
+  if(await bloomMore.count())await bloomMore.click();
+  assert.equal(await page.locator('[data-act="connect"]').count(),0,'terminal bloomed wish must not expose CONNECT');
 
-  const abandonedId=await createWish('QA wish to abandon intentionally');
-  await open(abandonedId);
+  const lifecycleRoot=await createWish('QA wish lifecycle root');
+  await open(lifecycleRoot);
+  await clickAction('split');
+  await page.fill('#branchInput','Temporary branch one\nTemporary branch two');
+  await page.locator('#confirm').click();
+  await page.waitForFunction(id=>window.__RV26_TEST__.state().events.some(e=>e.type==='split'&&e.parentSemanticId===id),lifecycleRoot);
+  const lifecycleBranch=await page.evaluate(id=>window.__RV26_TEST__.state().events.find(e=>e.type==='split'&&e.parentSemanticId===id).children[0].semanticId,lifecycleRoot);
+
+  await open(lifecycleBranch);
   page.once('dialog',d=>d.accept());
   await clickAction('abandon');
-  await page.waitForFunction(id=>window.__RV26_TEST__.state().events.some(e=>e.type==='abandon'&&e.semanticId===id),abandonedId);
+  await page.waitForFunction(id=>window.__RV26_TEST__.state().events.some(e=>e.type==='abandon'&&e.semanticId===id),lifecycleBranch);
+  await open(lifecycleBranch);
+  assert(await page.locator('[data-act="resume"]').isVisible(),'abandoned branch should expose Resume');
+  const abandonedMore=page.locator('details.more > summary');
+  if(await abandonedMore.count())await abandonedMore.click();
+  assert.equal(await page.locator('[data-act="connect"]').count(),0,'abandoned branch must not expose CONNECT');
+  page.once('dialog',d=>d.accept());
+  await clickAction('resume');
+  await page.waitForFunction(id=>window.__RV26_TEST__.state().events.some(e=>e.type==='resume'&&e.semanticId===id),lifecycleBranch);
+
+  await open(lifecycleRoot);
+  page.once('dialog',d=>d.accept());
+  await clickAction('close_lineage');
+  await page.waitForFunction(id=>window.__RV26_TEST__.state().events.some(e=>e.type==='close_lineage'&&e.semanticId===id),lifecycleRoot);
+  await open(lifecycleRoot);
+  assert(await page.locator('[data-act="resume_lineage"]').isVisible(),'closed root should expose Resume wish');
+  page.once('dialog',d=>d.accept());
+  await clickAction('resume_lineage');
+  await page.waitForFunction(id=>window.__RV26_TEST__.state().events.some(e=>e.type==='resume_lineage'&&e.semanticId===id),lifecycleRoot);
 
   const mistakeId=await createWish('QA accidental wish to remove');
   await open(mistakeId);
