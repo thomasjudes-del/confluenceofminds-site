@@ -16,6 +16,11 @@ async function openWish(page,id){
   await page.evaluate(id=>window.__RV26_SOLO__.open(id),id);
   await page.waitForSelector('#drawer:not(.hidden) .wish',{timeout:5000});
 }
+async function openMore(page){
+  const d=page.locator('details.more');if(!await d.count())return false;
+  if(!await d.evaluate(el=>el.open))await d.locator('summary').click();
+  return true;
+}
 async function idByText(page,text){
   return page.evaluate(text=>window.__RV26_SOLO__.semantic().find(x=>x.text===text)?.semanticId||null,text);
 }
@@ -97,17 +102,17 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('#myWorldBtn');
   await page.click('#drawerBody [data-open="'+root+'"]');
   assert((await page.locator('#drawerBody .wish').innerText()).includes('apprendre à naviguer'));
-  await page.locator('details.more summary').click();
+  await openMore(page);
   assert.equal(await page.locator('[data-act="connect"]').count(),0,'solo candidate must not expose CONNECT on own wishes');
 
   // CORRECT cancel then confirm. This is not an evolution.
-  await page.locator('details.more summary').click();
+  await openMore(page);
   await page.click('[data-act="correct"]');
   await page.fill('#correctText','Texte temporaire');
   await page.click('#cancel');
   assert.equal((await semantic(page)).find(x=>x.semanticId===root).text,rootText,'cancelled correction must not change wish');
   await openWish(page,root);
-  await page.locator('details.more summary').click();
+  await openMore(page);
   await page.click('[data-act="correct"]');
   rootText='Je veux apprendre à bien naviguer pour traverser une baie.';
   await page.fill('#correctText',rootText);
@@ -162,7 +167,7 @@ async function clickConfirmDialog(page,selector,accept){
 
   // REATTACH cancel then confirm.
   await openWish(page,b1);
-  await page.locator('details.more summary').click();
+  await openMore(page);
   await page.click('[data-act="reattach"]');
   const opts=await page.locator('#parentSelect option').evaluateAll(os=>os.map(o=>o.value));
   assert(!opts.includes(b1),'reattach cannot target itself');
@@ -170,7 +175,7 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('#cancel');
   assert.equal((await semantic(page)).find(x=>x.semanticId===b1).parentSemanticId,evolved,'cancelled reattach must preserve parent');
   await openWish(page,b1);
-  await page.locator('details.more summary').click();
+  await openMore(page);
   await page.click('[data-act="reattach"]');
   await page.selectOption('#parentSelect',b2);
   t=Date.now();await page.click('#confirm');
@@ -183,19 +188,19 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('[data-act="bloom"]');
   assert((await page.locator('#toast').innerText()).includes('branches actives'),'root bloom must be blocked while descendants are active');
   assert.equal((await semantic(page)).find(x=>x.semanticId===root).state,'alive');
-  await openWish(page,b2);await page.locator('details.more summary').click();
+  await openWish(page,b2);await openMore(page);
   await page.click('[data-act="abandon"]');
   assert((await page.locator('#toast').innerText()).includes('branches actives'),'branch abandon must be blocked while its descendant is active');
   assert.equal((await semantic(page)).find(x=>x.semanticId===b2).state,'alive');
 
   // ABANDON cancel then confirm, then RESUME.
   await openWish(page,b3);
-  await page.locator('details.more summary').click();
+  await openMore(page);
   const abandonSoundBefore=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='abandon').length);
   await clickConfirmDialog(page,'[data-act="abandon"]',false);
   assert.equal((await semantic(page)).find(x=>x.semanticId===b3).state,'alive','dismissed abandon must preserve state');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='abandon').length),abandonSoundBefore,'dismissed abandon must be silent');
-  await openWish(page,b3);await page.locator('details.more summary').click();
+  await openWish(page,b3);await openMore(page);
   t=Date.now();await clickConfirmDialog(page,'[data-act="abandon"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.state==='abandoned',b3,{timeout:8000});
   await waitSound(page,'abandon',t);
@@ -203,7 +208,7 @@ async function clickConfirmDialog(page,selector,accept){
   await openWish(page,b3);
   assert.equal(await page.locator('[data-act="resume"]').count(),1,'abandoned branch must offer Resume');
   assert.equal(await page.locator('[data-act="evolve"],[data-act="split"],[data-act="branch"],[data-act="bloom"]').count(),0,'abandoned branch must not expose active actions');
-  await page.locator('details.more summary').click();
+  await openMore(page);
   assert.equal(await page.locator('[data-act="remove"]').count(),0,'abandoned trace must not expose mistake deletion');
   t=Date.now();await clickConfirmDialog(page,'[data-act="resume"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.state==='alive',b3,{timeout:8000});
@@ -223,20 +228,20 @@ async function clickConfirmDialog(page,selector,accept){
   await page.waitForSelector('#ritualLayer .rv-petal',{timeout:5000});
   await openWish(page,b1);
   assert.equal(await page.locator('[data-act="evolve"],[data-act="split"],[data-act="branch"],[data-act="bloom"],[data-act="abandon"],[data-act="resume"],[data-act="connect"]').count(),0,'bloomed branch must be terminal');
-  await page.locator('details.more summary').click();
+  await openMore(page);
   assert.equal(await page.locator('[data-act="remove"]').count(),0,'bloomed trace must not expose mistake deletion');
 
   // Remove mistake with descendants must be blocked.
-  await openWish(page,root);await page.locator('details.more summary').click();
+  await openWish(page,root);await openMore(page);
   await page.click('[data-act="remove"]');
   assert((await page.locator('#toast').innerText()).includes('déjà une suite'),'root with descendants must not be removable');
   assert((await semantic(page)).some(x=>x.semanticId===root),'blocked removal must preserve root');
 
   // CLOSE WHOLE WISH cancel then confirm, then RESUME WHOLE WISH.
-  await openWish(page,root);await page.locator('details.more summary').click();
+  await openWish(page,root);await openMore(page);
   await clickConfirmDialog(page,'[data-act="close_lineage"]',false);
   assert.equal((await semantic(page)).find(x=>x.semanticId===root).state,'alive');
-  await openWish(page,root);await page.locator('details.more summary').click();
+  await openWish(page,root);await openMore(page);
   t=Date.now();await clickConfirmDialog(page,'[data-act="close_lineage"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().filter(x=>x.lineageId===window.__RV26_SOLO__.semantic().find(y=>y.semanticId===id).lineageId&&x.owner&&x.state==='alive').length===0,root,{timeout:8000});
   await waitSound(page,'close_lineage',t);
@@ -250,7 +255,7 @@ async function clickConfirmDialog(page,selector,accept){
   assert.equal((await semantic(page)).find(x=>x.semanticId===b1).state,'bloom','whole-wish resume must not reopen a bloomed branch');
 
   // SHARE produces a deep link and sound; deep link reopens exact wish after reload.
-  await openWish(page,root);await page.locator('details.more summary').click();
+  await openWish(page,root);await openMore(page);
   t=Date.now();await page.click('[data-act="share"]');await waitSound(page,'share',t);
   const copied=await page.evaluate(()=>navigator.clipboard.readText());
   assert(copied.includes('#wish='+encodeURIComponent(root)),'share must copy deep link');
@@ -267,7 +272,7 @@ async function clickConfirmDialog(page,selector,accept){
 
   // Untouched accidental wish can be removed, with sound and visual erasure.
   const accidental=await createWish(page,'Wish créé par erreur','');
-  await openWish(page,accidental);await page.locator('details.more summary').click();
+  await openWish(page,accidental);await openMore(page);
   t=Date.now();await clickConfirmDialog(page,'[data-act="remove"]',true);
   await waitSound(page,'remove',t);
   await page.waitForSelector('#ritualLayer .rv-collapse',{timeout:5000});
