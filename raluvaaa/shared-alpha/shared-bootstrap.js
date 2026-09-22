@@ -36,11 +36,11 @@ function buildState(world,me,inbox,actorId){
   for(const w of wishes){
     const actor=ownerFor(w,actorId);
     if(w.kind==='create'){
-      events.push({type:'create',actorId:actor,semanticId:w.id,lineageId:w.lineageId,text:w.text,loc:w.locationText||'Somewhere',seed:seed(w.lineageId),at:w.createdAt});
+      events.push({type:'create',actorId:actor,semanticId:w.id,lineageId:w.lineageId,text:w.text,loc:w.locationText||'',seed:seed(w.lineageId),at:w.createdAt});
     }else if(w.kind==='evolve'){
-      events.push({type:'evolve',actorId:actor,semanticId:w.id,lineageId:w.lineageId,parentSemanticId:w.parentWishId,text:w.text,loc:w.locationText||'Somewhere',seed:seed(w.id),at:w.createdAt});
+      events.push({type:'evolve',actorId:actor,semanticId:w.id,lineageId:w.lineageId,parentSemanticId:w.parentWishId,text:w.text,loc:w.locationText||'',seed:seed(w.id),at:w.createdAt});
     }else if(w.kind==='split'){
-      events.push({type:'branch_add',actorId:actor,lineageId:w.lineageId,parentSemanticId:w.parentWishId,children:[{semanticId:w.id,text:w.text,loc:w.locationText||'Somewhere',seed:seed(w.id)}],at:w.createdAt});
+      events.push({type:'branch_add',actorId:actor,lineageId:w.lineageId,parentSemanticId:w.parentWishId,children:[{semanticId:w.id,text:w.text,loc:w.locationText||'',seed:seed(w.id)}],at:w.createdAt});
     }
   }
   const mineEnc=new Set(me.encouragedWishIds||[]);
