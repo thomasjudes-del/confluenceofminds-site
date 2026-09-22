@@ -22,6 +22,14 @@ assert.equal(new Set([A.actorId,B.actorId,C.actorId,ISO.actorId]).size,4);
 
 await rejectsCode(()=>A.createWish({text:'Email me at test@example.com',locationText:'Nantes'}),'contact_or_url');
 
+const noLoc=await A.createWish({text:'I want to learn one new constellation.'});
+assert.equal((await A.world()).wishes.find(w=>w.id===noLoc.wishId)?.locationText,null,'omitted location must remain absent');
+const corrected=await A.wishEvent(noLoc.wishId,{type:'correct',text:'I want to learn two new constellations.',locationText:'Rennes, France'});
+assert.equal(corrected.text,'I want to learn two new constellations.');
+assert.equal(corrected.locationText,'Rennes, France');
+await rejectsCode(()=>A.wishEvent(noLoc.wishId,{type:'correct',text:'I want to learn two new constellations.',locationText:'Rennes, France'}),'nothing_to_correct');
+await rejectsCode(()=>A.wishEvent(noLoc.wishId,{type:'correct',text:'Reach me at edit@example.com',locationText:'Rennes, France'}),'contact_or_url');
+
 const root=await A.createWish({text:'I want to learn coastal sailing.',locationText:'Nantes, France'});
 assert((await B.world()).wishes.some(w=>w.id===root.wishId));
 assert(!(await ISO.world()).wishes.some(w=>w.id===root.wishId));
