@@ -3,7 +3,7 @@
 
 const STORE=window.RALUVAAA_STORE_KEY||'raluvaaaManualMvpV26';
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let ctx=null,master=null,lastAt=0;
+let ctx=null,master=null,lastAt=0;const history=[];
 
 const motifs={
   create:[[0,523,.46,.010],[.09,659,.58,.008]],
@@ -57,6 +57,7 @@ function tone(at,freq,dur,gain,type='sine'){
 function play(name){
   if(!audioEnabled())return false;
   const seq=motifs[name];if(!seq)return false;
+  history.push({name,at:Date.now()});if(history.length>100)history.shift();
   const c=ensure();if(!c)return false;
   const now=c.currentTime;
   if(now-lastAt<.045)return false;
@@ -88,5 +89,5 @@ document.addEventListener('pointerdown',()=>ensure(),{capture:true,once:true});
 document.addEventListener('keydown',()=>ensure(),{capture:true,once:true});
 window.addEventListener('raluvaaa-share',()=>play('share'));
 window.addEventListener('raluvaaa-remove',()=>play('remove'));
-window.__RALUVAAA_ACTION_AUDIO__={play,motifs,get context(){return ctx},get enabled(){return audioEnabled()},reduceMotion};
+window.__RALUVAAA_ACTION_AUDIO__={play,motifs,history,get context(){return ctx},get enabled(){return audioEnabled()},reduceMotion};
 })();
