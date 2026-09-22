@@ -2,7 +2,7 @@
 'use strict';
 
 const STORE=window.RALUVAAA_STORE_KEY||'raluvaaaManualMvpV26';
-const POLICY='raluvaaaEntrustedV26PolicyV2';
+const POLICY=window.RALUVAAA_SOLO?'raluvaaaEntrustedSoloV1':'raluvaaaEntrustedV26PolicyV2';
 const params=new URLSearchParams(location.search);
 const HOUR=3600000,MIN=60000;
 const bands=[
