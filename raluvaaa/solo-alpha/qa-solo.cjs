@@ -29,15 +29,16 @@ async function assertNoOverflow(page,label){
   if(m.drawer&&!document.getElementById('drawer').classList.contains('hidden'))assert(m.drawer.left>=-1&&m.drawer.right<=m.iw+1,label+' drawer outside viewport');
 }
 async function createWish(page,text,loc){
+  const expected=String(text).trim();
   await page.click('#createBtn');
   await page.fill('#wishInput',text);
   await page.fill('#locInput',loc||'');
   const t=Date.now();
   await page.click('#confirm');
-  await page.waitForFunction(text=>window.__RV26_SOLO__.semantic().some(x=>x.text===text),text,{timeout:10000});
+  await page.waitForFunction(text=>window.__RV26_SOLO__.semantic().some(x=>x.text===text),expected,{timeout:10000});
   await waitSound(page,'create',t);
   await page.waitForSelector('#ritualLayer .rv-seed',{timeout:5000});
-  return await idByText(page,text);
+  return await idByText(page,expected);
 }
 async function clickConfirmDialog(page,selector,accept){
   page.once('dialog',d=>accept?d.accept():d.dismiss());
