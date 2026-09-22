@@ -103,7 +103,7 @@ async function syncEvent(ev){
     }else if((ev.type==='split'||ev.type==='branch_add')&&!ev.proposalId){
       out=await client.wishEvent(idOf(ev.parentSemanticId),{type:ev.type==='split'?'split':'add_branch',children:(ev.children||[]).map(c=>c.text)});
       (ev.children||[]).forEach((c,i)=>{if(out.wishIds?.[i])maps.wish.set(c.semanticId,out.wishIds[i])});
-    }else if(ev.type==='bloom'||ev.type==='abandon'||ev.type==='resume'){
+    }else if(ev.type==='bloom'||ev.type==='abandon'||ev.type==='resume'||ev.type==='close_lineage'||ev.type==='resume_lineage'){
       await client.wishEvent(idOf(ev.semanticId),{type:ev.type});
     }else if(ev.type==='correct'){
       await client.wishEvent(idOf(ev.semanticId),{type:'correct',text:ev.text,locationText:ev.loc||''});
