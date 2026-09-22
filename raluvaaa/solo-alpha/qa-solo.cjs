@@ -255,7 +255,7 @@ async function clickConfirmDialog(page,selector,accept){
 
   // Final persistence and no runtime errors.
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__RV26_SOLO__&&window.__RV26_SOLO__.semantic().some(x=>x.semanticId===arguments[0]),root,{timeout:20000}).catch(()=>{});
+  await page.waitForFunction(id=>window.__RV26_SOLO__&&window.__RV26_SOLO__.semantic().some(x=>x.semanticId===id),root,{timeout:20000});
   assert.deepEqual(errors,[],errors.join('\n'));
   console.log('RALUVAAA Solo RC full wisher QA passed');
   await browser.close();
