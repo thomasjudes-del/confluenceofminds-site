@@ -84,7 +84,7 @@ async function fetchState(){
 async function refresh(force=false){
   if(mutating)return;
   const next=await fetchState(),fingerprint=fp(next);
-  if(!force&&fingerprint===lastFingerprint)return;
+  if(fingerprint===lastFingerprint)return;
   lastFingerprint=fingerprint;
   if(window.__RV26_SHARED__)window.__RV26_SHARED__.replace(next);
   else localStorage.setItem(STORE,JSON.stringify(next));
