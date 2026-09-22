@@ -38,6 +38,21 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   await page.locator('[data-lang="fr"]').click();
 
   await open('qa-a-e1');
+  const moreForCopy=page.locator('details.more > summary');if(await moreForCopy.count())await moreForCopy.click();
+  assert.equal((await page.locator('[data-act="correct"]').innerText()).trim(),'CORRIGER','French correction action must be human copy, not an internal key');
+  await page.locator('[data-act="correct"]').click();
+  assert.equal((await page.locator('#overlay h3').innerText()).trim(),'Corriger ce wish');
+  await page.locator('#cancel').click();
+  await page.locator('[data-lang="en"]').click();
+  await open('qa-a-e1');
+  const moreForCopyEn=page.locator('details.more > summary');if(await moreForCopyEn.count())await moreForCopyEn.click();
+  assert.equal((await page.locator('[data-act="correct"]').innerText()).trim(),'CORRECT');
+  await page.locator('[data-act="correct"]').click();
+  assert.equal((await page.locator('#overlay h3').innerText()).trim(),'Correct this wish');
+  await page.locator('#cancel').click();
+  await page.locator('[data-lang="fr"]').click();
+
+  await open('qa-a-e1');
   const before=await brightCount();
   await clickAction('focus');
   await page.waitForFunction(()=>document.body.dataset.focusLineage==='qa-a-lineage');
