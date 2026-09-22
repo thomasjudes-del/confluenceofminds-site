@@ -246,8 +246,11 @@ async function assertNoOverflow(page,label){
   await connectButton.click();
   await B.waitForFunction(()=>!document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:3000});
   assert(await B.locator('#modeBar').isVisible(),'CONNECT selection mode should be visible');
-  await B.click('#modeClose');
+  await B.evaluate(()=>document.getElementById('modeClose')?.click());
   assert(await B.locator('#modeBar').isHidden(),'CONNECT mode close must fully cancel selection');
+  await B.evaluate(id=>window.__RV26_SHARED__.select(id),wishA);
+  await B.waitForSelector('#drawer:not(.hidden) .wish',{timeout:5000});
+  assert.equal(await B.locator('#overlay #confirm').count(),0,'cancelled CONNECT mode must not remain armed');
 
   await openWish(B,wishB);
   await B.locator('details.more summary').click();
