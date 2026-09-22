@@ -168,12 +168,14 @@ await B.encourage(protectedWish.wishId);
 await rejects(()=>A.wishEvent(protectedWish.wishId,{type:'remove_mistake'}),'has_external_activity');
 
 // Notifications read/unread.
+const noteProbe=await C.proposeHelp(wa2.wishId,'I can share a seed-starting checklist.');
 inboxA=await A.inbox();
-const unread=inboxA.notifications.find(n=>!n.isRead);
-assert(unread,'expected unread notification');
+const unread=inboxA.notifications.find(n=>n.objectId===noteProbe.proposalId&&!n.isRead);
+assert(unread,'expected unread notification for fresh pending proposal');
 await A.markRead(unread.id);
 inboxA=await A.inbox();
 assert.equal(inboxA.notifications.find(n=>n.id===unread.id).isRead,true,'read state persists');
+await C.cancelProposal(noteProbe.proposalId);
 
 // Report and room isolation.
 const report=await C.report({wishId:wa.wishId,reason:'other',details:'QA report'});
