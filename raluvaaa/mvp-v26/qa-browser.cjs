@@ -23,7 +23,7 @@ const BASE='http://127.0.0.1:4173/raluvaaa/mvp-v26/';
   async function open(id){await page.evaluate(id=>window.__RV26_TEST__.open(id),id);await page.waitForSelector('#drawer:not(.hidden)');await page.waitForTimeout(120)}
   async function clickAction(name){const target=page.locator(`[data-act="${name}"]`).first();if(!(await target.isVisible())){const summary=page.locator('details.more > summary');assert(await summary.count(),`missing More menu for ${name}`);await summary.click()}await target.click()}
   async function brightCount(){return page.evaluate(()=>{const f=document.getElementById('engine'),c=f.contentDocument.querySelector('canvas'),x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data;let n=0;for(let i=0;i<d.length;i+=32){if(d[i]+d[i+1]+d[i+2]>90)n++}return n})}
-  async function createWish(text){await page.locator('#createBtn').click();await page.fill('#wishInput',text);await page.locator('#confirm').click();await page.waitForFunction(text=>window.__RV26_TEST__.state().events.some(e=>e.type==='create'&&e.text===text),text);return page.evaluate(text=>window.__RV26_TEST__.state().events.find(e=>e.type==='create'&&e.text===text).semanticId,text)}
+  async function createWish(text){await page.locator('#createBtn').click();await page.fill('#wishInput',text);await page.fill('#locInput','Nantes, France');await page.locator('#confirm').click();await page.waitForFunction(text=>window.__RV26_TEST__.state().events.some(e=>e.type==='create'&&e.text===text),text);return page.evaluate(text=>window.__RV26_TEST__.state().events.find(e=>e.type==='create'&&e.text===text).semanticId,text)}
 
   await go('A');
   assert(await page.locator('#rail').isVisible());
