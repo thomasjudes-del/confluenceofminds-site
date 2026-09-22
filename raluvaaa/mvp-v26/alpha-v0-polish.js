@@ -56,7 +56,9 @@ async function ritual(ev){
   if(ev.type==='split'||ev.type==='branch_add'){const a=await waitPoint(ev.parentSemanticId);for(const child of ev.children||[]){const b=await waitPoint(child.semanticId);path(a,b);ring(b);seedPulse(b)}return}
   if(ev.type==='bloom'){const p=await waitPoint(ev.semanticId);ring(p);ring(p,'r2');petals(p,13);seedPulse(p);return}
   if(ev.type==='abandon'){const p=await waitPoint(ev.semanticId);ring(p);return}
+  if(ev.type==='close_lineage'){for(const id of ev.semanticIds||[ev.semanticId]){const p=await waitPoint(id);ring(p,'decline')}return}
   if(ev.type==='resume'){const p=await waitPoint(ev.semanticId);ring(p);ring(p,'r2');buds(p,4);seedPulse(p);return}
+  if(ev.type==='resume_lineage'){for(const id of ev.semanticIds||[ev.semanticId]){const p=await waitPoint(id);ring(p,'soft');buds(p,3)}return}
   if(ev.type==='correct'){const p=await waitPoint(ev.semanticId);ring(p,'soft');return}
   if(ev.type==='encourage'){const p=await waitPoint(ev.semanticId);ring(p);ring(p,'r2');return}
   if(ev.type==='help_proposed'||ev.type==='suggest_proposed'){const p=await waitPoint(ev.semanticId);ring(p,'soft');return}
