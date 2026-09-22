@@ -34,6 +34,23 @@ const H=3600000;
   await page.waitForFunction(prev=>{const el=document.querySelector('#drawerBody [data-entrusted-band="short"] .m');return el&&el.textContent.trim()!==prev},c1,{timeout:3500});
   const c2=(await page.locator('#drawerBody [data-entrusted-band="short"] .m').innerText()).trim();
   assert.notEqual(c1,c2,'entrusted countdown should visibly tick');
+
+  // Expire only the short slot: it must rotate to a different wish while the other two remain stable.
+  const entrustedBefore=await page.evaluate(()=>({
+    policy:JSON.parse(localStorage.getItem('raluvaaaEntrustedV26PolicyV2')),
+    state:JSON.parse(localStorage.getItem('raluvaaaManualMvpV26'))
+  }));
+  await page.evaluate(()=>{
+    const p=JSON.parse(localStorage.getItem('raluvaaaEntrustedV26PolicyV2'));p.entries[0].expires=Date.now()-1000;localStorage.setItem('raluvaaaEntrustedV26PolicyV2',JSON.stringify(p));
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.__RV26_TEST__&&window.__RV26_TEST__.semantic().length>100,null,{timeout:30000});
+  await page.waitForFunction(prev=>{const p=JSON.parse(localStorage.getItem('raluvaaaEntrustedV26PolicyV2')||'null');return p?.entries?.length===3&&p.entries[0].semanticId!==prev},entrustedBefore.policy.entries[0].semanticId,{timeout:15000});
+  const entrustedAfter=await page.evaluate(()=>JSON.parse(localStorage.getItem('raluvaaaEntrustedV26PolicyV2')));
+  assert.notEqual(entrustedAfter.entries[0].semanticId,entrustedBefore.policy.entries[0].semanticId,'expired entrusted slot must not immediately repeat the same wish');
+  assert.equal(entrustedAfter.entries[1].semanticId,entrustedBefore.policy.entries[1].semanticId,'unexpired medium entrusted slot must remain stable');
+  assert.equal(entrustedAfter.entries[2].semanticId,entrustedBefore.policy.entries[2].semanticId,'unexpired long entrusted slot must remain stable');
+  assert.equal(await page.locator('#drawerBody button:has-text("Save")').count(),0,'entrusted mechanic must not expose Save');
   await page.locator('#drawerClose').click();
   await page.locator('#myWorldBtn').click();
   await page.waitForTimeout(60);
