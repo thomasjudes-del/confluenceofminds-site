@@ -94,6 +94,7 @@ function friendlyError(err){
   const lang=window.__RV26_SHARED__?.state?.().lang||((navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr');
   const fr={
     invalid_wish:'Le wish doit contenir entre 3 et 280 caractères.',
+    location_required:'Le lieu est nécessaire pour publier ce wish.',
     contact_or_url:'Les liens et coordonnées personnelles ne peuvent pas être publiés dans un wish.',
     outside_alpha_scope:'Ce sujet n’est pas ouvert dans cette première version de RALUVAAA.',
     owner_required:'Cette action appartient au wisher.',
