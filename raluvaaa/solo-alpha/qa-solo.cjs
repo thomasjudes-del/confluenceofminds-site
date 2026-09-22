@@ -203,6 +203,8 @@ async function clickConfirmDialog(page,selector,accept){
   await openWish(page,b3);
   assert.equal(await page.locator('[data-act="resume"]').count(),1,'abandoned branch must offer Resume');
   assert.equal(await page.locator('[data-act="evolve"],[data-act="split"],[data-act="branch"],[data-act="bloom"]').count(),0,'abandoned branch must not expose active actions');
+  await page.locator('details.more summary').click();
+  assert.equal(await page.locator('[data-act="remove"]').count(),0,'abandoned trace must not expose mistake deletion');
   t=Date.now();await clickConfirmDialog(page,'[data-act="resume"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.state==='alive',b3,{timeout:8000});
   await waitSound(page,'resume',t);
@@ -221,6 +223,8 @@ async function clickConfirmDialog(page,selector,accept){
   await page.waitForSelector('#ritualLayer .rv-petal',{timeout:5000});
   await openWish(page,b1);
   assert.equal(await page.locator('[data-act="evolve"],[data-act="split"],[data-act="branch"],[data-act="bloom"],[data-act="abandon"],[data-act="resume"],[data-act="connect"]').count(),0,'bloomed branch must be terminal');
+  await page.locator('details.more summary').click();
+  assert.equal(await page.locator('[data-act="remove"]').count(),0,'bloomed trace must not expose mistake deletion');
 
   // Remove mistake with descendants must be blocked.
   await openWish(page,root);await page.locator('details.more summary').click();
