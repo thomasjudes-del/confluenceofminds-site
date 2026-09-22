@@ -27,11 +27,11 @@ jobs:
           node --check raluvaaa/shared-alpha/shared-bootstrap.js
           node --check raluvaaa/shared-alpha/qa-shared-ui.cjs
           node --check raluvaaa/mvp-v26/app.js
-          node --check raluvaaa/mvp-v26/alpha-sound.js
+          node --check raluvaaa/mvp-v26/action-audio.js
           node --check raluvaaa/alpha-api/worker.mjs
           grep -q "RALUVAAA_SHARED" raluvaaa/shared-alpha/index.html
           grep -q "shared-bootstrap.js" raluvaaa/shared-alpha/index.html
-          grep -q "alpha-sound.js" raluvaaa/shared-alpha/index.html
+          grep -q "action-audio.js" raluvaaa/shared-alpha/index.html
       - name: Install browser and Worker QA dependencies
         run: |
           npm install --no-save playwright@1.55.0 wrangler@4 >/dev/null 2>&1
