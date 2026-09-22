@@ -4,7 +4,7 @@ const STORE=window.RALUVAAA_STORE_KEY||'raluvaaaManualMvpV26';
 const params=new URLSearchParams(location.search);
 const frame=document.getElementById('engine');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const structuralTypes=new Set(['create','evolve','split','branch_add','bloom','abandon']);
+const structuralTypes=new Set(['create','evolve','split','branch_add','bloom','abandon','close_lineage','resume','resume_lineage','reparent']);
 
 function injectChrome(){
   document.title=window.RALUVAAA_SOLO?'RALUVAAA · Solo RC':'RALUVAAA · Alpha V0';
