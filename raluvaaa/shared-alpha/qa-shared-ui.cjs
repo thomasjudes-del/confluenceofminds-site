@@ -111,8 +111,9 @@ async function assertNoOverflow(page,label){
   // One encouragement per human, and persistence after Firefox reload.
   await openWish(B,wishA);
   const foreignDrawer=(await B.locator('#drawerBody').innerText());
-  assert(foreignDrawer.includes('Autre humain'),'real foreign wish must be labelled as another human');
-  assert(!foreignDrawer.includes('Simulé'),'real foreign wish must never be labelled simulated');
+  const foreignMeta=await B.evaluate(id=>window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id),wishA);
+  assert(foreignDrawer.includes('Autre humain'),'real foreign wish must be labelled as another human; drawer='+JSON.stringify(foreignDrawer)+' meta='+JSON.stringify(foreignMeta));
+  assert(!foreignDrawer.includes('Simulé'),'real foreign wish must never be labelled simulated; drawer='+JSON.stringify(foreignDrawer)+' meta='+JSON.stringify(foreignMeta));
   assert.equal(await B.locator('[data-act="report"]').count(),1,'real foreign wish must expose Report');
   await B.click('[data-act="report"]');
   await B.fill('#reportDetails','QA report flow');
