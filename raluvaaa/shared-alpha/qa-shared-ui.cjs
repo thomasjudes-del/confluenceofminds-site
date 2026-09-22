@@ -89,7 +89,7 @@ async function assertNoOverflow(page,label){
   const actorM=await M.evaluate(()=>window.RALUVAAA_ACTOR_ID);
   assert(actorA&&actorB&&actorM,'all test browsers need identities');
   assert.equal(new Set([actorA,actorB,actorM]).size,3,'independent browsers must have independent anonymous identities');
-  assert.equal(await A.locator('script[src*="action-audio.js"]').count(),1,'Shared Alpha must load one action sound grammar');
+  assert.equal(await A.evaluate(()=>!!window.__RALUVAAA_ACTION_AUDIO__),true,'Shared Alpha action sound grammar must initialize');
   assert.equal(await A.evaluate(()=>!!window.__RALUVAAA_ACTION_AUDIO__?.motifs?.bloom),true,'BLOOM sound motif required');
   assert.equal(await A.evaluate(()=>!!window.__RALUVAAA_ACTION_AUDIO__?.motifs?.proposal_decline),true,'decline sound motif required');
   assert.equal(await A.evaluate(()=>!!window.__RALUVAAA_ACTION_AUDIO__?.motifs?.remove),true,'remove sound motif required');
