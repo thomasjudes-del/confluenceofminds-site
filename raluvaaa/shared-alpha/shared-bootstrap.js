@@ -90,7 +90,67 @@ async function refresh(force=false){
   else localStorage.setItem(STORE,JSON.stringify(next));
 }
 function scheduleRefresh(ms=250){clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>refresh(true).catch(showError),ms)}
-function showError(err){console.error(err);status('Shared sync error: '+String(err?.message||err),true);setTimeout(()=>{if(window.__RALUVAAA_SHARED_READY__)hideStatus()},3200)}
+function friendlyError(err){
+  const lang=window.__RV26_SHARED__?.state?.().lang||((navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr');
+  const fr={
+    invalid_wish:'Le wish doit contenir entre 3 et 280 caractères.',
+    contact_or_url:'Les liens et coordonnées personnelles ne peuvent pas être publiés dans un wish.',
+    outside_alpha_scope:'Ce sujet n’est pas ouvert dans cette première version de RALUVAAA.',
+    owner_required:'Cette action appartient au wisher.',
+    wish_not_alive:'Ce wish n’est plus actif.',
+    same_text:'Le nouvel état doit réellement être différent.',
+    already_continued:'Cet état a déjà une continuation.',
+    need_two_branches:'Ajoutez au moins deux branches.',
+    need_branch:'Ajoutez au moins une branche.',
+    root_cannot_move:'Le wish racine ne peut pas être rattaché.',
+    different_lineage:'Une branche ne peut être rattachée qu’à sa propre lignée.',
+    cycle:'Ce rattachement créerait une boucle impossible.',
+    has_descendants:'Cette trace a des descendants. Retirez d’abord ses descendants ou laissez-la dans l’histoire.',
+    has_external_activity:'Cette trace a déjà reçu une interaction humaine et ne peut plus être effacée comme simple erreur.',
+    own_wish:'Cette action est destinée au wish d’un autre humain.',
+    already_encouraged:'Vous avez déjà encouragé ce wish.',
+    target_not_available:'Ce wish n’est plus disponible pour cette proposition.',
+    other_not_available:'L’autre wish n’est plus disponible.',
+    same_lineage:'Choisissez un wish d’une autre lignée.',
+    help_note_required:'Décrivez l’aide concrète que vous proposez.',
+    steps_required:'Proposez au moins une branche.',
+    duplicate_pending:'Une proposition similaire est déjà en attente.',
+    proposal_not_found:'Cette proposition n’existe plus.',
+    proposal_not_pending:'Cette proposition a déjà été traitée.',
+    consent_not_required:'Votre accord n’est pas requis pour cette proposition.',
+    already_decided:'Vous avez déjà répondu à cette proposition.'
+  };
+  const en={
+    invalid_wish:'A wish must contain between 3 and 280 characters.',
+    contact_or_url:'Links and personal contact details cannot be published in a wish.',
+    outside_alpha_scope:'This topic is not open in this first version of RALUVAAA.',
+    owner_required:'Only the wisher can do this.',
+    wish_not_alive:'This wish is no longer active.',
+    same_text:'The new state must actually be different.',
+    already_continued:'This state already has a continuation.',
+    need_two_branches:'Add at least two branches.',
+    need_branch:'Add at least one branch.',
+    root_cannot_move:'The root wish cannot be reattached.',
+    different_lineage:'A branch can only be reattached within its own lineage.',
+    cycle:'This reattachment would create an impossible loop.',
+    has_descendants:'This trace has descendants. Remove them first or keep the trace in its history.',
+    has_external_activity:'This trace already has human activity and can no longer be erased as a simple mistake.',
+    own_wish:'This action is for another human’s wish.',
+    already_encouraged:'You already encouraged this wish.',
+    target_not_available:'This wish is no longer available for the proposal.',
+    other_not_available:'The other wish is no longer available.',
+    same_lineage:'Choose a wish from another lineage.',
+    help_note_required:'Describe the concrete help you are offering.',
+    steps_required:'Suggest at least one branch.',
+    duplicate_pending:'A similar proposal is already pending.',
+    proposal_not_found:'This proposal no longer exists.',
+    proposal_not_pending:'This proposal has already been handled.',
+    consent_not_required:'Your consent is not required for this proposal.',
+    already_decided:'You already responded to this proposal.'
+  };
+  return (lang==='en'?en:fr)[err?.code]||String(err?.message||err||'Unexpected error');
+}
+function showError(err){console.error(err);status(friendlyError(err),true);setTimeout(()=>{if(window.__RALUVAAA_SHARED_READY__)hideStatus()},4200)}
 
 async function syncEvent(ev){
   mutating++;
@@ -171,6 +231,7 @@ async function boot(){
   await loadScript('../mvp-v26/ambient-audio.js?build=shared-alpha-20260921-1');
   await loadScript('../mvp-v26/action-audio.js?build=shared-alpha-20260922-1');
   window.__RALUVAAA_SHARED_READY__=true;
+  window.__RALUVAAA_SHARED_ERROR__=friendlyError;
   window.__RALUVAAA_SHARED_DEBUG__={client,room,refresh:()=>refresh(true),world:()=>lastWorld,me:()=>lastMe,inbox:()=>lastInbox,maps};
   hideStatus();
   setInterval(()=>{if(!document.hidden)refresh(false).catch(showError)},2500);
