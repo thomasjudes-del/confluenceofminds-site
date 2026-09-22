@@ -29,6 +29,12 @@ async function openWish(page,id){
   await page.evaluate(id=>window.__RV26_SHARED__.open(id),id);
   await page.waitForSelector('#drawer:not(.hidden) .wish',{timeout:5000});
 }
+async function openMore(page){
+  const d=page.locator('details.more');
+  if(!await d.count())return false;
+  if(!await d.evaluate(el=>el.open))await d.locator('summary').click();
+  return true;
+}
 async function createWish(page,text){
   await page.click('#createBtn');
   await page.fill('#wishInput',text);
@@ -131,7 +137,7 @@ async function assertNoOverflow(page,label){
   const typoText='QA wish with a typoo '+stamp;
   const correctionId=await createWish(A,typoText);
   await openWish(A,correctionId);
-  await A.locator('details.more summary').click();
+  await openMore(A);
   await A.click('[data-act="correct"]');
   const correctedText='QA wish with a corrected title '+stamp;
   await A.fill('#correctText',correctedText);
@@ -154,7 +160,7 @@ async function assertNoOverflow(page,label){
   assert(/simulé/i.test(simText),'simulated fallback must be explicitly labelled');
   assert.equal(await B.locator('[data-act="encourage"],[data-act="help"],[data-act="suggest"],[data-act="connect"],[data-act="report"]').count(),0,'simulated wishes must be read-only in Shared Alpha');
   await openWish(B,wishA);
-  await B.locator('details.more summary').click();
+  await openMore(B);
   await B.click('[data-act="report"]');
   await B.fill('#reportDetails','QA report flow');
   await B.click('#confirm');
@@ -237,7 +243,7 @@ async function assertNoOverflow(page,label){
   const connectDebug=await B.evaluate(id=>({meta:window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id),drawer:document.getElementById('drawerBody')?.innerText||'',html:document.getElementById('drawerBody')?.innerHTML||''}),wishB);
   const moreSummary=B.locator('details.more summary');
   assert(await moreSummary.count(),`own live wish must expose More before CONNECT: ${JSON.stringify(connectDebug)}`);
-  await moreSummary.click();
+  await openMore(B);
   const connectButton=B.locator('[data-act="connect"]');
   assert(await connectButton.count(),`own live wish must expose CONNECT: ${JSON.stringify(connectDebug)}`);
   const stableConnect=await connectButton.elementHandle();
@@ -253,7 +259,7 @@ async function assertNoOverflow(page,label){
   assert.equal(await B.locator('#overlay #confirm').count(),0,'cancelled CONNECT mode must not remain armed');
 
   await openWish(B,wishB);
-  await B.locator('details.more summary').click();
+  await openMore(B);
   assert(await B.locator('[data-act="connect"]').count(),'CONNECT must remain available on the live owned wish');
   await B.locator('[data-act="connect"]').click();
   await B.waitForFunction(()=>!document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:3000});
@@ -264,7 +270,7 @@ async function assertNoOverflow(page,label){
   assert.equal((await B.locator('#overlay').innerText()).trim(),'','CONNECT cancel must clear modal');
 
   await openWish(B,wishB);
-  await B.locator('details.more summary').click();
+  await openMore(B);
   assert(await B.locator('[data-act="connect"]').count(),'CONNECT must remain available on the live owned wish');
   await B.locator('[data-act="connect"]').click();
   await B.waitForFunction(()=>!document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:3000});
@@ -297,7 +303,7 @@ async function assertNoOverflow(page,label){
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='bloomed',branches[0].id,{timeout:10000});
 
   await refresh(A);await openWish(A,branches[1].id);
-  await A.locator('details.more summary').click();
+  await openMore(A);
   A.once('dialog',d=>d.accept());
   await A.click('[data-act="abandon"]');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='abandoned',branches[1].id,{timeout:10000});
@@ -309,17 +315,17 @@ async function assertNoOverflow(page,label){
 
   // Terminal-state UI must not offer impossible social actions.
   await refresh(A);await openWish(A,branches[0].id);
-  const bloomMore=A.locator('details.more summary');if(await bloomMore.count())await bloomMore.click();
+  await openMore(A);
   assert.equal(await A.locator('[data-act="connect"]').count(),0,'bloomed wish must not expose CONNECT');
   await refresh(B);await openWish(B,branches[0].id);
-  const foreignBloomMore=B.locator('details.more summary');if(await foreignBloomMore.count())await foreignBloomMore.click();
+  await openMore(B);
   assert.equal(await B.locator('[data-act="encourage"],[data-act="help"],[data-act="suggest"],[data-act="connect"]').count(),0,'helper must not receive active actions on a bloomed wish');
 
   // Whole-wish close/resume semantics through the real UI.
   const wholeText='QA whole wish '+stamp;
   const wholeRoot=await createWish(A,wholeText);
   await refresh(A);await openWish(A,wholeRoot);
-  await A.locator('details.more summary').click();
+  await openMore(A);
   A.once('dialog',d=>d.accept());
   await A.click('[data-act="close_lineage"]');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='abandoned',wholeRoot,{timeout:10000});
@@ -332,7 +338,7 @@ async function assertNoOverflow(page,label){
   // Mistake removal through the UI must really remove an untouched wish.
   const mistake=await createWish(A,'QA accidental untouched wish '+stamp);
   await refresh(A);await openWish(A,mistake);
-  await A.locator('details.more summary').click();
+  await openMore(A);
   A.once('dialog',d=>d.accept());
   await A.click('[data-act="remove"]');
   await A.waitForFunction(id=>!window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.some(w=>w.id===id),mistake,{timeout:10000});
