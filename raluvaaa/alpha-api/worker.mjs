@@ -128,6 +128,7 @@ async function addWishEvent(request,env,cors,wishId){
   if(type==='split'||type==='add_branch')return split(env,cors,row,actorId,p,type);
   if(type==='bloom'||type==='abandon')return closeWish(env,cors,row,actorId,type);
   if(type==='resume')return resumeWish(env,cors,row,actorId);
+  if(type==='correct')return correctWish(env,cors,row,actorId,p);
   if(type==='reparent')return reparent(env,cors,row,actorId,p);
   if(type==='remove_mistake')return removeMistake(env,cors,row,actorId);
   fail(400,'invalid_event','Unsupported wish event');
@@ -147,6 +148,16 @@ async function split(env,cors,row,actorId,p,type){
 }
 async function closeWish(env,cors,row,actorId,type){
   assertAlive(row);const state=type==='bloom'?'bloomed':'abandoned',t=now();await env.DB.batch([env.DB.prepare('UPDATE wishes SET state=?,updated_at=? WHERE id=?').bind(state,t,row.id),env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id),env.DB.prepare('INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?,?,?,\'{}\',\'{}\',?)').bind(id('evt'),row.id,row.lineage_id,actorId,type,row.parent_wish_id,t)]);return json({wishId:row.id,state},200,cors);
+}
+async function correctWish(env,cors,row,actorId,p){
+  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION)||null;
+  if(text===row.text&&(loc||null)===(row.location_text||null))fail(409,'nothing_to_correct','Nothing changed');
+  const t=now(),before={text:row.text,locationText:row.location_text},after={text,locationText:loc};
+  await env.DB.batch([
+    env.DB.prepare('UPDATE wishes SET text=?,location_text=?,updated_at=? WHERE id=?').bind(text,loc,t,row.id),
+    env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'correct',?,?,?,?)").bind(id('evt'),row.id,row.lineage_id,actorId,row.parent_wish_id,JSON.stringify({before,after}),JSON.stringify({corrected:true}),t)
+  ]);
+  return json({wishId:row.id,text,locationText:loc},200,cors);
 }
 async function resumeWish(env,cors,row,actorId){
   if(row.state!=='abandoned')fail(409,'resume_only_abandoned','Only an abandoned wish can be resumed');
