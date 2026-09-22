@@ -19,6 +19,7 @@ function fresh(lang){if(SOLO)return{version:26,lang:lang||defaultLang,entrusted:
 {type:'evolve',actorId:'B',semanticId:'qa-b-e1',lineageId:'qa-b-lineage',parentSemanticId:'qa-b-root',text:'I will start with one small shared planting area.',loc:'Nantes, France'},
 {type:'split',actorId:'B',lineageId:'qa-b-lineage',parentSemanticId:'qa-b-e1',children:[{semanticId:'qa-b-s1',text:'Find three neighbours who want to join',loc:'Nantes, France'},{semanticId:'qa-b-s2',text:'Choose the first small plot',loc:'Nantes, France'},{semanticId:'qa-b-s3',text:'Plan the first planting day',loc:'Nantes, France'}]}
 ]}}
+if(SOLO&&params.get('fresh')==='1'){localStorage.removeItem(STORE);const u=new URL(location.href);u.searchParams.delete('fresh');history.replaceState(null,'',u.pathname+(u.searchParams.toString()?'?'+u.searchParams.toString():'')+u.hash)}
 function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||'null');if(x&&x.version===26&&Array.isArray(x.events))return x}catch{}return fresh(defaultLang)}
 let state=load(),semantic=[],byId=new Map(),engineReady=false,current=null,drawerKind=null,connectSource=null,focusLineageId=null,reconciling=false,hashOpenedId=null;
 function save(){localStorage.setItem(STORE,JSON.stringify(state))}
