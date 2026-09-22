@@ -14,7 +14,7 @@ let roots=[];
 let timer=null;
 let engineGuardInstalled=false;
 
-if(params.get('reset')==='1') localStorage.removeItem(POLICY);
+if(params.get('reset')==='1'||(window.RALUVAAA_SOLO&&params.get('fresh')==='1')) localStorage.removeItem(POLICY);
 
 function read(key){try{return JSON.parse(localStorage.getItem(key)||'null')}catch{return null}}
 function write(key,value){localStorage.setItem(key,JSON.stringify(value))}
