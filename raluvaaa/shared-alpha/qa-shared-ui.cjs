@@ -117,6 +117,19 @@ async function assertNoOverflow(page,label){
   await A.waitForSelector('#drawer:not(.hidden) .wish',{timeout:5000});
   assert((await A.locator('#drawerBody .wish').innerText()).includes(textA),'My wishes entry must open wish details');
 
+  // Correction is not semantic evolution: text/location change in place and propagate.
+  const typoText='QA wish with a typoo '+stamp;
+  const correctionId=await createWish(A,typoText);
+  await openWish(A,correctionId);
+  await A.locator('details.more summary').click();
+  await A.click('[data-act="correct"]');
+  const correctedText='QA wish with a corrected title '+stamp;
+  await A.fill('#correctText',correctedText);
+  await A.fill('#correctLoc','');
+  await A.click('#confirm');
+  await A.waitForFunction(([id,t])=>{const w=window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(x=>x.id===id);return w?.text===t&&w?.locationText===null},[correctionId,correctedText],{timeout:10000});
+  await B.waitForFunction(([id,t])=>window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id)?.text===t,[correctionId,correctedText],{timeout:10000});
+
   // One encouragement per human, and persistence after Firefox reload.
   await openWish(B,wishA);
   const foreignDrawer=(await B.locator('#drawerBody').innerText());
