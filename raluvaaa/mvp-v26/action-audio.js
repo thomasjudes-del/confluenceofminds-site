@@ -66,7 +66,7 @@ function play(name){
   return true;
 }
 function eventName(ev){
-  if(!ev)return null;
+  if(!ev||ev.quiet)return null;
   if(ev.type==='proposal_response')return ev.decision==='accept'?'proposal_accept':'proposal_decline';
   if(ev.type==='proposal_cancelled')return'proposal_cancel';
   if(ev.type==='remove_mistake')return'remove';
