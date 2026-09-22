@@ -72,10 +72,13 @@ async function verifyTurnstile(request,env,payload){
   const r=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',body:form});
   const result=await r.json();if(!result.success)fail(403,'turnstile_failed','Human verification failed');
 }
+function validateNoContact(text){
+  if(/https?:\/\/|www\.|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(text))fail(400,'contact_or_url','Links or contact details are not allowed here');
+  if(/(?:\+?\d[\s().-]*){8,}/.test(text))fail(400,'contact_or_url','Phone numbers are not allowed here');
+}
 function validatePublicText(text){
   if(text.length<3||text.length>MAX_WISH)fail(400,'invalid_wish','Wish must contain 3 to 280 characters');
-  if(/https?:\/\/|www\.|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(text))fail(400,'contact_or_url','Public wishes cannot contain links or contact details');
-  if(/(?:\+?\d[\s().-]*){8,}/.test(text))fail(400,'contact_or_url','Public wishes cannot contain phone numbers');
+  validateNoContact(text);
   const blocked=/(suicid|self[- ]?harm|kill myself|automutil|medical|diagnos|cancer|maladie|m[eé]dic|porn|explicit sex|sexe explicite|weapon|gun|firearm|bomb|arme|bombe|doxx|harass|harcel|hate crime|haine|crowdfund|donation|send money|argent|crypto)/i;
   if(blocked.test(text))fail(422,'outside_alpha_scope','This wish is outside the current alpha publication scope');
 }
@@ -162,7 +165,7 @@ async function createProposal(request,env,cors){
   const proposer=await actor(request,env,true),room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);const type=String(p.type||'');if(!['help','suggest_branch','connect'].includes(type))fail(400,'invalid_proposal','Unsupported proposal type');
   const target=await wishById(env,String(p.targetWishId||''));if(!target||target.room_key!==room||!target.is_public||target.state!=='alive')fail(404,'target_not_available','Target wish is not available');
   let other=null;if(type==='connect'){other=await wishById(env,String(p.otherWishId||''));if(!other||other.room_key!==room||!other.is_public||other.state!=='alive')fail(404,'other_not_available','Other wish is not available');if(other.lineage_id===target.lineage_id)fail(409,'same_lineage','Connection must link independent lineages')}
-  const privatePayload={};if(type==='help'){const note=cleanText(p.note,MAX_HELP);if(note.length<2)fail(400,'help_note_required','Describe the concrete help');privatePayload.note=note}if(type==='suggest_branch'){const steps=(Array.isArray(p.steps)?p.steps:[]).map(x=>cleanText(x,MAX_WISH)).filter(Boolean).slice(0,5);if(!steps.length)fail(400,'steps_required','Suggest at least one branch');steps.forEach(validatePublicText);privatePayload.steps=steps}
+  const privatePayload={};if(type==='help'){const note=cleanText(p.note,MAX_HELP);if(note.length<2)fail(400,'help_note_required','Describe the concrete help');validateNoContact(note);privatePayload.note=note}if(type==='suggest_branch'){const steps=(Array.isArray(p.steps)?p.steps:[]).map(x=>cleanText(x,MAX_WISH)).filter(Boolean).slice(0,5);if(!steps.length)fail(400,'steps_required','Suggest at least one branch');steps.forEach(validatePublicText);privatePayload.steps=steps}
   const duplicate=await env.DB.prepare("SELECT id FROM proposals WHERE proposer_actor_id=? AND proposal_type=? AND target_wish_id=? AND COALESCE(other_wish_id,'')=COALESCE(?, '') AND status='pending' LIMIT 1").bind(proposer,type,target.id,other?.id||null).first();if(duplicate)fail(409,'duplicate_pending','A matching proposal is already pending');
   const owners=[target.owner_actor_id];if(other)owners.push(other.owner_actor_id);const required=[...new Set(owners)];if(required.length===1&&required[0]===proposer&&type!=='connect')fail(409,'own_wish','Use wisher actions on your own wish');
   const pid=id('prop'),t=now(),stmts=[env.DB.prepare('INSERT INTO proposals (id,proposal_type,proposer_actor_id,target_wish_id,other_wish_id,private_payload_json,status,created_at,updated_at) VALUES (?,?,?,?,?,?,\'pending\',?,?)').bind(pid,type,proposer,target.id,other?.id||null,JSON.stringify(privatePayload),t,t)];
