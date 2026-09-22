@@ -19,7 +19,7 @@ function status(text,error=false){
 }
 function hideStatus(){const b=document.getElementById('sharedStatus');if(b)b.remove()}
 function installRoomBadge(){
-  const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='SHARED ALPHA · '+room;
+  const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='SHARED ALPHA · REAL · '+room;
   if(document.getElementById('sharedRoomBadge'))return;
   const style=document.createElement('style');style.textContent='#sharedRoomBadge{position:fixed;z-index:49;left:50%;bottom:10px;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:5px 7px 5px 10px;border:1px solid rgba(184,214,255,.14);border-radius:999px;background:rgba(3,9,18,.82);backdrop-filter:blur(12px);font:7px/1 Inter,system-ui,sans-serif;letter-spacing:.08em;color:rgba(226,238,251,.58)}#sharedRoomBadge b{color:rgba(242,248,255,.88);font-size:8px;letter-spacing:.14em}#sharedRoomBadge button{height:24px;border:1px solid rgba(184,214,255,.12);border-radius:999px;background:rgba(255,255,255,.04);padding:0 8px;color:rgba(237,246,255,.74);font-size:7px;letter-spacing:.05em;text-transform:uppercase}#sharedRoomBadge button:hover{background:rgba(89,206,255,.07)}@media(max-width:820px){#sharedRoomBadge{bottom:7px;max-width:calc(100vw - 20px)}}';document.head.appendChild(style);
   const el=document.createElement('div');el.id='sharedRoomBadge';el.innerHTML='<span>TEST</span><b>'+room+'</b><button type="button">Copier le lien</button>';document.body.appendChild(el);
@@ -147,6 +147,19 @@ async function boot(){
   window.__RALUVAAA_SHARED_REMOVE__=removeShared;
   window.__RALUVAAA_SHARED_SHARE__=async localId=>{await queue;return idOf(localId)};
   window.__RALUVAAA_SHARED_MARK_READ__=id=>client.markRead(id);
+  window.__RALUVAAA_SHARED_STATS__=()=>{
+    const wishes=lastWorld?.wishes||[],events=lastWorld?.events||[];
+    return{
+      roots:wishes.filter(w=>w.kind==='create').length,
+      states:wishes.length,
+      blooms:wishes.filter(w=>w.state==='bloomed').length,
+      abandoned:wishes.filter(w=>w.state==='abandoned').length,
+      helps:events.filter(e=>e.type==='help').length,
+      warps:events.filter(e=>e.type==='connect').length,
+      localRoots:(lastMe?.wishes||[]).filter(w=>w.kind==='create').length
+    };
+  };
+
   window.__RALUVAAA_SHARED_REPORT__=async(localId,reason,details)=>{await queue;return client.report({wishId:idOf(localId),reason,details})};
   const initial=await fetchState();
   lastFingerprint=fp(initial);
