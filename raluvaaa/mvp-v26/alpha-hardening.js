@@ -21,7 +21,7 @@ function write(key,value){localStorage.setItem(key,JSON.stringify(value))}
 function hash(s){let h=2166136261>>>0;for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function randMs(band,slot,salt){const span=band.max-band.min;return band.min+(hash(`${salt}|${slot}`)%Math.max(1,span))}
 function validRoots(){return roots.filter(x=>x&&x.simulated&&x.kind==='create').map(x=>x.semanticId)}
-function chooseReplacement(ids,slot,salt){const all=validRoots();if(!all.length)return ids[slot];const blocked=new Set(ids.filter((_,i)=>i!==slot));let idx=hash(`${salt}|replacement|${slot}`)%all.length;for(let i=0;i<all.length;i++){const id=all[(idx+i)%all.length];if(!blocked.has(id))return id}return all[idx]}
+function chooseReplacement(ids,slot,salt){const all=validRoots();if(!all.length)return ids[slot];const previous=ids[slot],blocked=new Set(ids);let idx=hash(`${salt}|replacement|${slot}`)%all.length;for(let i=0;i<all.length;i++){const id=all[(idx+i)%all.length];if(!blocked.has(id))return id}const fallback=all.find(id=>!ids.some((x,j)=>j!==slot&&x===id));return fallback||previous}
 function sameIds(a,b){return Array.isArray(a)&&Array.isArray(b)&&a.length===3&&b.length===3&&a.every((x,i)=>x.semanticId===b[i].semanticId)}
 function sameEntrusted(a,b){return sameIds(a,b)&&a.every((x,i)=>Math.abs(x.expires-b[i].expires)<1000)}
 
