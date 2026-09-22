@@ -49,6 +49,9 @@ await rejectsCode(()=>A.wishEvent(split.wishIds[1],{type:'reparent',newParentWis
 await A.wishEvent(extra.wishIds[0],{type:'abandon'});
 await rejectsCode(()=>A.wishEvent(extra.wishIds[0],{type:'evolve',text:'Should not revive implicitly'}),'wish_not_alive');
 await rejectsCode(()=>A.wishEvent(split.wishIds[0],{type:'reparent',newParentWishId:extra.wishIds[0]}),'wish_not_alive');
+const resumed=await A.wishEvent(extra.wishIds[0],{type:'resume'});
+assert.equal(resumed.state,'alive','abandoned wish should resume as alive');
+await rejectsCode(()=>A.wishEvent(root.wishId,{type:'resume'}),'resume_only_abandoned');
 
 const helpB=await B.proposeHelp(ev.wishId,'I can share one practical sailing exercise.');
 await rejectsCode(()=>B.proposeHelp(ev.wishId,'A duplicate pending help.'),'duplicate_pending');
