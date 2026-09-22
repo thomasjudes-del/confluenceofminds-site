@@ -87,5 +87,6 @@ Storage.prototype.setItem=function(key,value){
 document.addEventListener('pointerdown',()=>ensure(),{capture:true,once:true});
 document.addEventListener('keydown',()=>ensure(),{capture:true,once:true});
 window.addEventListener('raluvaaa-share',()=>play('share'));
+window.addEventListener('raluvaaa-remove',()=>play('remove'));
 window.__RALUVAAA_ACTION_AUDIO__={play,motifs,get context(){return ctx},get enabled(){return audioEnabled()},reduceMotion};
 })();
