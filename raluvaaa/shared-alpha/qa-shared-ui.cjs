@@ -240,6 +240,9 @@ async function assertNoOverflow(page,label){
   await moreSummary.click();
   const connectButton=B.locator('[data-act="connect"]');
   assert(await connectButton.count(),`own live wish must expose CONNECT: ${JSON.stringify(connectDebug)}`);
+  const stableConnect=await connectButton.elementHandle();
+  await refresh(B);
+  assert(await stableConnect.evaluate(el=>el.isConnected),'unchanged shared refresh must not detach the open wish action DOM');
   await connectButton.click();
   await B.waitForFunction(()=>!document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:3000});
   assert(await B.locator('#modeBar').isVisible(),'CONNECT selection mode should be visible');
