@@ -135,9 +135,9 @@ async function assertNoOverflow(page,label){
   await A.click('[data-act="correct"]');
   const correctedText='QA wish with a corrected title '+stamp;
   await A.fill('#correctText',correctedText);
-  await A.fill('#correctLoc','');
+  await A.fill('#correctLoc','Rome, Italy');
   await A.click('#confirm');
-  await A.waitForFunction(([id,t])=>{const w=window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(x=>x.id===id);return w?.text===t&&w?.locationText===null},[correctionId,correctedText],{timeout:10000});
+  await A.waitForFunction(([id,t])=>{const w=window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(x=>x.id===id);return w?.text===t&&w?.locationText==='Rome, Italy'},[correctionId,correctedText],{timeout:10000});
   await B.waitForFunction(([id,t])=>window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id)?.text===t,[correctionId,correctedText],{timeout:10000});
 
   // One encouragement per human, and persistence after Firefox reload.
