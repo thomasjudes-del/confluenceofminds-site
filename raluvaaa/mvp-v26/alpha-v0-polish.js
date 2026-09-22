@@ -16,12 +16,12 @@ function injectChrome(){
   .rv-ring.r2{animation-delay:.16s}.rv-ring.r3{animation-delay:.32s}.rv-ring.soft{opacity:.46;box-shadow:0 0 12px rgba(99,217,255,.22)}.rv-ring.decline{border-color:rgba(210,220,232,.38);box-shadow:0 0 10px rgba(180,195,210,.15)}
   .rv-seed{position:absolute;width:8px;height:8px;margin:-4px;border-radius:50%;background:rgba(239,250,255,.92);box-shadow:0 0 9px rgba(164,235,255,.95),0 0 30px rgba(83,198,255,.55);animation:rv-seed 1.7s ease-out forwards}
   .rv-petal{position:absolute;width:5px;height:13px;margin:-7px -2px;border-radius:70% 70% 55% 55%;transform-origin:2px 28px;background:rgba(238,245,255,.92);box-shadow:0 0 9px rgba(173,226,255,.64);animation:rv-petal 1.9s cubic-bezier(.18,.72,.17,1) forwards}
-  .rv-bud{position:absolute;width:6px;height:10px;margin:-5px -3px;border-radius:70% 30% 70% 30%;background:rgba(151,241,202,.88);box-shadow:0 0 9px rgba(103,224,170,.58);animation:rv-bud 1.55s ease-out forwards}
+  .rv-bud{position:absolute;width:6px;height:10px;margin:-5px -3px;border-radius:70% 30% 70% 30%;background:rgba(151,241,202,.88);box-shadow:0 0 9px rgba(103,224,170,.58);animation:rv-bud 1.55s ease-out forwards}.rv-collapse{position:absolute;width:34px;height:34px;margin:-17px;border:1px solid rgba(210,220,232,.38);border-radius:50%;box-shadow:0 0 16px rgba(180,195,210,.14);animation:rv-collapse .72s ease-in forwards}
   .rv-path{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.rv-path path{fill:none;stroke:rgba(172,232,255,.76);stroke-width:1.3;stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(110,210,255,.45));stroke-dasharray:8 8;animation:rv-dash 1.35s ease-out forwards}.rv-path.connect path{stroke-dasharray:3 8}.rv-path.bloom path{stroke:rgba(235,245,255,.45)}
   @keyframes rv-ring{0%{transform:scale(.25);opacity:1}100%{transform:scale(7.2);opacity:0}}
   @keyframes rv-seed{0%{transform:scale(.2);opacity:0}22%{transform:scale(2);opacity:1}100%{transform:scale(.9);opacity:0}}
   @keyframes rv-petal{0%{transform:rotate(var(--a)) translateY(0) scale(.15);opacity:0}24%{opacity:1}100%{transform:rotate(var(--a)) translateY(-22px) scale(1);opacity:0}}
-  @keyframes rv-bud{0%{transform:translate(0,0) scale(.2);opacity:0}30%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(1);opacity:0}}
+  @keyframes rv-bud{0%{transform:translate(0,0) scale(.2);opacity:0}30%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(1);opacity:0}}@keyframes rv-collapse{0%{transform:scale(1.35);opacity:.72}100%{transform:scale(.08);opacity:0}}
   @keyframes rv-dash{0%{stroke-dashoffset:70;opacity:0}20%{opacity:1}100%{stroke-dashoffset:0;opacity:0}}
   @media(max-width:820px){#qaStrip:not(.hidden){max-width:160px;overflow:hidden}.drawer-item .m{font-variant-numeric:tabular-nums}}
   `;document.head.appendChild(style);
@@ -46,6 +46,7 @@ function ring(p,delayClass=''){if(!p)return;const e=document.createElement('i');
 function seedPulse(p){if(!p)return;const e=document.createElement('i');e.className='rv-seed';e.style.left=p.x+'px';e.style.top=p.y+'px';layer.appendChild(e);setTimeout(()=>e.remove(),2100)}
 function petals(p,count=11){if(!p)return;for(let i=0;i<count;i++){const e=document.createElement('i');e.className='rv-petal';e.style.left=p.x+'px';e.style.top=p.y+'px';e.style.setProperty('--a',(i*360/count)+'deg');layer.appendChild(e);setTimeout(()=>e.remove(),2200)}}
 function buds(p,count=5){if(!p)return;for(let i=0;i<count;i++){const a=(i/count)*Math.PI*2,rad=18+((i*7)%13),e=document.createElement('i');e.className='rv-bud';e.style.left=p.x+'px';e.style.top=p.y+'px';e.style.setProperty('--dx',(Math.cos(a)*rad)+'px');e.style.setProperty('--dy',(Math.sin(a)*rad)+'px');e.style.setProperty('--r',(i*39)+'deg');layer.appendChild(e);setTimeout(()=>e.remove(),1900)}}
+function collapse(p){if(!p)return;const e=document.createElement('i');e.className='rv-collapse';e.style.left=p.x+'px';e.style.top=p.y+'px';layer.appendChild(e);setTimeout(()=>e.remove(),900)}
 function path(a,b,kind=''){if(!a||!b)return;const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','rv-path '+kind);const p=document.createElementNS('http://www.w3.org/2000/svg','path');const dx=b.x-a.x,dy=b.y-a.y,curve=Math.max(20,Math.min(90,Math.hypot(dx,dy)*.22));p.setAttribute('d',`M ${a.x} ${a.y} Q ${a.x-dy/Math.max(1,Math.hypot(dx,dy))*curve} ${a.y+dx/Math.max(1,Math.hypot(dx,dy))*curve} ${b.x} ${b.y}`);svg.appendChild(p);layer.appendChild(svg);setTimeout(()=>svg.remove(),1800)}
 function revealMap(){const d=document.getElementById('drawer');if(d&&!d.classList.contains('hidden'))document.getElementById('drawerClose')?.click()}
 
@@ -69,6 +70,8 @@ async function ritual(ev){
   if(ev.type==='connect'){const [a,b]=await Promise.all([waitPoint(ev.aSemanticId),waitPoint(ev.bSemanticId)]);path(a,b,'connect');ring(a);ring(b);return}
   if(ev.type==='reparent'){const p=await waitPoint(ev.semanticId);ring(p);seedPulse(p)}
 }
+
+window.addEventListener('raluvaaa-remove',async ev=>{if(reduce)return;const id=ev.detail?.semanticId;if(!id)return;const p=await waitPoint(id,4);collapse(p)});
 
 const nativeSet=Storage.prototype.setItem;
 Storage.prototype.setItem=function(key,value){
