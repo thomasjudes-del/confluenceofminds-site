@@ -53,6 +53,7 @@ const resumed=await A.wishEvent(extra.wishIds[0],{type:'resume'});
 assert.equal(resumed.state,'alive','abandoned wish should resume as alive');
 await rejectsCode(()=>A.wishEvent(root.wishId,{type:'resume'}),'resume_only_abandoned');
 
+await rejectsCode(()=>B.proposeHelp(ev.wishId,'Email me at helper@example.com'),'contact_or_url');
 const helpB=await B.proposeHelp(ev.wishId,'I can share one practical sailing exercise.');
 await rejectsCode(()=>B.proposeHelp(ev.wishId,'A duplicate pending help.'),'duplicate_pending');
 const helpC=await C.proposeHelp(ev.wishId,'I can introduce you to a sailing instructor.');
@@ -121,6 +122,8 @@ const inboxB=await B.inbox(),inboxC=await C.inbox();
 assert(inboxB.receivedHistory.some(p=>p.id===nProp.proposalId&&p.status==='declined'));
 assert(inboxC.sent.some(p=>p.id===nProp.proposalId&&p.status==='declined'));
 
+const report=await B.report({wishId:root.wishId,reason:'safety',details:'QA valid report'});
+assert(report.reportId,'valid report should be stored');
 await rejectsCode(()=>ISO.report({wishId:root.wishId,reason:'test',details:'cross-room'}),'wish_not_found');
 
 console.log('RALUVAAA shared alpha contract/edge-case QA passed');
