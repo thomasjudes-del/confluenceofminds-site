@@ -38,10 +38,16 @@ async function createWish(page,text){
   const w=await world(page);
   return w.wishes.find(x=>x.text===text).id;
 }
+async function openInbox(page){
+  const visible=await page.locator('#drawer:not(.hidden)').count();
+  const title=visible?((await page.locator('#drawerTitle').innerText()).trim().toLowerCase()):'';
+  if(!visible||!/(notifications|inbox|demandes|requests|activité|activity)/i.test(title))await page.click('#inboxBtn');
+  await page.waitForSelector('#drawer:not(.hidden)',{timeout:5000});
+}
 async function acceptPending(page,type){
   await refresh(page);
   await page.waitForFunction(type=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type===type),type,{timeout:10000});
-  await page.click('#inboxBtn');
+  await openInbox(page);
   const p=await inbox(page);
   const wanted=p.pending.find(x=>x.type===type);
   assert(wanted,'pending '+type+' required');
@@ -177,12 +183,12 @@ async function assertNoOverflow(page,label){
   await refresh(A);
   const declinedHelp=(await inbox(A)).pending.find(p=>p.type==='help');
   assert(declinedHelp,'decline-path help proposal must arrive');
-  await A.click('#inboxBtn');
+  await openInbox(A);
   await A.click('[data-decline="'+declinedHelp.id+'"]');
   await B.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.sent?.some(p=>p.id===id&&p.status==='declined'),declinedHelp.id,{timeout:10000});
   await B.reload({waitUntil:'domcontentloaded'});
   await B.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,{timeout:20000});
-  await B.click('#inboxBtn');
+  await openInbox(B);
   assert((await B.locator('#drawerBody').innerText()).includes('Refusé'),'declined proposal history must survive Firefox reload');
   const resultNote=B.locator('[data-note]').first();
   if(await resultNote.count()){
@@ -197,7 +203,7 @@ async function assertNoOverflow(page,label){
   await B.fill('#helpInput','This offer will be cancelled by the helper.');
   await B.click('#confirm');
   await B.waitForFunction(()=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.sent?.some(p=>p.type==='help'&&p.status==='pending'),{timeout:10000});
-  await B.click('#inboxBtn');
+  await openInbox(B);
   await B.waitForSelector('[data-cancel-proposal]',{timeout:6000});
   const cancelId=await B.locator('[data-cancel-proposal]').first().getAttribute('data-cancel-proposal');
   await B.locator('[data-cancel-proposal="'+cancelId+'"]').click();
