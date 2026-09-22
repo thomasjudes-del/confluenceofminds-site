@@ -56,3 +56,10 @@ jobs:
             cat /tmp/raluvaaa-d1.log || true
             exit 1
           fi
+          if ! node qa-contract.mjs; then
+            echo '--- Worker log ---'
+            cat /tmp/raluvaaa-worker.log || true
+            echo '--- D1 log ---'
+            cat /tmp/raluvaaa-d1.log || true
+            exit 1
+          fi
