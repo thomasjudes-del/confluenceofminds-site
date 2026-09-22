@@ -113,7 +113,7 @@ async function getWorld(request,env,cors){
 }
 async function createWish(request,env,cors){
   const actorId=await actor(request,env,true),room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);
-  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION)||null;
+  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION);if(!loc)fail(400,'location_required','Location is required');
   const wid=id('wish'),t=now();
   await env.DB.batch([
     env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,?,'create',?,?, 'alive',1,?,?)").bind(wid,wid,actorId,room,null,wid,text,loc,t,t),
@@ -152,8 +152,8 @@ async function closeWish(env,cors,row,actorId,type){
   assertAlive(row);const state=type==='bloom'?'bloomed':'abandoned',t=now();await env.DB.batch([env.DB.prepare('UPDATE wishes SET state=?,updated_at=? WHERE id=?').bind(state,t,row.id),env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id),env.DB.prepare('INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?,?,?,\'{}\',\'{}\',?)').bind(id('evt'),row.id,row.lineage_id,actorId,type,row.parent_wish_id,t)]);return json({wishId:row.id,state},200,cors);
 }
 async function correctWish(env,cors,row,actorId,p){
-  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION)||null;
-  if(text===row.text&&(loc||null)===(row.location_text||null))fail(409,'nothing_to_correct','Nothing changed');
+  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION);if(!loc)fail(400,'location_required','Location is required');
+  if(text===row.text&&loc===(row.location_text||''))fail(409,'nothing_to_correct','Nothing changed');
   const t=now(),before={text:row.text,locationText:row.location_text},after={text,locationText:loc};
   await env.DB.batch([
     env.DB.prepare('UPDATE wishes SET text=?,location_text=?,updated_at=? WHERE id=?').bind(text,loc,t,row.id),
