@@ -16,6 +16,7 @@ async function openWish(page,id){
   const browser=await webkit.launch({headless:true});
   const context=await browser.newContext({
     viewport:{width:900,height:844},
+    screen:{width:900,height:844},
     locale:'fr-FR',
     geolocation:{latitude:41.9028,longitude:12.4964},
     permissions:['geolocation']
@@ -53,6 +54,7 @@ async function openWish(page,id){
   // On an actual mobile-size WebKit page, the minimap must be suppressed from first paint.
   const mobileContext=await browser.newContext({
     viewport:{width:390,height:844},
+    screen:{width:390,height:844},
     locale:'fr-FR',
     geolocation:{latitude:41.9028,longitude:12.4964},
     permissions:['geolocation']
