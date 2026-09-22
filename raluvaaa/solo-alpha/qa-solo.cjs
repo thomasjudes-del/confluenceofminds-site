@@ -277,7 +277,7 @@ async function clickConfirmDialog(page,selector,accept){
   const longId=await createWish(page,longText,'Saint-Etienne-de-Montluc, Loire-Atlantique, France');
   await page.setViewportSize({width:390,height:844});await openWish(page,longId);await assertNoOverflow(page,'mobile long wish');
   const target=await page.locator('#drawerBody [data-act="evolve"]').boundingBox();assert(target&&target.height>=36,'mobile action target must remain tappable');
-  await page.click('#createBtn');await page.locator('#wishInput').focus();const inputBox=await page.locator('#wishInput').boundingBox();assert(inputBox&&inputBox.left>=0&&inputBox.right<=390,'mobile create input must stay in viewport');await page.click('#cancel');
+  await page.click('#createBtn');await page.locator('#wishInput').focus();const inputBox=await page.locator('#wishInput').boundingBox();assert(inputBox&&inputBox.x>=0&&inputBox.x+inputBox.width<=390,'mobile create input must stay in viewport: '+JSON.stringify(inputBox));await page.click('#cancel');
 
   // The single sound control mutes both ambience and semantic micro-sounds.
   await page.click('#musicBtn');
