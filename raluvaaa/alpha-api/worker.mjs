@@ -128,6 +128,8 @@ async function addWishEvent(request,env,cors,wishId){
   if(type==='split'||type==='add_branch')return split(env,cors,row,actorId,p,type);
   if(type==='bloom'||type==='abandon')return closeWish(env,cors,row,actorId,type);
   if(type==='resume')return resumeWish(env,cors,row,actorId);
+  if(type==='close_lineage')return setLineageState(env,cors,row,actorId,'abandoned');
+  if(type==='resume_lineage')return setLineageState(env,cors,row,actorId,'alive');
   if(type==='correct')return correctWish(env,cors,row,actorId,p);
   if(type==='reparent')return reparent(env,cors,row,actorId,p);
   if(type==='remove_mistake')return removeMistake(env,cors,row,actorId);
@@ -158,6 +160,18 @@ async function correctWish(env,cors,row,actorId,p){
     env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'correct',?,?,?,?)").bind(id('evt'),row.id,row.lineage_id,actorId,row.parent_wish_id,JSON.stringify({before,after}),JSON.stringify({corrected:true}),t)
   ]);
   return json({wishId:row.id,text,locationText:loc},200,cors);
+}
+async function setLineageState(env,cors,row,actorId,targetState){
+  if(row.kind!=='create')fail(409,'root_required','Whole-wish close/resume starts from the root wish');
+  const rows=await env.DB.prepare("SELECT * FROM wishes WHERE lineage_id=? AND owner_actor_id=? AND state!='removed' ORDER BY created_at ASC").bind(row.lineage_id,actorId).all();
+  const all=rows.results||[],fromState=targetState==='abandoned'?'alive':'abandoned',type=targetState==='abandoned'?'abandon':'resume',targets=all.filter(w=>w.state===fromState);
+  if(!targets.length)fail(409,targetState==='abandoned'?'lineage_not_alive':'lineage_not_abandoned','No matching lineage states to change');
+  const t=now(),stmts=[];
+  for(const w of targets){
+    stmts.push(env.DB.prepare('UPDATE wishes SET state=?,updated_at=? WHERE id=?').bind(targetState,t,w.id));
+    stmts.push(env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?,?,?,? ,?,?)").bind(id('evt'),w.id,w.lineage_id,actorId,type,w.parent_wish_id,JSON.stringify({scope:'lineage'}),JSON.stringify({scope:'lineage'}),t));
+  }
+  await env.DB.batch(stmts);return json({rootWishId:row.id,state:targetState,wishIds:targets.map(w=>w.id)},200,cors);
 }
 async function resumeWish(env,cors,row,actorId){
   if(row.state!=='abandoned')fail(409,'resume_only_abandoned','Only an abandoned wish can be resumed');
