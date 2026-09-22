@@ -44,6 +44,8 @@ const H=3600000;
   assert.equal(await page.locator('#ambientCredit').count(),1,'music attribution should remain visible');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__?.url),'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Immersed.mp3');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__?.audio?.loop),true,'ambient music must loop');
+  assert.equal(await page.evaluate(()=>!!window.__RALUVAAA_ACTION_AUDIO__?.motifs?.bloom),true,'action sound grammar should expose BLOOM motif');
+  assert.equal(await page.evaluate(()=>Object.keys(window.__RALUVAAA_ACTION_AUDIO__?.motifs||{}).length>=12),true,'action sound grammar should cover the main V0 actions');
 
   await page.locator('#createBtn').click();
   await page.locator('#wishInput').fill('I want to make one real thing this week.');
