@@ -12,8 +12,8 @@
       switchToEn: 'Switch to English',
       heroKicker: 'Stories · games · experiments · impossible worlds',
       heroTitle: 'Different worlds.<br />One confluence.',
-      heroLede: 'A personal constellation of stories, games, sound and experiments — connected more by curiosity than by genre.',
-      heroCta: 'Explore the worlds',
+      heroLede: 'Over the years, I have written, built, created and experimented.<br /><strong>• Writer:</strong> 3 novels, <em>Chronicles of Kashgar</em>, <em>Authentic Victims</em>, <em>Searching for Katephomi Kitembe</em><br /><strong>• Audio fiction:</strong> SILMEA (Amazon / Audible, Cannes Film Festival...)<br /><strong>• Entrepreneur &amp; creator:</strong> artistic, social and tech projects, commitments<br /><strong>• And many other worlds</strong>, past, present and still to come...',
+      heroCta: 'Explore my worlds',
       scroll: 'Scroll to enter',
       paper1Title: 'STORIES',
       paper1Text: 'Fragments become worlds.',
@@ -54,8 +54,8 @@
       switchToEn: 'Passer en anglais',
       heroKicker: 'Récits · jeux · expériences · mondes impossibles',
       heroTitle: 'Des mondes différents.<br />Une même confluence.',
-      heroLede: 'Une constellation personnelle de récits, jeux, sons et expériences — reliés davantage par la curiosité que par un genre.',
-      heroCta: 'Explorer les univers',
+      heroLede: 'Au fil des années, j’ai écrit, entrepris, créé et expérimenté.<br /><strong>• Écrivain :</strong> 3 romans, <em>Chroniques de Kashgar</em>, <em>Authentiques Victimes</em>, <em>À la recherche de Katephomi Kitembe</em><br /><strong>• Fiction sonore :</strong> SILMEA (Amazon / Audible, Festival de Cannes...)<br /><strong>• Entrepreneur et créateur :</strong> projets artistiques, sociaux, technologiques, engagements<br /><strong>• Et bien d’autres mondes</strong> passés, présents et à venir...',
+      heroCta: 'Explorez mes mondes',
       scroll: 'Descendre pour entrer',
       paper1Title: 'RÉCITS',
       paper1Text: 'Les fragments deviennent des mondes.',
@@ -188,7 +188,7 @@
 
     setText('.hero-kicker', copy.heroKicker);
     setHtml('#hero-title', copy.heroTitle);
-    setText('.hero-lede', copy.heroLede);
+    setHtml('.hero-lede', copy.heroLede);
     setHtml('.primary-button', `${copy.heroCta} <span aria-hidden="true">↓</span>`);
     setText('.scroll-cue span', copy.scroll);
 
