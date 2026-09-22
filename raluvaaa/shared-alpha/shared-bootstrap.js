@@ -150,6 +150,7 @@ async function boot(){
   window.__RALUVAAA_SHARED_REMOVE__=removeShared;
   window.__RALUVAAA_SHARED_SHARE__=async localId=>{await queue;return idOf(localId)};
   window.__RALUVAAA_SHARED_MARK_READ__=id=>client.markRead(id);
+  window.__RALUVAAA_SHARED_REPORT__=async(localId,reason,details)=>{await queue;return client.report({wishId:idOf(localId),reason,details})};
   const initial=await fetchState();
   lastFingerprint=fp(initial);
   localStorage.setItem(STORE,JSON.stringify(initial));
