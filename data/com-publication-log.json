@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-20",
+  "version": "2026-09-22",
   "purpose": "Machine-readable log linking CoM publications to worlds, editorial angles, formats and Buffer IDs so performance can be learned over time.",
   "rules": [
     "Every future autonomous CoM Instagram publication must append one entry after Buffer confirms creation.",
@@ -293,6 +293,58 @@
       "scheduled_for": "2026-09-22T18:10:00+02:00",
       "published_at": null,
       "notes": "Rolling-queue experiment. 8 s, source teaser reframed vertically with curiosity hook."
+    },
+    {
+      "experiment_id": "com-shattered-dragons-2026-09-22-approved",
+      "world_id": "shattered-dragons",
+      "content_mode": "archive-remix",
+      "angle": "They were not born. They were made.",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": null,
+      "source_event": null,
+      "creative_master": "Google Drive: Shattered Dragons social approved 2026-09-22.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-22T16:57:00+02:00",
+      "notes": "QC-passed, user-approved master. Existing Shattered Dragons footage/audio reused; social-safe hook/title adaptation. 23.731 s.",
+      "platform": "instagram",
+      "buffer_post_id": "6ab29780760fb23fa985ee62",
+      "published_at": "2026-09-22T16:58:36.784+02:00"
+    },
+    {
+      "experiment_id": "com-shattered-dragons-2026-09-22-approved",
+      "world_id": "shattered-dragons",
+      "content_mode": "archive-remix",
+      "angle": "They were not born. They were made.",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": null,
+      "source_event": null,
+      "creative_master": "Google Drive: Shattered Dragons social approved 2026-09-22.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-22T16:57:00+02:00",
+      "notes": "QC-passed, user-approved master. Existing Shattered Dragons footage/audio reused; social-safe hook/title adaptation. 23.731 s.",
+      "platform": "tiktok",
+      "buffer_post_id": "6ab2978ceb284b640b6ecd00",
+      "published_at": null,
+      "status_at_log": "sending"
+    },
+    {
+      "experiment_id": "com-shattered-dragons-2026-09-22-approved",
+      "world_id": "shattered-dragons",
+      "content_mode": "archive-remix",
+      "angle": "They were not born. They were made.",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": null,
+      "source_event": null,
+      "creative_master": "Google Drive: Shattered Dragons social approved 2026-09-22.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-22T16:57:00+02:00",
+      "notes": "QC-passed, user-approved master. Existing Shattered Dragons footage/audio reused; social-safe hook/title adaptation. 23.731 s.",
+      "platform": "youtube",
+      "buffer_post_id": "6ab29798bafcc0c7efe33f23",
+      "published_at": "2026-09-22T16:58:34.675+02:00"
     }
   ]
 }
