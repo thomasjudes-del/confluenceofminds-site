@@ -15,8 +15,7 @@ let started=false;
 function installStyle(){
   const style=document.createElement('style');
   style.textContent=`
-    #musicBtn{font-size:15px}
-    #musicBtn.muted{opacity:.46}
+    #musicBtn{font-size:15px}.sound-note{position:relative;display:inline-block;line-height:1}.sound-note::after{content:'';position:absolute;left:50%;top:50%;width:0;height:1.4px;background:rgba(235,244,255,.92);transform:translate(-50%,-50%) rotate(-42deg);transform-origin:center;transition:width .16s ease}#musicBtn.muted{opacity:.62}#musicBtn.muted .sound-note::after{width:20px}
     #ambientCredit{position:fixed;z-index:29;left:14px;bottom:10px;max-width:300px;font-size:6.5px;letter-spacing:.025em;color:rgba(219,230,246,.34);pointer-events:auto}
     #ambientCredit a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(219,230,246,.13)}
     #ambientCredit a:hover{color:rgba(236,245,255,.68)}
@@ -33,7 +32,7 @@ function installUi(){
   btn.id='musicBtn';
   btn.className='rail-btn';
   btn.type='button';
-  btn.textContent='♪';
+  btn.innerHTML='<span class="sound-note" aria-hidden="true">♪</span>';
   btn.setAttribute('aria-label','Musique d’ambiance');
   btn.title='Musique d’ambiance · Immersed · Kevin MacLeod · CC BY 4.0';
   rail.insertBefore(btn,create||null);
@@ -56,7 +55,6 @@ function refresh(){
   const btn=document.getElementById('musicBtn');
   if(!btn)return;
   btn.classList.toggle('muted',!enabled);
-  btn.textContent=enabled?'♪':'×';
   btn.setAttribute('aria-pressed',enabled?'true':'false');
   btn.title=enabled?'Couper la musique · Immersed · Kevin MacLeod · CC BY 4.0':'Activer la musique · Immersed · Kevin MacLeod · CC BY 4.0';
 }
