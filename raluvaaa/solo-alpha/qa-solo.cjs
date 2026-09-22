@@ -339,7 +339,9 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('#musicBtn');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled),false,'music button must mute ambience');
   assert.equal((await page.locator('#musicBtn').innerText()).trim(),'♪','muted sound icon must remain a music note, not an X');
-  assert.notEqual(await page.locator('#musicBtn .sound-note').evaluate(el=>getComputedStyle(el,'::after').width),'0px','muted note must show a strike');
+  await page.waitForTimeout(180);
+  assert.equal(await page.locator('#musicBtn .sound-strike').count(),1,'muted note must include a strike');
+  assert(parseFloat(await page.locator('#musicBtn .sound-strike').evaluate(el=>getComputedStyle(el).opacity))>.8,'muted note strike must be visible');
   const mutedHistory=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.length);
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.play('correct')),false,'action sound must respect global mute');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.length),mutedHistory,'muted action must not enter sound history');
