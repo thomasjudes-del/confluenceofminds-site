@@ -50,7 +50,9 @@ function path(a,b,kind=''){if(!a||!b)return;const svg=document.createElementNS('
 function revealMap(){const d=document.getElementById('drawer');if(d&&!d.classList.contains('hidden'))document.getElementById('drawerClose')?.click()}
 
 async function ritual(ev){
-  if(reduce||!ev)return;
+  if(!ev)return;
+  window.dispatchEvent(new CustomEvent('raluvaaa-ritual',{detail:ev}));
+  if(reduce)return;
   if(ev.type==='create'){const p=await waitPoint(ev.semanticId);ring(p);ring(p,'r2');ring(p,'r3');seedPulse(p);return}
   if(ev.type==='evolve'){const [a,b]=await Promise.all([waitPoint(ev.parentSemanticId),waitPoint(ev.semanticId)]);path(a,b);ring(b);seedPulse(b);return}
   if(ev.type==='split'||ev.type==='branch_add'){const a=await waitPoint(ev.parentSemanticId);for(const child of ev.children||[]){const b=await waitPoint(child.semanticId);path(a,b);ring(b);seedPulse(b)}return}
