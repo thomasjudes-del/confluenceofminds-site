@@ -78,10 +78,12 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('#drawerClose');
 
   // Cancel CREATE must leave no trace.
+  const createSoundBefore=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='create').length);
   await page.click('#createBtn');
   await page.fill('#wishInput','This must never be created');
   await page.click('#cancel');
   assert.equal((await state(page)).events.length,0,'cancelled create must leave no event');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='create').length),createSoundBefore,'cancelled create must be silent');
 
   // CREATE + persistence.
   let rootText='Je veux apprendre à naviguer assez bien pour traverser une baie.';
@@ -111,6 +113,7 @@ async function clickConfirmDialog(page,selector,accept){
   let t=Date.now();await page.click('#confirm');
   await page.waitForFunction(([id,text])=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.text===text,[root,rootText],{timeout:8000});
   await waitSound(page,'correct',t);
+  await page.waitForSelector('#ritualLayer .rv-ring.soft',{timeout:5000});
   assert.equal((await semantic(page)).find(x=>x.semanticId===root).loc,'Pornichet, France');
 
   // EVOLVE cancel then confirm.
@@ -141,6 +144,7 @@ async function clickConfirmDialog(page,selector,accept){
   t=Date.now();await page.click('#confirm');
   await page.waitForFunction(()=>window.__RV26_SOLO__.semantic().filter(x=>x.text==='Trouver un club de voile'||x.text==='Apprendre les noeuds essentiels').length===2,{timeout:8000});
   await waitSound(page,'split',t);
+  await page.waitForSelector('#ritualLayer .rv-path',{timeout:5000});
   const b1=await idByText(page,'Trouver un club de voile');
   const b2=await idByText(page,'Apprendre les noeuds essentiels');
 
@@ -151,6 +155,7 @@ async function clickConfirmDialog(page,selector,accept){
   t=Date.now();await page.click('#confirm');
   await page.waitForFunction(()=>window.__RV26_SOLO__.semantic().some(x=>x.text==='Faire une première sortie en mer'),{timeout:8000});
   await waitSound(page,'branch_add',t);
+  await page.waitForSelector('#ritualLayer .rv-path',{timeout:5000});
   const b3=await idByText(page,'Faire une première sortie en mer');
 
   // REATTACH cancel then confirm.
@@ -169,6 +174,7 @@ async function clickConfirmDialog(page,selector,accept){
   t=Date.now();await page.click('#confirm');
   await page.waitForFunction(([id,p])=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.parentSemanticId===p,[b1,b2],{timeout:8000});
   await waitSound(page,'reparent',t);
+  await page.waitForSelector('#ritualLayer .rv-seed',{timeout:5000});
 
   // A parent with active descendants cannot be bloomed or abandoned into a contradictory state.
   await openWish(page,root);
@@ -183,23 +189,29 @@ async function clickConfirmDialog(page,selector,accept){
   // ABANDON cancel then confirm, then RESUME.
   await openWish(page,b3);
   await page.locator('details.more summary').click();
+  const abandonSoundBefore=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='abandon').length);
   await clickConfirmDialog(page,'[data-act="abandon"]',false);
   assert.equal((await semantic(page)).find(x=>x.semanticId===b3).state,'alive','dismissed abandon must preserve state');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='abandon').length),abandonSoundBefore,'dismissed abandon must be silent');
   await openWish(page,b3);await page.locator('details.more summary').click();
   t=Date.now();await clickConfirmDialog(page,'[data-act="abandon"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.state==='abandoned',b3,{timeout:8000});
   await waitSound(page,'abandon',t);
+  await page.waitForSelector('#ritualLayer .rv-ring',{timeout:5000});
   await openWish(page,b3);
   assert.equal(await page.locator('[data-act="resume"]').count(),1,'abandoned branch must offer Resume');
   assert.equal(await page.locator('[data-act="evolve"],[data-act="split"],[data-act="branch"],[data-act="bloom"]').count(),0,'abandoned branch must not expose active actions');
   t=Date.now();await clickConfirmDialog(page,'[data-act="resume"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.state==='alive',b3,{timeout:8000});
   await waitSound(page,'resume',t);
+  await page.waitForSelector('#ritualLayer .rv-bud',{timeout:5000});
 
   // BLOOM cancel then confirm. Terminal action set must be coherent.
   await openWish(page,b1);
+  const bloomSoundBefore=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='bloom').length);
   await clickConfirmDialog(page,'[data-act="bloom"]',false);
   assert.equal((await semantic(page)).find(x=>x.semanticId===b1).state,'alive');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.filter(x=>x.name==='bloom').length),bloomSoundBefore,'dismissed bloom must be silent');
   await openWish(page,b1);
   t=Date.now();await clickConfirmDialog(page,'[data-act="bloom"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.state==='bloom',b1,{timeout:8000});
@@ -222,11 +234,13 @@ async function clickConfirmDialog(page,selector,accept){
   t=Date.now();await clickConfirmDialog(page,'[data-act="close_lineage"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().filter(x=>x.lineageId===window.__RV26_SOLO__.semantic().find(y=>y.semanticId===id).lineageId&&x.owner&&x.state==='alive').length===0,root,{timeout:8000});
   await waitSound(page,'close_lineage',t);
+  await page.waitForSelector('#ritualLayer .rv-ring.decline',{timeout:5000});
   await openWish(page,root);
   assert.equal(await page.locator('[data-act="resume_lineage"]').count(),1,'closed root must offer Resume wish');
   t=Date.now();await clickConfirmDialog(page,'[data-act="resume_lineage"]',true);
   await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id)?.state==='alive',root,{timeout:8000});
   await waitSound(page,'resume_lineage',t);
+  await page.waitForSelector('#ritualLayer .rv-bud',{timeout:5000});
   assert.equal((await semantic(page)).find(x=>x.semanticId===b1).state,'bloom','whole-wish resume must not reopen a bloomed branch');
 
   // SHARE produces a deep link and sound; deep link reopens exact wish after reload.
@@ -250,6 +264,7 @@ async function clickConfirmDialog(page,selector,accept){
   await openWish(page,accidental);await page.locator('details.more summary').click();
   t=Date.now();await clickConfirmDialog(page,'[data-act="remove"]',true);
   await waitSound(page,'remove',t);
+  await page.waitForSelector('#ritualLayer .rv-collapse',{timeout:5000});
   await page.waitForFunction(id=>!window.__RV26_SOLO__.semantic().some(x=>x.semanticId===id),accidental,{timeout:8000});
 
   // FR/EN switch updates product copy and returns cleanly.
@@ -263,6 +278,15 @@ async function clickConfirmDialog(page,selector,accept){
   await page.setViewportSize({width:390,height:844});await openWish(page,longId);await assertNoOverflow(page,'mobile long wish');
   const target=await page.locator('#drawerBody [data-act="evolve"]').boundingBox();assert(target&&target.height>=36,'mobile action target must remain tappable');
   await page.click('#createBtn');await page.locator('#wishInput').focus();const inputBox=await page.locator('#wishInput').boundingBox();assert(inputBox&&inputBox.left>=0&&inputBox.right<=390,'mobile create input must stay in viewport');await page.click('#cancel');
+
+  // The single sound control mutes both ambience and semantic micro-sounds.
+  await page.click('#musicBtn');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled),false,'music button must mute ambience');
+  const mutedHistory=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.length);
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.play('correct')),false,'action sound must respect global mute');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.length),mutedHistory,'muted action must not enter sound history');
+  await page.click('#musicBtn');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled),true,'music button must restore ambience and micro-sounds');
 
   // Final persistence and no runtime errors.
   await page.reload({waitUntil:'domcontentloaded'});
