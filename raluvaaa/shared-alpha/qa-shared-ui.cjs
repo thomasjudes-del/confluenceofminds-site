@@ -97,6 +97,10 @@ async function assertNoOverflow(page,label){
   // Automatic cross-browser propagation, no manual refresh.
   await B.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishA,{timeout:9000});
   await M.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishA,{timeout:9000});
+  await M.goto(url(room)+'#wish='+encodeURIComponent(wishA),{waitUntil:'domcontentloaded'});
+  await M.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,{timeout:20000});
+  await M.waitForSelector('#drawer:not(.hidden) .wish',{timeout:12000});
+  assert((await M.locator('#drawerBody .wish').innerText()).includes(textA),'direct shared link must open the exact wish, not only move the camera');
   await wait(3200);
   assert(!(await world(ISO)).wishes.some(w=>w.id===wishA),'another room code must not see the wish');
   assert.equal((await B.evaluate(id=>window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id)?.owner,wishA)),false,'foreign wish must not become owned in Firefox');
@@ -107,6 +111,11 @@ async function assertNoOverflow(page,label){
   await A.waitForFunction(id=>window.__RV26_SHARED__?.semantic().some(x=>x.semanticId===id),wishA,{timeout:12000});
   assert.equal(await A.evaluate(()=>window.RALUVAAA_ACTOR_ID),actorA,'Chrome reload must preserve anonymous identity');
   assert.equal(await A.evaluate(id=>window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id)?.owner,wishA),true,'Chrome reload must preserve wish ownership');
+  await A.click('#myWorldBtn');
+  await A.waitForSelector('#drawerBody [data-open="'+wishA+'"]',{timeout:6000});
+  await A.click('#drawerBody [data-open="'+wishA+'"]');
+  await A.waitForSelector('#drawer:not(.hidden) .wish',{timeout:5000});
+  assert((await A.locator('#drawerBody .wish').innerText()).includes(textA),'My wishes entry must open wish details');
 
   // One encouragement per human, and persistence after Firefox reload.
   await openWish(B,wishA);
