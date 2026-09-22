@@ -8,7 +8,7 @@ const structuralTypes=new Set(['create','evolve','split','branch_add','bloom','a
 
 function injectChrome(){
   document.title='RALUVAAA · Alpha V0';
-  const sub=document.querySelector('#brand .sub');if(sub)sub.textContent=params.has('qa')?'ALPHA V0 · QA':'ALPHA V0';
+  const sub=document.querySelector('#brand .sub');if(sub)sub.textContent=params.has('qa')?'ALPHA V0 · QA · SIMULÉ':'ALPHA V0 · SIMULÉ';
   if(!params.has('qa')){const q=document.getElementById('qaStrip');if(q)q.classList.add('hidden')}
   const style=document.createElement('style');style.textContent=`
   #ritualLayer{position:fixed;inset:0;z-index:62;pointer-events:none;overflow:hidden}
