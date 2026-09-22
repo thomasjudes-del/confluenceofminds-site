@@ -131,6 +131,7 @@ async function assertNoOverflow(page,label){
   assert(/simulé/i.test(simText),'simulated fallback must be explicitly labelled');
   assert.equal(await B.locator('[data-act="encourage"],[data-act="help"],[data-act="suggest"],[data-act="connect"],[data-act="report"]').count(),0,'simulated wishes must be read-only in Shared Alpha');
   await openWish(B,wishA);
+  await B.locator('details.more summary').click();
   await B.click('[data-act="report"]');
   await B.fill('#reportDetails','QA report flow');
   await B.click('#confirm');
