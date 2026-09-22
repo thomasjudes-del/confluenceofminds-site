@@ -73,7 +73,7 @@ function buildState(world,me,inbox,actorId){
   events.sort((a,b)=>(a.at||0)-(b.at||0));
   return{version:26,lang:(navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr',entrusted:null,notifications:(inbox.notifications||[]).map(x=>({...x})),events};
 }
-function fp(state){return JSON.stringify({events:state.events.map(e=>[e.type,e.semanticId||'',e.parentSemanticId||'',e.proposalId||'',e.decision||'',e.serverStatus||'',e.aSemanticId||'',e.bSemanticId||'',(e.children||[]).map(c=>c.semanticId).join(',')]),notifications:(state.notifications||[]).map(n=>[n.id,n.kind,n.objectId,n.isRead,n.title||'',n.body||''])})}
+function fp(state){return JSON.stringify({events:state.events.map(e=>[e.type,e.semanticId||'',e.parentSemanticId||'',e.proposalId||'',e.decision||'',e.serverStatus||'',e.aSemanticId||'',e.bSemanticId||'',e.text||'',e.loc||'',e.state||'',(e.suggestions||[]).join('|'),(e.children||[]).map(c=>[c.semanticId,c.text||'',c.loc||'']).join('|')]),notifications:(state.notifications||[]).map(n=>[n.id,n.kind,n.objectId,n.isRead,n.title||'',n.body||''])})}
 
 async function fetchState(){
   const [world,me,inbox]=await Promise.all([client.world(),client.me(),client.inbox()]);
