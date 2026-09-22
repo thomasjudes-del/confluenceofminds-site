@@ -89,6 +89,10 @@ async function assertNoOverflow(page,label){
   const actorM=await M.evaluate(()=>window.RALUVAAA_ACTOR_ID);
   assert(actorA&&actorB&&actorM,'all test browsers need identities');
   assert.equal(new Set([actorA,actorB,actorM]).size,3,'independent browsers must have independent anonymous identities');
+  assert.equal(await A.locator('script[src*="action-audio.js"]').count(),1,'Shared Alpha must load one action sound grammar');
+  assert.equal(await A.evaluate(()=>!!window.__RALUVAAA_ACTION_AUDIO__?.motifs?.bloom),true,'BLOOM sound motif required');
+  assert.equal(await A.evaluate(()=>!!window.__RALUVAAA_ACTION_AUDIO__?.motifs?.proposal_decline),true,'decline sound motif required');
+  assert.equal(await A.evaluate(()=>!!window.__RALUVAAA_ACTION_AUDIO__?.motifs?.remove),true,'remove sound motif required');
 
   const stamp=Date.now().toString(36);
   const textA='QA shared wish '+stamp+' alpha';
@@ -280,6 +284,36 @@ async function assertNoOverflow(page,label){
   A.once('dialog',d=>d.accept());
   await A.click('[data-act="resume"]');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='alive',branches[1].id,{timeout:10000});
+
+  // Terminal-state UI must not offer impossible social actions.
+  await refresh(A);await openWish(A,branches[0].id);
+  const bloomMore=A.locator('details.more summary');if(await bloomMore.count())await bloomMore.click();
+  assert.equal(await A.locator('[data-act="connect"]').count(),0,'bloomed wish must not expose CONNECT');
+  await refresh(B);await openWish(B,branches[0].id);
+  const foreignBloomMore=B.locator('details.more summary');if(await foreignBloomMore.count())await foreignBloomMore.click();
+  assert.equal(await B.locator('[data-act="encourage"],[data-act="help"],[data-act="suggest"],[data-act="connect"]').count(),0,'helper must not receive active actions on a bloomed wish');
+
+  // Whole-wish close/resume semantics through the real UI.
+  const wholeText='QA whole wish '+stamp;
+  const wholeRoot=await createWish(A,wholeText);
+  await refresh(A);await openWish(A,wholeRoot);
+  await A.locator('details.more summary').click();
+  A.once('dialog',d=>d.accept());
+  await A.click('[data-act="close_lineage"]');
+  await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='abandoned',wholeRoot,{timeout:10000});
+  await refresh(A);await openWish(A,wholeRoot);
+  assert.equal(await A.locator('[data-act="resume_lineage"]').count(),1,'closed root must expose Resume wish');
+  A.once('dialog',d=>d.accept());
+  await A.click('[data-act="resume_lineage"]');
+  await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='alive',wholeRoot,{timeout:10000});
+
+  // Mistake removal through the UI must really remove an untouched wish.
+  const mistake=await createWish(A,'QA accidental untouched wish '+stamp);
+  await refresh(A);await openWish(A,mistake);
+  await A.locator('details.more summary').click();
+  A.once('dialog',d=>d.accept());
+  await A.click('[data-act="remove"]');
+  await A.waitForFunction(id=>!window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.some(w=>w.id===id),mistake,{timeout:10000});
 
   // Concurrent independent writes must survive and converge.
   const concurrentA='QA concurrent '+stamp+' gamma';
