@@ -79,7 +79,7 @@ semanticChannel.addEventListener('playing',()=>{
   pendingSemanticName=null;
 });
 
-function fxEnabled(){return localStorage.getItem('raluvaaaSoundFxV1')!=='off'}
+function fxEnabled(){return window.RALUVAAA_SOUND_DESIGN_APPROVED===true&&localStorage.getItem('raluvaaaSoundFxV1')!=='off'}
 
 function buildSampleUrl(name){
   return poeticSamples[name]||null;
