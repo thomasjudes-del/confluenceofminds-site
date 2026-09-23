@@ -44,6 +44,7 @@ async function createWish(page,text,loc){
   await waitSound(page,'create',t);
   await page.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.mediaHistory||[]).some(x=>x.name==='create'&&x.at>=after),t,{timeout:5000});
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.semanticChannel instanceof HTMLAudioElement),true,'create sound must use the iOS-safe HTMLAudio semantic channel');
+  await page.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.playbackHistory||[]).some(x=>x.name==='create'&&x.at>=after),t,{timeout:5000});
   await page.waitForSelector('#ritualLayer .rv-seed',{timeout:5000});
   return await idByText(page,expected);
 }
