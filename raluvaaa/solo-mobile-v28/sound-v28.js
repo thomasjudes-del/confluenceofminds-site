@@ -36,7 +36,8 @@ const motifs={
 };
 
 function enabled(){
-  return localStorage.getItem('raluvaaaSoundFxV1')!=='off';
+  const a=window.__RALUVAAA_AUDIO__;
+  return (a?.enabled!==false)&&localStorage.getItem('raluvaaaAmbientAudioV1')!=='off';
 }
 function ensure(){
   if(!enabled())return null;
@@ -45,7 +46,7 @@ function ensure(){
   if(!ctx){
     ctx=new AC();
     master=ctx.createGain();
-    master.gain.value=.92;
+    master.gain.value=1;
     master.connect(ctx.destination);
   }
   if(ctx.state==='suspended')ctx.resume().catch(()=>{});
@@ -57,7 +58,7 @@ function tone(freq,offset,dur,gain,type='sine'){
   o.type=type;o.frequency.setValueAtTime(freq,t);
   lp.type='lowpass';lp.frequency.setValueAtTime(Math.min(2300,freq*3.3),t);lp.Q.value=.25;
   g.gain.setValueAtTime(.0001,t);
-  g.gain.exponentialRampToValueAtTime(Math.max(.0002,Math.min(.085,gain*1.9)),t+.022);
+  g.gain.exponentialRampToValueAtTime(Math.max(.0002,Math.min(.12,gain*2.35)),t+.022);
   g.gain.exponentialRampToValueAtTime(.0001,t+dur);
   o.connect(lp);lp.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.04);
 }
@@ -120,21 +121,10 @@ tryAmbient();
 setTimeout(tryAmbient,350);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')tryAmbient()});
 
-const previousSet=Storage.prototype.setItem;
-Storage.prototype.setItem=function(key,value){
-  let before=null;
-  if(key===STORE){try{before=JSON.parse(this.getItem(key)||'null')}catch{}}
-  previousSet.call(this,key,value);
-  if(key!==STORE)return;
-  let after=null;try{after=JSON.parse(value||'null')}catch{}
-  const n=Array.isArray(before?.events)?before.events.length:0;
-  const fresh=Array.isArray(after?.events)?after.events.slice(n):[];
-  let delay=70;
-  for(const ev of fresh){
-    const name=eventName(ev);
-    if(name){setTimeout(()=>play(name,true),delay);delay+=95}
-  }
-};
+window.addEventListener('raluvaaa-action',e=>{
+  const name=eventName(e.detail?.event);
+  if(name)play(name,true);
+});
 window.addEventListener('raluvaaa-share',()=>play('share',true));
 window.addEventListener('raluvaaa-remove',()=>play('remove',true));
 
