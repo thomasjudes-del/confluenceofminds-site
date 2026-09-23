@@ -35,10 +35,93 @@ const motifs={
   ui_more:[[440,0,.08,.008],[554,.035,.12,.006]]
 };
 
-function enabled(){
-  const a=window.__RALUVAAA_AUDIO__;
-  return (a?.enabled!==false)&&localStorage.getItem('raluvaaaAmbientAudioV1')!=='off';
+/* Semantic sound transport: a single pre-unlocked HTMLAudio channel.
+   This is intentionally separate from ambient music and is more reliable
+   than WebAudio-only playback on iOS Safari. */
+const sampleUrls=new Map();
+const semanticChannel=new Audio();
+semanticChannel.preload='auto';
+semanticChannel.playsInline=true;
+semanticChannel.volume=.82;
+let semanticUnlocked=false;
+const mediaHistory=[];
+
+function fxEnabled(){return localStorage.getItem('raluvaaaSoundFxV1')!=='off'}
+
+function buildSampleUrl(name){
+  if(sampleUrls.has(name))return sampleUrls.get(name);
+  const seq=motifs[name];if(!seq)return null;
+  const sr=22050;
+  const duration=Math.min(1.55,Math.max(...seq.map(x=>x[1]+x[2]))+.12);
+  const frames=Math.max(1,Math.ceil(sr*duration));
+  const buffer=new ArrayBuffer(44+frames*2),v=new DataView(buffer);
+  const write=(o,str)=>{for(let i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i))};
+  write(0,'RIFF');v.setUint32(4,36+frames*2,true);write(8,'WAVE');write(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);
+  v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);write(36,'data');v.setUint32(40,frames*2,true);
+  for(let i=0;i<frames;i++){
+    const t=i/sr;let y=0;
+    for(const [freq,off,dur,gain] of seq){
+      if(t<off||t>off+dur)continue;
+      const x=(t-off)/dur;
+      const attack=Math.min(1,x/.055),decay=Math.pow(Math.max(0,1-x),1.65);
+      const env=attack*decay;
+      const p=2*Math.PI*freq*(t-off);
+      const harmonic=Math.sin(p)+.23*Math.sin(2*p+.15)+.07*Math.sin(3*p+.35);
+      y+=harmonic*env*Math.min(.24,Math.max(.07,gain*8.5));
+    }
+    y=Math.max(-.92,Math.min(.92,y));
+    v.setInt16(44+i*2,Math.round(y*32767),true);
+  }
+  const url=URL.createObjectURL(new Blob([buffer],{type:'audio/wav'}));
+  sampleUrls.set(name,url);
+  return url;
 }
+function primeSemanticChannel(){
+  const url=buildSampleUrl('create');if(!url)return;
+  if(!semanticChannel.src)semanticChannel.src=url;
+  try{semanticChannel.load()}catch{}
+}
+async function unlockSemanticChannel(){
+  if(semanticUnlocked||!fxEnabled())return semanticUnlocked;
+  primeSemanticChannel();
+  const prev=semanticChannel.volume;semanticChannel.volume=0;
+  try{
+    await semanticChannel.play();
+    semanticChannel.pause();
+    try{semanticChannel.currentTime=0}catch{}
+    semanticUnlocked=true;
+  }catch{}
+  semanticChannel.volume=prev;
+  return semanticUnlocked;
+}
+function playSemantic(name){
+  if(!fxEnabled())return false;
+  const url=buildSampleUrl(name);
+  if(!url)return play(name,true);
+  try{
+    semanticChannel.pause();
+    semanticChannel.src=url;
+    semanticChannel.volume=.86;
+    try{semanticChannel.currentTime=0}catch{}
+    const at=Date.now();
+    mediaHistory.push({name,at});
+    if(mediaHistory.length>120)mediaHistory.shift();
+    history.push({name,at,transport:'media'});
+    if(history.length>120)history.shift();
+    duckAmbient();
+    const promise=semanticChannel.play();
+    if(promise&&typeof promise.catch==='function')promise.catch(()=>play(name,true));
+    try{if(navigator.vibrate)navigator.vibrate(name==='bloom'?[10,24,12]:8)}catch{}
+    return true;
+  }catch{
+    return play(name,true);
+  }
+}
+primeSemanticChannel();
+
+
+function enabled(){return fxEnabled()}
 function ensure(){
   if(!enabled())return null;
   const AC=window.AudioContext||window.webkitAudioContext;
@@ -99,6 +182,7 @@ function eventName(ev){
 function arm(){
   armed=true;
   ensure();
+  unlockSemanticChannel();
   const A=window.__RALUVAAA_AUDIO__;
   if(A?.enabled!==false)A?.start?.();
 }
@@ -123,10 +207,10 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 window.addEventListener('raluvaaa-action',e=>{
   const name=eventName(e.detail?.event);
-  if(name)play(name,true);
+  if(name)playSemantic(name);
 });
-window.addEventListener('raluvaaa-share',()=>play('share',true));
-window.addEventListener('raluvaaa-remove',()=>play('remove',true));
+window.addEventListener('raluvaaa-share',()=>playSemantic('share'));
+window.addEventListener('raluvaaa-remove',()=>playSemantic('remove'));
 
 /* Audible but restrained UI layer. Semantic actions still have their own motifs;
    these cues make the interface itself feel alive on mobile. */
@@ -143,9 +227,10 @@ document.addEventListener('click',e=>{
 },true);
 
 window.__RALUVAAA_ACTION_AUDIO__={
-  play,motifs,history,
+  play,playSemantic,motifs,history,mediaHistory,semanticChannel,unlockSemanticChannel,
   get context(){return ctx},
-  get enabled(){return enabled()},
+  get enabled(){return fxEnabled()},
+  get mediaUnlocked(){return semanticUnlocked},
   get armed(){return armed}
 };
 })();
