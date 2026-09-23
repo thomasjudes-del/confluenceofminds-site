@@ -193,6 +193,16 @@ Storage.prototype.setItem=function(key,value){
   },780);
 };
 
+const drawerEl=document.getElementById('drawer');
+if(drawerEl){
+  new MutationObserver(()=>{
+    /* If the sheet is deliberately reopened after an action, do not let an
+       old fallback/ritual close the newly opened wish. Engine auto-refocus
+       is suppressed separately in app.js for the short post-action window. */
+    if(!drawerEl.classList.contains('hidden'))pendingClose=0;
+  }).observe(drawerEl,{attributes:true,attributeFilter:['class']});
+}
+
 const ritualLayer=document.getElementById('ritualLayer');
 if(ritualLayer){
   const ritualObserver=new MutationObserver(mutations=>{
