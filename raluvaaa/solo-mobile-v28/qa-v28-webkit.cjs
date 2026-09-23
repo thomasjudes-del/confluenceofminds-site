@@ -67,8 +67,19 @@ async function openWish(page,id){
     body:JSON.stringify({address:{city:'Rome',country:'Italie'}})
   }));
   await ready(mobile);
+  assert.equal(await mobile.evaluate(()=>window.RALUVAAA_STORE_KEY),'raluvaaaSoloMobileV28R1','WebKit V28 must use isolated wish storage');
+  assert.equal(await mobile.evaluate(()=>window.RALUVAAA_ENTRUSTED_POLICY_KEY),'raluvaaaEntrustedSoloMobileV28R1','WebKit V28 must use isolated entrusted cache');
   const miniDisplay=await mobile.evaluate(()=>getComputedStyle(document.getElementById('engine').contentDocument.querySelector('.minimap')).display);
   assert.equal(miniDisplay,'none','mobile parent viewport must suppress the engine minimap');
+
+  // Entrusted countdown rarity colors must remain visible on the primary mobile browser.
+  let soundAt=Date.now();
+  await mobile.click('#entrustedBtn');
+  await mobile.waitForFunction(()=>document.querySelectorAll('#drawerBody [data-entrusted-band]').length===3,{timeout:10000});
+  await mobile.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.history||[]).some(x=>x.name==='ui_open'&&x.at>=after),soundAt,{timeout:5000});
+  const entrustedColors=await mobile.locator('#drawerBody [data-entrusted-band] .m').evaluateAll(els=>els.map(el=>getComputedStyle(el).color));
+  assert.equal(new Set(entrustedColors).size,3,'WebKit entrusted timers need three distinct colors');
+  await mobile.click('#drawerClose');
 
   // Geolocation is approximate city/country, mandatory, and can still be edited manually.
   const p=mobile;
