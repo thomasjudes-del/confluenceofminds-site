@@ -38,11 +38,35 @@ const motifs={
 /* Semantic sound transport: a single pre-unlocked HTMLAudio channel.
    This is intentionally separate from ambient music and is more reliable
    than WebAudio-only playback on iOS Safari. */
-const sampleUrls=new Map();
+const poeticSamples={
+  create:'audio/create.mp3',
+  encourage:'audio/encourage.mp3',
+  evolve:'audio/evolve.mp3',
+  resume:'audio/evolve.mp3',
+  resume_lineage:'audio/evolve.mp3',
+  split:'audio/split.mp3',
+  branch_add:'audio/split.mp3',
+  reparent:'audio/split.mp3',
+  connect:'audio/connect.mp3',
+  connect_proposed:'audio/connect.mp3',
+  share:'audio/connect.mp3',
+  help:'audio/help.mp3',
+  help_proposed:'audio/help.mp3',
+  proposal_accept:'audio/help.mp3',
+  bloom:'audio/bloom.mp3',
+  abandon:'audio/letgo.mp3',
+  close_lineage:'audio/letgo.mp3',
+  remove:'audio/letgo.mp3',
+  proposal_decline:'audio/letgo.mp3',
+  proposal_cancel:'audio/letgo.mp3',
+  correct:'audio/encourage.mp3',
+  suggest_proposed:'audio/encourage.mp3'
+};
+
 const semanticChannel=new Audio();
 semanticChannel.preload='auto';
 semanticChannel.playsInline=true;
-semanticChannel.volume=.82;
+semanticChannel.volume=.42;
 let semanticUnlocked=false;
 const mediaHistory=[];
 const playbackHistory=[];
@@ -58,33 +82,7 @@ semanticChannel.addEventListener('playing',()=>{
 function fxEnabled(){return localStorage.getItem('raluvaaaSoundFxV1')!=='off'}
 
 function buildSampleUrl(name){
-  if(sampleUrls.has(name))return sampleUrls.get(name);
-  const seq=motifs[name];if(!seq)return null;
-  const sr=22050;
-  const duration=Math.min(1.55,Math.max(...seq.map(x=>x[1]+x[2]))+.12);
-  const frames=Math.max(1,Math.ceil(sr*duration));
-  const buffer=new ArrayBuffer(44+frames*2),v=new DataView(buffer);
-  const write=(o,str)=>{for(let i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i))};
-  write(0,'RIFF');v.setUint32(4,36+frames*2,true);write(8,'WAVE');write(12,'fmt ');
-  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);
-  v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);write(36,'data');v.setUint32(40,frames*2,true);
-  for(let i=0;i<frames;i++){
-    const t=i/sr;let y=0;
-    for(const [freq,off,dur,gain] of seq){
-      if(t<off||t>off+dur)continue;
-      const x=(t-off)/dur;
-      const attack=Math.min(1,x/.055),decay=Math.pow(Math.max(0,1-x),1.65);
-      const env=attack*decay;
-      const p=2*Math.PI*freq*(t-off);
-      const harmonic=Math.sin(p)+.23*Math.sin(2*p+.15)+.07*Math.sin(3*p+.35);
-      y+=harmonic*env*Math.min(.24,Math.max(.07,gain*8.5));
-    }
-    y=Math.max(-.92,Math.min(.92,y));
-    v.setInt16(44+i*2,Math.round(y*32767),true);
-  }
-  const url=URL.createObjectURL(new Blob([buffer],{type:'audio/wav'}));
-  sampleUrls.set(name,url);
-  return url;
+  return poeticSamples[name]||null;
 }
 function primeSemanticChannel(){
   const url=buildSampleUrl('create');if(!url)return;
@@ -112,7 +110,7 @@ function playSemantic(name){
     semanticChannel.pause();
     pendingSemanticName=name;
     semanticChannel.src=url;
-    semanticChannel.volume=.86;
+    semanticChannel.volume=.42;
     try{semanticChannel.currentTime=0}catch{}
     const at=Date.now();
     mediaHistory.push({name,at});
@@ -121,8 +119,8 @@ function playSemantic(name){
     if(history.length>120)history.shift();
     duckAmbient();
     const promise=semanticChannel.play();
-    if(promise&&typeof promise.catch==='function')promise.catch(()=>play(name,true));
-    try{if(navigator.vibrate)navigator.vibrate(name==='bloom'?[10,24,12]:8)}catch{}
+    if(promise&&typeof promise.catch==='function')promise.catch(()=>{});
+    
     return true;
   }catch{
     return play(name,true);
@@ -176,8 +174,8 @@ function duckAmbient(){
   const a=window.__RALUVAAA_AUDIO__?.audio;
   if(!a||a.paused)return;
   const base=a.volume||.125;
-  a.volume=Math.max(.055,base*.46);
-  setTimeout(()=>{try{a.volume=base}catch{}},720);
+  a.volume=Math.max(.075,base*.72);
+  setTimeout(()=>{try{a.volume=base}catch{}},1100);
 }
 function play(name,force=false){
   const seq=motifs[name];if(!seq||!enabled())return false;
@@ -232,22 +230,10 @@ window.addEventListener('raluvaaa-action',e=>{
 window.addEventListener('raluvaaa-share',()=>playSemantic('share'));
 window.addEventListener('raluvaaa-remove',()=>playSemantic('remove'));
 
-/* Audible but restrained UI layer. Semantic actions still have their own motifs;
-   these cues make the interface itself feel alive on mobile. */
-document.addEventListener('click',e=>{
-  const el=e.target.closest('button,summary,[data-open],[data-nav-wish]');
-  if(!el||el.disabled||el.id==='musicBtn')return;
-  let name=null;
-  if(el.id==='drawerClose'||el.id==='cancel')name='ui_close';
-  else if(el.matches('[data-nav-wish],.v28-back,.v28-root,[data-open]'))name='ui_nav';
-  else if(el.matches('summary'))name='ui_more';
-  else if(el.id==='entrustedBtn'||el.id==='myWorldBtn'||el.id==='createBtn')name='ui_open';
-  else if(el.matches('[data-act],#confirm,.sheet-actions button'))name='ui_action';
-  if(name)play(name);
-},true);
+/* No generic click/notification layer: RALUVAAA sound belongs to meaningful human actions only. */
 
 window.__RALUVAAA_ACTION_AUDIO__={
-  play,playSemantic,playCreate,motifs,history,mediaHistory,playbackHistory,semanticChannel,unlockSemanticChannel,
+  play,playSemantic,playCreate,motifs,poeticSamples,history,mediaHistory,playbackHistory,semanticChannel,unlockSemanticChannel,
   get context(){return ctx},
   get enabled(){return fxEnabled()},
   get mediaUnlocked(){return semanticUnlocked},
