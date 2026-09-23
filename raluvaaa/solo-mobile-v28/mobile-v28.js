@@ -170,7 +170,7 @@ let pendingClose=0;
 const previousSet=Storage.prototype.setItem;
 function closeWishSheet(){
   const drawer=document.getElementById('drawer');
-  if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
+  if(drawer&&!drawer.classList.contains('hidden')){drawer.classList.add('hidden');document.getElementById('drawerClose')?.click();}
 }
 Storage.prototype.setItem=function(key,value){
   let before=null;
