@@ -73,7 +73,7 @@ async function openWish(page,id){
   assert.equal(miniDisplay,'none','mobile parent viewport must suppress the engine minimap');
 
   // Entrusted countdown rarity colors must remain visible on the primary mobile browser.
-  assert.equal(await mobile.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__?.semanticChannel instanceof HTMLAudioElement),true,'WebKit must expose the HTMLAudio semantic sound channel');
+  assert.equal(await mobile.evaluate(()=>window.RALUVAAA_SOUND_DESIGN_APPROVED),false,'WebKit must keep unvalidated sound design disabled');
   assert.deepEqual(await mobile.evaluate(()=>window.__RALUVAAA_PLAYLIST__?.tracks),['Immersed'],'WebKit must only expose validated soundtrack Immersed');
   await mobile.click('#entrustedBtn');
   await mobile.waitForFunction(()=>document.querySelectorAll('#drawerBody [data-entrusted-band]').length===3,{timeout:10000});
@@ -91,11 +91,9 @@ async function openWish(page,id){
   await p.click('#confirm');
   assert((await p.locator('#toast').innerText()).toLowerCase().includes('lieu'),'WebKit must reject locationless creation');
   await p.fill('#locInput','Rome, Italie');
-  const createSoundAt=Date.now();
   await p.click('#confirm');
   await p.waitForFunction(()=>window.__RV26_SOLO__.semantic().some(x=>x.text==='Trouver un amour réciproque'),{timeout:10000});
-  await p.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.playbackHistory||[]).some(x=>x.name==='create'&&x.at>=after),createSoundAt,{timeout:5000});
-  assert((await p.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.semanticChannel.src)).includes('/raluvaaa/solo-mobile-v28/audio/create.mp3'),'WebKit CREATE must play the poetic recorded sample');
+  assert.equal(await p.evaluate(()=>window.RALUVAAA_SOUND_DESIGN_APPROVED),false,'CREATE must stay silent until the palette is approved');
   const root=await p.evaluate(()=>window.__RV26_SOLO__.semantic().find(x=>x.text==='Trouver un amour réciproque').semanticId);
 
   // Root vs branch Bloom labels + in-sheet navigation.
