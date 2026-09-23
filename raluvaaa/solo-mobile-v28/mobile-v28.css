@@ -249,3 +249,14 @@
 @media(prefers-reduced-motion:reduce){
   #drawer{animation:none!important}
 }
+
+
+/* Entrusted rarity is communicated by the countdown itself, not only the dot.
+   Keep the agreed short / medium / long palette visible on mobile. */
+#drawerBody [data-entrusted-band="short"] .m{color:#ff7b7b!important}
+#drawerBody [data-entrusted-band="medium"] .m{color:#f6c56f!important}
+#drawerBody [data-entrusted-band="long"] .m{color:#78e2b3!important}
+#drawerBody [data-entrusted-band] .m{
+  opacity:.94!important;
+  text-shadow:0 0 14px currentColor;
+}
