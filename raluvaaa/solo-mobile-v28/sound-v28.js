@@ -36,8 +36,7 @@ const motifs={
 };
 
 function enabled(){
-  const a=window.__RALUVAAA_AUDIO__;
-  return (a?.enabled!==false)&&localStorage.getItem('raluvaaaAmbientAudioV1')!=='off';
+  return localStorage.getItem('raluvaaaSoundFxV1')!=='off';
 }
 function ensure(){
   if(!enabled())return null;
