@@ -182,6 +182,7 @@ Storage.prototype.setItem=function(key,value){
   const fresh=Array.isArray(after?.events)?after.events.slice(n):[];
   const visible=fresh.find(ev=>!ev.quiet&&CLOSE_AFTER.has(ev.type));
   if(!visible)return;
+  window.__RALUVAAA_SUPPRESS_ENGINE_SELECT_UNTIL__=Date.now()+1400;
   const ticket=++pendingClose;
   /* The engine may refocus/reopen the selected wish after commit. Close only
      after its visual consequence begins, with a short fallback if no ritual fires. */
