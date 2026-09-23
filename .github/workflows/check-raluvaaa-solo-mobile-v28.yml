@@ -7,6 +7,10 @@ on:
       - '.github/workflows/check-raluvaaa-solo-mobile-v28.yml'
   workflow_dispatch:
 
+concurrency:
+  group: raluvaaa-solo-mobile-v28-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
