@@ -132,6 +132,7 @@ Storage.prototype.setItem=function(key,value){
   }
 };
 window.addEventListener('raluvaaa-share',()=>play('share'));
+window.addEventListener('raluvaaa-remove',()=>play('remove'));
 
 window.__RALUVAAA_ACTION_AUDIO__={
   play,motifs,history,
