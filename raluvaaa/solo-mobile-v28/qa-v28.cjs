@@ -174,7 +174,7 @@ async function clickConfirmDialog(page,selector,accept){
   await page.waitForFunction(()=>window.__RV26_SOLO__.semantic().filter(x=>x.text==='Trouver un club de voile'||x.text==='Apprendre les noeuds essentiels').length===2,{timeout:8000});
   await waitSound(page,'split',t);
   await page.waitForSelector('#ritualLayer .rv-path',{timeout:5000});
-  await page.waitForFunction(()=>document.getElementById('drawer').classList.contains('hidden'),{timeout:3000});
+  await page.waitForFunction(()=>document.getElementById('drawer').classList.contains('hidden'),null,{timeout:3000});
   const b1=await idByText(page,'Trouver un club de voile');
   const b2=await idByText(page,'Apprendre les noeuds essentiels');
 
