@@ -6,7 +6,7 @@ const history=[];
 let ctx=null,master=null,armed=false,lastAt=-1e9;
 
 const motifs={
-  create:[[196,0,.34,.026],[294,.08,.42,.020],[392,.18,.52,.014]],
+  create:[[174,0,.34,.060],[349,.055,.52,.055],[523,.19,.64,.050],[784,.39,.70,.038],[1047,.62,.52,.025]],
   evolve:[[220,0,.26,.018],[330,.10,.34,.020],[494,.22,.46,.016]],
   split:[[196,0,.24,.016],[247,.07,.27,.015],[330,.14,.31,.015],[392,.22,.36,.012]],
   branch_add:[[220,0,.25,.016],[294,.09,.32,.018],[440,.19,.40,.013]],
@@ -128,6 +128,14 @@ function playSemantic(name){
     return play(name,true);
   }
 }
+let lastDirectCreateAt=0;
+function playCreate(){
+  lastDirectCreateAt=Date.now();
+  /* CREATE is intentionally more legible than generic UI cues: a low seed pulse
+     followed by an ascending organic chime, with a short ambient duck. */
+  return playSemantic('create');
+}
+
 primeSemanticChannel();
 
 
@@ -217,7 +225,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 window.addEventListener('raluvaaa-action',e=>{
   const name=eventName(e.detail?.event);
-  if(name)playSemantic(name);
+  if(!name)return;
+  if(name==='create'&&Date.now()-lastDirectCreateAt<900)return;
+  playSemantic(name);
 });
 window.addEventListener('raluvaaa-share',()=>playSemantic('share'));
 window.addEventListener('raluvaaa-remove',()=>playSemantic('remove'));
@@ -237,7 +247,7 @@ document.addEventListener('click',e=>{
 },true);
 
 window.__RALUVAAA_ACTION_AUDIO__={
-  play,playSemantic,motifs,history,mediaHistory,playbackHistory,semanticChannel,unlockSemanticChannel,
+  play,playSemantic,playCreate,motifs,history,mediaHistory,playbackHistory,semanticChannel,unlockSemanticChannel,
   get context(){return ctx},
   get enabled(){return fxEnabled()},
   get mediaUnlocked(){return semanticUnlocked},
