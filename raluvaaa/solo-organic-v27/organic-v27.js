@@ -170,5 +170,5 @@ if(!reduced&&frame){
   requestAnimationFrame(draw);
 }
 
-window.__RALUVAAA_V27__={version:27,decorate,cue,icons:ICONS};
+window.__RALUVAAA_V27__={version:27,decorate,icons:ICONS};
 })();
