@@ -74,6 +74,7 @@ async function openWish(page,id){
 
   // Entrusted countdown rarity colors must remain visible on the primary mobile browser.
   let soundAt=Date.now();
+  assert.equal(await mobile.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__?.semanticChannel instanceof HTMLAudioElement),true,'WebKit must expose the HTMLAudio semantic sound channel');
   await mobile.click('#entrustedBtn');
   await mobile.waitForFunction(()=>document.querySelectorAll('#drawerBody [data-entrusted-band]').length===3,{timeout:10000});
   await mobile.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.history||[]).some(x=>x.name==='ui_open'&&x.at>=after),soundAt,{timeout:5000});
