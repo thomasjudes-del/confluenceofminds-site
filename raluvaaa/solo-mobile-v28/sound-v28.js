@@ -78,10 +78,10 @@ function duckAmbient(){
   a.volume=Math.max(.055,base*.46);
   setTimeout(()=>{try{a.volume=base}catch{}},720);
 }
-function play(name){
+function play(name,force=false){
   const seq=motifs[name];if(!seq||!enabled())return false;
   const c=ensure();if(!c)return false;
-  const now=c.currentTime;if(now-lastAt<.055)return false;lastAt=now;
+  const now=c.currentTime;if(!force&&now-lastAt<.055)return false;lastAt=now;
   history.push({name,at:Date.now()});if(history.length>120)history.shift();
   duckAmbient();
   seq.forEach((x,i)=>tone(x[0],x[1],x[2],x[3],i%3===1?'triangle':'sine'));
@@ -133,11 +133,11 @@ Storage.prototype.setItem=function(key,value){
   let delay=70;
   for(const ev of fresh){
     const name=eventName(ev);
-    if(name){setTimeout(()=>play(name),delay);delay+=95}
+    if(name){setTimeout(()=>play(name,true),delay);delay+=95}
   }
 };
-window.addEventListener('raluvaaa-share',()=>play('share'));
-window.addEventListener('raluvaaa-remove',()=>play('remove'));
+window.addEventListener('raluvaaa-share',()=>play('share',true));
+window.addEventListener('raluvaaa-remove',()=>play('remove',true));
 
 /* Audible but restrained UI layer. Semantic actions still have their own motifs;
    these cues make the interface itself feel alive on mobile. */
