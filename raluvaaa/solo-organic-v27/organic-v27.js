@@ -75,10 +75,10 @@ function chipDescriptor(raw){
   if(/bloomed|fleuri/.test(p))return['bloom',en?'bloomed':'fleuri','bloom'];
   if(/abandoned|abandonne/.test(p))return['trace',en?'trace':'trace','trace'];
   const br=p.match(/^(\d+)\s+branches?/);if(br)return['branch',br[1]+' '+(en?'offshoots':'pousses'),'alive'];
-  const ah=p.match(/^(\\d+)\\s+aides?/);if(ah)return['help',ah[1]+' aide','alive'];
+  const ah=p.match(/^(\d+)\s+aides?/);if(ah)return['help',ah[1]+' aide','alive'];
   const hp=p.match(/^(\d+)\s+help/);if(hp)return['help',hp[1]+' '+(en?'help':'aide'),'alive'];
-  const cc=p.match(/^(\\d+)\\s+connexions?/);if(cc)return['link',cc[1]+' lien','alive'];
-  const tp=p.match(/^(\\d+)\\s+(traces?|nodes?)/);if(tp)return['trace',tp[1]+' traces','trace'];
+  const cc=p.match(/^(\d+)\s+connexions?/);if(cc)return['link',cc[1]+' lien','alive'];
+  const tp=p.match(/^(\d+)\s+(traces?|nodes?)/);if(tp)return['trace',tp[1]+' traces','trace'];
   const cp=p.match(/^(\d+)\s+connect/);if(cp)return['link',cp[1]+' '+(en?'link':'lien'),'alive'];
   return null;
 }
