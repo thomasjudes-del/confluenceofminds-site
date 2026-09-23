@@ -45,6 +45,15 @@ semanticChannel.playsInline=true;
 semanticChannel.volume=.82;
 let semanticUnlocked=false;
 const mediaHistory=[];
+const playbackHistory=[];
+let pendingSemanticName=null;
+
+semanticChannel.addEventListener('playing',()=>{
+  if(!pendingSemanticName)return;
+  playbackHistory.push({name:pendingSemanticName,at:Date.now()});
+  if(playbackHistory.length>120)playbackHistory.shift();
+  pendingSemanticName=null;
+});
 
 function fxEnabled(){return localStorage.getItem('raluvaaaSoundFxV1')!=='off'}
 
@@ -101,6 +110,7 @@ function playSemantic(name){
   if(!url)return play(name,true);
   try{
     semanticChannel.pause();
+    pendingSemanticName=name;
     semanticChannel.src=url;
     semanticChannel.volume=.86;
     try{semanticChannel.currentTime=0}catch{}
@@ -227,7 +237,7 @@ document.addEventListener('click',e=>{
 },true);
 
 window.__RALUVAAA_ACTION_AUDIO__={
-  play,playSemantic,motifs,history,mediaHistory,semanticChannel,unlockSemanticChannel,
+  play,playSemantic,motifs,history,mediaHistory,playbackHistory,semanticChannel,unlockSemanticChannel,
   get context(){return ctx},
   get enabled(){return fxEnabled()},
   get mediaUnlocked(){return semanticUnlocked},
