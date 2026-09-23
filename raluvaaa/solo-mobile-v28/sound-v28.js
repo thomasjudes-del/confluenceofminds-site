@@ -27,7 +27,12 @@ const motifs={
   proposal_decline:[[294,0,.25,.009],[220,.11,.34,.008]],
   proposal_cancel:[[262,0,.22,.008],[196,.10,.32,.007]],
   remove:[[262,0,.21,.009],[196,.08,.30,.007]],
-  share:[[659,0,.16,.006],[880,.07,.22,.005]]
+  share:[[659,0,.16,.010],[880,.07,.22,.008]],
+  ui_open:[[294,0,.12,.012],[440,.055,.17,.009]],
+  ui_close:[[392,0,.11,.010],[262,.05,.16,.008]],
+  ui_nav:[[330,0,.10,.010],[494,.045,.15,.008]],
+  ui_action:[[247,0,.09,.009],[370,.04,.14,.007]],
+  ui_more:[[440,0,.08,.008],[554,.035,.12,.006]]
 };
 
 function enabled(){
@@ -41,7 +46,7 @@ function ensure(){
   if(!ctx){
     ctx=new AC();
     master=ctx.createGain();
-    master.gain.value=.72;
+    master.gain.value=.92;
     master.connect(ctx.destination);
   }
   if(ctx.state==='suspended')ctx.resume().catch(()=>{});
@@ -53,7 +58,7 @@ function tone(freq,offset,dur,gain,type='sine'){
   o.type=type;o.frequency.setValueAtTime(freq,t);
   lp.type='lowpass';lp.frequency.setValueAtTime(Math.min(2300,freq*3.3),t);lp.Q.value=.25;
   g.gain.setValueAtTime(.0001,t);
-  g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.022);
+  g.gain.exponentialRampToValueAtTime(Math.max(.0002,Math.min(.085,gain*1.9)),t+.022);
   g.gain.exponentialRampToValueAtTime(.0001,t+dur);
   o.connect(lp);lp.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.04);
 }
@@ -133,6 +138,20 @@ Storage.prototype.setItem=function(key,value){
 };
 window.addEventListener('raluvaaa-share',()=>play('share'));
 window.addEventListener('raluvaaa-remove',()=>play('remove'));
+
+/* Audible but restrained UI layer. Semantic actions still have their own motifs;
+   these cues make the interface itself feel alive on mobile. */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('button,summary,[data-open],[data-nav-wish]');
+  if(!el||el.disabled||el.id==='musicBtn')return;
+  let name=null;
+  if(el.id==='drawerClose'||el.id==='cancel')name='ui_close';
+  else if(el.matches('[data-nav-wish],.v28-back,.v28-root,[data-open]'))name='ui_nav';
+  else if(el.matches('summary'))name='ui_more';
+  else if(el.id==='entrustedBtn'||el.id==='myWorldBtn'||el.id==='createBtn')name='ui_open';
+  else if(el.matches('[data-act],#confirm,.sheet-actions button'))name='ui_action';
+  if(name)play(name);
+},true);
 
 window.__RALUVAAA_ACTION_AUDIO__={
   play,motifs,history,
