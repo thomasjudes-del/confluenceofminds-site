@@ -96,8 +96,9 @@ async function openWish(page,id){
   assert.equal(await p.locator('[data-nav-wish="'+child+'"]').count(),1,'root sheet should expose sub-wishes');
   await p.click('[data-nav-wish="'+child+'"]');
   assert.equal(await p.locator('[data-act="bloom"]').getAttribute('data-v27-bloom'),'branch');
-  assert.equal(await p.locator('[data-nav-wish="'+root+'"]').count(),1,'child sheet should expose parent wish');
-  await p.click('[data-nav-wish="'+root+'"]');
+  await p.waitForSelector('.v28-back',{state:'visible',timeout:2000});
+  assert.equal(await p.locator('.v28-back').count(),1,'child sheet should expose visible back navigation');
+  await p.click('.v28-back');
 
   let warning='';
   p.once('dialog',d=>{warning=d.message();d.accept()});
