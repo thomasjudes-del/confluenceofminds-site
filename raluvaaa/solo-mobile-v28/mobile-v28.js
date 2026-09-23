@@ -201,6 +201,25 @@ if(ritualLayer){
   ritualObserver.observe(ritualLayer,{childList:true,subtree:true});
 }
 
+function storedEventCount(){
+  try{
+    const x=JSON.parse(localStorage.getItem(STORE)||'null');
+    return Array.isArray(x?.events)?x.events.length:0;
+  }catch{return 0}
+}
+document.addEventListener('click',e=>{
+  const trigger=e.target.closest('#confirm,[data-act]');
+  if(!trigger)return;
+  const before=storedEventCount();
+  setTimeout(()=>{
+    const after=storedEventCount();
+    if(after===before)return;
+    closeGuardUntil=performance.now()+1500;
+    const drawer=document.getElementById('drawer');
+    if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
+  },170);
+},true);
+
 window.__RALUVAAA_V28__={
   version:28,
   decorate,
