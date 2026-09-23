@@ -7,10 +7,12 @@ const params=new URLSearchParams(location.search);
 const qa=params.has('qa')||params.has('sharedqa')||params.has('soloqa');
 const audio=new Audio(AUDIO_URL);
 audio.loop=true;
-audio.preload='none';
+audio.preload='auto';
 audio.volume=.16;
 let enabled=localStorage.getItem(STORE)!=='off';
 let started=false;
+let starting=false;
+let disarmAudioGesture=null;
 
 function installStyle(){
   const style=document.createElement('style');
@@ -45,7 +47,7 @@ function installUi(){
   btn.onclick=()=>{
     enabled=!enabled;
     localStorage.setItem(STORE,enabled?'on':'off');
-    if(enabled)start();else{audio.pause();started=false}
+    if(enabled){arm();start()}else{audio.pause();started=false;starting=false}
     refresh();
   };
   refresh();
@@ -62,26 +64,48 @@ function refresh(){
 }
 
 async function start(){
-  if(!enabled||started||qa)return;
+  if(!enabled||qa)return false;
+  if(!audio.paused&&!audio.ended){
+    started=true;
+    refresh();
+    if(disarmAudioGesture)disarmAudioGesture();
+    return true;
+  }
+  if(starting)return false;
+  starting=true;
   try{
     await audio.play();
     started=true;
     refresh();
+    if(disarmAudioGesture)disarmAudioGesture();
+    return true;
   }catch{
     started=false;
+    refresh();
+    return false;
+  }finally{
+    starting=false;
   }
 }
 
 function arm(){
   if(qa)return;
-  const begin=()=>{start();document.removeEventListener('pointerdown',begin,true);document.removeEventListener('keydown',begin,true)};
-  document.addEventListener('pointerdown',begin,true);
-  document.addEventListener('keydown',begin,true);
+  const events=['pointerup','touchend','click','keydown'];
+  const begin=()=>{if(enabled&&!started)start()};
+  disarmAudioGesture=()=>{
+    for(const type of events)document.removeEventListener(type,begin,true);
+    disarmAudioGesture=null;
+  };
+  for(const type of events){
+    document.addEventListener(type,begin,type==='touchend'?{capture:true,passive:true}:true);
+  }
 }
 
 installStyle();
 installUi();
 arm();
 
-window.__RALUVAAA_AUDIO__={audio,start,get enabled(){return enabled},url:AUDIO_URL};
+audio.addEventListener('playing',()=>{started=true;refresh();if(disarmAudioGesture)disarmAudioGesture()});
+audio.addEventListener('pause',()=>{if(!audio.ended)started=false});
+window.__RALUVAAA_AUDIO__={audio,start,get enabled(){return enabled},get started(){return started},url:AUDIO_URL};
 })();
