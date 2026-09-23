@@ -183,6 +183,8 @@ async function clickConfirmDialog(page,selector,accept){
   assert.equal(await page.locator('[data-nav-wish="'+b1+'"]').count(),1,'parent sheet must expose its branches');
   await page.click('[data-nav-wish="'+b1+'"]');
   assert.equal((await page.locator('#drawerBody .wish').innerText()).trim(),'Trouver un club de voile');
+  await page.waitForSelector('.v28-back',{state:'visible',timeout:2000});
+  await page.waitForSelector('.v28-root',{state:'visible',timeout:2000});
   assert.equal(await page.locator('.v28-back').count(),1,'child sheet must expose a visible parent back control');
   assert.equal(await page.locator('.v28-root').count(),1,'child sheet must expose a direct root control');
   await page.click('.v28-back');
