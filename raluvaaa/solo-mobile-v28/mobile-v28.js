@@ -178,10 +178,10 @@ Storage.prototype.setItem=function(key,value){
   const fresh=Array.isArray(after?.events)?after.events.slice(n):[];
   const visible=fresh.find(ev=>!ev.quiet&&CLOSE_AFTER.has(ev.type));
   if(visible){
-    closeGuardUntil=performance.now()+1500;
     setTimeout(()=>{
       const drawer=document.getElementById('drawer');
       if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
+      closeGuardUntil=performance.now()+1500;
     },70);
   }
 };
