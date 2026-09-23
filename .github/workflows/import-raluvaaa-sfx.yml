@@ -1,0 +1,37 @@
+name: Import RALUVAAA poetic SFX
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-raluvaaa-sfx.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download generated poetic SFX
+        run: |
+          set -e
+          mkdir -p raluvaaa/solo-mobile-v28/audio
+          curl -L --fail --retry 3 'https://dnznrvs05pmza.cloudfront.net/audio_sfx/339d1b8c-bdad-4bbd-ace6-d6bddb9fbb39/raluvaaa_create_soft_v1.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzVhYjQ4NDVmM2RmN2FiOCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDMzNzYwNX0.6SQqtSe2t2CI0m5ligfMAcW-NxCF750T8peg7CM7bJI' -o raluvaaa/solo-mobile-v28/audio/create.mp3
+          curl -L --fail --retry 3 'https://dnznrvs05pmza.cloudfront.net/audio_sfx/3e53d195-c4fa-4ef4-a28b-64728cf4765b/raluvaaa_encourage_soft_v1.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzUwYzc5MmVmZGUyMjI3NiIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDI5NzkwMn0.K92KhnDYGWKN7OOWwCmbzd4Km-HaI0NIpwNfmoWiEIw' -o raluvaaa/solo-mobile-v28/audio/encourage.mp3
+          curl -L --fail --retry 3 'https://dnznrvs05pmza.cloudfront.net/audio_sfx/53e68774-7c1c-4aa8-ae0c-ce6c3ca4ae3d/raluvaaa_evolve_soft_v1.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNWI0MjgwMDJlZWE5MjkzNCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDI4NDgwMn0.dLY6ELKoMJfE3HNYAvRmcUwRX0zpMpSM1CKV72t5NjY' -o raluvaaa/solo-mobile-v28/audio/evolve.mp3
+          curl -L --fail --retry 3 'https://dnznrvs05pmza.cloudfront.net/audio_sfx/b184cdc4-713a-4389-a344-b750ef78f13d/raluvaaa_split_soft_v1.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZDgxNGVmODU3NDZhM2QzOCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDI4NzQ5M30.1ovNeczFoM3PxpeJ_pxu4QDwDeUX8yOh3d-91oV16Lc' -o raluvaaa/solo-mobile-v28/audio/split.mp3
+          curl -L --fail --retry 3 'https://dnznrvs05pmza.cloudfront.net/audio_sfx/926a7a16-1374-4aa7-aec5-8fcc74eb1468/raluvaaa_connect_soft_v1.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNzQ0YmRlMjkxYTlmNDMwYyIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDMzODcyOX0.6iJuTU77N8pnoUHVJx2aL0pWn3vAOlME-aIYxZBNRm4' -o raluvaaa/solo-mobile-v28/audio/connect.mp3
+          curl -L --fail --retry 3 'https://dnznrvs05pmza.cloudfront.net/audio_sfx/c08b8035-5682-4ab9-accb-82ca72c79910/raluvaaa_help_soft_v1.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZTU0OWJjZGYxYWE2NjgyOSIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDMyMjE0M30.LDhVh635h5UVpjD7XLWe01qnSidvl2MEP4HKTGB7ins' -o raluvaaa/solo-mobile-v28/audio/help.mp3
+          curl -L --fail --retry 3 'https://dnznrvs05pmza.cloudfront.net/audio_sfx/1779e517-cd1f-4810-bb58-4cda7a7c4738/raluvaaa_bloom_soft_v1.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZTVlNjhlYTlhNDgxN2Q0NCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDMxNzg2NX0.MAhEW8eOljOFueqsfT5H7fyRq3LY_xrbSXPbxvFlMsE' -o raluvaaa/solo-mobile-v28/audio/bloom.mp3
+          curl -L --fail --retry 3 'https://dnznrvs05pmza.cloudfront.net/audio_sfx/462b8306-2cb5-4bc1-9cd3-47bc0627bc1b/raluvaaa_letgo_soft_v1.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNDUwOWZlZDY1M2ZlMTY5NCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDI5ODk2Nn0.jbVpEXrU1NJbkg6IYk7fC-JpN4yJLrtuZLDm2W7ypb0' -o raluvaaa/solo-mobile-v28/audio/letgo.mp3
+          file raluvaaa/solo-mobile-v28/audio/*.mp3
+      - name: Commit static SFX assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add raluvaaa/solo-mobile-v28/audio
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add poetic RALUVAAA sound design assets"
+          git push
