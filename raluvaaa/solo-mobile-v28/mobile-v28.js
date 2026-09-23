@@ -184,6 +184,20 @@ Storage.prototype.setItem=function(key,value){
   }
 };
 
+const ritualLayer=document.getElementById('ritualLayer');
+if(ritualLayer){
+  const ritualObserver=new MutationObserver(mutations=>{
+    const visible=mutations.some(m=>[...m.addedNodes].some(n=>n.nodeType===1&&(
+      n.matches?.('.rv-ring,.rv-seed,.rv-petal,.rv-bud,.rv-collapse,.rv-path')||
+      n.querySelector?.('.rv-ring,.rv-seed,.rv-petal,.rv-bud,.rv-collapse,.rv-path')
+    )));
+    if(!visible)return;
+    const drawer=document.getElementById('drawer');
+    if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
+  });
+  ritualObserver.observe(ritualLayer,{childList:true,subtree:true});
+}
+
 window.__RALUVAAA_V28__={
   version:28,
   decorate,
