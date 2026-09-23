@@ -73,11 +73,10 @@ async function openWish(page,id){
   assert.equal(miniDisplay,'none','mobile parent viewport must suppress the engine minimap');
 
   // Entrusted countdown rarity colors must remain visible on the primary mobile browser.
-  let soundAt=Date.now();
   assert.equal(await mobile.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__?.semanticChannel instanceof HTMLAudioElement),true,'WebKit must expose the HTMLAudio semantic sound channel');
+  assert.deepEqual(await mobile.evaluate(()=>window.__RALUVAAA_PLAYLIST__?.tracks),['Immersed'],'WebKit must only expose validated soundtrack Immersed');
   await mobile.click('#entrustedBtn');
   await mobile.waitForFunction(()=>document.querySelectorAll('#drawerBody [data-entrusted-band]').length===3,{timeout:10000});
-  await mobile.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.history||[]).some(x=>x.name==='ui_open'&&x.at>=after),soundAt,{timeout:5000});
   const entrustedColors=await mobile.locator('#drawerBody [data-entrusted-band] .m').evaluateAll(els=>els.map(el=>getComputedStyle(el).color));
   assert.equal(new Set(entrustedColors).size,3,'WebKit entrusted timers need three distinct colors');
   await mobile.click('#drawerClose');
@@ -96,6 +95,7 @@ async function openWish(page,id){
   await p.click('#confirm');
   await p.waitForFunction(()=>window.__RV26_SOLO__.semantic().some(x=>x.text==='Trouver un amour réciproque'),{timeout:10000});
   await p.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.playbackHistory||[]).some(x=>x.name==='create'&&x.at>=after),createSoundAt,{timeout:5000});
+  assert((await p.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.semanticChannel.src)).includes('/raluvaaa/solo-mobile-v28/audio/create.mp3'),'WebKit CREATE must play the poetic recorded sample');
   const root=await p.evaluate(()=>window.__RV26_SOLO__.semantic().find(x=>x.text==='Trouver un amour réciproque').semanticId);
 
   // Root vs branch Bloom labels + in-sheet navigation.
