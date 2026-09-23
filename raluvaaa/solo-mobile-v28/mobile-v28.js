@@ -163,6 +163,9 @@ observer.observe(document.body,{subtree:true,childList:true});
 document.addEventListener('click',e=>{
   if(e.target.closest('.lang button'))setTimeout(decorate,30);
 },true);
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-nav-wish],.v28-back,.v28-root'))decorate();
+});
 decorate();
 
 /* After a successful meaningful action, clear the UI so the consequence is seen in the world. */
