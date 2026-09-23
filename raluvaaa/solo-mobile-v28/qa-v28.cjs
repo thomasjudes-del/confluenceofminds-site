@@ -42,6 +42,8 @@ async function createWish(page,text,loc){
   await page.click('#confirm');
   await page.waitForFunction(text=>window.__RV26_SOLO__.semantic().some(x=>x.text===text),expected,{timeout:10000});
   await waitSound(page,'create',t);
+  await page.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.mediaHistory||[]).some(x=>x.name==='create'&&x.at>=after),t,{timeout:5000});
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.semanticChannel instanceof HTMLAudioElement),true,'create sound must use the iOS-safe HTMLAudio semantic channel');
   await page.waitForSelector('#ritualLayer .rv-seed',{timeout:5000});
   return await idByText(page,expected);
 }
@@ -358,18 +360,18 @@ async function clickConfirmDialog(page,selector,accept){
   assert.equal(await page.locator('#drawerBody .drawer-kicker:visible').count(),0,'technical wish kicker must not clutter the mobile sheet');
   await page.click('#createBtn');await page.locator('#wishInput').focus();const inputBox=await page.locator('#wishInput').boundingBox();assert(inputBox&&inputBox.x>=0&&inputBox.x+inputBox.width<=390,'mobile create input must stay in viewport: '+JSON.stringify(inputBox));await page.click('#cancel');
 
-  // The single sound control mutes both ambience and semantic micro-sounds.
+  // Music and sound design are distinct: muting the soundtrack must not kill interaction sounds.
   await page.click('#musicBtn');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled),false,'music button must mute ambience');
-  assert.equal((await page.locator('#musicBtn').innerText()).trim(),'♪','muted sound icon must remain a music note, not an X');
+  assert.equal((await page.locator('#musicBtn').innerText()).trim(),'♪','muted music icon must remain a music note, not an X');
   await page.waitForTimeout(180);
   assert.equal(await page.locator('#musicBtn .sound-strike').count(),1,'muted note must include a strike');
   assert(parseFloat(await page.locator('#musicBtn .sound-strike').evaluate(el=>getComputedStyle(el).opacity))>.8,'muted note strike must be visible');
-  const mutedHistory=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.length);
-  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.play('correct')),false,'action sound must respect global mute');
-  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.history.length),mutedHistory,'muted action must not enter sound history');
+  const fxBefore=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.mediaHistory.length);
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.playSemantic('correct')),true,'semantic sound design must remain active when soundtrack is muted');
+  await page.waitForFunction(n=>window.__RALUVAAA_ACTION_AUDIO__.mediaHistory.length>n,fxBefore,{timeout:5000});
   await page.click('#musicBtn');
-  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled),true,'music button must restore ambience and micro-sounds');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled),true,'music button must restore ambience');
 
   // Final persistence and no runtime errors.
   await page.reload({waitUntil:'domcontentloaded'});
