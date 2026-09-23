@@ -1,5 +1,6 @@
 (function(){
 'use strict';
+if(window.RALUVAAA_SOLO)document.title='RALUVAAA · Solo Organic V27';
 
 const frame=document.getElementById('engine');
 const STORE=window.RALUVAAA_STORE_KEY||'raluvaaaManualMvpV26';
