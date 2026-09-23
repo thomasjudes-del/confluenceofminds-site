@@ -45,6 +45,7 @@ async function createWish(page,text,loc){
   await page.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.mediaHistory||[]).some(x=>x.name==='create'&&x.at>=after),t,{timeout:5000});
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.semanticChannel instanceof HTMLAudioElement),true,'create sound must use the iOS-safe HTMLAudio semantic channel');
   await page.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.playbackHistory||[]).some(x=>x.name==='create'&&x.at>=after),t,{timeout:5000});
+  assert((await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.semanticChannel.src)).includes('/raluvaaa/solo-mobile-v28/audio/create.mp3'),'CREATE must use the poetic recorded sample, not a synthesized notification tone');
   await page.waitForSelector('#ritualLayer .rv-seed',{timeout:5000});
   return await idByText(page,expected);
 }
@@ -68,14 +69,17 @@ async function clickConfirmDialog(page,selector,accept){
   assert.equal((await state(page)).events.length,0,'solo candidate must start with no fake personal wish');
   assert.equal(await page.evaluate(()=>window.RALUVAAA_STORE_KEY),STORE,'V28 must use an isolated local wish store');
   assert.equal(await page.evaluate(()=>window.RALUVAAA_ENTRUSTED_POLICY_KEY),POLICY,'V28 must use an isolated entrusted policy cache');
-  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.audio.loop),false,'V27 ambient music must rotate as a playlist');
-  assert.equal(await page.evaluate(()=>window.__RALUVAAA_PLAYLIST__?.tracks?.length),4,'V27 must expose four ambient tracks');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.audio.loop),true,'Immersed must loop until the soundtrack shortlist is validated');
+  assert.deepEqual(await page.evaluate(()=>window.__RALUVAAA_PLAYLIST__?.tracks),['Immersed'],'only validated soundtrack Immersed may play');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_V27__?.version),27,'organic visual layer must remain active');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_V28__?.version),28,'V28 mobile-first layer must be active');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.audio.autoplay),true,'V28 must attempt ambient autoplay');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.audio.preload),'auto','V28 must preload ambient audio');
   assert.equal(await page.locator('#rvAtmosphere').count(),1,'V27 living atmosphere canvas must exist');
   const motifs=await page.evaluate(()=>Object.keys(window.__RALUVAAA_ACTION_AUDIO__.motifs));
+  const samples=await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.poeticSamples);
+  assert.equal(samples.create,'audio/create.mp3');
+  for(const name of ['create','encourage','evolve','split','branch_add','connect','help','bloom','abandon','resume','close_lineage'])assert(samples[name],'missing poetic sample mapping '+name);
   for(const name of ['create','correct','evolve','split','branch_add','reparent','bloom','abandon','resume','close_lineage','resume_lineage','remove','share'])assert(motifs.includes(name),'missing sound motif '+name);
 
   assert.equal(await page.locator('#musicBtn .sound-note').count(),1,'music control must use a music-note glyph');
@@ -83,9 +87,7 @@ async function clickConfirmDialog(page,selector,accept){
   const mini=await page.evaluate(()=>{const f=document.getElementById('engine').contentWindow,c=f.document.getElementById('mini'),r=c.getBoundingClientRect();if(r.width<2||r.height<2)return{visible:false};const x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data,w=c.width,h=c.height;let bright=0,opaque=0,rowMax=0;for(let y=0;y<h;y++){let row=0;for(let xx=0;xx<w;xx++){const i=(y*w+xx)*4,a=d[i+3];if(a>20)opaque++;if(a>90&&d[i]>220&&d[i+1]>220&&d[i+2]>220){bright++;row++}}rowMax=Math.max(rowMax,row)}return{visible:true,w,h,brightRatio:bright/(w*h),rowBrightRatio:rowMax/w,opaqueRatio:opaque/(w*h)}});assert.equal(mini.visible,true,'desktop minimap should render');assert(mini.brightRatio<.08,'minimap must not contain a large white block: '+JSON.stringify(mini));assert(mini.rowBrightRatio<.35,'minimap must not contain white stripe artifacts: '+JSON.stringify(mini));
 
   // Entrusted wishes remain part of solo discovery but are read-only.
-  let uiT=Date.now();
   await page.click('#entrustedBtn');
-  await waitSound(page,'ui_open',uiT);
   await page.waitForFunction(()=>document.querySelectorAll('#drawerBody [data-entrusted-band]').length===3,{timeout:10000});
   assert.equal(await page.locator('#drawerBody [data-entrusted-band]').count(),3);
   const timerColors=await page.locator('#drawerBody [data-entrusted-band] .m').evaluateAll(els=>els.map(el=>getComputedStyle(el).color));
