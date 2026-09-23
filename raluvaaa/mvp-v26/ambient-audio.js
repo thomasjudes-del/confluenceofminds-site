@@ -12,6 +12,8 @@ audio.volume=.16;
 let enabled=localStorage.getItem(STORE)!=='off';
 let started=false;
 let starting=false;
+let autoplayPrimed=false;
+let blockedByAutoplay=false;
 let disarmAudioGesture=null;
 
 function installStyle(){
@@ -47,7 +49,7 @@ function installUi(){
   btn.onclick=()=>{
     enabled=!enabled;
     localStorage.setItem(STORE,enabled?'on':'off');
-    if(enabled){arm();start()}else{audio.pause();started=false;starting=false}
+    if(enabled){arm();start().then(ok=>{if(!ok)primeMutedAutoplay()})}else{audio.pause();audio.muted=false;started=false;starting=false;autoplayPrimed=false;blockedByAutoplay=false}
     refresh();
   };
   refresh();
@@ -65,8 +67,9 @@ function refresh(){
 
 async function start(){
   if(!enabled||qa)return false;
-  if(!audio.paused&&!audio.ended){
+  if(!audio.paused&&!audio.ended&&!audio.muted){
     started=true;
+    blockedByAutoplay=false;
     refresh();
     if(disarmAudioGesture)disarmAudioGesture();
     return true;
@@ -74,13 +77,17 @@ async function start(){
   if(starting)return false;
   starting=true;
   try{
+    audio.muted=false;
     await audio.play();
     started=true;
+    autoplayPrimed=false;
+    blockedByAutoplay=false;
     refresh();
     if(disarmAudioGesture)disarmAudioGesture();
     return true;
   }catch{
     started=false;
+    blockedByAutoplay=true;
     refresh();
     return false;
   }finally{
@@ -88,16 +95,63 @@ async function start(){
   }
 }
 
+async function primeMutedAutoplay(){
+  if(!enabled||qa||autoplayPrimed||(!audio.paused&&!audio.ended))return false;
+  const previousMuted=audio.muted;
+  try{
+    audio.muted=true;
+    await audio.play();
+    autoplayPrimed=true;
+    blockedByAutoplay=true;
+    started=false;
+    refresh();
+    return true;
+  }catch{
+    audio.muted=previousMuted;
+    autoplayPrimed=false;
+    return false;
+  }
+}
+
+function fadeIn(){
+  const target=.16;
+  audio.volume=.015;
+  const began=performance.now(),duration=620;
+  const step=now=>{
+    const p=Math.min(1,(now-began)/duration);
+    audio.volume=.015+(target-.015)*(1-Math.pow(1-p,3));
+    if(p<1)requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+async function awakenFromGesture(){
+  if(!enabled||qa)return false;
+  try{
+    audio.muted=false;
+    if(audio.paused||audio.ended)await audio.play();
+    fadeIn();
+    started=true;
+    autoplayPrimed=false;
+    blockedByAutoplay=false;
+    refresh();
+    if(disarmAudioGesture)disarmAudioGesture();
+    return true;
+  }catch{
+    return start();
+  }
+}
+
 function arm(){
-  if(qa)return;
-  const events=['pointerup','touchend','click','keydown'];
-  const begin=()=>{if(enabled&&!started)start()};
+  if(qa||disarmAudioGesture)return;
+  const events=['pointerdown','touchstart','keydown'];
+  const begin=()=>{if(enabled&&(!started||audio.muted||blockedByAutoplay))awakenFromGesture()};
   disarmAudioGesture=()=>{
     for(const type of events)document.removeEventListener(type,begin,true);
     disarmAudioGesture=null;
   };
   for(const type of events){
-    document.addEventListener(type,begin,type==='touchend'?{capture:true,passive:true}:true);
+    document.addEventListener(type,begin,type==='touchstart'?{capture:true,passive:true}:true);
   }
 }
 
@@ -105,7 +159,10 @@ installStyle();
 installUi();
 arm();
 
-audio.addEventListener('playing',()=>{started=true;refresh();if(disarmAudioGesture)disarmAudioGesture()});
+audio.addEventListener('playing',()=>{if(audio.muted){autoplayPrimed=true;started=false}else{started=true;blockedByAutoplay=false;if(disarmAudioGesture)disarmAudioGesture()}refresh()});
 audio.addEventListener('pause',()=>{if(!audio.ended)started=false});
-window.__RALUVAAA_AUDIO__={audio,start,get enabled(){return enabled},get started(){return started},url:AUDIO_URL};
+window.__RALUVAAA_AUDIO__={audio,start,awakenFromGesture,primeMutedAutoplay,get enabled(){return enabled},get started(){return started},get blockedByAutoplay(){return blockedByAutoplay},get autoplayPrimed(){return autoplayPrimed},url:AUDIO_URL};
+if(enabled&&!qa){
+  start().then(ok=>{if(!ok)primeMutedAutoplay()});
+}
 })();
