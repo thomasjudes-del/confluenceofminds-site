@@ -1,0 +1,41 @@
+name: Check RALUVAAA Solo Mobile V28
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-mobile-v28/**'
+      - '.github/workflows/check-raluvaaa-solo-mobile-v28.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/solo-mobile-v28/mobile-v28.js
+          node --check raluvaaa/solo-mobile-v28/sound-v28.js
+          node --check raluvaaa/solo-mobile-v28/qa-v28.cjs
+          node --check raluvaaa/solo-mobile-v28/qa-v28-webkit.cjs
+          grep -q 'data-version="28"' raluvaaa/solo-mobile-v28/index.html
+          grep -q 'mobile-v28.css' raluvaaa/solo-mobile-v28/index.html
+          grep -q 'mobile-v28.js' raluvaaa/solo-mobile-v28/index.html
+          grep -q 'sound-v28.js' raluvaaa/solo-mobile-v28/index.html
+          ! grep -q 'mvp-v26/action-audio.js' raluvaaa/solo-mobile-v28/index.html
+      - name: Install browsers
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium webkit >/dev/null 2>&1
+      - name: Run V28 regression and mobile QA
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v28-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          node raluvaaa/solo-mobile-v28/qa-v28.cjs
+          node raluvaaa/solo-mobile-v28/qa-v28-webkit.cjs
