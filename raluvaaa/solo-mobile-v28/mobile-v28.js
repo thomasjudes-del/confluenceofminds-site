@@ -71,16 +71,18 @@ function buildLineageBar(){
   const body=document.getElementById('drawerBody');
   if(!body||!body.querySelector('.wish'))return;
   let bar=body.querySelector('.v28-lineage-bar');
-  if(bar)bar.remove();
-
   const api=semantic(),cur=currentSemantic();
   if(!cur)return;
   const parent=cur.parentSemanticId?api.find(x=>x.semanticId===cur.parentSemanticId):null;
   const root=rootFor(cur,api);
   if(!parent&&!root)return;
+  const sig=[cur.semanticId,parent?.semanticId||'',root?.semanticId||'',lang()].join('|');
+  if(bar?.dataset.sig===sig)return;
+  if(bar)bar.remove();
 
   bar=document.createElement('div');
   bar.className='v28-lineage-bar';
+  bar.dataset.sig=sig;
 
   if(parent){
     const back=document.createElement('button');
@@ -139,7 +141,7 @@ function simplifyFragments(){
     nav.setAttribute('aria-label',lang().startsWith('en')?'Branches':'Branches');
     nav.querySelectorAll('button:not(.wish-nav-parent)').forEach(b=>{
       const s=b.querySelector('span');
-      if(s)s.textContent=lang().startsWith('en')?'Branch':'Branche';
+      if(s){const next=lang().startsWith('en')?'Branch':'Branche';if(s.textContent!==next)s.textContent=next;}
     });
   }
 }
