@@ -2,8 +2,8 @@ const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 
 const BASE='http://127.0.0.1:4173/raluvaaa/solo-mobile-v28/?soloqa=1&fresh=1';
-const STORE='raluvaaaSoloAlphaV1';
-const POLICY='raluvaaaEntrustedSoloV1';
+const STORE='raluvaaaSoloMobileV28R1';
+const POLICY='raluvaaaEntrustedSoloMobileV28R1';
 
 async function waitReady(page){
   await page.goto(BASE,{waitUntil:'domcontentloaded'});
@@ -63,6 +63,8 @@ async function clickConfirmDialog(page,selector,accept){
   assert.equal(await page.locator('#inboxBtn').isHidden(),true,'solo must hide inbox');
   assert.equal(await page.locator('#qaStrip').isHidden(),true,'solo must hide A/B QA controls');
   assert.equal((await state(page)).events.length,0,'solo candidate must start with no fake personal wish');
+  assert.equal(await page.evaluate(()=>window.RALUVAAA_STORE_KEY),STORE,'V28 must use an isolated local wish store');
+  assert.equal(await page.evaluate(()=>window.RALUVAAA_ENTRUSTED_POLICY_KEY),POLICY,'V28 must use an isolated entrusted policy cache');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.audio.loop),false,'V27 ambient music must rotate as a playlist');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_PLAYLIST__?.tracks?.length),4,'V27 must expose four ambient tracks');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_V27__?.version),27,'organic visual layer must remain active');
@@ -78,9 +80,14 @@ async function clickConfirmDialog(page,selector,accept){
   const mini=await page.evaluate(()=>{const f=document.getElementById('engine').contentWindow,c=f.document.getElementById('mini'),r=c.getBoundingClientRect();if(r.width<2||r.height<2)return{visible:false};const x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data,w=c.width,h=c.height;let bright=0,opaque=0,rowMax=0;for(let y=0;y<h;y++){let row=0;for(let xx=0;xx<w;xx++){const i=(y*w+xx)*4,a=d[i+3];if(a>20)opaque++;if(a>90&&d[i]>220&&d[i+1]>220&&d[i+2]>220){bright++;row++}}rowMax=Math.max(rowMax,row)}return{visible:true,w,h,brightRatio:bright/(w*h),rowBrightRatio:rowMax/w,opaqueRatio:opaque/(w*h)}});assert.equal(mini.visible,true,'desktop minimap should render');assert(mini.brightRatio<.08,'minimap must not contain a large white block: '+JSON.stringify(mini));assert(mini.rowBrightRatio<.35,'minimap must not contain white stripe artifacts: '+JSON.stringify(mini));
 
   // Entrusted wishes remain part of solo discovery but are read-only.
+  let uiT=Date.now();
   await page.click('#entrustedBtn');
+  await waitSound(page,'ui_open',uiT);
   await page.waitForFunction(()=>document.querySelectorAll('#drawerBody [data-entrusted-band]').length===3,{timeout:10000});
   assert.equal(await page.locator('#drawerBody [data-entrusted-band]').count(),3);
+  const timerColors=await page.locator('#drawerBody [data-entrusted-band] .m').evaluateAll(els=>els.map(el=>getComputedStyle(el).color));
+  assert.equal(new Set(timerColors).size,3,'entrusted countdowns must keep three distinct rarity colors');
+  assert(timerColors.every(c=>!c.includes('219, 230, 246')),'entrusted countdowns must not regress to generic grey');
   const entrustedIds=await page.locator('#drawerBody [data-open]').evaluateAll(els=>els.slice(0,3).map(x=>x.dataset.open));
   assert.equal(new Set(entrustedIds).size,3,'entrusted slots must be distinct');
   await page.click('#drawerBody [data-open="'+entrustedIds[0]+'"]');
