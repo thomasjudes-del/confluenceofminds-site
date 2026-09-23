@@ -1,0 +1,60 @@
+name: Check RALUVAAA Solo Organic V27
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-organic-v27/**'
+      - 'raluvaaa/mvp-v26/app.js'
+      - 'raluvaaa/mvp-v26/alpha-hardening.js'
+      - 'raluvaaa/mvp-v26/alpha-v0-polish.js'
+      - 'raluvaaa/mvp-v26/ambient-audio.js'
+      - 'raluvaaa/mvp-v26/action-audio.js'
+      - 'raluvaaa/mvp-v25/engine-runtime.js'
+      - 'raluvaaa/v22/engine-v03-locked.html'
+      - '.github/workflows/check-raluvaaa-solo-organic-v27.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/mvp-v26/app.js
+          node --check raluvaaa/mvp-v26/alpha-hardening.js
+          node --check raluvaaa/mvp-v26/alpha-v0-polish.js
+          node --check raluvaaa/mvp-v26/ambient-audio.js
+          node --check raluvaaa/mvp-v26/action-audio.js
+          node --check raluvaaa/solo-organic-v27/organic-v27.js
+          node --check raluvaaa/solo-organic-v27/ambient-playlist-v27.js
+          node --check raluvaaa/solo-organic-v27/qa-solo-v27.cjs
+          node --check raluvaaa/solo-organic-v27/qa-solo-v27-webkit.cjs
+          grep -q "RALUVAAA_SOLO" raluvaaa/solo-organic-v27/index.html
+          grep -q "solo-organic-v27" raluvaaa/solo-organic-v27/index.html
+          grep -q "organic-v27.js" raluvaaa/solo-organic-v27/index.html
+          grep -q "ambient-playlist-v27.js" raluvaaa/solo-organic-v27/index.html
+      - name: Install browsers
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium webkit >/dev/null 2>&1
+      - name: Run Solo Organic V27 QA
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v27-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          if ! node raluvaaa/solo-organic-v27/qa-solo-v27.cjs; then
+            echo '--- Static server log ---'
+            cat /tmp/raluvaaa-v27-http.log || true
+            exit 1
+          fi
+          if ! node raluvaaa/solo-organic-v27/qa-solo-v27-webkit.cjs; then
+            echo '--- Static server log ---'
+            cat /tmp/raluvaaa-v27-http.log || true
+            exit 1
+          fi
