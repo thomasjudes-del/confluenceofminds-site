@@ -166,8 +166,12 @@ document.addEventListener('click',e=>{
 decorate();
 
 /* After a successful meaningful action, clear the UI so the consequence is seen in the world. */
-let closeGuardUntil=0;
+let pendingClose=0;
 const previousSet=Storage.prototype.setItem;
+function closeWishSheet(){
+  const drawer=document.getElementById('drawer');
+  if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
+}
 Storage.prototype.setItem=function(key,value){
   let before=null;
   if(key===STORE){try{before=JSON.parse(this.getItem(key)||'null')}catch{}}
@@ -177,48 +181,31 @@ Storage.prototype.setItem=function(key,value){
   const n=Array.isArray(before?.events)?before.events.length:0;
   const fresh=Array.isArray(after?.events)?after.events.slice(n):[];
   const visible=fresh.find(ev=>!ev.quiet&&CLOSE_AFTER.has(ev.type));
-  if(visible){
-    const drawer=document.getElementById('drawer');
-    if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
-    closeGuardUntil=performance.now()+1500;
-  }
+  if(!visible)return;
+  const ticket=++pendingClose;
+  /* The engine may refocus/reopen the selected wish after commit. Close only
+     after its visual consequence begins, with a short fallback if no ritual fires. */
+  setTimeout(()=>{
+    if(pendingClose!==ticket)return;
+    closeWishSheet();
+    pendingClose=0;
+  },780);
 };
 
 const ritualLayer=document.getElementById('ritualLayer');
 if(ritualLayer){
   const ritualObserver=new MutationObserver(mutations=>{
-    const visible=mutations.some(m=>[...m.addedNodes].some(n=>n.nodeType===1&&(
+    if(!pendingClose)return;
+    const visual=mutations.some(m=>[...m.addedNodes].some(n=>n.nodeType===1&&(
       n.matches?.('.rv-ring,.rv-seed,.rv-petal,.rv-bud,.rv-collapse,.rv-path')||
       n.querySelector?.('.rv-ring,.rv-seed,.rv-petal,.rv-bud,.rv-collapse,.rv-path')
     )));
-    if(!visible||performance.now()<closeGuardUntil)return;
-    const drawer=document.getElementById('drawer');
-    if(drawer&&!drawer.classList.contains('hidden')){
-      closeGuardUntil=performance.now()+1200;
-      document.getElementById('drawerClose')?.click();
-    }
+    if(!visual)return;
+    closeWishSheet();
+    pendingClose=0;
   });
   ritualObserver.observe(ritualLayer,{childList:true,subtree:true});
 }
-
-function storedEventCount(){
-  try{
-    const x=JSON.parse(localStorage.getItem(STORE)||'null');
-    return Array.isArray(x?.events)?x.events.length:0;
-  }catch{return 0}
-}
-document.addEventListener('click',e=>{
-  const trigger=e.target.closest('#confirm,[data-act]');
-  if(!trigger)return;
-  const before=storedEventCount();
-  setTimeout(()=>{
-    const after=storedEventCount();
-    if(after===before)return;
-    closeGuardUntil=performance.now()+1500;
-    const drawer=document.getElementById('drawer');
-    if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
-  },170);
-},true);
 
 window.__RALUVAAA_V28__={
   version:28,
