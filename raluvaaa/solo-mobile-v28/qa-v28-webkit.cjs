@@ -92,8 +92,10 @@ async function openWish(page,id){
   await p.click('#confirm');
   assert((await p.locator('#toast').innerText()).toLowerCase().includes('lieu'),'WebKit must reject locationless creation');
   await p.fill('#locInput','Rome, Italie');
+  const createSoundAt=Date.now();
   await p.click('#confirm');
   await p.waitForFunction(()=>window.__RV26_SOLO__.semantic().some(x=>x.text==='Trouver un amour réciproque'),{timeout:10000});
+  await p.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.playbackHistory||[]).some(x=>x.name==='create'&&x.at>=after),createSoundAt,{timeout:5000});
   const root=await p.evaluate(()=>window.__RV26_SOLO__.semantic().find(x=>x.text==='Trouver un amour réciproque').semanticId);
 
   // Root vs branch Bloom labels + in-sheet navigation.
