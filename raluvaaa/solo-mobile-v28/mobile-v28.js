@@ -146,6 +146,7 @@ function simplifyFragments(){
   }
 }
 function decorate(){
+  try{window.__RALUVAAA_V27__?.decorate?.()}catch{}
   if(window.RALUVAAA_SOLO)document.title='RALUVAAA · Solo Mobile V28';
   if(document.querySelector('#drawer:not(.hidden) #drawerBody .wish')){
     buildLineageBar();
