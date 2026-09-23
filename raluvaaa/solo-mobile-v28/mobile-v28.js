@@ -166,6 +166,7 @@ document.addEventListener('click',e=>{
 decorate();
 
 /* After a successful meaningful action, clear the UI so the consequence is seen in the world. */
+let closeGuardUntil=0;
 const previousSet=Storage.prototype.setItem;
 Storage.prototype.setItem=function(key,value){
   let before=null;
@@ -177,6 +178,7 @@ Storage.prototype.setItem=function(key,value){
   const fresh=Array.isArray(after?.events)?after.events.slice(n):[];
   const visible=fresh.find(ev=>!ev.quiet&&CLOSE_AFTER.has(ev.type));
   if(visible){
+    closeGuardUntil=performance.now()+1500;
     setTimeout(()=>{
       const drawer=document.getElementById('drawer');
       if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
@@ -191,9 +193,12 @@ if(ritualLayer){
       n.matches?.('.rv-ring,.rv-seed,.rv-petal,.rv-bud,.rv-collapse,.rv-path')||
       n.querySelector?.('.rv-ring,.rv-seed,.rv-petal,.rv-bud,.rv-collapse,.rv-path')
     )));
-    if(!visible)return;
+    if(!visible||performance.now()<closeGuardUntil)return;
     const drawer=document.getElementById('drawer');
-    if(drawer&&!drawer.classList.contains('hidden'))document.getElementById('drawerClose')?.click();
+    if(drawer&&!drawer.classList.contains('hidden')){
+      closeGuardUntil=performance.now()+1200;
+      document.getElementById('drawerClose')?.click();
+    }
   });
   ritualObserver.observe(ritualLayer,{childList:true,subtree:true});
 }
