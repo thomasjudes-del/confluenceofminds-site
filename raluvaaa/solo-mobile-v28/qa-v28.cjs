@@ -38,14 +38,9 @@ async function createWish(page,text,loc){
   await page.click('#createBtn');
   await page.fill('#wishInput',text);
   if(loc!==undefined)await page.fill('#locInput',loc);
-  const t=Date.now();
   await page.click('#confirm');
   await page.waitForFunction(text=>window.__RV26_SOLO__.semantic().some(x=>x.text===text),expected,{timeout:10000});
-  await waitSound(page,'create',t);
-  await page.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.mediaHistory||[]).some(x=>x.name==='create'&&x.at>=after),t,{timeout:5000});
-  assert.equal(await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.semanticChannel instanceof HTMLAudioElement),true,'create sound must use the iOS-safe HTMLAudio semantic channel');
-  await page.waitForFunction(after=>(window.__RALUVAAA_ACTION_AUDIO__?.playbackHistory||[]).some(x=>x.name==='create'&&x.at>=after),t,{timeout:5000});
-  assert((await page.evaluate(()=>window.__RALUVAAA_ACTION_AUDIO__.semanticChannel.src)).includes('/raluvaaa/solo-mobile-v28/audio/create.mp3'),'CREATE must use the poetic recorded sample, not a synthesized notification tone');
+  assert.equal(await page.evaluate(()=>window.RALUVAAA_SOUND_DESIGN_APPROVED),false,'candidate sounds must not play before approval');
   await page.waitForSelector('#ritualLayer .rv-seed',{timeout:5000});
   return await idByText(page,expected);
 }
@@ -104,6 +99,20 @@ async function clickConfirmDialog(page,selector,accept){
   await page.click('#myWorldBtn');
   assert((await page.locator('#drawerBody').innerText()).includes('Aucun wish'),'solo My wishes should start empty');
   await page.click('#drawerClose');
+
+  // Desktop Chrome fallback: if browser geolocation is denied/unavailable, use an approximate network city/country.
+  {
+    const denied=await browser.newContext({viewport:{width:1365,height:820},locale:'fr-FR'});
+    const p2=await denied.newPage();
+    await p2.route('https://ipwho.is/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,city:'Nantes',country:'France'})}));
+    await p2.route('https://ipapi.co/json/**',route=>route.abort());
+    await p2.goto(BASE,{waitUntil:'domcontentloaded'});
+    await p2.waitForFunction(()=>window.__RV26_SOLO__,{timeout:20000});
+    await p2.click('#createBtn');
+    await p2.waitForFunction(()=>document.getElementById('locInput')?.value==='Nantes, France',{timeout:7000});
+    assert((await p2.locator('#locStatus').innerText()).toLowerCase().includes('réseau'),'desktop fallback must identify network-based location');
+    await denied.close();
+  }
 
   // Location is mandatory and is prefilled from the place where the wish is formulated.
   await page.click('#createBtn');
