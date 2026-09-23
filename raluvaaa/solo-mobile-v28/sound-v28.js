@@ -3,7 +3,7 @@
 
 const STORE=window.RALUVAAA_STORE_KEY||'raluvaaaSoloAlphaV1';
 const history=[];
-let ctx=null,master=null,armed=false,lastAt=0;
+let ctx=null,master=null,armed=false,lastAt=-1e9;
 
 const motifs={
   create:[[196,0,.34,.026],[294,.08,.42,.020],[392,.18,.52,.014]],
