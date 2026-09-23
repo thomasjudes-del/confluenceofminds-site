@@ -5,15 +5,12 @@ if(!A||!A.audio)return;
 const audio=A.audio;
 const base='https://incompetech.com/music/royalty-free/mp3-royaltyfree/';
 const tracks=[
-  {name:'Immersed',file:'Immersed.mp3',isrc:'USUAN1600010'},
-  {name:'Meditation Impromptu 01',file:'Meditation Impromptu 01.mp3',isrc:'USUAN1100163'},
-  {name:'Windswept',file:'Windswept.mp3',isrc:'USUAN1100757'},
-  {name:'Dream Culture',file:'Dream Culture.mp3',isrc:'USUAN1300046'}
+  {name:'Immersed',file:'Immersed.mp3',isrc:'USUAN1600010'}
 ];
 const KEY='raluvaaaAmbientTrackV27';
 let index=Math.max(0,Math.min(tracks.length-1,Number(localStorage.getItem(KEY)||0)||0));
 let advancing=false;
-audio.loop=false;
+audio.loop=true;
 audio.preload='auto';
 
 function trackUrl(t){return base+encodeURIComponent(t.file)}
