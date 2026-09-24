@@ -28,18 +28,18 @@ function normalized(value){
 function semanticFor(label){
   const s=normalized(label);
   if(!s)return null;
-  if(s.includes('prolong')||s.includes('continue'))return 'evolve';
-  if(s.includes('embranch')||s==='branch'||s.includes('brancher'))return 'branch';
+  if(s.includes('prolong')||s.includes('continue')||s.includes('faire evoluer'))return 'evolve';
+  if(s.includes('embranch')||s==='branch'||s.includes('brancher')||s.includes('decompos')||s==='+ branche')return 'branch';
   if(s.includes('fleur')||s.includes('bloom'))return 'bloom';
   if(s.includes('soutien')||s.includes('soutenir')||s.includes('encourag')||s==='support')return 'encourage';
-  if(s.includes("proposer de l'aide")||s.includes('offer help')||s==='help')return 'help';
-  if(s.includes('greffer')||s.includes('graft'))return 'graft';
+  if(s.includes("proposer de l'aide")||s.includes('proposer une aide')||s.includes('offer help')||s==='help')return 'help';
+  if(s.includes('greffer')||s.includes('graft')||s.includes('greffe')||s.includes('connect'))return 'graft';
   if(s.includes('recentr')||s.includes('recenter'))return 'recenter';
   if(s.includes('modifier')||s.includes('modify'))return 'modify';
   if(s.includes('partager')||s.includes('share'))return 'share';
-  if(s.includes('proposer une piste')||s.includes('suggest a path'))return 'suggest';
-  if(s.includes('laisser ce wish')||s.includes('laisser cette branche')||s.includes('let this'))return 'letgo';
-  if(s.includes('reveiller')||s.includes('revive'))return 'revive';
+  if(s.includes('proposer une piste')||s.includes('suggest a path')||s.includes('suggerer')||s.includes('suggest'))return 'suggest';
+  if(s.includes('laisser ce wish')||s.includes('laisser cette branche')||s.includes('let this')||s.includes('abandonner')||s.includes('clore le wish'))return 'letgo';
+  if(s.includes('reveiller')||s.includes('revive')||s.includes('reprendre'))return 'revive';
   if(s.includes('signaler')||s.includes('report'))return 'report';
   return null;
 }
