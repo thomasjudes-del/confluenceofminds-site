@@ -1,0 +1,64 @@
+name: Build Anjin final social master
+
+on:
+  push:
+    paths:
+      - ".github/workflows/build-anjin-final.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install media tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg curl
+
+      - name: Download visual master
+        run: |
+          curl -L --fail --retry 3 \
+            "https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/anjin/anjin-visual-master-v3.mp4" \
+            -o visual.mp4
+
+      - name: Download free licensed soundtrack
+        run: |
+          curl -L --fail --retry 3 \
+            "https://peritune.com/music/PerituneMaterial_Sakuya2.mp3" \
+            -o soundtrack.mp3 \
+          || curl -L --fail --retry 3 \
+            "https://raw.githubusercontent.com/4thfever/cultivation-world-simulator/main/web/public/bgm/PerituneMaterial_Sakuya2.mp3" \
+            -o soundtrack.mp3
+          ffprobe -v error -show_entries format=duration -of default=nk=1:nw=1 soundtrack.mp3
+
+      - name: Replace soundtrack and master audio
+        run: |
+          ffmpeg -y \
+            -i visual.mp4 \
+            -i soundtrack.mp3 \
+            -filter_complex "[1:a]atrim=0:22.133,afade=t=in:st=0:d=0.5,afade=t=out:st=21.0:d=1.1,loudnorm=I=-14:TP=-1:LRA=7[a]" \
+            -map 0:v:0 -map "[a]" \
+            -c:v copy -c:a aac -b:a 192k -ar 48000 -ac 2 \
+            -movflags +faststart -shortest \
+            ANJIN_FINAL_SAKUYA2.mp4
+          ffprobe -v error \
+            -show_entries stream=codec_type,codec_name,width,height,channels,sample_rate:format=duration,size \
+            -of json ANJIN_FINAL_SAKUYA2.mp4
+
+      - name: Write music credit
+        run: |
+          cat > MUSIC_CREDIT.txt <<'EOF'
+          Music: "Sakuya2" by PeriTune
+          Source: https://peritune.com/blog/2016/01/01/sakuya2/
+          License: Creative Commons Attribution 4.0 International
+          https://creativecommons.org/licenses/by/4.0/
+          EOF
+
+      - name: Upload final master
+        uses: actions/upload-artifact@v4
+        with:
+          name: anjin-final-sakuya2
+          path: |
+            ANJIN_FINAL_SAKUYA2.mp4
+            MUSIC_CREDIT.txt
+          if-no-files-found: error
+          retention-days: 7
