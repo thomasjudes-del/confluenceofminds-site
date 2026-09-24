@@ -106,7 +106,7 @@ async function assertBloom(page,childId){
 }
 
 async function assertSuggestIsBranching(page){
-  await page.click('#drawerClose');
+  if(await page.locator('#drawerClose').isVisible())await page.click('#drawerClose');
   await page.click('[data-lang="en"]');
   await page.click('#entrustedBtn');
   await page.waitForSelector('#drawerBody [data-open]',{timeout:6000});
