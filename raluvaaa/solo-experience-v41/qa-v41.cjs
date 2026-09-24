@@ -375,6 +375,8 @@ async function testLegoReattachAndRemoveQC(page){
 }
 
 async function testForeignActionSmoke(page,ownRoot){
+  // The earlier workflow may have bloomed ownRoot. Graft QC needs a current live local endpoint.
+  const connectorRoot=(await meta(page,ownRoot))?.state==='alive'?ownRoot:await createWish(page,'Fresh graft source');
   const foreign=await page.evaluate(()=>{
     const s=window.__RV26_SOLO__.semantic();
     return s.find(x=>x.simulated&&x.state==='alive'&&!window.__RALUVAAA_WORKFLOW_V41__.isSuperseded(x.semanticId))?.semanticId||null;
@@ -401,7 +403,7 @@ async function testForeignActionSmoke(page,ownRoot){
   await page.click('#confirm');
   assert((await state(page)).events.some(e=>e.type==='suggest_proposed'&&e.semanticId===foreign),'branch suggestion must be recorded');
 
-  await open(page,ownRoot);
+  await open(page,connectorRoot);
   await action(page,'connect');
   await page.waitForSelector('#modeBar:not(.hidden)',{timeout:4000});
   await page.evaluate(id=>document.getElementById('engine').contentWindow.postMessage({type:'rv25-focus',semanticId:id},location.origin),foreign);
