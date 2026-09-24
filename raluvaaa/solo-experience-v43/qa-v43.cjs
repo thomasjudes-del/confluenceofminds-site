@@ -127,6 +127,9 @@ async function testShare(page,id){
 async function testMobile(page,id){
   await page.setViewportSize({width:390,height:844});
   await open(page,id);
+  await page.waitForSelector('#v43MobileBookmarkBtn',{state:'visible',timeout:5000});
+  assert.equal(await page.locator('#v43MobileBookmarkBtn').innerText(),'Saved','mobile Save must be visibly labeled, not an unexplained icon');
+  assert.equal(await page.locator('#v43BookmarkBtn').isVisible(),false,'desktop header bookmark must not create a stray mobile icon');
   await page.locator('#drawerBody .v33-action-unit[data-v39-icon="share"] .v33-action-circle').click();
   await page.waitForSelector('#v43ShareOverlay.open',{timeout:5000});
   const box=await page.locator('.v43-share-sheet').boundingBox();
