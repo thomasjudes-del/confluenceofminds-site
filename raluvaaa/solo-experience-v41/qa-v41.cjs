@@ -207,8 +207,10 @@ async function testSelectiveWholeRevive(page){
   assert(!close.semanticIds.includes(old),'close snapshot must not absorb a branch already let go');
 
   await open(page,root);
-  await page.waitForSelector('#drawerBody .v33-action-unit[data-v41-icon="revive"] img.v41-revive-art',{timeout:5000});
-  const reviveIcon=await page.locator('#drawerBody .v33-action-unit[data-v41-icon="revive"] img.v41-revive-art').evaluate(img=>({src:img.src,nw:img.naturalWidth,nh:img.naturalHeight}));
+  await page.waitForSelector('#drawerBody .v33-action-unit[data-v41-icon="revive"]:not(.v41-workflow-hidden) img.v41-revive-art',{timeout:5000});
+  const visibleRevives=page.locator('#drawerBody .v33-action-unit[data-v41-icon="revive"]:not(.v41-workflow-hidden)');
+  assert.equal(await visibleRevives.count(),1,'legacy layers must expose only one visible Revive action');
+  const reviveIcon=await visibleRevives.locator('img.v41-revive-art').evaluate(img=>({src:img.src,nw:img.naturalWidth,nh:img.naturalHeight}));
   assert(reviveIcon.src.endsWith('/raluvaaa/v41/icons/revive.svg'),'revive must use the V41 watering asset');
   assert(reviveIcon.nw>0&&reviveIcon.nh>0,'revive asset must load');
 
@@ -260,10 +262,16 @@ async function testLegoReattachAndRemoveQC(page){
   const [c1,c2]=await split(page,moving,['Moving child one','Moving child two']);
 
   await open(page,moving);
+  assert.equal(await page.locator('#drawerBody .action-grid [data-act="bloom"]').count(),0,'branch with active descendants must not expose an impossible Bloom action');
+  await page.waitForSelector('#drawerBody .v41-move-unit .v33-action-circle',{timeout:5000});
+  const moveIcon=await page.locator('#drawerBody .v41-move-unit img.v41-move-art').evaluate(img=>({src:img.src,nw:img.naturalWidth,nh:img.naturalHeight}));
+  assert(moveIcon.src.endsWith('/raluvaaa/v41/icons/move-branch.svg'),'LEGO move must use the versioned exact-source move asset');
+  assert(moveIcon.nw>0&&moveIcon.nh>0,'move branch asset must load');
+
   const allowed=await page.evaluate(({moving,target})=>document.getElementById('engine').contentWindow.__RV41_WORKFLOW_ENGINE__.reparentAllowed(moving,target),{moving,target});
   assert.equal(allowed,true,'live split branch must be movable to a valid live target');
 
-  await action(page,'reattach');
+  await page.locator('#drawerBody .v41-move-unit .v33-action-circle').click();
   await page.waitForSelector('#parentSelect',{timeout:4000});
   await page.selectOption('#parentSelect',target);
   await page.click('#confirm');
@@ -273,6 +281,31 @@ async function testLegoReattachAndRemoveQC(page){
       s.find(x=>x.semanticId===c1)?.parentSemanticId===moving &&
       s.find(x=>x.semanticId===c2)?.parentSemanticId===moving;
   },{moving,target,c1,c2},{timeout:7000});
+
+  // Evolve the branch itself, carry its children, then verify the historical split anchor remains the movable LEGO piece.
+  await open(page,moving);
+  await action(page,'evolve');
+  await page.waitForSelector('#evolveCarry',{timeout:4000});
+  await page.fill('#evolveInput','Move this branch evolved');
+  await page.check('#evolveCarry');
+  await page.click('#confirm');
+  await page.waitForFunction(()=>window.__RV26_SOLO__.semantic().some(x=>x.text==='Move this branch evolved'),null,{timeout:6000});
+  const movingCurrent=(await semantic(page)).find(x=>x.text==='Move this branch evolved').semanticId;
+  await page.waitForFunction(({c1,c2,movingCurrent})=>{
+    const s=window.__RV26_SOLO__.semantic();
+    return s.find(x=>x.semanticId===c1)?.parentSemanticId===movingCurrent &&
+      s.find(x=>x.semanticId===c2)?.parentSemanticId===movingCurrent;
+  },{c1,c2,movingCurrent},{timeout:7000});
+
+  await open(page,moving);
+  assert.equal(await page.evaluate(id=>window.__RALUVAAA_WORKFLOW_V41__.isSuperseded(id),moving),true,'split anchor should be historical after its own evolve');
+  await page.waitForSelector('#drawerBody .v41-move-unit .v33-action-circle',{timeout:5000});
+  const historicalMoveAllowed=await page.evaluate(({moving,target})=>document.getElementById('engine').contentWindow.__RV41_WORKFLOW_ENGINE__.reparentAllowed(moving,target),{moving,target});
+  assert.equal(historicalMoveAllowed,true,'historical split anchor must still move its whole evolved subtree');
+  const graftUnit=page.locator('#drawerBody .v33-action-unit[data-v37-icon="graft"]');
+  if(await graftUnit.count())assert(await graftUnit.first().evaluate(el=>el.classList.contains('v41-workflow-invalid')),'historical state graft must be hidden');
+  const letgoUnit=page.locator('#drawerBody .v33-action-unit[data-v37-icon="letgo"]');
+  if(await letgoUnit.count())assert(await letgoUnit.first().evaluate(el=>el.classList.contains('v41-workflow-invalid')),'historical branch let-go must be hidden while descendants are active');
 
   await open(page,root);
   await action(page,'evolve');
@@ -286,7 +319,7 @@ async function testLegoReattachAndRemoveQC(page){
   assert.equal(blocked,false,'superseded historical state must not be a reparent target');
 
   await open(page,moving);
-  await action(page,'reattach');
+  await page.locator('#drawerBody .v41-move-unit .v33-action-circle').click();
   await page.waitForSelector('#parentSelect',{timeout:4000});
   const options=await page.locator('#parentSelect option').evaluateAll(xs=>xs.map(x=>x.value));
   assert(!options.includes(root),'manual LEGO UI must also exclude superseded targets');
