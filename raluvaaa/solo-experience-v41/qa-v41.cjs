@@ -300,12 +300,12 @@ async function testLegoReattachAndRemoveQC(page){
 }
 
 async function testForeignActionSmoke(page,ownRoot){
-  if(await page.locator('#drawerClose').isVisible())await page.click('#drawerClose');
-  await page.click('#entrustedBtn');
-  await page.waitForSelector('#drawerBody [data-open]',{timeout:5000});
-  const foreign=await page.locator('#drawerBody [data-open]').first().getAttribute('data-open');
-  await page.locator('#drawerBody [data-open]').first().click();
-  await page.waitForFunction(id=>window.__RALUVAAA_UI__.current()?.semanticId===id,foreign,{timeout:5000});
+  const foreign=await page.evaluate(()=>{
+    const s=window.__RV26_SOLO__.semantic();
+    return s.find(x=>x.simulated&&x.state==='alive'&&!window.__RALUVAAA_WORKFLOW_V41__.isSuperseded(x.semanticId))?.semanticId||null;
+  });
+  assert(foreign,'need one current live simulated wish state for foreign-action QC');
+  await open(page,foreign);
 
   const beforeEnc=(await state(page)).events.filter(e=>e.type==='encourage'&&e.semanticId===foreign).length;
   await action(page,'encourage');
@@ -354,10 +354,10 @@ async function testForeignActionSmoke(page,ownRoot){
   try{
     await assertFresh(page);
     const first=await testCreateCorrectEvolveCarryAndBloom(page);
-    await testSelectiveWholeRevive(page);
+    const selective=await testSelectiveWholeRevive(page);
     await testReviveOnePath(page);
     await testLegoReattachAndRemoveQC(page);
-    await testForeignActionSmoke(page,first.root);
+    await testForeignActionSmoke(page,selective.root);
 
     const finalState=await state(page);
     assert(finalState.events.some(e=>e.type==='correct'),'correct workflow missing');
