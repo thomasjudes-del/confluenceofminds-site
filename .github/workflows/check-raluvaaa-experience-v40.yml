@@ -22,8 +22,8 @@ jobs:
           node-version: '22'
       - name: Static checks
         run: |
-          node --check raluvaaa/solo-experience-v40/engine-bloom-v40.js
-          node --check raluvaaa/solo-experience-v40/bloom-parent-v40.js
+          node --check raluvaaa/solo-experience-v40/app-v40.js
+          node --check raluvaaa/solo-experience-v40/engine-runtime-v40.js
           node --check raluvaaa/solo-experience-v40/ui-v40.js
           node --check raluvaaa/solo-experience-v40/qa-v40.cjs
           grep -q 'data-layout-version="40"' raluvaaa/solo-experience-v40/index.html
