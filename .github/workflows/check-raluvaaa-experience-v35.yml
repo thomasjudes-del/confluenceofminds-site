@@ -1,0 +1,41 @@
+name: Check RALUVAAA Experience V35
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-experience-v35/**'
+      - 'raluvaaa/solo-experience-v33/**'
+      - 'raluvaaa/solo-experience-v34/create-sound-v34.js'
+      - 'raluvaaa/mvp-v26/**'
+      - '.github/workflows/check-raluvaaa-experience-v35.yml'
+  workflow_dispatch:
+concurrency:
+  group: raluvaaa-experience-v35-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/solo-experience-v35/experience-v35.js
+          node --check raluvaaa/solo-experience-v35/qa-v35.cjs
+          grep -q 'data-ui-version="35"' raluvaaa/solo-experience-v35/index.html
+          grep -q 'experience-v35.css' raluvaaa/solo-experience-v35/index.html
+          grep -q 'experience-v35.js' raluvaaa/solo-experience-v35/index.html
+          grep -q '../solo-experience-v34/create-sound-v34.js' raluvaaa/solo-experience-v35/index.html
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run V35 visual QA
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v35-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          node raluvaaa/solo-experience-v35/qa-v35.cjs
