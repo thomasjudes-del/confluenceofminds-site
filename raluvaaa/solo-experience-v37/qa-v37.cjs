@@ -12,8 +12,8 @@ const expectedRail={
 async function setup(actor='A'){
   const browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport:{width:1600,height:900}});
-  await context.addInitScript(()=>{
-    if(window.top!==window)return;
+  const page=await context.newPage();
+  await page.addInitScript(()=>{
     localStorage.removeItem('raluvaaaSoloExperienceV37R1FreshStart');
     localStorage.setItem('raluvaaaSoloExperienceV33R1',JSON.stringify({
       version:26,lang:'fr',entrusted:null,
@@ -24,7 +24,6 @@ async function setup(actor='A'){
       events:[{type:'create',actorId:'A',semanticId:'bad-v37-root',lineageId:'bad-v37-lineage',text:'STALE V37 DATA',loc:'Nantes, France'}]
     }));
   });
-  const page=await context.newPage();
   await page.route('https://ipwho.is/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,city:'Nantes',country:'France'})}));
   await page.route('https://ipapi.co/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({city:'Nantes',country_name:'France'})}));
   await page.goto(BASE+PATH+'?qa=1&actor='+actor,{waitUntil:'domcontentloaded'});
