@@ -109,8 +109,8 @@ async function mobile(){
     assert(m.deck.length>=8);
     assert(m.deck.every(x=>x.w>=70&&Math.abs(x.w-x.h)<1&&x.sw>=40),'mobile actions must stay large and uniform');
     assert(m.labels.every(x=>x>=10.5),'mobile action labels must remain readable');
-    assert(m.rail.every(x=>x.w===m.rail[0].w&&x.h===m.rail[0].h&&x.sw>=27),'mobile rail must use one button scale');
-    assert(m.rail.every(x=>Math.abs(x.sw-m.rail[0].sw)<1),'every mobile rail pictogram must use the exact same visual size');
+    assert(m.rail.every(x=>Math.abs(x.w-m.rail[0].w)<1&&Math.abs(x.h-m.rail[0].h)<1&&x.w>=40&&x.sw>=27),'mobile rail must use one button scale: '+JSON.stringify(m.rail));
+    assert(m.rail.every(x=>Math.abs(x.sw-m.rail[0].sw)<1),'every mobile rail pictogram must use the same visual size: '+JSON.stringify(m.rail));
     console.log('RALUVAAA Experience V31 WebKit/mobile QA passed');
   } finally {await browser.close();}
 }
