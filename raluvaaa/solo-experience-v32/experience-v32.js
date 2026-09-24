@@ -10,6 +10,10 @@ const V32={
 };
 
 function isEn(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(window.RALUVAAA_STORE_KEY)||'null');
+    if(saved?.lang)return saved.lang==='en';
+  }catch{}
   return (document.querySelector('.lang button.active')?.dataset.lang||document.documentElement.lang||'fr').startsWith('en');
 }
 
@@ -149,8 +153,12 @@ function schedule(){
 const observer=new MutationObserver(schedule);
 observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','disabled','data-sig']});
 document.addEventListener('click',e=>{
-  if(e.target.closest('.lang button,[data-panel],[data-nav-wish],.v28-back,.v28-root,#drawerClose'))setTimeout(schedule,0);
-},true);
+  if(e.target.closest('.lang button')){
+    setTimeout(()=>{decorate();schedule()},20);
+    return;
+  }
+  if(e.target.closest('[data-panel],[data-nav-wish],.v28-back,.v28-root,#drawerClose'))setTimeout(schedule,0);
+});
 
 decorate();
 window.__RALUVAAA_V32__={version:32,decorate,seed:V32.seed,create:V32.create,wishes:V32.wishes};
