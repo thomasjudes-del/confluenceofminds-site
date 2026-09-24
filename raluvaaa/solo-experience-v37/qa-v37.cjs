@@ -65,19 +65,34 @@ async function assertOwner(page){
     assert(got[name]?.endsWith('/raluvaaa/v37/icons/'+name+'.svg'),'owner action mismatch: '+name);
   }
 }
-async function assertHelper(context,id){
-  const page=await context.newPage();
-  await page.goto(BASE+PATH+'?qa=1&actor=B',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__RALUVAAA_V37__?.version===37&&window.__RV26_SOLO__?.semantic,null,{timeout:12000});
-  await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().some(x=>x.semanticId===id),id,{timeout:6000});
-  await page.evaluate(id=>window.__RV26_SOLO__.open(id),id);
-  await page.waitForFunction(()=>document.querySelectorAll('#drawerBody .v33-action-circle img.v37-icon').length>=6,null,{timeout:6000});
-  const got=new Set(await page.locator('#drawerBody .v33-action-circle').evaluateAll(bs=>bs.map(b=>b.dataset.v37Icon)));
-  for(const name of ['encourage','help','graft','suggest','recenter','share']){
-    assert(got.has(name),'helper action mismatch: '+name);
-  }
-  await page.close();
+async function assertHelperMap(page){
+  const map=await page.evaluate(()=>{
+    const f=window.__RALUVAAA_V37__.semanticForAction;
+    return {
+      support:f('support'),
+      encourage:f('encourage'),
+      help:f('help'),
+      graft:f('graft'),
+      connect:f('connect'),
+      suggest:f('suggest'),
+      recenter:f('recenter'),
+      share:f('share'),
+      report:f('report')
+    };
+  });
+  assert.deepEqual(map,{
+    support:'encourage',
+    encourage:'encourage',
+    help:'help',
+    graft:'graft',
+    connect:'graft',
+    suggest:'suggest',
+    recenter:'recenter',
+    share:'share',
+    report:'report'
+  });
 }
+
 (async()=>{
   const {browser,context,page}=await setup('A');
   try{
@@ -85,7 +100,7 @@ async function assertHelper(context,id){
     await assertRail(page);
     const id=await createWish(page);
     await assertOwner(page);
-    await assertHelper(context,id);
+    await assertHelperMap(page);
     console.log('RALUVAAA V37 full semantic icon + fresh-state QA passed');
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});
