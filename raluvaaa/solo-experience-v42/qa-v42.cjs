@@ -508,7 +508,7 @@ async function testPassiveDormancyWakeV42(page){
 
 async function testResumeVsWakeWordingV42(page){
   const root=await createWish(page,'Explicit let go wording');
-  const [branch]=await split(page,root,['Branch explicitly left']);
+  const [branch]=await split(page,root,['Branch explicitly left','Sibling remains active']);
   await abandon(page,branch);
   await open(page,branch);
   await page.waitForFunction(()=>[...document.querySelectorAll('#drawerBody .v33-action-label')].some(x=>x.textContent.trim()==='Resume'),null,{timeout:5000});
