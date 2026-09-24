@@ -1,0 +1,47 @@
+name: Check RALUVAAA Experience V42
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-experience-v42/**'
+      - 'raluvaaa/VITALITY-GRAMMAR-V42.md'
+      - 'raluvaaa/ICON-ASSET-PROCEDURE.md'
+      - '.github/workflows/check-raluvaaa-experience-v42.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: raluvaaa-experience-v42-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/solo-experience-v42/app-v42.js
+          node --check raluvaaa/solo-experience-v42/engine-runtime-v42.js
+          node --check raluvaaa/solo-experience-v42/ui-v42.js
+          node --check raluvaaa/solo-experience-v42/revive-sound-v42.js
+          node --check raluvaaa/solo-experience-v42/qa-v42.cjs
+          grep -q 'data-vitality-version="42"' raluvaaa/solo-experience-v42/index.html
+          grep -q "raluvaaaSoloExperienceV42R1" raluvaaa/solo-experience-v42/index.html
+          grep -q 'app-v42.js' raluvaaa/solo-experience-v42/index.html
+          grep -q 'ui-v42.js' raluvaaa/solo-experience-v42/index.html
+          grep -q 'revive-sound-v42.js' raluvaaa/solo-experience-v42/index.html
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run V42 QC
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v42-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          node raluvaaa/solo-experience-v42/qa-v42.cjs
