@@ -40,25 +40,26 @@ async function createWish(page){
   await page.waitForFunction(()=>document.querySelector('#locInput')?.value==='Nantes, France',null,{timeout:8000});
   await page.click('#confirm');
   await page.waitForFunction(()=>window.__RALUVAAA_CREATE_AUDIO_V34__?.history?.some(x=>x.name==='create'),null,{timeout:5000});
+  await page.waitForFunction(()=>window.__RV26_SOLO__?.semantic?.().some(x=>x.kind==='create'),null,{timeout:6000});
+  const wishId=await page.evaluate(()=>window.__RV26_SOLO__.semantic().find(x=>x.kind==='create').semanticId);
+  await page.evaluate(id=>window.__RV26_SOLO__.open(id),wishId);
   await page.waitForFunction(()=>document.querySelectorAll('#drawerBody .v33-action-circle .v34-icon').length>=6,null,{timeout:6000});
-  const state=await page.evaluate(()=>({
-    semantic:window.__RV26_TEST__.semantic(),
-    deck:[...document.querySelectorAll('#drawerBody .v33-action-circle')].map(b=>({
-      icon:b.dataset.v34Icon,
-      label:b.getAttribute('aria-label')
-    }))
-  }));
-  assert(state.semantic.length>=1,'created wish must exist');
-  const icons=new Set(state.deck.map(x=>x.icon));
+  const deck=await page.locator('#drawerBody .v33-action-circle').evaluateAll(btns=>btns.map(b=>({
+    icon:b.dataset.v34Icon,
+    label:b.getAttribute('aria-label')
+  })));
+  const icons=new Set(deck.map(x=>x.icon));
   for(const key of ['evolve','branch','bloom','recenter','modify','graft','share','letgo']){
     assert(icons.has(key),'owner deck missing V34 icon: '+key);
   }
-  return state.semantic.find(x=>x.kind==='create')?.semanticId||state.semantic[0].semanticId;
+  return wishId;
 }
 
 async function assertHelperDeck(context,page,wishId){
   await page.goto(BASE+PATH+'?qa=1&actor=B#wish='+encodeURIComponent(wishId),{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__RALUVAAA_V34__?.version===34&&window.__RV26_TEST__?.state,null,{timeout:12000});
+  await page.waitForFunction(()=>window.__RALUVAAA_V34__?.version===34&&window.__RV26_TEST__?.state&&window.__RV26_SOLO__?.semantic,null,{timeout:12000});
+  await page.waitForFunction(id=>window.__RV26_SOLO__.semantic().some(x=>x.semanticId===id),wishId,{timeout:6000});
+  await page.evaluate(id=>window.__RV26_SOLO__.open(id),wishId);
   await page.waitForFunction(()=>document.querySelectorAll('#drawerBody .v33-action-circle .v34-icon').length>=6,null,{timeout:6000});
   const icons=new Set(await page.locator('#drawerBody .v33-action-circle').evaluateAll(btns=>btns.map(b=>b.dataset.v34Icon)));
   for(const key of ['encourage','help','graft','suggest','recenter','share','report']){
