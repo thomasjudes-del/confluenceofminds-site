@@ -56,7 +56,14 @@ function patchSuggestModal(){
 
 function applyReviveIcon(){
   const copy=reviveCopy();
-  document.querySelectorAll('#drawerBody .v33-action-unit').forEach(unit=>{
+  const reviveUnits=[...document.querySelectorAll('#drawerBody .v33-action-unit')].filter(unit=>{
+    const semantic=unit.dataset.v39Icon||unit.dataset.v37Icon||unit.dataset.v35Icon||'';
+    return semantic==='revive';
+  });
+  // V30 + V33 expose the abandoned-state revive twice (primary + secondary).
+  // Keep one user action in the visible deck.
+  reviveUnits.slice(1).forEach(unit=>unit.remove());
+  reviveUnits.slice(0,1).forEach(unit=>{
     const semantic=unit.dataset.v39Icon||unit.dataset.v37Icon||unit.dataset.v35Icon||'';
     if(semantic!=='revive')return;
     const button=unit.querySelector('.v33-action-circle');
