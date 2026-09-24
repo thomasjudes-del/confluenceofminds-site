@@ -1,0 +1,44 @@
+name: Check RALUVAAA Experience V32
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-experience-v32/**'
+      - 'raluvaaa/mvp-v26/app.js'
+      - '.github/workflows/check-raluvaaa-experience-v32.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: raluvaaa-experience-v32-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/solo-experience-v32/experience-v32.js
+          node --check raluvaaa/solo-experience-v32/create-sound-v32.js
+          node --check raluvaaa/solo-experience-v32/qa-v32.cjs
+          test -s raluvaaa/solo-experience-v32/create-a-wish.mp3
+          grep -q 'data-version="32"' raluvaaa/solo-experience-v32/index.html
+          grep -q 'experience-v32.css' raluvaaa/solo-experience-v32/index.html
+          grep -q 'experience-v32.js' raluvaaa/solo-experience-v32/index.html
+          grep -q 'create-sound-v32.js' raluvaaa/solo-experience-v32/index.html
+      - name: Install QA browsers
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium webkit >/dev/null 2>&1
+      - name: Run V32 language and audio QA
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v32-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          node raluvaaa/solo-experience-v32/qa-v32.cjs
