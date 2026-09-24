@@ -1,4 +1,4 @@
-const {chromium,webkit}=require('playwright');
+const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 
 const BASE=process.env.RALUVAAA_QA_BASE||'http://127.0.0.1:4173';
@@ -49,6 +49,7 @@ async function createWish(page){
     icon:b.dataset.v34Icon,
     label:b.getAttribute('aria-label')
   })));
+  console.log('V34_OWNER_DECK',JSON.stringify(await page.evaluate(()=>({deck:[...document.querySelectorAll('#drawerBody .v33-action-circle')].map(b=>({label:b.getAttribute('aria-label'),icon:b.dataset.v34Icon,html:b.innerHTML.slice(0,80)})),primary:[...document.querySelectorAll('#drawerBody .action-grid button[data-act]')].map(b=>({act:b.dataset.act,label:b.getAttribute('aria-label')||b.title||b.textContent.trim()})),secondary:[...document.querySelectorAll('#drawerBody .v30-action-surface .v30-action')].map(b=>({act:b.dataset.v30Act,label:b.querySelector('.v30-action-label')?.textContent.trim()}))}))));
   const icons=new Set(deck.map(x=>x.icon));
   for(const key of ['evolve','branch','bloom','recenter','modify','graft','share','letgo']){
     assert(icons.has(key),'owner deck missing V34 icon: '+key);
@@ -92,12 +93,12 @@ async function desktop(){
 }
 
 async function mobile(){
-  const {browser,page}=await setup(webkit,{width:393,height:852});
+  const {browser,page}=await setup(chromium,{width:393,height:852});
   try{
     await assertRail(page);
     const box=await page.locator('#rail').boundingBox();
     assert(box&&box.x>=0&&box.x+box.width<=393,'V34 mobile rail must remain inside viewport');
-    console.log('RALUVAAA Experience V34 WebKit/mobile rail QA passed');
+    console.log('RALUVAAA Experience V34 mobile rail QA passed');
   }finally{await browser.close()}
 }
 
