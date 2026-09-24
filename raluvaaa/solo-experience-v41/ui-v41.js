@@ -116,7 +116,7 @@ function normalizeWorkflowDeck(){
     const semantic=semanticOf(unit);
     let hide=false;
     if(superseded&&semantic==='graft')hide=true;
-    if(!cur.owner&&superseded&&semantic==='suggest')hide=true;
+    if(!cur.owner&&superseded&&['support','help','suggest'].includes(semantic))hide=true;
     if(cur.owner&&cur.kind!=='create'&&activeBelow&&semantic==='letgo')hide=true;
     unit.classList.toggle('v41-workflow-invalid',hide);
 
