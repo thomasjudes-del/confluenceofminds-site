@@ -37,12 +37,13 @@ async function assertRail(page){
 
 async function createWish(page){
   await page.click('#createBtn');
-  await page.fill('#wishInput','I want to grow a small human project.');
+  const wishText='I want to grow a small human project.';
+  await page.fill('#wishInput',wishText);
   await page.waitForFunction(()=>document.querySelector('#locInput')?.value==='Nantes, France',null,{timeout:8000});
   await page.click('#confirm');
   await page.waitForFunction(()=>window.__RALUVAAA_CREATE_AUDIO_V34__?.history?.some(x=>x.name==='create'),null,{timeout:5000});
-  await page.waitForFunction(()=>window.__RV26_SOLO__?.semantic?.().some(x=>x.kind==='create'),null,{timeout:6000});
-  const wishId=await page.evaluate(()=>window.__RV26_SOLO__.semantic().find(x=>x.kind==='create').semanticId);
+  await page.waitForFunction(text=>window.__RV26_SOLO__?.semantic?.().some(x=>x.kind==='create'&&x.text===text),wishText,{timeout:6000});
+  const wishId=await page.evaluate(text=>window.__RV26_SOLO__.semantic().find(x=>x.kind==='create'&&x.text===text).semanticId,wishText);
   await page.evaluate(id=>window.__RV26_SOLO__.open(id),wishId);
   await page.waitForFunction(()=>document.querySelectorAll('#drawerBody .v33-action-circle .v34-icon').length>=6,null,{timeout:6000});
   const deck=await page.locator('#drawerBody .v33-action-circle').evaluateAll(btns=>btns.map(b=>({
