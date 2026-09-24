@@ -13,6 +13,7 @@ async function setup(actor='A'){
   const browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport:{width:1600,height:900}});
   await context.addInitScript(()=>{
+    if(window.top!==window)return;
     localStorage.removeItem('raluvaaaSoloExperienceV37R1FreshStart');
     localStorage.setItem('raluvaaaSoloExperienceV33R1',JSON.stringify({
       version:26,lang:'fr',entrusted:null,
