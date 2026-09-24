@@ -50,6 +50,7 @@ async function desktop(){
     }));
     assert(rail.every(x=>x.w===rail[0].w&&x.h===rail[0].h),'rail controls must have one size');
     assert(rail.every(x=>x.sw>=28&&x.sh>=28),'rail pictograms must use the available button area');
+    assert(rail.every(x=>Math.abs(x.sw-rail[0].sw)<1&&Math.abs(x.sh-rail[0].sh)<1),'every desktop rail pictogram must use the exact same visual size');
     assert(rail.find(x=>x.id==='createBtn').html.includes('M27 5V15'),'release icon must be a simple seed + plus');
     assert((rail.find(x=>x.id==='myWorldBtn').html.match(/<path/g)||[]).length>=3,'My wishes must read as multiple wish seeds');
 
@@ -108,7 +109,8 @@ async function mobile(){
     assert(m.deck.length>=8);
     assert(m.deck.every(x=>x.w>=70&&Math.abs(x.w-x.h)<1&&x.sw>=40),'mobile actions must stay large and uniform');
     assert(m.labels.every(x=>x>=10.5),'mobile action labels must remain readable');
-    assert(m.rail.every(x=>x.w===m.rail[0].w&&x.h===m.rail[0].h&&x.sw>=27),'mobile rail must use one visual scale');
+    assert(m.rail.every(x=>x.w===m.rail[0].w&&x.h===m.rail[0].h&&x.sw>=27),'mobile rail must use one button scale');
+    assert(m.rail.every(x=>Math.abs(x.sw-m.rail[0].sw)<1),'every mobile rail pictogram must use the exact same visual size');
     console.log('RALUVAAA Experience V31 WebKit/mobile QA passed');
   } finally {await browser.close();}
 }
