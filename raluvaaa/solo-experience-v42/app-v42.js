@@ -150,7 +150,7 @@ function isDormant(m){return m?.state==='alive'&&vitalityFor(m)?.status==='dorma
 function sendVitality(){
   if(!engineReady)return;
   const map={};
-  for(const root of semantic.filter(x=>x.owner&&x.kind==='create')){
+  for(const root of semantic.filter(x=>x.owner&&x.kind==='create'&&x.state==='alive')){
     const v=vitalityFor(root)||vitalityForLineage(root.lineageId);
     if(v)map[root.lineageId]=v
   }
