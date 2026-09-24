@@ -93,3 +93,10 @@ body[data-workflow-version="41"] .v41-revive-art{
     font-size:12px;
   }
 }
+body[data-workflow-version="41"] .v41-workflow-hidden,
+body[data-workflow-version="41"] .v41-workflow-invalid{
+  display:none!important;
+}
+body[data-workflow-version="41"] .v41-move-art{
+  filter:none!important;
+}
