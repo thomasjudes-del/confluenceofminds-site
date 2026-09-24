@@ -1,0 +1,1217 @@
+
+:root{
+  --v29-panel:rgba(3,10,20,.78);
+  --v29-panel-deep:rgba(2,7,15,.92);
+  --v29-ink:#f2f7fb;
+  --v29-soft:rgba(229,239,248,.62);
+  --v29-faint:rgba(223,235,247,.34);
+  --v29-line:rgba(164,218,242,.10);
+  --v29-glow:rgba(126,211,242,.13);
+  --v29-action:88px;
+  --v29-serif:"Iowan Old Style","Baskerville","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --v29-ui:"Avenir Next","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+body[data-version="33"]{
+  font-family:var(--v29-ui)!important;
+}
+body[data-version="33"] #engine{
+  filter:saturate(1.12) contrast(1.035) brightness(.995)!important;
+}
+
+/* Brand should belong to the world, not sit in a widget. */
+body[data-version="33"] #brand{
+  background:transparent!important;
+  backdrop-filter:none!important;
+  box-shadow:none!important;
+  border:0!important;
+  padding:7px 8px!important;
+}
+body[data-version="33"] .logo{
+  font-size:15px!important;
+  letter-spacing:.36em!important;
+  font-weight:560!important;
+  color:rgba(246,250,255,.94)!important;
+  text-shadow:0 0 18px rgba(140,213,240,.08);
+}
+body[data-version="33"] .lang{
+  background:rgba(5,14,25,.18)!important;
+  border:0!important;
+}
+
+/* The wish card is now an inhabited layer, not a full-height control panel. */
+body[data-version="33"] #drawer{
+  right:5.2vw!important;
+  top:7vh!important;
+  bottom:auto!important;
+  width:clamp(430px,32vw,565px)!important;
+  max-height:82vh!important;
+  min-height:0!important;
+  overflow:auto!important;
+  padding:28px 30px 31px!important;
+  border:0!important;
+  border-radius:42px 54px 40px 58px!important;
+  background:
+    radial-gradient(100% 76% at 10% 0%,rgba(93,194,232,.11),transparent 56%),
+    radial-gradient(62% 70% at 100% 100%,rgba(177,111,214,.045),transparent 66%),
+    linear-gradient(150deg,rgba(4,14,27,.88),rgba(2,8,17,.73))!important;
+  backdrop-filter:blur(24px) saturate(118%)!important;
+  box-shadow:
+    0 42px 120px rgba(0,0,0,.36),
+    inset 0 0 0 1px rgba(180,225,246,.065)!important;
+  animation:v29-arrive .48s cubic-bezier(.18,.82,.22,1) both;
+}
+@keyframes v29-arrive{
+  from{opacity:0;transform:translate3d(10px,6px,0) scale(.985)}
+  to{opacity:1;transform:none}
+}
+body[data-version="33"] #drawer::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:inherit;
+  pointer-events:none;
+  background:linear-gradient(120deg,rgba(255,255,255,.025),transparent 24%,transparent 74%,rgba(124,214,243,.018));
+}
+body[data-version="33"] .drawer-head{
+  min-height:42px!important;
+  margin:0 0 4px!important;
+}
+body[data-version="33"] .drawer-close{
+  right:-7px!important;
+  top:-8px!important;
+  width:44px!important;
+  height:44px!important;
+  border-radius:50%!important;
+  font-size:27px!important;
+  color:rgba(231,240,248,.50)!important;
+  background:rgba(194,229,245,.018)!important;
+  transition:background .2s ease,color .2s ease,transform .2s ease!important;
+}
+body[data-version="33"] .drawer-close:hover{
+  background:rgba(194,229,245,.055)!important;
+  color:rgba(245,249,253,.88)!important;
+  transform:rotate(4deg);
+}
+
+/* Typography carries the emotion. */
+body[data-version="33"] #drawerBody>.wish{
+  max-width:94%;
+  margin:8px 0 11px!important;
+  font-family:var(--v29-serif)!important;
+  font-size:clamp(32px,2.2vw,42px)!important;
+  line-height:1.08!important;
+  letter-spacing:-.025em!important;
+  font-weight:400!important;
+  color:var(--v29-ink)!important;
+  text-wrap:balance;
+  text-shadow:0 0 26px rgba(120,200,232,.035);
+}
+body[data-version="33"] #drawerBody>.meta{
+  margin:0 0 18px!important;
+  font-size:13px!important;
+  line-height:1.45!important;
+  color:var(--v29-soft)!important;
+}
+body[data-version="33"] .v27-loc{
+  gap:8px!important;
+}
+body[data-version="33"] .v27-loc svg{
+  width:14px!important;
+  height:14px!important;
+  opacity:.62!important;
+}
+body[data-version="33"] .chips{
+  display:none!important;
+}
+
+/* Navigation should read as movement through one living intention. */
+body[data-version="33"] .v28-lineage-bar{
+  min-height:48px!important;
+  margin:0 54px 13px 0!important;
+  gap:9px!important;
+}
+body[data-version="33"] .v28-lineage-bar button{
+  min-height:44px!important;
+  padding:0 14px!important;
+  border-radius:999px!important;
+  background:rgba(171,222,245,.028)!important;
+  box-shadow:inset 0 0 0 1px rgba(177,223,245,.06)!important;
+  color:rgba(236,246,253,.76)!important;
+  font-size:11px!important;
+}
+body[data-version="33"] .v28-lineage-bar .v28-back{
+  width:44px!important;
+  padding:0!important;
+  font-size:24px!important;
+}
+body[data-version="33"] .v28-lineage-bar .v28-root{
+  gap:8px!important;
+}
+body[data-version="33"] .v28-lineage-bar .v28-root svg{
+  width:18px!important;
+  height:18px!important;
+}
+body[data-version="33"] .v28-lineage-bar .v28-root span{
+  max-width:170px!important;
+  font-size:11px!important;
+  letter-spacing:.01em!important;
+}
+
+body[data-version="33"] .wish-nav{
+  display:grid!important;
+  gap:9px!important;
+  overflow:visible!important;
+  margin:14px 0 22px!important;
+  padding:0!important;
+}
+body[data-version="33"] .wish-nav button:not(.wish-nav-parent){
+  position:relative!important;
+  flex:none!important;
+  width:100%!important;
+  min-height:68px!important;
+  padding:12px 16px 12px 52px!important;
+  border:0!important;
+  border-radius:22px 30px 21px 34px!important;
+  background:
+    radial-gradient(90% 100% at 0% 50%,rgba(93,193,230,.065),transparent 60%),
+    rgba(174,222,245,.018)!important;
+  box-shadow:inset 0 0 0 1px rgba(173,220,243,.055)!important;
+  transition:transform .24s ease,background .24s ease,box-shadow .24s ease!important;
+}
+body[data-version="33"] .wish-nav button:not(.wish-nav-parent):hover{
+  transform:translateX(4px)!important;
+  background:
+    radial-gradient(90% 100% at 0% 50%,rgba(93,193,230,.105),transparent 60%),
+    rgba(174,222,245,.025)!important;
+  box-shadow:inset 0 0 0 1px rgba(173,220,243,.095),0 0 24px rgba(91,190,228,.025)!important;
+}
+body[data-version="33"] .wish-nav button .v29-branch-mark{
+  position:absolute;
+  left:16px;
+  top:50%;
+  width:24px;
+  height:34px;
+  transform:translateY(-50%);
+  color:rgba(153,222,245,.70);
+  pointer-events:none;
+}
+body[data-version="33"] .wish-nav button span:not(.v29-branch-mark){
+  display:block!important;
+  margin:0 0 3px!important;
+  font-size:10px!important;
+  letter-spacing:.06em!important;
+  text-transform:uppercase!important;
+  color:rgba(214,232,244,.42)!important;
+}
+body[data-version="33"] .wish-nav button b{
+  display:block!important;
+  font-family:var(--v29-serif)!important;
+  font-size:17px!important;
+  line-height:1.25!important;
+  font-weight:400!important;
+  color:rgba(242,248,253,.84)!important;
+}
+
+/* Primary actions: visual verbs, not tiny UI buttons. */
+body[data-version="33"] .action-grid{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:18px!important;
+  margin:22px 0 4px!important;
+  padding:2px 0 8px!important;
+}
+body[data-version="33"] .action-grid button{
+  position:relative!important;
+  flex:0 0 var(--v29-action)!important;
+  width:var(--v29-action)!important;
+  height:var(--v29-action)!important;
+  min-width:var(--v29-action)!important;
+  min-height:var(--v29-action)!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:50% 47% 54% 46% / 48% 55% 45% 52%!important;
+  display:grid!important;
+  place-items:center!important;
+  background:
+    radial-gradient(circle at 40% 33%,rgba(192,237,250,.095),rgba(120,203,231,.035) 48%,rgba(60,133,169,.012) 72%)!important;
+  box-shadow:
+    0 0 46px rgba(93,194,232,.035),
+    inset 0 0 0 1px rgba(186,229,247,.085)!important;
+  color:rgba(224,244,252,.92)!important;
+  transition:transform .28s cubic-bezier(.18,.82,.22,1),background .28s ease,box-shadow .28s ease!important;
+}
+body[data-version="33"] .action-grid button:nth-child(2){
+  border-radius:45% 55% 49% 51% / 56% 44% 58% 42%!important;
+}
+body[data-version="33"] .action-grid button:nth-child(3){
+  border-radius:54% 46% 52% 48% / 44% 56% 47% 53%!important;
+}
+body[data-version="33"] .action-grid button:hover:not(:disabled),
+body[data-version="33"] .action-grid button:focus-visible{
+  transform:translateY(-4px) scale(1.045)!important;
+  background:
+    radial-gradient(circle at 40% 33%,rgba(206,244,255,.16),rgba(108,205,238,.055) 52%,rgba(60,133,169,.015) 74%)!important;
+  box-shadow:
+    0 0 54px rgba(100,208,244,.075),
+    inset 0 0 0 1px rgba(197,236,251,.16)!important;
+  outline:none!important;
+}
+body[data-version="33"] .action-grid button:active{
+  transform:scale(.965)!important;
+}
+body[data-version="33"] .action-grid button svg.v29-gesture{
+  width:56px!important;
+  height:56px!important;
+  overflow:visible!important;
+  pointer-events:none!important;
+  filter:drop-shadow(0 0 8px rgba(126,214,245,.08));
+}
+body[data-version="33"] .action-grid button[data-act="bloom"] svg.v29-gesture{
+  width:60px!important;
+  height:60px!important;
+}
+body[data-version="33"] .action-grid button[data-act="focus"]{
+  display:none!important;
+}
+body[data-version="33"] .action-grid .v27-action-label,
+body[data-version="33"] .action-grid .v29-action-name{
+  position:absolute!important;
+  width:1px!important;height:1px!important;
+  margin:-1px!important;padding:0!important;
+  overflow:hidden!important;clip:rect(0 0 0 0)!important;
+  white-space:nowrap!important;border:0!important;
+}
+
+/* Secondary actions: the menu is obvious and legible when opened. */
+body[data-version="33"] .more{
+  position:absolute!important;
+  right:56px!important;
+  top:18px!important;
+  margin:0!important;
+  z-index:14!important;
+}
+body[data-version="33"] .more summary{
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  border:0!important;
+  border-radius:50%!important;
+  display:grid!important;
+  place-items:center!important;
+  background:rgba(177,223,245,.025)!important;
+  box-shadow:inset 0 0 0 1px rgba(180,223,246,.065)!important;
+  color:rgba(232,243,250,.62)!important;
+  cursor:pointer!important;
+  transition:background .2s ease,color .2s ease,transform .2s ease!important;
+}
+body[data-version="33"] .more summary:hover{
+  background:rgba(177,223,245,.07)!important;
+  color:rgba(248,252,255,.94)!important;
+  transform:scale(1.04);
+}
+body[data-version="33"] .v29-more-mark{
+  width:26px;
+  height:26px;
+  pointer-events:none;
+}
+body[data-version="33"] .more-grid{
+  position:absolute!important;
+  right:0!important;
+  top:56px!important;
+  width:280px!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:5px!important;
+  padding:10px!important;
+  border:0!important;
+  border-radius:28px 35px 25px 38px!important;
+  background:
+    radial-gradient(85% 70% at 15% 0%,rgba(92,190,228,.095),transparent 58%),
+    rgba(2,9,18,.965)!important;
+  backdrop-filter:blur(25px)!important;
+  box-shadow:0 28px 75px rgba(0,0,0,.52),inset 0 0 0 1px rgba(181,224,246,.08)!important;
+}
+body[data-version="33"] .more-grid button{
+  width:100%!important;
+  min-width:0!important;
+  height:52px!important;
+  min-height:52px!important;
+  padding:0 13px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:12px!important;
+  border:0!important;
+  border-radius:17px 21px 16px 24px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  text-transform:none!important;
+  color:rgba(237,245,251,.77)!important;
+  font-size:13px!important;
+  letter-spacing:0!important;
+}
+body[data-version="33"] .more-grid button:hover{
+  background:rgba(104,201,235,.06)!important;
+  color:#fff!important;
+}
+body[data-version="33"] .more-grid button.danger{
+  color:rgba(247,198,198,.68)!important;
+}
+body[data-version="33"] .v29-secondary-icon{
+  flex:0 0 30px;
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:rgba(178,223,244,.035);
+  box-shadow:inset 0 0 0 1px rgba(179,222,243,.055);
+  pointer-events:none;
+}
+body[data-version="33"] .v29-secondary-icon svg{
+  width:18px!important;
+  height:18px!important;
+}
+body[data-version="33"] .v29-secondary-label{
+  font-size:13px!important;
+  line-height:1.2!important;
+  opacity:1!important;
+  pointer-events:none;
+}
+
+/* Lists and entrusted wishes should be readable, not microcopy. */
+body[data-version="33"] .drawer-item{
+  padding:14px 15px!important;
+  border-radius:20px 27px 19px 30px!important;
+}
+body[data-version="33"] .drawer-item .t{
+  font-family:var(--v29-serif)!important;
+  font-size:17px!important;
+  line-height:1.28!important;
+  font-weight:400!important;
+}
+body[data-version="33"] .drawer-item .m{
+  margin-top:7px!important;
+  font-family:var(--v29-ui)!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:550!important;
+}
+body[data-version="33"] .drawer-item .state{
+  font-size:10px!important;
+}
+
+/* Creation/action sheets also need game-scale type. */
+body[data-version="33"] .sheet{
+  width:min(560px,calc(100vw - 30px))!important;
+  padding:28px 30px!important;
+  border-radius:36px 46px 34px 50px!important;
+}
+body[data-version="33"] .sheet h3{
+  font-family:var(--v29-serif)!important;
+  font-size:34px!important;
+  line-height:1.1!important;
+}
+body[data-version="33"] .sheet p{
+  font-size:14px!important;
+  line-height:1.55!important;
+}
+body[data-version="33"] .field{
+  gap:8px!important;
+  margin-top:15px!important;
+}
+body[data-version="33"] .field label{
+  font-size:11px!important;
+  letter-spacing:.07em!important;
+}
+body[data-version="33"] .field-note{
+  font-size:11px!important;
+}
+body[data-version="33"] .field textarea,
+body[data-version="33"] .field input,
+body[data-version="33"] .field select{
+  font-size:17px!important;
+  line-height:1.45!important;
+  padding:14px 15px!important;
+}
+body[data-version="33"] .field textarea{
+  min-height:112px!important;
+}
+body[data-version="33"] .sheet-actions button{
+  min-height:46px!important;
+  padding:0 18px!important;
+  font-size:13px!important;
+}
+
+/* Mobile: it becomes a bottom-sheet scene, not a narrow side panel. */
+@media(max-width:820px){
+  :root{--v29-action:78px}
+
+  body[data-version="33"] #brand{
+    left:10px!important;
+    top:max(8px,env(safe-area-inset-top))!important;
+  }
+  body[data-version="33"] .logo{
+    font-size:12px!important;
+    letter-spacing:.32em!important;
+  }
+
+  body[data-version="33"] #drawer{
+    left:8px!important;
+    right:8px!important;
+    top:auto!important;
+    bottom:calc(68px + max(8px,env(safe-area-inset-bottom)))!important;
+    width:auto!important;
+    max-height:72vh!important;
+    padding:22px 20px 24px!important;
+    border-radius:34px 42px 32px 46px!important;
+    background:
+      radial-gradient(100% 72% at 9% 0%,rgba(93,194,232,.12),transparent 58%),
+      linear-gradient(155deg,rgba(4,14,27,.94),rgba(2,8,17,.88))!important;
+    box-shadow:0 34px 90px rgba(0,0,0,.52),inset 0 0 0 1px rgba(181,224,246,.07)!important;
+  }
+
+  body[data-version="33"] .drawer-head{
+    min-height:34px!important;
+  }
+  body[data-version="33"] .drawer-close{
+    right:-4px!important;
+    top:-7px!important;
+    width:42px!important;
+    height:42px!important;
+    font-size:26px!important;
+  }
+
+  body[data-version="33"] #drawerBody>.wish{
+    max-width:91%;
+    margin:4px 0 9px!important;
+    font-size:clamp(28px,8.4vw,36px)!important;
+    line-height:1.09!important;
+  }
+  body[data-version="33"] #drawerBody>.meta{
+    font-size:12px!important;
+    margin-bottom:14px!important;
+  }
+
+  body[data-version="33"] .v28-lineage-bar{
+    min-height:44px!important;
+    margin:0 48px 10px 0!important;
+  }
+  body[data-version="33"] .v28-lineage-bar button{
+    min-height:40px!important;
+  }
+
+  body[data-version="33"] .wish-nav{
+    margin:10px 0 16px!important;
+    gap:7px!important;
+  }
+  body[data-version="33"] .wish-nav button:not(.wish-nav-parent){
+    min-height:62px!important;
+    padding:10px 13px 10px 48px!important;
+  }
+  body[data-version="33"] .wish-nav button b{
+    font-size:15px!important;
+  }
+
+  body[data-version="33"] .action-grid{
+    gap:13px!important;
+    margin-top:17px!important;
+  }
+  body[data-version="33"] .action-grid button{
+    width:var(--v29-action)!important;
+    height:var(--v29-action)!important;
+    min-width:var(--v29-action)!important;
+    min-height:var(--v29-action)!important;
+  }
+  body[data-version="33"] .action-grid button svg.v29-gesture{
+    width:50px!important;
+    height:50px!important;
+  }
+
+  body[data-version="33"] .more{
+    right:46px!important;
+    top:10px!important;
+  }
+  body[data-version="33"] .more summary{
+    width:44px!important;
+    height:44px!important;
+  }
+  body[data-version="33"] .more-grid{
+    right:-2px!important;
+    top:52px!important;
+    width:min(270px,calc(100vw - 58px))!important;
+    max-height:48vh!important;
+    overflow:auto!important;
+  }
+
+  body[data-version="33"] .drawer-item .t{
+    font-size:16px!important;
+  }
+  body[data-version="33"] .drawer-item .m{
+    font-size:13px!important;
+  }
+
+  body[data-version="33"] .sheet{
+    left:8px!important;
+    right:8px!important;
+    top:auto!important;
+    bottom:calc(12px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    transform:none!important;
+    padding:24px 20px!important;
+    border-radius:30px 38px 29px 42px!important;
+  }
+  body[data-version="33"] .sheet h3{
+    font-size:30px!important;
+  }
+  body[data-version="33"] .sheet p{
+    font-size:13px!important;
+  }
+}
+
+/* Narrow phones still get three distinct primary gestures without illegible scaling. */
+@media(max-width:390px){
+  :root{--v29-action:72px}
+  body[data-version="33"] #drawer{
+    padding-left:17px!important;
+    padding-right:17px!important;
+  }
+  body[data-version="33"] .action-grid{
+    gap:9px!important;
+  }
+  body[data-version="33"] .action-grid button svg.v29-gesture{
+    width:46px!important;
+    height:46px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  body[data-version="33"] #drawer,
+  body[data-version="33"] .action-grid button,
+  body[data-version="33"] .more summary,
+  body[data-version="33"] .wish-nav button{
+    animation:none!important;
+    transition:none!important;
+  }
+}
+
+
+/* V30 semantic overrides */
+
+/* RALUVAAA Experience V30
+   One visual language: seed = wish/root/release. No hidden action menu. */
+
+body[data-version="33"]{
+  --seed:#f1d98b;
+  --grow:#79d9f1;
+  --branch:#c990f4;
+  --bloom:#f4d889;
+  --support:#88e0bc;
+  --help:#efc98d;
+  --graft:#d8a0f5;
+  --suggest:#91bdf6;
+  --quiet:rgba(225,238,247,.72);
+}
+
+/* Better overall type consistency */
+body[data-version="33"] .drawer-title{
+  font-family:var(--v29-serif)!important;
+  font-size:24px!important;
+  font-weight:400!important;
+}
+body[data-version="33"] .drawer-kicker{
+  font-size:11px!important;
+  letter-spacing:.08em!important;
+}
+body[data-version="33"] #drawerBody>.meta{
+  font-size:14px!important;
+  line-height:1.5!important;
+}
+body[data-version="33"] .v28-lineage-bar button{
+  min-height:48px!important;
+  font-size:13px!important;
+  font-weight:560!important;
+}
+body[data-version="33"] .v28-lineage-bar .v28-back{
+  width:48px!important;
+  min-width:48px!important;
+  padding:0!important;
+}
+body[data-version="33"] .v30-back-icon{
+  width:24px;
+  height:24px;
+}
+body[data-version="33"] .v28-lineage-bar .v28-root{
+  gap:10px!important;
+  padding:0 16px 0 12px!important;
+}
+body[data-version="33"] .v30-seed{
+  width:30px;
+  height:30px;
+  color:var(--seed);
+  filter:drop-shadow(0 0 9px rgba(241,217,139,.13));
+}
+body[data-version="33"] .v28-root .v30-seed{
+  width:28px;
+  height:28px;
+}
+body[data-version="33"] .v28-root span{
+  font-size:13px!important;
+  max-width:none!important;
+  color:rgba(245,248,251,.82)!important;
+}
+
+/* Primary owner verbs remain wordless, but are semantically colored. */
+body[data-version="33"] .action-grid{
+  gap:18px!important;
+}
+body[data-version="33"] .action-grid button[data-act="evolve"]{
+  color:var(--grow)!important;
+  background:radial-gradient(circle at 40% 33%,rgba(121,217,241,.15),rgba(65,151,177,.035) 58%,transparent 78%)!important;
+  box-shadow:0 0 52px rgba(121,217,241,.05),inset 0 0 0 1px rgba(121,217,241,.16)!important;
+}
+body[data-version="33"] .action-grid button[data-act="split"],
+body[data-version="33"] .action-grid button[data-act="branch"]{
+  color:var(--branch)!important;
+  background:radial-gradient(circle at 40% 33%,rgba(201,144,244,.15),rgba(137,78,182,.035) 58%,transparent 78%)!important;
+  box-shadow:0 0 52px rgba(201,144,244,.05),inset 0 0 0 1px rgba(201,144,244,.16)!important;
+}
+body[data-version="33"] .action-grid button[data-act="bloom"]{
+  color:var(--bloom)!important;
+  background:radial-gradient(circle at 40% 33%,rgba(244,216,137,.16),rgba(178,137,58,.035) 58%,transparent 78%)!important;
+  box-shadow:0 0 52px rgba(244,216,137,.055),inset 0 0 0 1px rgba(244,216,137,.17)!important;
+}
+body[data-version="33"] .action-grid button[data-act="resume"],
+body[data-version="33"] .action-grid button[data-act="resume_lineage"]{
+  color:var(--grow)!important;
+}
+body[data-version="33"] .action-grid button[data-act="focus"],
+body[data-version="33"] .action-grid button[data-act="encourage"],
+body[data-version="33"] .action-grid button[data-act="help"],
+body[data-version="33"] .action-grid button[data-act="suggest"]{
+  display:none!important;
+}
+
+/* No ellipsis menu at all in V30. */
+body[data-version="33"] details.more{
+  display:none!important;
+}
+
+/* Role-dependent visible action surface. */
+body[data-version="33"] .v30-action-surface{
+  margin-top:20px;
+  display:grid;
+  gap:11px;
+}
+body[data-version="33"] .v30-action-surface.v30-owner{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+body[data-version="33"] .v30-action-surface.v30-helper{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+body[data-version="33"] .v30-action{
+  min-height:62px;
+  border:0;
+  border-radius:20px 27px 19px 30px;
+  background:rgba(178,222,242,.025);
+  box-shadow:inset 0 0 0 1px rgba(181,224,245,.065);
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  padding:10px 13px;
+  text-align:left;
+  color:rgba(239,247,252,.78);
+  transition:transform .2s ease,background .2s ease,box-shadow .2s ease,color .2s ease;
+}
+body[data-version="33"] .v30-action:hover,
+body[data-version="33"] .v30-action:focus-visible{
+  transform:translateY(-2px);
+  background:rgba(177,223,245,.055);
+  box-shadow:inset 0 0 0 1px rgba(188,230,248,.11),0 0 30px rgba(90,192,230,.03);
+  color:#fff;
+  outline:none;
+}
+body[data-version="33"] .v30-action:disabled{
+  opacity:.38;
+}
+body[data-version="33"] .v30-action-icon{
+  flex:0 0 36px;
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:rgba(255,255,255,.025);
+}
+body[data-version="33"] .v30-action-icon svg{
+  width:27px;
+  height:27px;
+}
+body[data-version="33"] .v30-action-label{
+  font-size:13px;
+  line-height:1.15;
+  font-weight:590;
+  letter-spacing:0;
+}
+body[data-version="33"] .v30-action[data-v30-act="support"]{color:var(--support)}
+body[data-version="33"] .v30-action[data-v30-act="help"]{color:var(--help)}
+body[data-version="33"] .v30-action[data-v30-act="graft"]{color:var(--graft)}
+body[data-version="33"] .v30-action[data-v30-act="suggest"]{color:var(--suggest)}
+body[data-version="33"] .v30-action[data-v30-act="letgo"]{color:rgba(243,196,196,.76)}
+
+/* Entrusted wishes: the whole phrase/card carries the temporary phase color. */
+body[data-version="33"] #drawerBody [data-entrusted-band="short"]{
+  color:#ff8787!important;
+  background:linear-gradient(105deg,rgba(255,112,112,.105),rgba(255,112,112,.025))!important;
+  box-shadow:inset 0 0 0 1px rgba(255,130,130,.16)!important;
+}
+body[data-version="33"] #drawerBody [data-entrusted-band="medium"]{
+  color:#f3c46d!important;
+  background:linear-gradient(105deg,rgba(239,181,73,.11),rgba(239,181,73,.025))!important;
+  box-shadow:inset 0 0 0 1px rgba(239,190,95,.16)!important;
+}
+body[data-version="33"] #drawerBody [data-entrusted-band="long"]{
+  color:#7de2b4!important;
+  background:linear-gradient(105deg,rgba(101,217,167,.10),rgba(101,217,167,.022))!important;
+  box-shadow:inset 0 0 0 1px rgba(115,224,177,.15)!important;
+}
+body[data-version="33"] #drawerBody [data-entrusted-band] .t,
+body[data-version="33"] #drawerBody [data-entrusted-band] .m,
+body[data-version="33"] #drawerBody [data-entrusted-band] .state{
+  color:currentColor!important;
+}
+body[data-version="33"] #drawerBody [data-entrusted-band] .t{
+  opacity:.95!important;
+}
+body[data-version="33"] #drawerBody [data-entrusted-band] .m{
+  opacity:.82!important;
+  text-shadow:none!important;
+}
+
+/* Larger, unmistakable feedback/errors. */
+body[data-version="33"] #toast{
+  top:66px!important;
+  max-width:min(560px,calc(100vw - 32px))!important;
+  padding:12px 17px!important;
+  border-radius:18px 24px 17px 26px!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+  font-weight:570!important;
+  text-align:center!important;
+  color:rgba(247,250,253,.93)!important;
+  background:rgba(5,13,24,.95)!important;
+  box-shadow:0 18px 60px rgba(0,0,0,.35),inset 0 0 0 1px rgba(185,225,246,.10)!important;
+}
+body[data-version="33"] .field-note{
+  min-height:18px!important;
+  font-size:12px!important;
+  line-height:1.4!important;
+}
+body[data-version="33"] .empty{
+  font-size:14px!important;
+}
+
+/* Rail uses the same seed/root/wish symbol for release. */
+body[data-version="33"] #rail{
+  gap:5px!important;
+}
+body[data-version="33"] #rail .rail-btn{
+  width:44px!important;
+  height:44px!important;
+  border-radius:14px 17px 13px 18px!important;
+}
+body[data-version="33"] #createBtn{
+  background:
+    radial-gradient(circle at 42% 36%,rgba(246,225,160,.24),rgba(221,196,119,.09) 52%,rgba(255,255,255,.035) 76%)!important;
+  color:var(--seed)!important;
+  box-shadow:0 0 32px rgba(238,210,128,.08),inset 0 0 0 1px rgba(240,216,144,.20)!important;
+}
+body[data-version="33"] #createBtn .v30-seed{
+  width:31px;
+  height:31px;
+}
+body[data-version="33"] #myWorldBtn .v30-world{
+  width:29px;
+  height:29px;
+  color:rgba(188,229,247,.86);
+}
+
+/* Root navigation reads as a real semantic control. */
+body[data-version="33"] .v28-lineage-bar{
+  gap:10px!important;
+}
+body[data-version="33"] .v28-lineage-bar .v28-back,
+body[data-version="33"] .v28-lineage-bar .v28-root{
+  background:rgba(174,220,241,.035)!important;
+  box-shadow:inset 0 0 0 1px rgba(184,225,245,.08)!important;
+}
+
+/* Mobile */
+@media(max-width:820px){
+  body[data-version="33"] #drawerBody>.meta{
+    font-size:13px!important;
+  }
+  body[data-version="33"] .v28-lineage-bar button{
+    min-height:46px!important;
+    font-size:12px!important;
+  }
+  body[data-version="33"] .v30-action-surface{
+    gap:8px;
+    margin-top:15px;
+  }
+  body[data-version="33"] .v30-action-surface.v30-owner,
+  body[data-version="33"] .v30-action-surface.v30-helper{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  body[data-version="33"] .v30-action{
+    min-height:58px;
+    padding:9px 11px;
+  }
+  body[data-version="33"] .v30-action-label{
+    font-size:12px;
+  }
+  body[data-version="33"] #toast{
+    top:max(72px,calc(env(safe-area-inset-top) + 54px))!important;
+    font-size:14px!important;
+  }
+  body[data-version="33"] #rail .rail-btn{
+    width:40px!important;
+    height:40px!important;
+  }
+}
+
+@media(max-width:390px){
+  body[data-version="33"] .v30-action-surface.v30-owner,
+  body[data-version="33"] .v30-action-surface.v30-helper{
+    grid-template-columns:1fr 1fr;
+  }
+  body[data-version="33"] .v30-action{
+    min-height:56px;
+  }
+}
+
+
+/* V33: one visual scale everywhere. Large pictogram, meaning below. */
+
+body[data-version="33"]{
+  --v33-action-size:86px;
+  --v33-action-icon:50px;
+  --v33-rail-icon:31px;
+}
+
+/* Hide inherited action groups; V33 rebuilds one unified deck. */
+body[data-version="33"] #drawerBody .action-grid,
+body[data-version="33"] #drawerBody .v30-action-surface{
+  display:none!important;
+}
+
+body[data-version="33"] .v33-action-deck{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(92px,1fr));
+  gap:18px 14px;
+  margin:24px 0 4px;
+  align-items:start;
+}
+body[data-version="33"] .v33-action-unit{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:9px;
+  color:rgba(239,247,252,.82);
+}
+body[data-version="33"] .v33-action-circle{
+  width:var(--v33-action-size);
+  height:var(--v33-action-size);
+  min-width:var(--v33-action-size);
+  min-height:var(--v33-action-size);
+  padding:0;
+  border:0;
+  border-radius:50% 47% 54% 46% / 48% 55% 45% 52%;
+  display:grid;
+  place-items:center;
+  color:inherit;
+  background:
+    radial-gradient(circle at 40% 34%,color-mix(in srgb,currentColor 13%,transparent),rgba(119,194,224,.025) 58%,transparent 78%);
+  box-shadow:
+    0 0 38px color-mix(in srgb,currentColor 5%,transparent),
+    inset 0 0 0 1px color-mix(in srgb,currentColor 17%,transparent);
+  transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+}
+body[data-version="33"] .v33-action-unit:nth-child(2n) .v33-action-circle{
+  border-radius:46% 54% 49% 51% / 55% 45% 57% 43%;
+}
+body[data-version="33"] .v33-action-unit:nth-child(3n) .v33-action-circle{
+  border-radius:54% 46% 52% 48% / 44% 56% 47% 53%;
+}
+body[data-version="33"] .v33-action-circle:hover,
+body[data-version="33"] .v33-action-circle:focus-visible{
+  transform:translateY(-3px) scale(1.035);
+  outline:none;
+  box-shadow:
+    0 0 48px color-mix(in srgb,currentColor 8%,transparent),
+    inset 0 0 0 1px color-mix(in srgb,currentColor 25%,transparent);
+}
+body[data-version="33"] .v33-action-circle:disabled{
+  opacity:.35;
+  transform:none;
+}
+body[data-version="33"] .v33-action-circle svg{
+  width:var(--v33-action-icon)!important;
+  height:var(--v33-action-icon)!important;
+  max-width:var(--v33-action-icon)!important;
+  max-height:var(--v33-action-icon)!important;
+  overflow:visible;
+}
+body[data-version="33"] .v33-action-label{
+  width:100%;
+  min-height:31px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  text-align:center;
+  font-size:12px;
+  line-height:1.2;
+  font-weight:590;
+  letter-spacing:0;
+  color:currentColor;
+}
+
+/* Rail: every glyph occupies the same visual footprint. */
+body[data-version="33"] #rail{
+  width:56px!important;
+  padding:5px!important;
+  gap:6px!important;
+  border-radius:20px!important;
+}
+body[data-version="33"] #rail .rail-btn{
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  border-radius:16px 19px 15px 20px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+}
+body[data-version="33"] #rail .v33-rail-icon,
+body[data-version="33"] #rail .sound-note{
+  width:var(--v33-rail-icon)!important;
+  height:var(--v33-rail-icon)!important;
+  display:grid!important;
+  place-items:center!important;
+  position:relative;
+}
+body[data-version="33"] #rail .v33-rail-icon svg,
+body[data-version="33"] #rail .sound-note svg{
+  width:var(--v33-rail-icon)!important;
+  height:var(--v33-rail-icon)!important;
+  overflow:visible;
+}
+body[data-version="33"] #musicBtn{
+  font-size:0!important;
+}
+body[data-version="33"] #musicBtn .sound-strike{
+  left:2px!important;
+  right:2px!important;
+  top:15px!important;
+  height:2px!important;
+}
+body[data-version="33"] #createBtn{
+  color:var(--seed)!important;
+}
+body[data-version="33"] #createBtn .v33-rail-icon,
+body[data-version="33"] #createBtn .v33-rail-icon svg{
+  width:var(--v33-rail-icon)!important;
+  height:var(--v33-rail-icon)!important;
+}
+
+/* Root uses the same seed grammar, without the creation plus. */
+body[data-version="33"] .v28-root .v30-seed{
+  width:31px!important;
+  height:31px!important;
+}
+body[data-version="33"] .v28-root .v33-root-seed{
+  display:grid!important;
+  place-items:center!important;
+  flex:0 0 31px!important;
+}
+body[data-version="33"] .v28-root .v33-root-seed>svg{
+  width:31px!important;
+  height:31px!important;
+}
+body[data-version="33"] .v28-root span{
+  font-size:13px!important;
+}
+
+/* Keep feedback readable. */
+body[data-version="33"] #toast{
+  font-size:14px!important;
+  padding:13px 18px!important;
+}
+
+@media(max-width:820px){
+  body[data-version="33"]{
+    --v33-action-size:76px;
+    --v33-action-icon:44px;
+    --v33-rail-icon:28px;
+  }
+  body[data-version="33"] .v33-action-deck{
+    grid-template-columns:repeat(3,minmax(84px,1fr));
+    gap:16px 9px;
+    margin-top:19px;
+  }
+  body[data-version="33"] .v33-action-label{
+    font-size:11.5px;
+    min-height:29px;
+  }
+  body[data-version="33"] #rail{
+    left:50%!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:calc(max(8px,env(safe-area-inset-bottom)) + 3px)!important;
+    transform:translateX(-50%)!important;
+    width:auto!important;
+    min-width:220px!important;
+    height:54px!important;
+    padding:4px 6px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:7px!important;
+  }
+  body[data-version="33"] #rail .rail-btn,
+  body[data-version="33"] #rail #createBtn{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    min-height:42px!important;
+    flex:0 0 42px!important;
+    margin:0!important;
+  }
+}
+
+@media(max-width:380px){
+  body[data-version="33"]{
+    --v33-action-size:72px;
+    --v33-action-icon:41px;
+  }
+  body[data-version="33"] .v33-action-deck{
+    grid-template-columns:repeat(3,minmax(76px,1fr));
+    gap:14px 6px;
+  }
+  body[data-version="33"] .v33-action-label{
+    font-size:10.8px;
+  }
+}
+
+
+body[data-version="33"] #drawerBody details.more{display:none!important;}
+
+
+/* Keep rail geometry strictly uniform, including touch-hover states. */
+body[data-version="33"] #rail .rail-btn:hover,
+body[data-version="33"] #rail .rail-btn.active{
+  transform:none!important;
+}
+
+
+/* V33: language control is always visible and touchable. */
+body[data-version="33"] .lang{
+  display:flex!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  border:1px solid rgba(184,214,255,.10)!important;
+  background:rgba(5,14,25,.28)!important;
+  border-radius:999px!important;
+}
+body[data-version="33"] .lang button{
+  display:grid!important;
+  place-items:center!important;
+  min-width:30px!important;
+  height:28px!important;
+  padding:0 7px!important;
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:650!important;
+}
+body[data-version="33"] .lang button.active{
+  background:rgba(203,236,249,.10)!important;
+  color:#fff!important;
+}
+
+/* Mobile repair: the inherited V28 layer explicitly hid .lang. */
+@media(max-width:820px){
+  body[data-version="33"] #brand{
+    width:224px!important;
+    max-width:calc(100vw - 76px)!important;
+    padding:8px 8px!important;
+    z-index:60!important;
+  }
+  body[data-version="33"] #brand .brand-row{
+    width:100%!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+  }
+  body[data-version="33"] .lang{
+    display:flex!important;
+    flex:0 0 auto!important;
+    margin-left:0!important;
+    padding:2px!important;
+    gap:2px!important;
+    opacity:1!important;
+    border:1px solid rgba(184,214,255,.10)!important;
+    background:rgba(5,14,25,.34)!important;
+    border-radius:999px!important;
+    pointer-events:auto!important;
+  }
+  body[data-version="33"] .lang button{
+    display:grid!important;
+    place-items:center!important;
+    min-width:32px!important;
+    height:30px!important;
+    padding:0 8px!important;
+    font-size:10px!important;
+    line-height:1!important;
+    font-weight:650!important;
+    letter-spacing:.02em!important;
+    color:rgba(229,239,248,.64)!important;
+  }
+  body[data-version="33"] .lang button.active{
+    color:#fff!important;
+    background:rgba(203,236,249,.11)!important;
+  }
+  body[data-version="33"] .sub{
+    display:none!important;
+  }
+}
+
+/* V33 requested refinements only */
+body[data-version="33"] #createBtn .v33-create-plus{
+  display:block;
+  font-size:34px;
+  line-height:.82;
+  font-weight:300;
+  transform:translateY(-1px);
+  color:currentColor;
+}
+body[data-version="33"] #musicBtn .v33-rail-icon,
+body[data-version="33"] #musicBtn .v33-rail-icon svg{
+  width:35px!important;
+  height:35px!important;
+}
+body[data-version="33"] #myWorldBtn .v33-rail-icon,
+body[data-version="33"] #myWorldBtn .v33-rail-icon svg{
+  width:32px!important;
+  height:32px!important;
+}
+@media(max-width:820px){
+  body[data-version="33"] #createBtn .v33-create-plus{font-size:32px}
+  body[data-version="33"] #musicBtn .v33-rail-icon,
+  body[data-version="33"] #musicBtn .v33-rail-icon svg{width:32px!important;height:32px!important}
+}
