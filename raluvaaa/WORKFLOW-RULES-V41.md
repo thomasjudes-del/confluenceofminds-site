@@ -38,7 +38,7 @@ A branch may be manually moved only when:
 
 Moving a branch moves its full subtree.
 
-EVOLVE nodes are state transitions, not movable branches.
+The original `split` node remains the structural branch anchor even after that branch has EVOLVED. It may therefore still be moved as one LEGO piece together with its evolved subtree. EVOLVE nodes themselves are state transitions, not movable branch anchors.
 
 ## BLOOM
 
