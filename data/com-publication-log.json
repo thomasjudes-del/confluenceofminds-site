@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22",
+  "version": "2026-09-24",
   "purpose": "Machine-readable log linking CoM publications to worlds, editorial angles, formats and Buffer IDs so performance can be learned over time.",
   "rules": [
     "Every future autonomous CoM Instagram publication must append one entry after Buffer confirms creation.",
@@ -345,6 +345,63 @@
       "platform": "youtube",
       "buffer_post_id": "6ab29798bafcc0c7efe33f23",
       "published_at": "2026-09-22T16:58:34.675+02:00"
+    },
+    {
+      "experiment_id": "com-snowwhite-2026-09-24-approved-v6",
+      "world_id": "snow-white-queen-of-ashes",
+      "content_mode": "archive-remix",
+      "angle": "Dying land / Queen of Ashes / Snow White must face the Queen",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": null,
+      "source_event": null,
+      "creative_master": "SnowWhite_FINAL_FOR_APPROVAL_2026-09-24.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-24T16:21:00+02:00",
+      "scheduled_for": "2026-09-24T16:30:00+02:00",
+      "metricool_post_id": "381396844",
+      "metricool_uuid": "7468818937472108913",
+      "status_at_log": "PENDING",
+      "notes": "User approved for publication with explicit quality caveat: typography/presentation below desired future standard. 23s vertical master, slowed pacing, lower-third text, final attached Snow White & the Queen of Ashes poster with glitter effect. Scheduled via Metricool to Instagram, TikTok and YouTube.",
+      "platform": "instagram"
+    },
+    {
+      "experiment_id": "com-snowwhite-2026-09-24-approved-v6",
+      "world_id": "snow-white-queen-of-ashes",
+      "content_mode": "archive-remix",
+      "angle": "Dying land / Queen of Ashes / Snow White must face the Queen",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": null,
+      "source_event": null,
+      "creative_master": "SnowWhite_FINAL_FOR_APPROVAL_2026-09-24.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-24T16:21:00+02:00",
+      "scheduled_for": "2026-09-24T16:30:00+02:00",
+      "metricool_post_id": "381396844",
+      "metricool_uuid": "7468818937472108913",
+      "status_at_log": "PENDING",
+      "notes": "User approved for publication with explicit quality caveat: typography/presentation below desired future standard. 23s vertical master, slowed pacing, lower-third text, final attached Snow White & the Queen of Ashes poster with glitter effect. Scheduled via Metricool to Instagram, TikTok and YouTube.",
+      "platform": "tiktok"
+    },
+    {
+      "experiment_id": "com-snowwhite-2026-09-24-approved-v6",
+      "world_id": "snow-white-queen-of-ashes",
+      "content_mode": "archive-remix",
+      "angle": "Dying land / Queen of Ashes / Snow White must face the Queen",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": null,
+      "source_event": null,
+      "creative_master": "SnowWhite_FINAL_FOR_APPROVAL_2026-09-24.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-24T16:21:00+02:00",
+      "scheduled_for": "2026-09-24T16:30:00+02:00",
+      "metricool_post_id": "381396844",
+      "metricool_uuid": "7468818937472108913",
+      "status_at_log": "PENDING",
+      "notes": "User approved for publication with explicit quality caveat: typography/presentation below desired future standard. 23s vertical master, slowed pacing, lower-third text, final attached Snow White & the Queen of Ashes poster with glitter effect. Scheduled via Metricool to Instagram, TikTok and YouTube.",
+      "platform": "youtube"
     }
   ]
 }
