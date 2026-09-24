@@ -117,7 +117,6 @@ function normalizeWorkflowDeck(){
     let hide=false;
     if(superseded&&semantic==='graft')hide=true;
     if(!cur.owner&&superseded&&['support','help','suggest'].includes(semantic))hide=true;
-    if(cur.owner&&cur.kind!=='create'&&activeBelow&&semantic==='letgo')hide=true;
     unit.classList.toggle('v41-workflow-invalid',hide);
 
     const order={evolve:1,branch:2,bloom:3,recenter:4,modify:5,graft:7,share:8,letgo:9,revive:1,support:1,help:2,suggest:3,report:9}[semantic];
