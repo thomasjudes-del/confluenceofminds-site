@@ -31,10 +31,12 @@ For visual review, compare the online rendering against the approved board/sourc
 
 ## V41 revive precedent
 
-The V41 Revive icon follows this procedure:
+The V41 Revive and Move branch icons follow this procedure:
 - exact open-source source vectors were taken from the Pinhead icon library;
-- watering can + plant/droplets were composed into one RALUVAAA tile;
-- the resulting tile is stored as a versioned R2 asset;
-- the UI maps `resume` and `resume_lineage` to that asset.
+- the watering can + plant/droplets source geometry is used for Revive;
+- the four-direction move source geometry is used for Move branch;
+- each is composed into a RALUVAAA tile without redrawing the source pictogram;
+- the resulting tiles are stored as versioned R2 assets;
+- the UI maps `resume` / `resume_lineage` to Revive and manual reattachment to Move branch.
 
 The important rule is not the specific library. It is that the pictogram geometry comes from an approved or verified visual source rather than being improvised in code.
