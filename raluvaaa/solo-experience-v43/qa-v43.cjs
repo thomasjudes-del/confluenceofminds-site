@@ -38,10 +38,9 @@ async function open(page,id){
 async function testCoreSmoke(page){
   const root=await createWish(page,'V43 core workflow root');
   await open(page,root);
-  await page.locator('#drawerBody [data-act="split"]').click();
-  await page.fill('#branchInput','Branch one');
-  const add=page.locator('[data-add-branch]');
-  if(await add.count()){await add.click();await page.locator('.branch-row textarea').nth(1).fill('Branch two')}
+  await page.evaluate(()=>window.__RALUVAAA_UI__.action('split'));
+  await page.waitForSelector('#branchInput',{timeout:4000});
+  await page.fill('#branchInput','Branch one\nBranch two');
   await page.click('#confirm');
   await page.waitForFunction(()=>window.__RV26_SOLO__.semantic().filter(x=>x.kind==='split'&&x.lineageId===window.__RV26_SOLO__.semantic().find(y=>y.text==='V43 core workflow root')?.lineageId).length>=2,null,{timeout:7000});
   return root;
@@ -54,7 +53,8 @@ async function testSavedFollowsEvolution(page,root){
   let saved=await page.evaluate(()=>window.__RALUVAAA_V43__.saved());
   assert.equal(saved.length,1,'one saved wish expected');
 
-  await page.locator('#drawerBody [data-act="evolve"]').click();
+  await page.evaluate(()=>window.__RALUVAAA_UI__.action('evolve'));
+  await page.waitForSelector('#evolveInput',{timeout:4000});
   await page.fill('#evolveInput','V43 evolved current state');
   await page.click('#confirm');
   await page.waitForFunction(()=>window.__RV26_SOLO__.semantic().some(x=>x.text==='V43 evolved current state'),null,{timeout:7000});
@@ -79,8 +79,8 @@ async function testSavedFollowsEvolution(page,root){
 }
 async function testShare(page,id){
   await open(page,id);
-  await page.waitForSelector('#drawerBody [data-act="share"]',{timeout:5000});
-  await page.locator('#drawerBody [data-act="share"]').click();
+  await page.waitForSelector('#drawerBody .v33-action-unit[data-v39-icon="share"] .v33-action-circle',{timeout:5000});
+  await page.locator('#drawerBody .v33-action-unit[data-v39-icon="share"] .v33-action-circle').click();
   await page.waitForSelector('#v43ShareOverlay.open',{timeout:5000});
   assert.equal(await page.locator('.v43-share-styles [data-style]').count(),5,'five share visual templates expected');
   assert.equal(await page.locator('.v43-share-modes [data-mode]').count(),2,'still and animated modes expected');
@@ -127,7 +127,7 @@ async function testShare(page,id){
 async function testMobile(page,id){
   await page.setViewportSize({width:390,height:844});
   await open(page,id);
-  await page.locator('#drawerBody [data-act="share"]').click();
+  await page.locator('#drawerBody .v33-action-unit[data-v39-icon="share"] .v33-action-circle').click();
   await page.waitForSelector('#v43ShareOverlay.open',{timeout:5000});
   const box=await page.locator('.v43-share-sheet').boundingBox();
   assert(box&&box.x>=0&&box.x+box.width<=390,'share sheet must stay inside mobile viewport');
