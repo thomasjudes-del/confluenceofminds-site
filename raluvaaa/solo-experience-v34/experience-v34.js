@@ -45,6 +45,12 @@ function semanticFor(label){
 }
 
 function decorateRail(){
+  const entrusted=document.getElementById('entrustedBtn');
+  if(entrusted&&(entrusted.dataset.v34Icon!=='explore'||!entrusted.querySelector('.v34-icon'))){
+    const badge=entrusted.querySelector('#entrustedBadge')?.outerHTML||'<span id="entrustedBadge" class="badge">3</span>';
+    entrusted.innerHTML='<span class="v33-rail-icon v34-rail-icon">'+ICONS.explore+'</span>'+badge;
+    entrusted.dataset.v34Icon='explore';
+  }
   const my=document.getElementById('myWorldBtn');
   if(my&&(my.dataset.v34Icon!=='myWishes'||!my.querySelector('.v34-icon'))){
     my.innerHTML='<span class="v33-rail-icon v34-rail-icon">'+ICONS.myWishes+'</span>';
