@@ -256,6 +256,48 @@ async function testReviveOnePath(page){
   return {root,parent,sibling,child,otherChild};
 }
 
+async function testBranchSubtreeCloseRevive(page){
+  const root=await createWish(page,'Branch subtree close root');
+  const [branch,sibling]=await split(page,root,['Branch to let go','Sibling stays awake']);
+  const [childA,childB]=await split(page,branch,['Branch child A','Branch child B']);
+
+  await open(page,branch);
+  const visibleLetgo=page.locator('#drawerBody .v33-action-unit[data-v37-icon="letgo"]:not(.v41-workflow-invalid):not(.v41-workflow-hidden)');
+  assert(await visibleLetgo.count()>=1,'Let go must stay available for a live branch subtree');
+
+  await acceptNextDialog(page,()=>action(page,'abandon'));
+  await page.waitForFunction(({branch,childA,childB,root,sibling})=>{
+    const s=window.__RV26_SOLO__.semantic();
+    return s.find(x=>x.semanticId===branch)?.state==='abandoned' &&
+      s.find(x=>x.semanticId===childA)?.state==='abandoned' &&
+      s.find(x=>x.semanticId===childB)?.state==='abandoned' &&
+      s.find(x=>x.semanticId===root)?.state==='alive' &&
+      s.find(x=>x.semanticId===sibling)?.state==='alive';
+  },{branch,childA,childB,root,sibling},{timeout:7000});
+
+  const closeEvent=await page.evaluate(id=>{
+    return [...window.__RV26_SOLO__.state().events].reverse().find(e=>e.type==='close_branch'&&e.semanticId===id)||null;
+  },branch);
+  assert(closeEvent,'branch subtree close must create a close_branch snapshot');
+  assert(closeEvent.semanticIds.includes(branch)&&closeEvent.semanticIds.includes(childA)&&closeEvent.semanticIds.includes(childB),'close_branch snapshot must contain its live subtree');
+  assert(!closeEvent.semanticIds.includes(sibling),'close_branch must not put sibling branches to sleep');
+
+  const soundBefore=await page.evaluate(()=>window.__RALUVAAA_REVIVE_AUDIO_V41__.history.length);
+  await open(page,branch);
+  await acceptNextDialog(page,()=>action(page,'resume'));
+  await page.waitForFunction(({branch,childA,childB,sibling})=>{
+    const s=window.__RV26_SOLO__.semantic();
+    return s.find(x=>x.semanticId===branch)?.state==='alive' &&
+      s.find(x=>x.semanticId===childA)?.state==='alive' &&
+      s.find(x=>x.semanticId===childB)?.state==='alive' &&
+      s.find(x=>x.semanticId===sibling)?.state==='alive';
+  },{branch,childA,childB,sibling},{timeout:7000});
+  const soundAfter=await page.evaluate(()=>window.__RALUVAAA_REVIVE_AUDIO_V41__.history.length);
+  assert.equal(soundAfter,soundBefore+1,'reviving a closed branch subtree must play one watering sound');
+
+  return {root,branch,sibling,childA,childB};
+}
+
 async function testLegoReattachAndRemoveQC(page){
   const root=await createWish(page,'LEGO root');
   const [moving,target]=await split(page,root,['Move this branch','Target branch']);
@@ -304,8 +346,8 @@ async function testLegoReattachAndRemoveQC(page){
   assert.equal(historicalMoveAllowed,true,'historical split anchor must still move its whole evolved subtree');
   const graftUnit=page.locator('#drawerBody .v33-action-unit[data-v37-icon="graft"]');
   if(await graftUnit.count())assert(await graftUnit.first().evaluate(el=>el.classList.contains('v41-workflow-invalid')),'historical state graft must be hidden');
-  const letgoUnit=page.locator('#drawerBody .v33-action-unit[data-v37-icon="letgo"]');
-  if(await letgoUnit.count())assert(await letgoUnit.first().evaluate(el=>el.classList.contains('v41-workflow-invalid')),'historical branch let-go must be hidden while descendants are active');
+  const letgoUnit=page.locator('#drawerBody .v33-action-unit[data-v37-icon="letgo"]:not(.v41-workflow-invalid):not(.v41-workflow-hidden)');
+  assert(await letgoUnit.count()>=1,'historical split anchor must still be able to let its whole evolved subtree go');
 
   await open(page,root);
   await action(page,'evolve');
@@ -389,6 +431,7 @@ async function testForeignActionSmoke(page,ownRoot){
     const first=await testCreateCorrectEvolveCarryAndBloom(page);
     const selective=await testSelectiveWholeRevive(page);
     await testReviveOnePath(page);
+    await testBranchSubtreeCloseRevive(page);
     await testLegoReattachAndRemoveQC(page);
     await testForeignActionSmoke(page,selective.root);
 
@@ -397,6 +440,8 @@ async function testForeignActionSmoke(page,ownRoot){
     assert(finalState.events.some(e=>e.type==='evolve'),'evolve workflow missing');
     assert(finalState.events.some(e=>e.type==='reparent'),'reparent workflow missing');
     assert(finalState.events.some(e=>e.type==='bloom'),'bloom workflow missing');
+    assert(finalState.events.some(e=>e.type==='close_branch'),'branch subtree close workflow missing');
+    assert(finalState.events.some(e=>e.type==='resume_branch'),'branch subtree revive workflow missing');
     assert(finalState.events.some(e=>e.type==='close_lineage'),'close workflow missing');
     assert(finalState.events.some(e=>e.type==='resume_lineage'),'whole revive workflow missing');
     assert(finalState.events.some(e=>e.type==='resume'),'path revive workflow missing');
