@@ -13,12 +13,18 @@ This file is the binding production standard for all future Confluence of Minds 
 ## 2. Music and sound must be editorial choices
 - Never use white noise, placeholder ambience, test tones, crude drones, accidental silence, or synthetic filler as a soundtrack.
 - Never use cheap MIDI-sounding melodies or mock-instrument imitations in an approval candidate.
+- Default music sourcing must have zero marginal cost unless Thomas explicitly approves a paid source for that specific asset.
 - Prefer, in order:
   1. owned project music/audio;
-  2. a high-quality properly licensed or royalty-free track with verified usage rights;
-  3. a genuinely musical generated score that sounds like a finished soundtrack, not a sketch.
+  2. a high-quality free-to-use track with verified rights, especially CC0, CC BY, public-domain, Incompetech/Kevin MacLeod, PeriTune, Pixabay or another reputable free library;
+  3. a genuinely musical generated score only when it can be used and integrated at no additional per-track cost.
+- Do NOT use Background Music, Runway music generation, or any other pay-per-track / credit-consuming music service for routine Confluence social production unless Thomas explicitly approves that cost first.
+- When a specific free-library track is selected, integrate the exact original track file. Never recreate, imitate, approximate, synthesize or locally substitute it with a "similar" soundtrack.
+- If the exact selected track cannot be retrieved and muxed into the video, the asset is REWORK. Do not present an approximation as the chosen soundtrack.
 - Soundtrack selection must fit the specific world and tone. Avoid generic corporate music, tourist-cliche "ethnic" music, or obvious stock cliches.
 - Check that music is clearly audible on phone playback and that the final mix has sensible loudness and no clipping.
+- Verify the final MP4 actually contains the selected source track, not an earlier placeholder or stale audio stream.
+- Preserve the track title, author, source URL and license alongside the production asset. Add required attribution to social copy/description whenever the license requires it.
 - If semantic listening is unavailable, state that limitation. Do not substitute poor audio because listening is unavailable.
 
 ## 3. New content means new editorial value
@@ -79,6 +85,7 @@ A candidate is approval-ready only if:
 - typography is intentional;
 - pacing is readable;
 - music is a real editorial choice and audible;
+- the exact intended soundtrack source is confirmed in the final export;
 - no accidental silence/placeholder audio remains;
 - rights/factual basis are checked;
 - mobile 9:16 preview is acceptable.
