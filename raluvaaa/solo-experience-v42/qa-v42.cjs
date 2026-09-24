@@ -11,12 +11,12 @@ async function setup(){
   const context=await browser.newContext({viewport:{width:1920,height:1080},locale:'en-US'});
   const page=await context.newPage();
 
-  await page.goto(BASE+'/__raluvaaa_v41_seed__',{waitUntil:'domcontentloaded'}).catch(()=>{});
+  await page.goto(BASE+'/__raluvaaa_v42_seed__',{waitUntil:'domcontentloaded'}).catch(()=>{});
   await page.evaluate(()=>{
     localStorage.removeItem('raluvaaaSoloExperienceV42R1FreshStart');
     localStorage.setItem('raluvaaaSoloExperienceV41R1',JSON.stringify({
       version:26,lang:'en',entrusted:null,
-      events:[{type:'create',actorId:'A',semanticId:'old-v40',lineageId:'old-v40-lineage',text:'OLD V41 WISH',loc:'Nantes, France'}]
+      events:[{type:'create',actorId:'A',semanticId:'old-v41',lineageId:'old-v41-lineage',text:'OLD V41 WISH',loc:'Nantes, France'}]
     }));
     localStorage.setItem('raluvaaaSoloExperienceV42R1',JSON.stringify({
       version:26,lang:'en',entrusted:null,
@@ -112,14 +112,14 @@ async function bloom(page,id){
 
 async function assertFresh(page){
   const x=await page.evaluate(()=>({
-    reset:window.__RALUVAAA_FRESH_RESET_V41__,
+    reset:window.__RALUVAAA_FRESH_RESET_V42__,
     state:window.__RV26_SOLO__.state(),
     old:localStorage.getItem('raluvaaaSoloExperienceV41R1')
   }));
   assert.equal(x.reset?.performed,true,'V42 fresh reset must run');
   assert(x.reset.removed.includes('raluvaaaSoloExperienceV41R1'),'V42 must clear previous V41 local state');
   assert(x.reset.removed.includes('raluvaaaSoloExperienceV42R1'),'V42 must clear stale V42 state');
-  assert.equal(x.state.events.length,0,'V41 must start without old human wishes');
+  assert.equal(x.state.events.length,0,'V42 must start without old human wishes');
   assert.equal(x.old,null,'old V41 local store must be gone');
 }
 
