@@ -66,7 +66,7 @@ async function assertDimensions(page){
   });
   assert(dims.drawerW<=652&&dims.drawerW>=568,'drawer width not rationalized');
   assert(dims.drawerH<850,'drawer should fit its content instead of filling the screen');
-  assert.equal(dims.bottom,'auto','drawer bottom must be auto');
+  assert(parseFloat(dims.bottom)>100,'drawer must no longer be pinned to the bottom edge');
   assert(dims.actionW>=102&&dims.actionW<=106,'action width mismatch');
   assert(dims.actionH>=89&&dims.actionH<=93,'action height mismatch');
 }
