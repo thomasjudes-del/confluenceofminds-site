@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - ".github/workflows/build-anjin-final.yml"
+  pull_request:
+    paths:
+      - ".github/anjin-build-trigger.txt"
 
 jobs:
   build:
