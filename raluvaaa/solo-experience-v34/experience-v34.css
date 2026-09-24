@@ -11,9 +11,15 @@ body[data-ui-version="34"] .v34-icon{
   overflow:visible;
 }
 
+body[data-ui-version="34"] #entrustedBtn,
 body[data-ui-version="34"] #myWorldBtn,
 body[data-ui-version="34"] #createBtn{
   color:var(--v34-ink)!important;
+}
+body[data-ui-version="34"] #entrustedBtn .v34-rail-icon,
+body[data-ui-version="34"] #entrustedBtn .v34-rail-icon svg{
+  width:33px!important;
+  height:33px!important;
 }
 body[data-ui-version="34"] #myWorldBtn .v34-rail-icon,
 body[data-ui-version="34"] #myWorldBtn .v34-rail-icon svg{
@@ -70,6 +76,11 @@ body[data-ui-version="34"] .v33-action-unit[data-v34-icon="letgo"]{
     height:49px!important;
     max-width:49px!important;
     max-height:49px!important;
+  }
+  body[data-ui-version="34"] #entrustedBtn .v34-rail-icon,
+  body[data-ui-version="34"] #entrustedBtn .v34-rail-icon svg{
+    width:29px!important;
+    height:29px!important;
   }
   body[data-ui-version="34"] #myWorldBtn .v34-rail-icon,
   body[data-ui-version="34"] #myWorldBtn .v34-rail-icon svg{
