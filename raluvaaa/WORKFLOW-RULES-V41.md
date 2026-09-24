@@ -49,7 +49,9 @@ The whole root wish can always be explicitly confirmed as fulfilled by its wishe
 V41 also detects the natural completion case:
 - determine the current leaf/end-point nodes under the root;
 - when every current leaf is bloomed, offer to bloom the whole wish;
-- accepting this creates the root BLOOM event and triggers the existing whole-wish bloom sound.
+- accepting this quietly blooms any remaining alive internal states, then blooms the root;
+- this flowers the full lineage without adding extra intermediate sounds;
+- the root event triggers the existing whole-wish bloom sound.
 
 Branch bloom and whole-wish bloom remain separate semantic events and separate sounds.
 
