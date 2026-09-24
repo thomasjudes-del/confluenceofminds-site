@@ -36,12 +36,18 @@ async function assertLanguageSwitch(page,viewportWidth){
   await page.click('.lang button[data-lang="en"]');
   await page.waitForFunction(()=>window.__RV26_TEST__.state().lang==='en');
   assert(await page.locator('.lang button[data-lang="en"]').evaluate(el=>el.classList.contains('active')),'EN must become active');
-  assert.equal(await page.getAttribute('#createBtn','aria-label'),'Release a wish');
+  await page.click('#createBtn');
+  assert.equal((await page.locator('.sheet h3').textContent()).trim(),'Release a wish','English must visibly translate the create sheet');
+  assert.equal((await page.locator('#confirm').textContent()).trim(),'Create','English create CTA must be visible');
+  await page.click('#cancel');
 
   await page.click('.lang button[data-lang="fr"]');
   await page.waitForFunction(()=>window.__RV26_TEST__.state().lang==='fr');
   assert(await page.locator('.lang button[data-lang="fr"]').evaluate(el=>el.classList.contains('active')),'FR must become active');
-  assert.equal(await page.getAttribute('#createBtn','aria-label'),'Déposer un wish');
+  await page.click('#createBtn');
+  assert.equal((await page.locator('.sheet h3').textContent()).trim(),'Déposer un wish','French must visibly translate the create sheet');
+  assert.equal((await page.locator('#confirm').textContent()).trim(),'Créer','French create CTA must be visible');
+  await page.click('#cancel');
 }
 
 async function expectVisible(locator,name){
