@@ -24,10 +24,11 @@ async function setup(type,viewport,actor='A'){
 
 async function assertRail(page){
   await page.waitForFunction(()=>document.querySelector('#myWorldBtn .v34-icon')&&document.querySelector('#createBtn .v34-icon'),null,{timeout:5000});
+  assert.equal(await page.locator('#entrustedBtn').getAttribute('data-v34-icon'),'explore');
   assert.equal(await page.locator('#myWorldBtn').getAttribute('data-v34-icon'),'myWishes');
   assert.equal(await page.locator('#createBtn').getAttribute('data-v34-icon'),'create');
-  assert.equal(await page.locator('#entrustedBtn .v34-icon').count(),0,'entrusted icon must stay the existing V33 three-wish symbol');
-  const sizes=await page.evaluate(()=>['myWorldBtn','createBtn'].map(id=>{
+  assert.equal(await page.locator('#entrustedBadge').textContent(),'3','the three entrusted wishes badge must remain visible');
+  const sizes=await page.evaluate(()=>['entrustedBtn','myWorldBtn','createBtn'].map(id=>{
     const r=document.querySelector('#'+id+' .v34-icon').getBoundingClientRect();
     return {id,w:r.width,h:r.height};
   }));
