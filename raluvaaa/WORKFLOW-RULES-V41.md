@@ -57,17 +57,17 @@ Branch bloom and whole-wish bloom remain separate semantic events and separate s
 
 ## LET GO / CLOSE
 
-LET GO on a branch is reversible and keeps its trace.
+LET GO on a branch is reversible and keeps its trace. If the branch has active descendants, LET GO closes the whole active branch subtree in one action and records exactly which nodes were put to sleep. Sibling branches are untouched.
 
 CLOSE on a whole wish records exactly which nodes were alive at the moment of closing and puts those nodes into the abandoned state.
 
-This snapshot matters for later REVIVE.
+These snapshots matter for later REVIVE.
 
 ## REVIVE
 
 Reviving a branch:
-- revives that branch;
-- also revives abandoned ancestors needed to reconnect its path;
+- if that branch was explicitly closed as a subtree, restores only the nodes recorded in that branch-close snapshot;
+- otherwise revives the selected trace and any abandoned ancestors needed to reconnect its path;
 - does not revive unrelated sibling branches;
 - does not cross a confirmed BLOOM ancestor.
 
