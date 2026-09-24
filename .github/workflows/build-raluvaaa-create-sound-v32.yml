@@ -24,7 +24,7 @@ jobs:
           m=re.search(r"data:audio/ogg;base64,([^']+)",s)
           if not m:
               raise SystemExit('embedded V31 create sound not found')
-          pathlib.Path('/tmp/create-a-wish.ogg').write_bytes(base64.b64decode(m.group(1)))
+          data=m.group(1); data += '='*((4-len(data)%4)%4); pathlib.Path('/tmp/create-a-wish.ogg').write_bytes(base64.b64decode(data))
           PY
           ffmpeg -y -i /tmp/create-a-wish.ogg -ac 1 -ar 44100 -b:a 128k raluvaaa/solo-experience-v32/create-a-wish.mp3
           file raluvaaa/solo-experience-v32/create-a-wish.mp3
