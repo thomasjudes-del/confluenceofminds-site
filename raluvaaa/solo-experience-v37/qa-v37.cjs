@@ -34,8 +34,10 @@ async function assertFresh(page){
   const state=await page.evaluate(()=>window.__RV26_SOLO__.state());
   assert.equal(state.events.length,0,'V37 must start with no persisted human test events');
   assert.equal(state.lang==='fr'||state.lang==='en',true);
-  const stale=await page.evaluate(()=>localStorage.getItem('raluvaaaSoloExperienceV33R1'));
-  assert.equal(stale,null,'legacy solo store must be cleared on first V37 load');
+  const reset=await page.evaluate(()=>window.__RALUVAAA_FRESH_RESET_V37__);
+  assert.equal(reset?.performed,true,'V37 fresh reset must run before the app starts');
+  assert(reset.removed.includes('raluvaaaSoloExperienceV33R1'),'V37 reset must remove the legacy V33 solo store');
+  assert(reset.removed.includes('raluvaaaSoloExperienceV37R1'),'V37 reset must remove stale V37 test data');
 }
 async function assertRail(page){
   await page.waitForFunction(()=>['entrustedBtn','inboxBtn','myWorldBtn','musicBtn','createBtn'].every(id=>document.querySelector('#'+id+' img.v37-icon')?.complete),null,{timeout:10000});
