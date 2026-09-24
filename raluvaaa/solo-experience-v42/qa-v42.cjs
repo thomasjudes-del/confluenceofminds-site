@@ -433,6 +433,42 @@ async function testForeignActionSmoke(page,ownRoot){
   await page.waitForFunction(n=>window.__RALUVAAA_SOUND_V38__.history.filter(x=>x.name==='share').length>n,shareBefore,{timeout:4000});
 }
 
+async function testSimulatedWorldQC(page){
+  const summary=await page.evaluate(()=>document.getElementById('engine').contentWindow.__RV42_SIMULATION_QC__?.summary());
+  assert(summary,'simulation QC API must exist');
+  assert(summary.roots>=95,'simulated world should expose a broad set of root wishes');
+  assert(summary.states>summary.roots,'simulation should contain evolved and branched histories');
+  assert(summary.evolved>25,'simulation should include many evolved wishes');
+  assert(summary.branches>25,'simulation should include many branches');
+  assert(summary.fullBloom>=4,'simulation should include several fully accomplished wishes');
+  assert(summary.fullAbandoned>=4,'simulation should include several fully abandoned wishes');
+  assert(summary.bloom>summary.fullBloom,'simulation should include partial blooms too');
+  assert(summary.abandoned>summary.fullAbandoned,'simulation should include partial abandonments too');
+  assert(summary.withHelp>0&&summary.withEncouragement>0&&summary.withSuggestion>0,'simulation should include human interaction variety');
+  assert(summary.warps>=5,'simulation should include several cross-wish grafts');
+  assert.equal(summary.invalidBloom,0,'simulation must never bloom a node above an active descendant');
+  assert.equal(summary.invalidAbandon,0,'simulation must never abandon a node while leaving an active descendant below it');
+
+  const reps=await page.evaluate(()=>{
+    const s=window.__RV26_SOLO__.semantic().filter(x=>x.simulated);
+    const roots=s.filter(x=>x.kind==='create');
+    return{
+      bloomed:roots.find(x=>x.state==='bloom')?.semanticId||null,
+      abandoned:roots.find(x=>x.state==='abandoned')?.semanticId||null
+    };
+  });
+  assert(reps.bloomed,'simulation must expose at least one completed root wish');
+  assert(reps.abandoned,'simulation must expose at least one abandoned root wish');
+
+  await open(page,reps.bloomed);
+  assert.equal(await page.locator('#drawerBody .v33-action-unit').filter({hasText:'Support'}).count(),0,'completed simulated wish must not ask for support');
+  assert.equal(await page.locator('#drawerBody .v33-action-unit').filter({hasText:'Offer help'}).count(),0,'completed simulated wish must not ask for help');
+
+  await open(page,reps.abandoned);
+  assert.equal(await page.locator('#drawerBody .v33-action-unit').filter({hasText:'Support'}).count(),0,'abandoned simulated wish must not ask for support');
+  assert.equal(await page.locator('#drawerBody .v33-action-unit').filter({hasText:'Suggest a branch'}).count(),0,'abandoned simulated wish must not ask for a new branch suggestion');
+}
+
 async function testEntrustedEligibilityV42(page){
   const rows=await page.evaluate(()=>{
     const ids=window.__RALUVAAA_VITALITY_V42__.entrusted().map(x=>x.semanticId);
@@ -519,6 +555,7 @@ async function testResumeVsWakeWordingV42(page){
   const {browser,page}=await setup();
   try{
     await assertFresh(page);
+    await testSimulatedWorldQC(page);
     await testEntrustedEligibilityV42(page);
     const first=await testCreateCorrectEvolveCarryAndBloom(page);
     const selective=await testSelectiveWholeRevive(page);
