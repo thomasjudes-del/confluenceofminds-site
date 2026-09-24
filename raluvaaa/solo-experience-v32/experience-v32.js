@@ -21,6 +21,22 @@ function railIcon(svg,extra=''){
   return '<span class="v32-rail-icon">'+svg+extra+'</span>';
 }
 
+function syncRailLanguage(code){
+  const en=code==='en';
+  const my=document.getElementById('myWorldBtn');
+  if(my){
+    const l=en?'My wishes':'Mes wishes';
+    my.setAttribute('aria-label',l);
+    my.title=l;
+  }
+  const create=document.getElementById('createBtn');
+  if(create){
+    const l=en?'Release a wish':'Déposer un wish';
+    create.setAttribute('aria-label',l);
+    create.title=l;
+  }
+}
+
 function decorateRail(){
   const entrusted=document.getElementById('entrustedBtn');
   if(entrusted){
@@ -153,8 +169,10 @@ function schedule(){
 const observer=new MutationObserver(schedule);
 observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','disabled','data-sig']});
 document.addEventListener('click',e=>{
-  if(e.target.closest('.lang button')){
-    setTimeout(()=>{decorate();schedule()},20);
+  const langButton=e.target.closest('.lang button');
+  if(langButton){
+    const code=langButton.dataset.lang;
+    setTimeout(()=>{decorate();syncRailLanguage(code);schedule()},60);
     return;
   }
   if(e.target.closest('[data-panel],[data-nav-wish],.v28-back,.v28-root,#drawerClose'))setTimeout(schedule,0);
