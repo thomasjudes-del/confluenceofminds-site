@@ -1119,7 +1119,31 @@ body[data-version="32"] #rail .rail-btn.active{
 }
 
 
-/* V32: restore and enlarge the FR / EN control on mobile. The inherited V28 layer hid it. */
+/* V32: language control is always visible and touchable. */
+body[data-version="32"] .lang{
+  display:flex!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  border:1px solid rgba(184,214,255,.10)!important;
+  background:rgba(5,14,25,.28)!important;
+  border-radius:999px!important;
+}
+body[data-version="32"] .lang button{
+  display:grid!important;
+  place-items:center!important;
+  min-width:30px!important;
+  height:28px!important;
+  padding:0 7px!important;
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:650!important;
+}
+body[data-version="32"] .lang button.active{
+  background:rgba(203,236,249,.10)!important;
+  color:#fff!important;
+}
+
+/* Mobile repair: the inherited V28 layer explicitly hid .lang. */
 @media(max-width:820px){
   body[data-version="32"] #brand{
     width:224px!important;
