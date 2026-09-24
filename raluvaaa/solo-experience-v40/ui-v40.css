@@ -1,0 +1,108 @@
+/* V40: tighter proportions, with the bloom remaining the main visual event in the world. */
+body[data-layout-version="40"] #drawer{
+  right:70px!important;
+  top:62px!important;
+  bottom:auto!important;
+  width:clamp(570px,35vw,650px)!important;
+  height:auto!important;
+  max-height:calc(100vh - 84px)!important;
+  padding:22px 25px 24px!important;
+  border-radius:30px!important;
+  overflow:auto!important;
+}
+
+body[data-layout-version="40"] #drawer .drawer-head{
+  margin-bottom:4px!important;
+  padding-top:6px!important;
+  padding-bottom:5px!important;
+}
+
+body[data-layout-version="40"] #drawerBody>.wish{
+  margin-top:8px!important;
+  font-size:clamp(27px,1.8vw,34px)!important;
+  line-height:1.13!important;
+}
+
+body[data-layout-version="40"] #drawerBody>.meta{
+  margin-top:8px!important;
+  font-size:13.5px!important;
+}
+
+body[data-layout-version="40"] .v33-action-deck{
+  grid-template-columns:repeat(4,minmax(105px,1fr))!important;
+  gap:18px 12px!important;
+  margin:23px 0 3px!important;
+}
+
+body[data-layout-version="40"] .v33-action-unit{
+  gap:6px!important;
+}
+
+body[data-layout-version="40"] .v33-action-circle{
+  width:104px!important;
+  height:91px!important;
+  min-width:104px!important;
+  min-height:91px!important;
+}
+
+body[data-layout-version="40"] .v33-action-circle .v39-icon-art{
+  width:104px!important;
+  height:91px!important;
+  max-width:104px!important;
+  max-height:91px!important;
+  border-radius:25px!important;
+}
+
+body[data-layout-version="40"] .v33-action-label{
+  min-height:27px!important;
+  font-size:12.5px!important;
+  line-height:1.16!important;
+}
+
+body[data-layout-version="40"] .wish-nav{
+  margin:8px 0 6px!important;
+  gap:4px!important;
+}
+
+body[data-layout-version="40"] .v28-root,
+body[data-layout-version="40"] .v28-back{
+  min-height:38px!important;
+}
+
+@media(max-width:1100px){
+  body[data-layout-version="40"] #drawer{
+    width:min(620px,calc(100vw - 92px))!important;
+  }
+}
+
+@media(max-width:820px){
+  body[data-layout-version="40"] #drawer{
+    left:8px!important;
+    right:58px!important;
+    top:8px!important;
+    width:auto!important;
+    max-height:calc(100vh - 16px)!important;
+    padding:18px 16px 20px!important;
+    border-radius:23px!important;
+  }
+  body[data-layout-version="40"] .v33-action-deck{
+    grid-template-columns:repeat(3,minmax(86px,1fr))!important;
+    gap:15px 8px!important;
+  }
+  body[data-layout-version="40"] .v33-action-circle{
+    width:88px!important;
+    height:77px!important;
+    min-width:88px!important;
+    min-height:77px!important;
+  }
+  body[data-layout-version="40"] .v33-action-circle .v39-icon-art{
+    width:88px!important;
+    height:77px!important;
+    max-width:88px!important;
+    max-height:77px!important;
+    border-radius:21px!important;
+  }
+  body[data-layout-version="40"] .v33-action-label{
+    font-size:11.5px!important;
+  }
+}
