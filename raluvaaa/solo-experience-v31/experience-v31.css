@@ -142,6 +142,15 @@ body[data-version="31"] .v28-root .v30-seed{
   width:31px!important;
   height:31px!important;
 }
+body[data-version="31"] .v28-root .v31-root-seed{
+  display:grid!important;
+  place-items:center!important;
+  flex:0 0 31px!important;
+}
+body[data-version="31"] .v28-root .v31-root-seed>svg{
+  width:31px!important;
+  height:31px!important;
+}
 body[data-version="31"] .v28-root span{
   font-size:13px!important;
 }
