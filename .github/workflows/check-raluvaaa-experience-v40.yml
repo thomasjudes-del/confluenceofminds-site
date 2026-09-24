@@ -1,0 +1,41 @@
+name: Check RALUVAAA Experience V40
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-experience-v40/**'
+      - '.github/workflows/check-raluvaaa-experience-v40.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: raluvaaa-experience-v40-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/solo-experience-v40/engine-bloom-v40.js
+          node --check raluvaaa/solo-experience-v40/bloom-parent-v40.js
+          node --check raluvaaa/solo-experience-v40/ui-v40.js
+          node --check raluvaaa/solo-experience-v40/qa-v40.cjs
+          grep -q 'data-layout-version="40"' raluvaaa/solo-experience-v40/index.html
+          grep -q "raluvaaaSoloExperienceV40R1" raluvaaa/solo-experience-v40/index.html
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run V40 QA
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v40-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          node raluvaaa/solo-experience-v40/qa-v40.cjs
