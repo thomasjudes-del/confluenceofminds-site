@@ -1110,3 +1110,10 @@ body[data-version="31"] #toast{
 
 
 body[data-version="31"] #drawerBody details.more{display:none!important;}
+
+
+/* Keep rail geometry strictly uniform, including touch-hover states. */
+body[data-version="31"] #rail .rail-btn:hover,
+body[data-version="31"] #rail .rail-btn.active{
+  transform:none!important;
+}
