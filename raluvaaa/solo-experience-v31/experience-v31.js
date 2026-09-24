@@ -62,9 +62,12 @@ function decorateRail(){
 }
 
 function decorateRoot(){
-  document.querySelectorAll('#drawerBody .v28-root .v30-seed').forEach(old=>{
+  document.querySelectorAll('#drawerBody .v28-root').forEach(root=>{
+    if(root.querySelector('.v31-root-seed'))return;
+    const old=root.querySelector('.v30-seed');
+    if(!old)return;
     const holder=document.createElement('span');
-    holder.className='v30-seed';
+    holder.className='v30-seed v31-root-seed';
     holder.innerHTML=V31.seed;
     old.replaceWith(holder);
   });
