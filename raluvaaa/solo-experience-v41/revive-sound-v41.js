@@ -40,7 +40,7 @@ function play(event){
 
 window.addEventListener('raluvaaa-action',e=>{
   const ev=e.detail?.event;
-  if(!ev||!['resume','resume_lineage'].includes(ev.type))return;
+  if(!ev||!['resume','resume_branch','resume_lineage'].includes(ev.type))return;
   play(ev);
 });
 
