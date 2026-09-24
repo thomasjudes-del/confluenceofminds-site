@@ -1,0 +1,95 @@
+/* V41 workflow affordances only. V39 owns approved icon assets; V40 owns panel proportions. */
+
+body[data-workflow-version="41"] .v41-current-state{
+  width:100%;
+  margin:14px 0 2px;
+  padding:12px 14px;
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  text-align:left;
+  border:0;
+  border-radius:15px;
+  background:rgba(110,190,198,.055);
+  box-shadow:inset 0 0 0 1px rgba(151,215,219,.12);
+  color:rgba(239,248,249,.94);
+}
+body[data-workflow-version="41"] .v41-current-state span{
+  flex:0 0 auto;
+  margin-top:2px;
+  font-size:10px;
+  line-height:1.2;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:rgba(153,214,219,.68);
+}
+body[data-workflow-version="41"] .v41-current-state b{
+  font-size:12.5px;
+  line-height:1.35;
+  font-weight:620;
+}
+body[data-workflow-version="41"] .v41-current-state:hover,
+body[data-workflow-version="41"] .v41-current-state:focus-visible{
+  background:rgba(110,190,198,.085);
+  box-shadow:inset 0 0 0 1px rgba(151,215,219,.20);
+}
+
+body[data-workflow-version="41"] .v41-bloom-ready{
+  margin:12px 0 2px;
+  padding:9px 12px;
+  border-radius:13px;
+  background:rgba(207,171,119,.07);
+  box-shadow:inset 0 0 0 1px rgba(228,196,147,.13);
+  color:rgba(238,215,178,.85);
+  font-size:11.5px;
+  line-height:1.35;
+  font-weight:630;
+}
+
+body[data-workflow-version="41"] .v41-carry{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin:14px 0 2px;
+  padding:11px 12px;
+  border-radius:14px;
+  background:rgba(111,179,184,.055);
+  box-shadow:inset 0 0 0 1px rgba(151,211,214,.11);
+  cursor:pointer;
+}
+body[data-workflow-version="41"] .v41-carry input{
+  margin-top:3px;
+  width:16px;
+  height:16px;
+  accent-color:#91c8bf;
+}
+body[data-workflow-version="41"] .v41-carry span{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  color:rgba(239,246,247,.91);
+  font-size:12.5px;
+  line-height:1.3;
+  font-weight:620;
+}
+body[data-workflow-version="41"] .v41-carry small{
+  color:rgba(187,202,207,.67);
+  font-size:11px;
+  line-height:1.35;
+  font-weight:500;
+}
+
+body[data-workflow-version="41"] .v41-revive-art{
+  filter:none!important;
+}
+
+@media(max-width:820px){
+  body[data-workflow-version="41"] .v41-current-state{
+    padding:10px 11px;
+  }
+  body[data-workflow-version="41"] .v41-current-state b,
+  body[data-workflow-version="41"] .v41-carry span{
+    font-size:12px;
+  }
+}
