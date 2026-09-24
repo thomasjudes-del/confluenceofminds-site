@@ -1,0 +1,293 @@
+
+/* RALUVAAA Experience V30
+   One visual language: seed = wish/root/release. No hidden action menu. */
+
+body[data-version="30"]{
+  --seed:#f1d98b;
+  --grow:#79d9f1;
+  --branch:#c990f4;
+  --bloom:#f4d889;
+  --support:#88e0bc;
+  --help:#efc98d;
+  --graft:#d8a0f5;
+  --suggest:#91bdf6;
+  --quiet:rgba(225,238,247,.72);
+}
+
+/* Better overall type consistency */
+body[data-version="30"] .drawer-title{
+  font-family:var(--v29-serif)!important;
+  font-size:24px!important;
+  font-weight:400!important;
+}
+body[data-version="30"] .drawer-kicker{
+  font-size:11px!important;
+  letter-spacing:.08em!important;
+}
+body[data-version="30"] #drawerBody>.meta{
+  font-size:14px!important;
+  line-height:1.5!important;
+}
+body[data-version="30"] .v28-lineage-bar button{
+  min-height:48px!important;
+  font-size:13px!important;
+  font-weight:560!important;
+}
+body[data-version="30"] .v28-lineage-bar .v28-back{
+  width:48px!important;
+  min-width:48px!important;
+  padding:0!important;
+}
+body[data-version="30"] .v30-back-icon{
+  width:24px;
+  height:24px;
+}
+body[data-version="30"] .v28-lineage-bar .v28-root{
+  gap:10px!important;
+  padding:0 16px 0 12px!important;
+}
+body[data-version="30"] .v30-seed{
+  width:30px;
+  height:30px;
+  color:var(--seed);
+  filter:drop-shadow(0 0 9px rgba(241,217,139,.13));
+}
+body[data-version="30"] .v28-root .v30-seed{
+  width:28px;
+  height:28px;
+}
+body[data-version="30"] .v28-root span{
+  font-size:13px!important;
+  max-width:none!important;
+  color:rgba(245,248,251,.82)!important;
+}
+
+/* Primary owner verbs remain wordless, but are semantically colored. */
+body[data-version="30"] .action-grid{
+  gap:18px!important;
+}
+body[data-version="30"] .action-grid button[data-act="evolve"]{
+  color:var(--grow)!important;
+  background:radial-gradient(circle at 40% 33%,rgba(121,217,241,.15),rgba(65,151,177,.035) 58%,transparent 78%)!important;
+  box-shadow:0 0 52px rgba(121,217,241,.05),inset 0 0 0 1px rgba(121,217,241,.16)!important;
+}
+body[data-version="30"] .action-grid button[data-act="split"],
+body[data-version="30"] .action-grid button[data-act="branch"]{
+  color:var(--branch)!important;
+  background:radial-gradient(circle at 40% 33%,rgba(201,144,244,.15),rgba(137,78,182,.035) 58%,transparent 78%)!important;
+  box-shadow:0 0 52px rgba(201,144,244,.05),inset 0 0 0 1px rgba(201,144,244,.16)!important;
+}
+body[data-version="30"] .action-grid button[data-act="bloom"]{
+  color:var(--bloom)!important;
+  background:radial-gradient(circle at 40% 33%,rgba(244,216,137,.16),rgba(178,137,58,.035) 58%,transparent 78%)!important;
+  box-shadow:0 0 52px rgba(244,216,137,.055),inset 0 0 0 1px rgba(244,216,137,.17)!important;
+}
+body[data-version="30"] .action-grid button[data-act="resume"],
+body[data-version="30"] .action-grid button[data-act="resume_lineage"]{
+  color:var(--grow)!important;
+}
+body[data-version="30"] .action-grid button[data-act="focus"],
+body[data-version="30"] .action-grid button[data-act="encourage"],
+body[data-version="30"] .action-grid button[data-act="help"],
+body[data-version="30"] .action-grid button[data-act="suggest"]{
+  display:none!important;
+}
+
+/* No ellipsis menu at all in V30. */
+body[data-version="30"] details.more{
+  display:none!important;
+}
+
+/* Role-dependent visible action surface. */
+body[data-version="30"] .v30-action-surface{
+  margin-top:20px;
+  display:grid;
+  gap:11px;
+}
+body[data-version="30"] .v30-action-surface.v30-owner{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+body[data-version="30"] .v30-action-surface.v30-helper{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+body[data-version="30"] .v30-action{
+  min-height:62px;
+  border:0;
+  border-radius:20px 27px 19px 30px;
+  background:rgba(178,222,242,.025);
+  box-shadow:inset 0 0 0 1px rgba(181,224,245,.065);
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  padding:10px 13px;
+  text-align:left;
+  color:rgba(239,247,252,.78);
+  transition:transform .2s ease,background .2s ease,box-shadow .2s ease,color .2s ease;
+}
+body[data-version="30"] .v30-action:hover,
+body[data-version="30"] .v30-action:focus-visible{
+  transform:translateY(-2px);
+  background:rgba(177,223,245,.055);
+  box-shadow:inset 0 0 0 1px rgba(188,230,248,.11),0 0 30px rgba(90,192,230,.03);
+  color:#fff;
+  outline:none;
+}
+body[data-version="30"] .v30-action:disabled{
+  opacity:.38;
+}
+body[data-version="30"] .v30-action-icon{
+  flex:0 0 36px;
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:rgba(255,255,255,.025);
+}
+body[data-version="30"] .v30-action-icon svg{
+  width:27px;
+  height:27px;
+}
+body[data-version="30"] .v30-action-label{
+  font-size:13px;
+  line-height:1.15;
+  font-weight:590;
+  letter-spacing:0;
+}
+body[data-version="30"] .v30-action[data-v30-act="support"]{color:var(--support)}
+body[data-version="30"] .v30-action[data-v30-act="help"]{color:var(--help)}
+body[data-version="30"] .v30-action[data-v30-act="graft"]{color:var(--graft)}
+body[data-version="30"] .v30-action[data-v30-act="suggest"]{color:var(--suggest)}
+body[data-version="30"] .v30-action[data-v30-act="letgo"]{color:rgba(243,196,196,.76)}
+
+/* Entrusted wishes: the whole phrase/card carries the temporary phase color. */
+body[data-version="30"] #drawerBody [data-entrusted-band="short"]{
+  color:#ff8787!important;
+  background:linear-gradient(105deg,rgba(255,112,112,.105),rgba(255,112,112,.025))!important;
+  box-shadow:inset 0 0 0 1px rgba(255,130,130,.16)!important;
+}
+body[data-version="30"] #drawerBody [data-entrusted-band="medium"]{
+  color:#f3c46d!important;
+  background:linear-gradient(105deg,rgba(239,181,73,.11),rgba(239,181,73,.025))!important;
+  box-shadow:inset 0 0 0 1px rgba(239,190,95,.16)!important;
+}
+body[data-version="30"] #drawerBody [data-entrusted-band="long"]{
+  color:#7de2b4!important;
+  background:linear-gradient(105deg,rgba(101,217,167,.10),rgba(101,217,167,.022))!important;
+  box-shadow:inset 0 0 0 1px rgba(115,224,177,.15)!important;
+}
+body[data-version="30"] #drawerBody [data-entrusted-band] .t,
+body[data-version="30"] #drawerBody [data-entrusted-band] .m,
+body[data-version="30"] #drawerBody [data-entrusted-band] .state{
+  color:currentColor!important;
+}
+body[data-version="30"] #drawerBody [data-entrusted-band] .t{
+  opacity:.95!important;
+}
+body[data-version="30"] #drawerBody [data-entrusted-band] .m{
+  opacity:.82!important;
+  text-shadow:none!important;
+}
+
+/* Larger, unmistakable feedback/errors. */
+body[data-version="30"] #toast{
+  top:66px!important;
+  max-width:min(560px,calc(100vw - 32px))!important;
+  padding:12px 17px!important;
+  border-radius:18px 24px 17px 26px!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+  font-weight:570!important;
+  text-align:center!important;
+  color:rgba(247,250,253,.93)!important;
+  background:rgba(5,13,24,.95)!important;
+  box-shadow:0 18px 60px rgba(0,0,0,.35),inset 0 0 0 1px rgba(185,225,246,.10)!important;
+}
+body[data-version="30"] .field-note{
+  min-height:18px!important;
+  font-size:12px!important;
+  line-height:1.4!important;
+}
+body[data-version="30"] .empty{
+  font-size:14px!important;
+}
+
+/* Rail uses the same seed/root/wish symbol for release. */
+body[data-version="30"] #rail{
+  gap:5px!important;
+}
+body[data-version="30"] #rail .rail-btn{
+  width:44px!important;
+  height:44px!important;
+  border-radius:14px 17px 13px 18px!important;
+}
+body[data-version="30"] #createBtn{
+  background:
+    radial-gradient(circle at 42% 36%,rgba(246,225,160,.24),rgba(221,196,119,.09) 52%,rgba(255,255,255,.035) 76%)!important;
+  color:var(--seed)!important;
+  box-shadow:0 0 32px rgba(238,210,128,.08),inset 0 0 0 1px rgba(240,216,144,.20)!important;
+}
+body[data-version="30"] #createBtn .v30-seed{
+  width:31px;
+  height:31px;
+}
+body[data-version="30"] #myWorldBtn .v30-world{
+  width:29px;
+  height:29px;
+  color:rgba(188,229,247,.86);
+}
+
+/* Root navigation reads as a real semantic control. */
+body[data-version="30"] .v28-lineage-bar{
+  gap:10px!important;
+}
+body[data-version="30"] .v28-lineage-bar .v28-back,
+body[data-version="30"] .v28-lineage-bar .v28-root{
+  background:rgba(174,220,241,.035)!important;
+  box-shadow:inset 0 0 0 1px rgba(184,225,245,.08)!important;
+}
+
+/* Mobile */
+@media(max-width:820px){
+  body[data-version="30"] #drawerBody>.meta{
+    font-size:13px!important;
+  }
+  body[data-version="30"] .v28-lineage-bar button{
+    min-height:46px!important;
+    font-size:12px!important;
+  }
+  body[data-version="30"] .v30-action-surface{
+    gap:8px;
+    margin-top:15px;
+  }
+  body[data-version="30"] .v30-action-surface.v30-owner,
+  body[data-version="30"] .v30-action-surface.v30-helper{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  body[data-version="30"] .v30-action{
+    min-height:58px;
+    padding:9px 11px;
+  }
+  body[data-version="30"] .v30-action-label{
+    font-size:12px;
+  }
+  body[data-version="30"] #toast{
+    top:max(72px,calc(env(safe-area-inset-top) + 54px))!important;
+    font-size:14px!important;
+  }
+  body[data-version="30"] #rail .rail-btn{
+    width:40px!important;
+    height:40px!important;
+  }
+}
+
+@media(max-width:390px){
+  body[data-version="30"] .v30-action-surface.v30-owner,
+  body[data-version="30"] .v30-action-surface.v30-helper{
+    grid-template-columns:1fr 1fr;
+  }
+  body[data-version="30"] .v30-action{
+    min-height:56px;
+  }
+}
