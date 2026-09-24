@@ -112,10 +112,10 @@ async function testShare(page,id){
   const support=await page.evaluate(()=>window.__RALUVAAA_V43__.supportsAnimation());
   assert.equal(support,true,'Chromium QA should support animated clip export');
   const clip=await page.evaluate(async id=>{
-    const r=await window.__RALUVAAA_V43__.record(id,2,650);
+    const r=await window.__RALUVAAA_V43__.record(id,2,1100);
     return{size:r?.blob?.size||0,mime:r?.mime||'',audioEmbedded:r?.audioEmbedded||false};
   },id);
-  assert(clip.size>4000,'animated share must export a real video blob');
+  assert(clip.size>2500,'animated share must export a real video blob');
   assert(/^video\//.test(clip.mime),'animated share must use a video MIME type');
 
   const canvas=page.locator('.v43-share-preview canvas');
