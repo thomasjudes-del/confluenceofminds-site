@@ -1,0 +1,110 @@
+/* V38 targeted patch: moderation affordance + legible action guidance. */
+body[data-patch-version="38"] #modeBar{
+  min-height:44px!important;
+  height:auto!important;
+  padding:10px 12px 10px 16px!important;
+  max-width:min(720px,calc(100vw - 440px))!important;
+  font-size:14px!important;
+  line-height:1.32!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+  border-radius:18px!important;
+  background:rgba(4,13,24,.94)!important;
+  box-shadow:0 18px 54px rgba(0,0,0,.34),inset 0 0 0 1px rgba(185,222,239,.10)!important;
+}
+body[data-patch-version="38"] #modeBar .mode-text{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  font-size:14px!important;
+  line-height:1.32!important;
+  font-weight:620!important;
+  color:rgba(245,249,252,.94)!important;
+}
+body[data-patch-version="38"] #modeBar .mode-close{
+  min-width:62px!important;
+  height:30px!important;
+  padding:0 10px!important;
+  font-size:11px!important;
+  color:rgba(234,242,247,.74)!important;
+}
+body[data-patch-version="38"] #toast{
+  top:66px!important;
+  max-width:min(620px,calc(100vw - 32px))!important;
+  padding:11px 16px!important;
+  border-radius:16px!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+  font-weight:610!important;
+  white-space:normal!important;
+  text-align:center!important;
+  background:rgba(3,11,21,.96)!important;
+  color:rgba(246,250,252,.94)!important;
+  box-shadow:0 16px 48px rgba(0,0,0,.32)!important;
+}
+
+body[data-patch-version="38"] .v38-report-row{
+  display:flex;
+  justify-content:flex-end;
+  margin:14px 2px 0!important;
+}
+body[data-patch-version="38"] .v38-report-button{
+  min-height:36px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:7px 11px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:rgba(150,89,84,.055)!important;
+  box-shadow:inset 0 0 0 1px rgba(225,152,143,.10)!important;
+  color:rgba(236,191,184,.76)!important;
+  font-size:11.5px!important;
+  line-height:1.2!important;
+  font-weight:600!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+}
+body[data-patch-version="38"] .v38-report-button:hover,
+body[data-patch-version="38"] .v38-report-button:focus-visible{
+  background:rgba(166,94,88,.09)!important;
+  box-shadow:inset 0 0 0 1px rgba(235,166,157,.18)!important;
+  color:rgba(246,209,203,.92)!important;
+}
+body[data-patch-version="38"] .v38-report-button img{
+  width:19px!important;
+  height:19px!important;
+  object-fit:contain!important;
+  opacity:.84!important;
+}
+body[data-patch-version="38"] .v38-report-unit{
+  color:rgba(236,191,184,.78)!important;
+}
+
+@media(max-width:820px){
+  body[data-patch-version="38"] #modeBar{
+    left:8px!important;
+    right:58px!important;
+    top:48px!important;
+    max-width:none!important;
+    min-height:42px!important;
+    padding:9px 10px 9px 13px!important;
+    font-size:13px!important;
+  }
+  body[data-patch-version="38"] #modeBar .mode-text{font-size:13px!important}
+  body[data-patch-version="38"] #toast{
+    top:92px!important;
+    max-width:calc(100vw - 24px)!important;
+    font-size:13px!important;
+    padding:10px 13px!important;
+  }
+  body[data-patch-version="38"] .v38-report-row{
+    justify-content:stretch;
+  }
+  body[data-patch-version="38"] .v38-report-button{
+    width:100%!important;
+    justify-content:center!important;
+    min-height:40px!important;
+    font-size:12px!important;
+  }
+}
