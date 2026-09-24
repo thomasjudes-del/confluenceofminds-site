@@ -1,0 +1,43 @@
+name: Check RALUVAAA Experience V30
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-experience-v30/**'
+      - 'raluvaaa/mvp-v26/app.js'
+      - '.github/workflows/check-raluvaaa-experience-v30.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: raluvaaa-experience-v30-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/mvp-v26/app.js
+          node --check raluvaaa/solo-experience-v30/experience-v30.js
+          node --check raluvaaa/solo-experience-v30/qa-v30.cjs
+          grep -q 'data-version="30"' raluvaaa/solo-experience-v30/index.html
+          grep -q 'raluvaaaSoloExperienceV30R1' raluvaaa/solo-experience-v30/index.html
+          grep -q 'experience-v30.css' raluvaaa/solo-experience-v30/index.html
+          grep -q 'experience-v30.js' raluvaaa/solo-experience-v30/index.html
+      - name: Install QA browsers
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium webkit >/dev/null 2>&1
+      - name: Run V30 UI and role QA
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v30-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          node raluvaaa/solo-experience-v30/qa-v30.cjs
