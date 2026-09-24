@@ -409,7 +409,7 @@ async function testForeignActionSmoke(page,ownRoot){
   await open(page,connectorRoot);
   await action(page,'connect');
   await page.waitForSelector('#modeBar:not(.hidden)',{timeout:4000});
-  await page.evaluate(id=>document.getElementById('engine').contentWindow.postMessage({type:'rv25-focus',semanticId:id},location.origin),foreign);
+  await page.evaluate(id=>{const m=window.__RV26_SOLO__.semantic().find(x=>x.semanticId===id);window.postMessage({type:'rv25-select',meta:m},location.origin)},foreign);
   await page.waitForFunction(()=>document.querySelector('.sheet h3')?.textContent?.toLowerCase().includes('graft'),null,{timeout:5000});
   await page.click('#confirm');
   await page.waitForFunction(id=>window.__RV26_SOLO__.state().events.some(e=>e.type==='connect_proposed'&&(e.aSemanticId===id||e.bSemanticId===id)),foreign,{timeout:5000});
