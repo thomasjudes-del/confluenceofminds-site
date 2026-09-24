@@ -35,6 +35,40 @@ body[data-feature-version="43"] .v43-bookmark.active svg path{
   fill:rgba(205,176,112,.22);
 }
 
+
+body[data-feature-version="43"] .v43-mobile-bookmark{
+  display:none;
+  width:100%;
+  min-height:40px;
+  margin:11px 0 4px;
+  border:1px solid rgba(188,215,231,.11);
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+  color:rgba(230,237,240,.78);
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:11px;
+  font-weight:650;
+}
+body[data-feature-version="43"] .v43-mobile-bookmark svg{
+  width:17px;
+  height:17px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+body[data-feature-version="43"] .v43-mobile-bookmark.active{
+  color:rgba(237,218,176,.96);
+  border-color:rgba(218,191,132,.18);
+  background:rgba(188,156,92,.06);
+}
+body[data-feature-version="43"] .v43-mobile-bookmark.active svg path{
+  fill:rgba(205,176,112,.22);
+}
+
 body[data-feature-version="43"] .v43-saved-section{
   margin-top:18px;
   padding-top:5px;
@@ -260,11 +294,10 @@ body[data-feature-version="43"] .v43-saved-unavailable{
 
 @media(max-width:820px){
   body[data-feature-version="43"] .v43-bookmark{
-    min-width:31px;
-    padding:0 7px;
+    display:none!important;
   }
-  body[data-feature-version="43"] .v43-bookmark span{
-    display:none;
+  body[data-feature-version="43"] .v43-mobile-bookmark{
+    display:flex;
   }
   .v43-share-sheet{
     top:8px;
