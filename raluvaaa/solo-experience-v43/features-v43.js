@@ -33,7 +33,7 @@ function lang(){
 }
 function copy(){
   return lang()==='en'?{
-    save:'Save',saved:'Saved',savedTitle:'Saved wishes',savedEmpty:'Save wishes you want to revisit, help or connect later.',
+    save:'Save',saved:'Saved',saveWish:'Save this wish',savedWish:'Saved',savedTitle:'Saved wishes',savedEmpty:'Save wishes you want to revisit, help or connect later.',
     entrusted:'Entrusted for now',remove:'Remove',unavailable:'Unavailable in this local session',
     shareTitle:'Share this wish',image:'Still image',animation:'Animated clip',style:'Style',preview:'Preview',
     shareNow:'Share',download:'Download',copyLink:'Copy link',close:'Close',creating:'Creating media…',
@@ -41,7 +41,7 @@ function copy(){
     shareText:'Discover this wish on RALUVAAA',simulated:'SIMULATED WISH',local:'LOCAL POC WISH',human:'HUMAN WISH',
     audioFail:'Music could not be embedded in this browser. The clip will be silent.',saveFailed:'Could not save this wish.'
   }:{
-    save:'Sauvegarder',saved:'Sauvegardé',savedTitle:'Wishes sauvegardés',savedEmpty:'Sauvegarde les wishes que tu veux retrouver, aider ou connecter plus tard.',
+    save:'Sauvegarder',saved:'Sauvegardé',saveWish:'Sauvegarder ce wish',savedWish:'Sauvegardé',savedTitle:'Wishes sauvegardés',savedEmpty:'Sauvegarde les wishes que tu veux retrouver, aider ou connecter plus tard.',
     entrusted:'Confiés pour un temps',remove:'Retirer',unavailable:'Indisponible dans cette session locale',
     shareTitle:'Partager ce wish',image:'Image fixe',animation:'Clip animé',style:'Style',preview:'Aperçu',
     shareNow:'Partager',download:'Télécharger',copyLink:'Copier le lien',close:'Fermer',creating:'Création du média…',
@@ -120,6 +120,34 @@ function ensureBookmark(){
   btn.classList.toggle('active',is);
   btn.querySelector('span').textContent=is?t.saved:t.save;
   btn.title=is?t.saved:t.save;
+  btn.setAttribute('aria-pressed',is?'true':'false');
+}
+function ensureMobileBookmark(){
+  const body=document.getElementById('drawerBody'),m=current();
+  let btn=document.getElementById('v43MobileBookmarkBtn');
+  if(!body||!m){
+    btn?.remove();
+    return;
+  }
+  if(!btn){
+    btn=document.createElement('button');
+    btn.id='v43MobileBookmarkBtn';
+    btn.type='button';
+    btn.className='v43-mobile-bookmark';
+    btn.innerHTML=bookmarkSvg+'<span></span>';
+    const meta=body.querySelector('.meta');
+    if(meta)meta.insertAdjacentElement('afterend',btn);
+    else body.prepend(btn);
+    btn.onclick=e=>{e.stopPropagation();toggleSaved(current())};
+  }else if(!body.contains(btn)){
+    const meta=body.querySelector('.meta');
+    if(meta)meta.insertAdjacentElement('afterend',btn);
+    else body.prepend(btn);
+  }
+  const is=!!savedRecordFor(m),t=copy();
+  btn.classList.toggle('active',is);
+  btn.querySelector('span').textContent=is?t.savedWish:t.saveWish;
+  btn.title=is?t.savedWish:t.saveWish;
   btn.setAttribute('aria-pressed',is?'true':'false');
 }
 function decorateEntrusted(){
@@ -395,13 +423,13 @@ function interceptShare(e){
 function decorate(){
   document.title='RALUVAAA · Experience V43';
   const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='EXPERIENCE V43';
-  ensureBookmark();decorateEntrusted();
+  ensureBookmark();ensureMobileBookmark();decorateEntrusted();
 }
 let queued=false;
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;decorate()})}
 new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-panel','data-open','data-v39-icon']});
 document.addEventListener('click',interceptShare,true);
-window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark()});
+window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark();ensureMobileBookmark()});
 decorate();setTimeout(decorate,120);setTimeout(decorate,400);
 
 window.__RALUVAAA_V43__={
@@ -412,6 +440,7 @@ window.__RALUVAAA_V43__={
   saved:()=>loadSaved().map(x=>({...x})),
   resolveSaved:id=>{const r=loadSaved().find(x=>x.semanticId===id);return r?resolveSaved(r):null},
   toggleSaved:id=>{const m=semantic().find(x=>x.semanticId===id);if(m)toggleSaved(m)},
+  ensureMobileBookmark,
   shareUrl:id=>{const m=semantic().find(x=>x.semanticId===id);return m?shareUrl(m):null},
   renderFrame:(canvas,id,style=0,t=3500,mode='image')=>{const m=semantic().find(x=>x.semanticId===id);if(m)renderFrame(canvas,m,style,t,mode)},
   openShare:id=>{const m=semantic().find(x=>x.semanticId===id);if(m)openShare(m)},
