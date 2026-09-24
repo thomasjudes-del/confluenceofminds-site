@@ -31,7 +31,7 @@ function semanticFor(label){
   if(s.includes('prolong')||s.includes('continue'))return 'evolve';
   if(s.includes('embranch')||s==='branch'||s.includes('brancher'))return 'branch';
   if(s.includes('fleur')||s.includes('bloom'))return 'bloom';
-  if(s.includes('soutien')||s.includes('soutenir')||s==='support')return 'encourage';
+  if(s.includes('soutien')||s.includes('soutenir')||s.includes('encourag')||s==='support')return 'encourage';
   if(s.includes("proposer de l'aide")||s.includes('offer help')||s==='help')return 'help';
   if(s.includes('greffer')||s.includes('graft'))return 'graft';
   if(s.includes('recentr')||s.includes('recenter'))return 'recenter';
@@ -46,12 +46,12 @@ function semanticFor(label){
 
 function decorateRail(){
   const my=document.getElementById('myWorldBtn');
-  if(my){
+  if(my&&(my.dataset.v34Icon!=='myWishes'||!my.querySelector('.v34-icon'))){
     my.innerHTML='<span class="v33-rail-icon v34-rail-icon">'+ICONS.myWishes+'</span>';
     my.dataset.v34Icon='myWishes';
   }
   const create=document.getElementById('createBtn');
-  if(create){
+  if(create&&(create.dataset.v34Icon!=='create'||!create.querySelector('.v34-icon'))){
     create.innerHTML='<span class="v33-rail-icon v34-rail-icon">'+ICONS.create+'</span>';
     create.dataset.v34Icon='create';
   }
