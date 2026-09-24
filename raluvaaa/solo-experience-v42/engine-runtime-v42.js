@@ -21,7 +21,148 @@ function abandon(node,m){if(!node||!m)return;m.state='abandoned';node.lastActive
 function resume(node,m){if(!node||!m||m.state!=='abandoned')return;m.state='alive';node.lastActive=world.clock;const e=world.edges.find(x=>x.semanticChildId===m.semanticId&&!x.semanticHidden);if(e)e.lastActive=world.clock}
 function addWarp(a,b,seed){if(!a||!b)return null;const ma=metaByNode.get(a.id),mb=metaByNode.get(b.id);if(!ma||!mb||ma.lineageId===mb.lineageId)return null;const R=Rfor(seed),ang=Math.atan2(b.y-a.y,b.x-a.x),len=Math.hypot(b.x-a.x,b.y-a.y),curve=(R()-.5)*.55,e=edgeGeom(a.x,a.y,ang,len,curve);e.id='warp'+world.next++;e.root=a.root;e.parentId=a.id;e.hue=a.root.hue;e.hue2=b.root.hue;e.generation=Math.max(a.generation,b.generation)+1;e.created=world.clock;e.lastActive=world.clock;e.mine=false;e.type='warp';e.seed=H(seed);e.micro=[];e.semanticWarp=true;e.aSemanticId=ma.semanticId;e.bSemanticId=mb.semanticId;e.warpCurve=curve;addEdge(e);warps.push(e);ma.warpCount=(ma.warpCount||0)+1;mb.warpCount=(mb.warpCount||0)+1;return e}
 function refreshWarp(e){const a=nodeBySemantic(e.aSemanticId),b=nodeBySemantic(e.bSemanticId);if(!a||!b)return;const ang=Math.atan2(b.y-a.y,b.x-a.x),len=Math.hypot(b.x-a.x,b.y-a.y),g=edgeGeom(a.x,a.y,ang,len,e.warpCurve||0);e.x0=g.x0;e.y0=g.y0;e.cx=g.cx;e.cy=g.cy;e.x1=g.x1;e.y1=g.y1}
-function buildSimulated(){const roots=[];payload.texts.slice(0,100).forEach((text,i)=>{const loc=payload.locs[(i*7+3)%Math.max(1,payload.locs.length)]||'Somewhere in the world',lineageId='sim-lineage-'+(i+1),rootId='sim-'+(i+1),p=profile(text),h=H('history|'+i)%100;const root=addSemanticRoot({semanticId:rootId,lineageId,text,loc,owner:false,simulated:true,seed:'simroot|'+i});roots.push(root);let current=root,mainMeta=metaByNode.get(root.id),children=[];if(h<72){const id=rootId+'-e1';current=growSemantic(root,'bend',{semanticId:id,lineageId,parentSemanticId:rootId,text:p.evolve,loc,kind:'evolve',owner:false,simulated:true,seed:'evolve|'+i});mainMeta=metaByNode.get(current.id)}if((H('split|'+i)%100)<58){const count=2+(H('split-count|'+i)%2);for(let k=0;k<count;k++){const id=rootId+'-s'+(k+1),n=growSemantic(current,'split',{semanticId:id,lineageId,parentSemanticId:mainMeta.semanticId,text:p.splits[k%p.splits.length],loc,kind:'split',owner:false,simulated:true,seed:'split|'+i+'|'+k});children.push(n)}}if(children.length&&(H('nested|'+i)%100)<26){const parent=children[0],pm=metaByNode.get(parent.id);for(let k=0;k<2;k++)growSemantic(parent,'split',{semanticId:rootId+'-n'+(k+1),lineageId,parentSemanticId:pm.semanticId,text:p.nested[k],loc,kind:'split',owner:false,simulated:true,seed:'nested|'+i+'|'+k})}const candidates=semantic.filter(m=>m.lineageId===lineageId&&m.kind!=='create');if(candidates.length&&(H('bloom|'+i)%100)<34){const m=candidates[H('bloom-target|'+i)%candidates.length];addBloom(nodeBySemantic(m.semanticId),m)}if(candidates.length>1&&(H('abandon|'+i)%100)<14){const alive=candidates.filter(m=>m.state==='alive');if(alive.length){const m=alive[H('abandon-target|'+i)%alive.length];abandon(nodeBySemantic(m.semanticId),m)}}if((H('help|'+i)%100)<34){const lineageNodes=semantic.filter(m=>m.lineageId===lineageId&&m.state!=='abandoned'),m=lineageNodes[H('help-target|'+i)%lineageNodes.length];addHelp(nodeBySemantic(m.semanticId),m,1+(H('help-count|'+i)%3),'help|'+i)}if((H('enc|'+i)%100)<40){const lineageNodes=semantic.filter(m=>m.lineageId===lineageId),m=lineageNodes[H('enc-target|'+i)%lineageNodes.length];m.encouragements=1+(H('enc-count|'+i)%5)}if((H('suggest|'+i)%100)<13){const lineageNodes=semantic.filter(m=>m.lineageId===lineageId&&m.state==='alive'),m=lineageNodes[H('suggest-target|'+i)%lineageNodes.length];m.suggestionCount=1}});for(let i=0;i<9;i++){const a=roots[(H('warp-a|'+i)%roots.length)],b=roots[(H('warp-b|'+i+41)%roots.length)];if(a&&b&&metaByNode.get(a.id)?.lineageId!==metaByNode.get(b.id)?.lineageId)addWarp(a,b,'simwarp|'+i)}}
+function buildSimulated(){
+  const roots=[];
+  const lineageRows=lineageId=>semantic.filter(m=>m.lineageId===lineageId);
+  const childRows=m=>semantic.filter(x=>x.parentSemanticId===m.semanticId);
+  const hasEvolve=m=>childRows(m).some(x=>x.kind==='evolve');
+  const leaves=lineageId=>lineageRows(lineageId).filter(m=>childRows(m).length===0);
+  const actionable=lineageId=>lineageRows(lineageId).filter(m=>m.state==='alive'&&!hasEvolve(m));
+  const bloomWhole=lineageId=>{
+    const rows=lineageRows(lineageId).filter(m=>m.state==='alive').sort((a,b)=>(b.generation||0)-(a.generation||0));
+    for(const m of rows)addBloom(nodeBySemantic(m.semanticId),m)
+  };
+  const abandonWhole=lineageId=>{
+    const rows=lineageRows(lineageId).filter(m=>m.state==='alive').sort((a,b)=>(b.generation||0)-(a.generation||0));
+    for(const m of rows)abandon(nodeBySemantic(m.semanticId),m)
+  };
+
+  payload.texts.slice(0,100).forEach((text,i)=>{
+    const loc=payload.locs[(i*7+3)%Math.max(1,payload.locs.length)]||'Somewhere in the world',
+      lineageId='sim-lineage-'+(i+1),rootId='sim-'+(i+1),p=profile(text),h=H('history|'+i)%100;
+    const root=addSemanticRoot({semanticId:rootId,lineageId,text,loc,owner:false,simulated:true,seed:'simroot|'+i});
+    roots.push(root);
+
+    let current=root,mainMeta=metaByNode.get(root.id),children=[];
+    if(h<72){
+      const id=rootId+'-e1';
+      current=growSemantic(root,'bend',{semanticId:id,lineageId,parentSemanticId:rootId,text:p.evolve,loc,kind:'evolve',owner:false,simulated:true,seed:'evolve|'+i});
+      mainMeta=metaByNode.get(current.id)
+    }
+
+    if((H('split|'+i)%100)<60){
+      const count=2+(H('split-count|'+i)%2);
+      for(let k=0;k<count;k++){
+        const id=rootId+'-s'+(k+1),
+          n=growSemantic(current,'split',{semanticId:id,lineageId,parentSemanticId:mainMeta.semanticId,text:p.splits[k%p.splits.length],loc,kind:'split',owner:false,simulated:true,seed:'split|'+i+'|'+k});
+        children.push(n)
+      }
+    }
+
+    if(children.length&&(H('nested|'+i)%100)<28){
+      const parent=children[0],pm=metaByNode.get(parent.id);
+      for(let k=0;k<2;k++)growSemantic(parent,'split',{semanticId:rootId+'-n'+(k+1),lineageId,parentSemanticId:pm.semanticId,text:p.nested[k],loc,kind:'split',owner:false,simulated:true,seed:'nested|'+i+'|'+k})
+    }
+
+    // Some simulated branches evolve too, so the world contains historical branch states, not only evolved roots.
+    const branchLeaves=leaves(lineageId).filter(m=>m.kind==='split');
+    if(branchLeaves.length&&(H('branch-evolve|'+i)%100)<20){
+      const parent=branchLeaves[H('branch-evolve-target|'+i)%branchLeaves.length];
+      growSemantic(nodeBySemantic(parent.semanticId),'bend',{
+        semanticId:rootId+'-be1',lineageId,parentSemanticId:parent.semanticId,
+        text:(p.nested?.[0]||p.evolve),loc,kind:'evolve',owner:false,simulated:true,seed:'branch-evolve|'+i
+      })
+    }
+
+    // Whole-lineage outcomes are intentionally represented in the simulation.
+    const scenario=H('scenario|'+i)%100;
+    if(scenario<8){
+      bloomWhole(lineageId)
+    }else if(scenario<16){
+      abandonWhole(lineageId)
+    }else{
+      // Partial outcomes only happen on terminal current states, keeping the simulated history workflow-valid.
+      let liveLeaves=leaves(lineageId).filter(m=>m.state==='alive');
+      if(liveLeaves.length&&(H('bloom|'+i)%100)<38){
+        const m=liveLeaves[H('bloom-target|'+i)%liveLeaves.length];
+        addBloom(nodeBySemantic(m.semanticId),m)
+      }
+      liveLeaves=leaves(lineageId).filter(m=>m.state==='alive');
+      if(liveLeaves.length&&(H('abandon|'+i)%100)<18){
+        const m=liveLeaves[H('abandon-target|'+i)%liveLeaves.length];
+        abandon(nodeBySemantic(m.semanticId),m)
+      }
+    }
+
+    const liveCurrent=actionable(lineageId);
+    if(liveCurrent.length&&(H('help|'+i)%100)<34){
+      const m=liveCurrent[H('help-target|'+i)%liveCurrent.length];
+      addHelp(nodeBySemantic(m.semanticId),m,1+(H('help-count|'+i)%3),'help|'+i)
+    }
+    if(liveCurrent.length&&(H('enc|'+i)%100)<42){
+      const m=liveCurrent[H('enc-target|'+i)%liveCurrent.length];
+      m.encouragements=1+(H('enc-count|'+i)%5)
+    }
+    if(liveCurrent.length&&(H('suggest|'+i)%100)<15){
+      const m=liveCurrent[H('suggest-target|'+i)%liveCurrent.length];
+      m.suggestionCount=1
+    }
+  });
+
+  // Simulated warps connect only actionable current states, never a completed, abandoned or superseded trace.
+  const warpCandidates=semantic.filter(m=>m.simulated&&m.state==='alive'&&!hasEvolve(m));
+  for(let i=0;i<9;i++){
+    if(warpCandidates.length<2)break;
+    const aMeta=warpCandidates[H('warp-a|'+i)%warpCandidates.length];
+    let bMeta=warpCandidates[H('warp-b|'+i+41)%warpCandidates.length];
+    if(aMeta&&bMeta&&aMeta.lineageId===bMeta.lineageId){
+      bMeta=warpCandidates.find(x=>x.lineageId!==aMeta.lineageId)||bMeta
+    }
+    const a=nodeBySemantic(aMeta?.semanticId),b=nodeBySemantic(bMeta?.semanticId);
+    if(a&&b&&aMeta.lineageId!==bMeta.lineageId)addWarp(a,b,'simwarp|'+i)
+  }
+
+  window.__RV42_SIMULATION_QC__={
+    version:42,
+    summary(){
+      const sim=semantic.filter(m=>m.simulated),roots=sim.filter(m=>m.kind==='create');
+      const byLineage=new Map();
+      for(const m of sim){if(!byLineage.has(m.lineageId))byLineage.set(m.lineageId,[]);byLineage.get(m.lineageId).push(m)}
+      let fullBloom=0,fullAbandoned=0,invalidBloom=0,invalidAbandon=0;
+      for(const rows of byLineage.values()){
+        if(rows.length&&rows.every(x=>x.state==='bloom'))fullBloom++;
+        if(rows.length&&rows.every(x=>x.state==='abandoned'))fullAbandoned++;
+        const descendants=id=>{
+          const out=new Set([id]);let changed=true;
+          while(changed){changed=false;for(const x of rows)if(x.parentSemanticId&&out.has(x.parentSemanticId)&&!out.has(x.semanticId)){out.add(x.semanticId);changed=true}}
+          return out
+        };
+        for(const m of rows){
+          const d=descendants(m.semanticId);
+          if(m.state==='bloom'&&rows.some(x=>x.semanticId!==m.semanticId&&d.has(x.semanticId)&&x.state==='alive'))invalidBloom++;
+          if(m.state==='abandoned'&&rows.some(x=>x.semanticId!==m.semanticId&&d.has(x.semanticId)&&x.state==='alive'))invalidAbandon++
+        }
+      }
+      return{
+        roots:roots.length,
+        states:sim.length,
+        alive:sim.filter(m=>m.state==='alive').length,
+        bloom:sim.filter(m=>m.state==='bloom').length,
+        abandoned:sim.filter(m=>m.state==='abandoned').length,
+        evolved:sim.filter(m=>m.kind==='evolve').length,
+        branches:sim.filter(m=>m.kind==='split').length,
+        fullBloom,
+        fullAbandoned,
+        withHelp:sim.filter(m=>(m.helpCount||0)>0).length,
+        withEncouragement:sim.filter(m=>(m.encouragements||0)>0).length,
+        withSuggestion:sim.filter(m=>(m.suggestionCount||0)>0).length,
+        warps:warps.filter(e=>metaBySemantic.get(e.aSemanticId)?.simulated&&metaBySemantic.get(e.bSemanticId)?.simulated).length,
+        invalidBloom,
+        invalidAbandon
+      }
+    }
+  }
+}
 function addLocalCreate(ev){const n=addSemanticRoot({semanticId:ev.semanticId,lineageId:ev.lineageId,text:ev.text,loc:ev.loc??'',owner:true,simulated:false,seed:ev.seed||ev.semanticId});n.mine=true;return n}
 function addChildrenEvent(ev){const p=nodeBySemantic(ev.parentSemanticId),pm=metaBySemantic.get(ev.parentSemanticId);if(!p||!pm)return null;let last=null;for(const c of ev.children||[]){if(!String(c.text||'').trim())continue;last=growSemantic(p,'split',{semanticId:c.semanticId,lineageId:ev.lineageId,parentSemanticId:ev.parentSemanticId,text:c.text,loc:c.loc||pm.loc,kind:'split',owner:true,simulated:false,seed:c.seed||c.semanticId});if(last)last.mine=true}return last}
 function applyEvent(ev){if(!ev||!ev.type)return null;if(ev.type==='create')return addLocalCreate(ev);if(ev.type==='evolve'){const p=nodeBySemantic(ev.parentSemanticId),pm=metaBySemantic.get(ev.parentSemanticId);if(!p||!pm||String(ev.text||'').trim()===String(pm.text||'').trim()||semantic.some(x=>x.parentSemanticId===ev.parentSemanticId&&x.kind==='evolve'))return null;const n=growSemantic(p,'bend',{semanticId:ev.semanticId,lineageId:ev.lineageId,parentSemanticId:ev.parentSemanticId,text:ev.text,loc:ev.loc||pm.loc,kind:'evolve',owner:true,simulated:false,seed:ev.seed||ev.semanticId});n.mine=true;return n}if(ev.type==='split'||ev.type==='branch_add')return addChildrenEvent(ev);if(ev.type==='bloom'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner&&m.state==='alive'){addBloom(n,m);return n}return null}if(ev.type==='abandon'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner&&m.state==='alive'){abandon(n,m);return n}return null}if(ev.type==='close_branch'){let last=null;const ids=Array.isArray(ev.semanticIds)&&ev.semanticIds.length?new Set(ev.semanticIds):null;for(const m of semantic.filter(x=>x.lineageId===ev.lineageId&&x.owner&&x.state==='alive'&&(!ids||ids.has(x.semanticId)))){const n=nodeBySemantic(m.semanticId);abandon(n,m);last=n||last}return last}if(ev.type==='close_lineage'){let last=null;const ids=Array.isArray(ev.semanticIds)&&ev.semanticIds.length?new Set(ev.semanticIds):null;for(const m of semantic.filter(x=>x.lineageId===ev.lineageId&&x.owner&&x.state==='alive'&&(!ids||ids.has(x.semanticId)))){const n=nodeBySemantic(m.semanticId);abandon(n,m);last=n||last}return last}if(ev.type==='resume_branch'){let last=null;const ids=Array.isArray(ev.semanticIds)&&ev.semanticIds.length?new Set(ev.semanticIds):null;for(const m of semantic.filter(x=>x.lineageId===ev.lineageId&&x.owner&&x.state==='abandoned'&&(!ids||ids.has(x.semanticId)))){const n=nodeBySemantic(m.semanticId);resume(n,m);last=n||last}return last}if(ev.type==='resume_lineage'){let last=null;const ids=Array.isArray(ev.semanticIds)&&ev.semanticIds.length?new Set(ev.semanticIds):null;for(const m of semantic.filter(x=>x.lineageId===ev.lineageId&&x.owner&&x.state==='abandoned'&&(!ids||ids.has(x.semanticId)))){const n=nodeBySemantic(m.semanticId);resume(n,m);last=n||last}return last}if(ev.type==='resume'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner&&m.state==='abandoned'){resume(n,m);return n}return null}if(ev.type==='wake'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner&&m.state==='alive'){if(n)n.lastActive=world.clock;return n}return null}if(ev.type==='correct'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner){if(String(ev.text||'').trim())m.text=String(ev.text).trim();if(Object.prototype.hasOwnProperty.call(ev,'loc'))m.loc=ev.loc||'';if(n)n.lastActive=world.clock;return n}return null}if(ev.type==='encourage'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m){m.encouragements=(m.encouragements||0)+1;m.localEncouragements=(m.localEncouragements||0)+1;if(n)n.lastActive=world.clock;return n}return null}if(ev.type==='help'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m&&m.state==='alive'){addHelp(n,m,1,ev.seed||ev.semanticId);return n}return null}if(ev.type==='suggest_split'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m&&m.state==='alive'){m.suggestionCount=(m.suggestionCount||0)+Math.max(1,(ev.suggestions||[]).length);return n}return null}if(ev.type==='connect'){const a=nodeBySemantic(ev.aSemanticId),b=nodeBySemantic(ev.bSemanticId);return addWarp(a,b,ev.seed||ev.aSemanticId+'|'+ev.bSemanticId)}if(ev.type==='reparent')return reparent(ev.semanticId,ev.newParentSemanticId,ev.seed||ev.semanticId+'|'+ev.newParentSemanticId);return null}
