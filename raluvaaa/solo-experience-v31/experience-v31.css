@@ -1023,13 +1023,10 @@ body[data-version="31"] #musicBtn .sound-strike{
 body[data-version="31"] #createBtn{
   color:var(--seed)!important;
 }
-body[data-version="31"] #createBtn .v31-rail-icon{
-  width:34px!important;
-  height:34px!important;
-}
+body[data-version="31"] #createBtn .v31-rail-icon,
 body[data-version="31"] #createBtn .v31-rail-icon svg{
-  width:34px!important;
-  height:34px!important;
+  width:var(--v31-rail-icon)!important;
+  height:var(--v31-rail-icon)!important;
 }
 
 /* Root uses the same seed grammar, without the creation plus. */
@@ -1080,11 +1077,6 @@ body[data-version="31"] #toast{
     height:42px!important;
     min-width:42px!important;
     min-height:42px!important;
-  }
-  body[data-version="31"] #createBtn .v31-rail-icon,
-  body[data-version="31"] #createBtn .v31-rail-icon svg{
-    width:31px!important;
-    height:31px!important;
   }
 }
 
