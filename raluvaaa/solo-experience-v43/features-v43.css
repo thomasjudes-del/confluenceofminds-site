@@ -1,0 +1,304 @@
+/* V43: Saved wishes + viral share. Core world/workflow styles remain inherited from V42. */
+
+body[data-feature-version="43"] .drawer-head{
+  grid-template-columns:1fr auto auto;
+}
+body[data-feature-version="43"] .v43-bookmark{
+  height:30px;
+  min-width:30px;
+  border:1px solid rgba(188,215,231,.10);
+  border-radius:10px;
+  background:rgba(255,255,255,.02);
+  color:rgba(222,232,238,.70);
+  padding:0 8px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:10px;
+  line-height:1;
+}
+body[data-feature-version="43"] .v43-bookmark svg{
+  width:16px;
+  height:16px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+body[data-feature-version="43"] .v43-bookmark.active{
+  color:rgba(232,214,170,.94);
+  background:rgba(188,156,92,.055);
+  border-color:rgba(218,191,132,.16);
+}
+body[data-feature-version="43"] .v43-bookmark.active svg path{
+  fill:rgba(205,176,112,.22);
+}
+
+body[data-feature-version="43"] .v43-saved-section{
+  margin-top:18px;
+  padding-top:5px;
+  border-top:1px solid rgba(188,215,231,.08);
+}
+body[data-feature-version="43"] .v43-saved-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+body[data-feature-version="43"] .v43-saved-head>span{
+  min-width:22px;
+  height:22px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  font-size:9px;
+  color:rgba(225,234,239,.62);
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(188,215,231,.08);
+}
+body[data-feature-version="43"] .v43-saved-list{
+  display:grid;
+  gap:6px;
+}
+body[data-feature-version="43"] .v43-saved-row{
+  position:relative;
+}
+body[data-feature-version="43"] .v43-saved-row .drawer-item{
+  margin:0;
+  padding-right:38px;
+}
+body[data-feature-version="43"] .v43-saved-remove{
+  position:absolute;
+  top:50%;
+  right:8px;
+  transform:translateY(-50%);
+  width:25px;
+  height:25px;
+  border:0;
+  border-radius:9px;
+  background:rgba(255,255,255,.025);
+  color:rgba(223,230,234,.42);
+  font-size:16px;
+  line-height:1;
+}
+body[data-feature-version="43"] .v43-saved-remove:hover{
+  color:rgba(245,225,219,.84);
+  background:rgba(146,89,80,.08);
+}
+body[data-feature-version="43"] .v43-saved-unavailable{
+  opacity:.58;
+}
+
+/* Share overlay */
+#v43ShareOverlay{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:none;
+}
+#v43ShareOverlay.open{
+  display:block;
+}
+.v43-share-scrim{
+  position:absolute;
+  inset:0;
+  background:rgba(1,5,10,.72);
+  backdrop-filter:blur(8px);
+}
+.v43-share-sheet{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(920px,calc(100vw - 28px));
+  max-height:calc(100vh - 28px);
+  overflow:auto;
+  padding:18px;
+  border-radius:26px;
+  border:1px solid rgba(188,215,231,.11);
+  background:
+    radial-gradient(80% 80% at 50% 5%,rgba(100,133,144,.06),transparent 55%),
+    linear-gradient(180deg,rgba(7,15,25,.98),rgba(3,9,17,.98));
+  box-shadow:0 34px 110px rgba(0,0,0,.50);
+}
+.v43-share-sheet header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.v43-share-sheet h3{
+  margin:2px 0 0;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:25px;
+  font-weight:500;
+}
+.v43-eyebrow{
+  font-size:8px;
+  letter-spacing:.14em;
+  color:rgba(218,229,235,.44);
+}
+.v43-share-x{
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+  color:rgba(230,238,243,.58);
+  font-size:22px;
+}
+.v43-share-modes{
+  display:flex;
+  gap:6px;
+  margin-bottom:12px;
+}
+.v43-share-modes button,
+.v43-share-styles button,
+.v43-share-sheet footer button{
+  border:1px solid rgba(188,215,231,.10);
+  background:rgba(255,255,255,.025);
+  color:rgba(225,234,239,.70);
+}
+.v43-share-modes button{
+  min-height:34px;
+  padding:0 12px;
+  border-radius:999px;
+  font-size:10px;
+}
+.v43-share-modes button.active{
+  background:rgba(207,221,224,.11);
+  color:#f0f4f3;
+  border-color:rgba(213,229,231,.18);
+}
+.v43-share-preview{
+  position:relative;
+  width:min(100%,560px);
+  margin:0 auto;
+  border-radius:24px;
+  overflow:hidden;
+  background:#07111b;
+  box-shadow:0 18px 60px rgba(0,0,0,.28);
+}
+.v43-share-preview canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:4/5;
+}
+.v43-share-busy{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  background:rgba(2,7,13,.68);
+  backdrop-filter:blur(5px);
+  color:rgba(241,246,245,.9);
+  font-size:12px;
+  letter-spacing:.04em;
+}
+.v43-share-styles{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  margin:13px 0 8px;
+}
+.v43-share-styles>span{
+  margin-right:4px;
+  font-size:9px;
+  color:rgba(220,230,235,.46);
+}
+.v43-share-styles button{
+  width:30px;
+  height:30px;
+  border-radius:999px;
+  font-size:9px;
+}
+.v43-share-styles button.active{
+  color:#f3f6f5;
+  background:rgba(197,214,217,.13);
+  border-color:rgba(220,232,234,.22);
+}
+.v43-share-credit{
+  min-height:15px;
+  text-align:center;
+  font-size:8px;
+  color:rgba(221,230,233,.35);
+  opacity:0;
+}
+.v43-share-credit.visible{
+  opacity:1;
+}
+.v43-share-status{
+  min-height:18px;
+  margin-top:3px;
+  text-align:center;
+  font-size:9px;
+  line-height:1.35;
+  color:rgba(231,211,187,.68);
+}
+.v43-share-sheet footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:7px;
+  margin-top:11px;
+}
+.v43-share-sheet footer button{
+  height:38px;
+  border-radius:11px;
+  padding:0 13px;
+  font-size:10px;
+}
+.v43-share-sheet footer button.primary{
+  background:#eaf0ee;
+  color:#071018;
+  border-color:transparent;
+  font-weight:700;
+}
+
+@media(max-width:820px){
+  body[data-feature-version="43"] .v43-bookmark{
+    min-width:31px;
+    padding:0 7px;
+  }
+  body[data-feature-version="43"] .v43-bookmark span{
+    display:none;
+  }
+  .v43-share-sheet{
+    top:8px;
+    bottom:8px;
+    transform:translateX(-50%);
+    max-height:none;
+    width:calc(100vw - 16px);
+    padding:13px;
+    border-radius:20px;
+  }
+  .v43-share-sheet h3{
+    font-size:21px;
+  }
+  .v43-share-preview{
+    width:min(100%,430px);
+  }
+  .v43-share-sheet footer{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .v43-share-sheet footer .primary{
+    grid-column:1/-1;
+  }
+  .v43-share-sheet footer button{
+    width:100%;
+  }
+}
+
+@media(max-width:390px){
+  .v43-share-modes{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .v43-share-modes button{
+    width:100%;
+  }
+}
