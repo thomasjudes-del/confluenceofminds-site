@@ -63,7 +63,7 @@ async function testSavedFollowsEvolution(page,root){
   const resolved=await page.evaluate(id=>window.__RALUVAAA_V43__.resolveSaved(id)?.semanticId,root);
   assert.equal(resolved,evolved,'saved root must resolve to its current evolved state');
 
-  await page.click('#drawerClose');
+  if(await page.locator('#drawerClose').isVisible())await page.click('#drawerClose');
   await page.click('#entrustedBtn');
   await page.waitForSelector('.v43-saved-section',{timeout:5000});
   assert.equal(await page.locator('.v43-saved-list .v43-saved-row').count(),1,'saved playlist should appear under entrusted wishes');
