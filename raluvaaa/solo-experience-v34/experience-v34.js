@@ -71,9 +71,35 @@ function decorateRoot(){
   });
 }
 
+function semanticForAction(act){
+  const map={
+    evolve:'evolve',split:'branch',branch:'branch',bloom:'bloom',
+    resume:'revive',resume_lineage:'revive',
+    support:'encourage',help:'help',graft:'graft',recenter:'recenter',
+    modify:'modify',share:'share',suggest:'suggest',letgo:'letgo',
+    revive:'revive',report:'report'
+  };
+  return map[act]||null;
+}
+
+function currentDeckSemantics(){
+  const out=[];
+  document.querySelectorAll('#drawerBody .action-grid button[data-act]').forEach(button=>{
+    const act=button.dataset.act||'';
+    if(!['evolve','split','branch','bloom','resume','resume_lineage'].includes(act))return;
+    out.push(semanticForAction(act));
+  });
+  document.querySelectorAll('#drawerBody .v30-action-surface .v30-action').forEach(button=>{
+    out.push(semanticForAction(button.dataset.v30Act||''));
+  });
+  return out;
+}
+
 function decorateDeck(){
-  document.querySelectorAll('#drawerBody .v33-action-circle').forEach(button=>{
-    const semantic=semanticFor(button.getAttribute('aria-label')||button.title||'');
+  const buttons=[...document.querySelectorAll('#drawerBody .v33-action-circle')];
+  const semantics=currentDeckSemantics();
+  buttons.forEach((button,index)=>{
+    const semantic=semantics[index]||semanticFor(button.getAttribute('aria-label')||button.title||'');
     if(!semantic||!ICONS[semantic])return;
     if(button.dataset.v34Icon===semantic&&button.querySelector('.v34-icon'))return;
     button.dataset.v34Icon=semantic;
