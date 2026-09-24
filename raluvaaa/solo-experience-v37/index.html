@@ -44,14 +44,15 @@ window.RALUVAAA_SOUND_DESIGN_APPROVED=false;
 (function(){
   const marker='raluvaaaSoloExperienceV37R1FreshStart';
   if(localStorage.getItem(marker)==='1')return;
-  for(let i=localStorage.length-1;i>=0;i--){
-    const k=localStorage.key(i)||'';
+  const keys=[];
+  for(let i=0;i<localStorage.length;i++)keys.push(localStorage.key(i)||'');
+  for(const k of keys){
     if(k.startsWith('raluvaaaSolo')||k.startsWith('raluvaaaEntrusted')||k==='raluvaaaManualMvpV26'){
       localStorage.removeItem(k);
     }
   }
   localStorage.setItem(marker,'1');
-})();;
+})();
 </script>
 <script src="../v22/seed.js"></script>
 <script src="../mvp-v26/ui-guard.js?build=solo-rc-20260922-3"></script>
