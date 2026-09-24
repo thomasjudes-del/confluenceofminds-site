@@ -6,6 +6,24 @@
 <meta name="theme-color" content="#020610">
 <meta name="robots" content="noindex,nofollow">
 <title>RALUVAAA · Experience V37</title>
+<script>
+window.__RALUVAAA_FRESH_RESET_V37__={performed:false,removed:[]};
+(function(){
+  const marker='raluvaaaSoloExperienceV37R1FreshStart';
+  if(localStorage.getItem(marker)==='1')return;
+  const keys=[];
+  for(let i=0;i<localStorage.length;i++)keys.push(localStorage.key(i)||'');
+  const removed=[];
+  for(const k of keys){
+    if(k.startsWith('raluvaaaSolo')||k.startsWith('raluvaaaEntrusted')||k==='raluvaaaManualMvpV26'){
+      localStorage.removeItem(k);
+      removed.push(k);
+    }
+  }
+  localStorage.setItem(marker,'1');
+  window.__RALUVAAA_FRESH_RESET_V37__={performed:true,removed};
+})();
+</script>
 <style>
 :root{color-scheme:dark;--panel:rgba(3,9,18,.74);--line:rgba(184,214,255,.14);--ink:#edf6ff;--muted:rgba(219,230,246,.56);--rail:52px}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020610;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{cursor:default;opacity:.48}#engine{position:fixed;inset:0;width:100%;height:100%;border:0;background:#020610}.glass{border:1px solid var(--line);background:linear-gradient(180deg,rgba(7,16,29,.78),rgba(3,9,18,.63));backdrop-filter:blur(15px) saturate(125%);box-shadow:0 14px 45px rgba(0,0,0,.27)}.hidden{display:none!important}
@@ -41,18 +59,7 @@ window.RALUVAAA_SOLO=true;
 window.RALUVAAA_STORE_KEY='raluvaaaSoloExperienceV37R1';
 window.RALUVAAA_ENTRUSTED_POLICY_KEY='raluvaaaEntrustedExperienceV37R1';
 window.RALUVAAA_SOUND_DESIGN_APPROVED=false;
-(function(){
-  const marker='raluvaaaSoloExperienceV37R1FreshStart';
-  if(localStorage.getItem(marker)==='1')return;
-  const keys=[];
-  for(let i=0;i<localStorage.length;i++)keys.push(localStorage.key(i)||'');
-  for(const k of keys){
-    if(k.startsWith('raluvaaaSolo')||k.startsWith('raluvaaaEntrusted')||k==='raluvaaaManualMvpV26'){
-      localStorage.removeItem(k);
-    }
-  }
-  localStorage.setItem(marker,'1');
-})();
+
 </script>
 <script src="../v22/seed.js"></script>
 <script src="../mvp-v26/ui-guard.js?build=solo-rc-20260922-3"></script>
