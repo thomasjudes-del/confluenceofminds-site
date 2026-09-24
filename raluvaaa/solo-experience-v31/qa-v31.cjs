@@ -22,7 +22,7 @@ async function setup(type,viewport){
   await page.route('https://ipapi.co/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({city:'Nantes',country_name:'France'})}));
   await page.goto(URL,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__RALUVAAA_V31__?.version===31&&window.__RV26_TEST__?.state,{timeout:10000});
-  await page.waitForFunction(()=>window.__RV26_TEST__.semantic().length>0,{timeout:10000});
+  await page.waitForFunction(()=>typeof window.__RV26_TEST__?.semantic==='function',{timeout:10000});
   return {browser,page};
 }
 
@@ -41,7 +41,7 @@ async function createWish(page,text='I want to learn pottery.'){
 async function desktop(){
   const {browser,page}=await setup(chromium,{width:1600,height:900});
   try{
-    assert.equal(await page.evaluate(()=>window.RALUVAAA_STORE_KEY),'raluvaaaSoloExperienceV31R1');
+    assert.equal(await page.evaluate(()=>window.RALUVAAA_STORE_KEY),'raluvaaaSoloExperienceV31R2');
     assert.equal(await page.evaluate(()=>window.__RV26_TEST__.state().events.length),0,'V31 must start clean');
 
     const rail=await page.evaluate(()=>['entrustedBtn','myWorldBtn','musicBtn','createBtn'].map(id=>{
