@@ -36,7 +36,7 @@ jobs:
       - name: Install QA browsers
         run: |
           npm install --no-save playwright@1.55.0 >/dev/null 2>&1
-          npx playwright install --with-deps chromium webkit >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
       - name: Run V34 icon QA
         run: |
           python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v34-http.log 2>&1 &
