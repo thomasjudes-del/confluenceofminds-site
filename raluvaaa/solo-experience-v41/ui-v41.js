@@ -69,13 +69,17 @@ function applyReviveIcon(){
       image.draggable=false;
       button.replaceChildren(image);
     }
-    image.classList.add('v39-icon-art','v41-revive-art');
-    image.src=REVIVE_ICON;
-    image.removeAttribute('srcset');
-    unit.dataset.v39Icon='revive';
-    unit.dataset.v41Icon='revive';
-    button.dataset.v39Icon='revive';
-    button.dataset.v41Icon='revive';
+    const assetReady=image.dataset.v41Revive==='1'&&image.src===REVIVE_ICON;
+    if(!assetReady){
+      image.classList.add('v39-icon-art','v41-revive-art');
+      image.src=REVIVE_ICON;
+      image.removeAttribute('srcset');
+      image.dataset.v41Revive='1';
+      unit.dataset.v39Icon='revive';
+      unit.dataset.v41Icon='revive';
+      button.dataset.v39Icon='revive';
+      button.dataset.v41Icon='revive';
+    }
     button.setAttribute('aria-label',copy.label);
     button.title=copy.label;
     const label=unit.querySelector('.v33-action-label');
