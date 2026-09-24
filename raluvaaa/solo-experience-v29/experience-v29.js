@@ -176,6 +176,7 @@ function schedule(){
   requestAnimationFrame(()=>{
     queued=false;
     try{window.__RALUVAAA_V28__?.decorate?.()}catch{}
+    document.title='RALUVAAA · Experience V29';
     decorateDrawer();
   });
 }
