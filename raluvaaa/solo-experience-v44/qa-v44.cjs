@@ -91,6 +91,28 @@ async function testShare(page,id){
   assert(!url.includes('actor='),'shared URL must not leak QA persona');
   assert(!url.includes('qa='),'shared URL must not leak QA mode');
 
+  await page.evaluate(()=>{
+    window.__qaCopied='';
+    window.__qaShared=null;
+    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__qaCopied=text}}});
+    Object.defineProperty(navigator,'canShare',{configurable:true,value:opts=>!!opts?.files?.length});
+    Object.defineProperty(navigator,'share',{configurable:true,value:async payload=>{window.__qaShared={hasFiles:!!payload?.files?.length,text:payload?.text||''}}});
+  });
+
+  await page.locator('[data-share-copy]').click();
+  await page.waitForFunction(()=>window.__qaCopied.includes('#wish='),null,{timeout:3000});
+  assert.equal(await page.locator('.v44-share-status').innerText(),'Link copied','Copy button must visibly confirm success');
+
+  await page.evaluate(()=>window.__RALUVAAA_V44__.prepareCurrentMedia());
+  const dl=page.waitForEvent('download',{timeout:5000});
+  await page.locator('[data-share-download]').click();
+  const download=await dl;
+  assert(/\.png$/i.test(download.suggestedFilename()),'Download button must emit the rendered still image');
+
+  await page.locator('[data-share-now]').click();
+  await page.waitForFunction(()=>window.__qaShared?.hasFiles===true,null,{timeout:3000});
+  assert.equal(await page.evaluate(()=>window.__qaShared.hasFiles),true,'Share button must invoke native file sharing when available');
+
   const still=await page.evaluate(async id=>{
     const b=await window.__RALUVAAA_V44__.createStill(id,3);
     return{size:b?.size||0,type:b?.type||''};
