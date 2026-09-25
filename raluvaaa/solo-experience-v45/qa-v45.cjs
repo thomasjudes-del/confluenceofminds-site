@@ -54,7 +54,11 @@ async function testThreeButtons(page,id){
   await openShare(page,id);
   assert.equal(await page.locator('.v45-style-dots [data-style]').count(),5,'five prebuilt share templates expected');
   assert.equal(await page.locator('.v45-share-modes [data-mode]').count(),2,'still and animation modes expected');
-  assert.equal(await page.locator('#v45ShareOverlay').getByText(/Preparing|Préparation|Creating|Création/).count(),0,'V45 must never generate media at share time');
+  assert.equal(await page.locator('#v45ShareOverlay').getByText(/Preparing|Préparation|Creating|Création/).count(),0,'V45 must never show a share-time rendering spinner');
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_V45__.mode()),'animation','animated clip must be the default share mode');
+  await page.waitForSelector('.v45-share-preview video',{timeout:3000});
+  assert.equal(await page.locator('.v45-share-preview video').getAttribute('loop'),null,'share preview audio/video must not loop');
+  assert.equal(await page.locator('.v45-share-preview video').evaluate(v=>v.muted),true,'share preview must stay muted over world music');
 
   const box=await page.locator('.v45-share-sheet').boundingBox();
   const footer=await page.locator('.v45-share-sheet footer').boundingBox();
@@ -65,6 +69,7 @@ async function testThreeButtons(page,id){
   assert(url.includes('#wish='+encodeURIComponent(id)),'share URL must deep-link to wish');
   assert(!url.includes('actor='),'share URL must not leak actor');
   assert(!url.includes('qa='),'share URL must not leak QA');
+  assert((await page.locator('.v45-card-url').innerText()).includes('#wish='),'visible share metadata must include the wish deep-link');
 
   await page.evaluate(()=>{
     window.__qaCopied='';
@@ -81,38 +86,36 @@ async function testThreeButtons(page,id){
   await page.waitForFunction(()=>window.__qaCopied.includes('#wish='),null,{timeout:3000});
   assert.equal(await page.locator('.v45-share-status').innerText(),'Link copied');
 
-  // Still download must produce a personalized PNG.
+  // Default animated mode uses the already-preloaded MP4. The click must not await a fetch.
+  const dlVideo=page.waitForEvent('download',{timeout:5000});
+  await page.locator('[data-share-download]').click();
+  const video=await dlVideo;
+  assert(/\.mp4$/i.test(video.suggestedFilename()),'default Download must emit stored MP4');
+
+  await page.locator('[data-share-now]').click();
+  await page.waitForFunction(()=>window.__qaShares.length>=1,null,{timeout:3000});
+  let last=await page.evaluate(()=>window.__qaShares.at(-1));
+  assert.equal(last.hasFiles,true,'default animated Share must include preloaded MP4');
+  assert.equal(last.type,'video/mp4','default Share must use MP4');
+  assert(last.text.includes('V45 instant sharing test'),'native share caption must include dynamic wish title');
+  assert(last.text.includes('Nantes, France'),'native share caption must include location');
+  assert(last.text.includes('#wish='),'native share caption must include deep-link');
+
+  // Still remains available as the secondary mode and produces a personalized PNG.
+  await page.locator('[data-mode="image"]').click();
+  await page.waitForSelector('.v45-share-preview img',{timeout:3000});
+  await page.evaluate(()=>window.__RALUVAAA_V45__.buildStillFile());
+
   const dlStill=page.waitForEvent('download',{timeout:5000});
   await page.locator('[data-share-download]').click();
   const still=await dlStill;
   assert(/\.png$/i.test(still.suggestedFilename()),'Still Download must emit PNG');
 
-  // Still share must invoke native share with an image file.
-  await page.evaluate(()=>window.__RALUVAAA_V45__.buildStillFile());
-  await page.locator('[data-share-now]').click();
-  await page.waitForFunction(()=>window.__qaShares.length>=1,null,{timeout:3000});
-  let last=await page.evaluate(()=>window.__qaShares.at(-1));
-  assert.equal(last.hasFiles,true,'Still Share must include file');
-  assert.equal(last.type,'image/png','Still Share file must be PNG');
-
-  // Animated mode uses a prebuilt MP4 with no render/preparation pass.
-  await page.locator('[data-mode="animation"]').click();
-  await page.waitForSelector('.v45-share-preview video',{timeout:3000});
-  await page.evaluate(()=>window.__RALUVAAA_V45__.loadVideoBlob(window.__RALUVAAA_V45__.style()));
-  const src=await page.locator('.v45-share-preview video').getAttribute('src');
-  assert(src&&src.includes('/share-assets/template-'),'Animated preview must point directly to a stored template');
-
-  const dlVideo=page.waitForEvent('download',{timeout:5000});
-  await page.locator('[data-share-download]').click();
-  const video=await dlVideo;
-  assert(/\.mp4$/i.test(video.suggestedFilename()),'Animated Download must emit stored MP4');
-
   await page.locator('[data-share-now]').click();
   await page.waitForFunction(()=>window.__qaShares.length>=2,null,{timeout:3000});
   last=await page.evaluate(()=>window.__qaShares.at(-1));
-  assert.equal(last.hasFiles,true,'Animated Share must include prebuilt file');
-  assert.equal(last.type,'video/mp4','Animated Share must use MP4');
-  assert(last.text.includes('V45 instant sharing test'),'native share caption must include dynamic wish title');
+  assert.equal(last.hasFiles,true,'Still Share must include file');
+  assert.equal(last.type,'image/png','Still Share file must be PNG');
 
   await page.click('.v45-share-x');
 }
