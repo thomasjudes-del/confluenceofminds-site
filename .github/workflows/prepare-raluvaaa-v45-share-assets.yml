@@ -26,7 +26,10 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install generator dependencies
-        run: pip install --quiet pillow numpy
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg >/dev/null
+          pip install --quiet pillow numpy
       - name: Generate five share templates
         run: python raluvaaa/solo-experience-v45/generate-share-assets.py
       - name: Verify MP4 audio and assets
