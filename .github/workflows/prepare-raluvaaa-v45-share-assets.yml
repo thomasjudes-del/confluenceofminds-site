@@ -44,7 +44,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add raluvaaa/solo-experience-v45/share-assets/
+          git add -A raluvaaa/solo-experience-v45/share-assets/
           git diff --cached --quiet && exit 0
           git commit -m 'RALUVAAA V45: add five prebuilt share videos and posters'
           git push
