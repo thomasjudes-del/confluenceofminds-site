@@ -249,7 +249,11 @@ def frame(idx,n):
     return im.convert('RGB')
 
 def download_music():
-    path=os.path.join(OUT,'Immersed.mp3')
+    # Keep the source track out of share-assets: only the five encoded clips belong in the public template bundle.
+    legacy=os.path.join(OUT,'Immersed.mp3')
+    try: os.remove(legacy)
+    except FileNotFoundError: pass
+    path=os.path.join(HERE,'.Immersed-share-cache.mp3')
     if not os.path.exists(path) or os.path.getsize(path)<100000:
         urllib.request.urlretrieve(MUSIC_URL,path)
     return path
@@ -284,6 +288,8 @@ def run():
             os.path.join(OUT,f'template-{idx+1}.mp4')
         ],check=True)
     shutil.rmtree(work,ignore_errors=True)
+    try: os.remove(audio)
+    except FileNotFoundError: pass
     print('Generated five V44-inspired 30fps share templates using Immersed by Kevin MacLeod (CC BY 4.0).')
 
 if __name__=='__main__':
