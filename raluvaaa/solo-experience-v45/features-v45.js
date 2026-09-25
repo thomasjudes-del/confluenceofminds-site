@@ -421,7 +421,7 @@ let shareStartedAt=performance.now();
 let sharePreviewFrames=0;
 
 function hash(s){let h=2166136261;for(const ch of String(s||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
-function assetUrl(kind,style){return V45_ASSET_BASE+(kind==='video'?'template-':'poster-')+(style+1)+(kind==='video'?'.mp4':'.png')}
+function assetUrl(kind,style){return V45_ASSET_BASE+(kind==='video'?'template-':'poster-')+(style+1)+(kind==='video'?'.mp4':'.png')+'?build=v45-organic-20260925-1'}
 function sanitize(s){return String(s||'wish').normalize('NFKD').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,42)||'wish'}
 function shareUrl(m){
   const base=window.RALUVAAA_PUBLIC_BASE_URL||location.href;
@@ -603,7 +603,7 @@ function modalHtml(){
       '<button type="button" class="v45-style-nav prev" data-style-prev>‹</button><button type="button" class="v45-style-nav next" data-style-next>›</button>'+
       '<div class="v45-style-dots">'+templateNames.map((n,i)=>'<button type="button" data-style="'+i+'" aria-label="'+n+'"></button>').join('')+'</div>'+
       '<div class="v45-swipe-hint">‹ '+(lang()==='en'?'swipe':'glisser')+' ›</div></div>'+
-    '<div class="v45-share-meta"><span class="v45-template-name"></span><span class="v45-audio-note">'+(lang()==='en'?'Music included in clip':'Musique incluse dans le clip')+'</span><span class="v45-share-status"></span></div>'+
+    '<div class="v45-share-meta"><span class="v45-template-name"></span><span class="v45-audio-note">Immersed · Kevin MacLeod · CC BY 4.0</span><span class="v45-share-status"></span></div>'+
     '<footer><button type="button" data-share-copy>'+escapeHtml(t.copyLink)+'</button><button type="button" data-share-download>'+escapeHtml(t.download)+'</button><button type="button" class="primary" data-share-now>'+escapeHtml(t.shareNow)+'</button></footer></section>'
 }
 function syncPreview(){
