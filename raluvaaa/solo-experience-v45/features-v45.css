@@ -469,15 +469,6 @@ body[data-feature-version="45"] .v43-saved-unavailable{
   font-weight:600;
   letter-spacing:.04em;
 }
-.v45-card-url{
-  margin-top:9px;
-  color:rgba(236,245,244,.72);
-  font-size:clamp(10px,1.8vw,13px);
-  font-weight:500;
-  line-height:1.25;
-  overflow-wrap:anywhere;
-  text-shadow:0 1px 10px rgba(0,0,0,.35);
-}
 .v45-audio-note{display:none}
 .v45-audio-note.visible{
   display:inline;
@@ -494,5 +485,4 @@ body[data-feature-version="45"] .v43-saved-unavailable{
   .v45-card-copy{left:7.5%;right:7.5%;bottom:9.5%}
   .v45-card-title{font-size:clamp(24px,7.8vw,34px)}
   .v45-card-loc{font-size:12px;margin-top:10px}
-  .v45-card-url{font-size:10.5px;margin-top:7px}
 }
