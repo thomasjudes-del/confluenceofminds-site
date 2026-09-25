@@ -27,7 +27,9 @@ jobs:
           grep -q 'data-feature-version="45"' raluvaaa/solo-experience-v45/index.html
           grep -q 'features-v45.js' raluvaaa/solo-experience-v45/index.html
           grep -q 'features-v45.css' raluvaaa/solo-experience-v45/index.html
-          ! grep -q 'MediaRecorder\|captureStream\|Preparing media\|Préparation du média' raluvaaa/solo-experience-v45/features-v45.js
+          grep -q 'recordPersonalizedClip' raluvaaa/solo-experience-v45/features-v45.js
+          grep -q 'captureStream' raluvaaa/solo-experience-v45/features-v45.js
+          grep -q 'MediaRecorder' raluvaaa/solo-experience-v45/features-v45.js
           for i in 1 2 3 4 5; do
             test -s "raluvaaa/solo-experience-v45/share-assets/template-$i.mp4"
             test -s "raluvaaa/solo-experience-v45/share-assets/poster-$i.png"
