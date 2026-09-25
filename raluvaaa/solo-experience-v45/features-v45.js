@@ -199,8 +199,10 @@ const V45_ASSET_BASE='./share-assets/';
 const videoBlobs=new Map();
 const posterImages=new Map();
 const stillFiles=new Map();
+const readyVideoFiles=new Map();
+const readyStillFiles=new Map();
 let shareStyle=Math.floor(Date.now()/1000)%5;
-let shareMode='image';
+let shareMode='animation';
 let shareWish=null;
 let shareStatus='';
 let preloadStarted=false;
@@ -256,7 +258,11 @@ async function loadVideoBlob(style){
   if(videoBlobs.has(style))return videoBlobs.get(style);
   const p=fetch(assetUrl('video',style),{cache:'force-cache'})
     .then(r=>{if(!r.ok)throw new Error('video '+r.status);return r.blob()})
-    .then(b=>new File([b],'raluvaaa-'+templateNames[style].toLowerCase()+'.mp4',{type:'video/mp4'}))
+    .then(b=>{
+      const file=new File([b],'raluvaaa-'+templateNames[style].toLowerCase()+'.mp4',{type:'video/mp4'});
+      readyVideoFiles.set(style,file);
+      return file
+    })
     .catch(e=>{console.warn('V45 video preload failed',style,e);return null});
   videoBlobs.set(style,p);
   return p
@@ -305,15 +311,18 @@ async function buildStillFile(style=shareStyle,m=shareWish){
     const lines=wrapCanvasText(ctx,m.text||'',624,4);let y=635;
     for(const line of lines){ctx.fillText(line,48,y);y+=48}
     if(m.loc){
-      ctx.font='600 14px system-ui,sans-serif';ctx.fillStyle='rgba(224,233,236,.72)';
-      ctx.fillText(m.loc,48,Math.min(805,y+18))
+      ctx.font='600 18px system-ui,sans-serif';ctx.fillStyle='rgba(224,233,236,.78)';
+      ctx.fillText(m.loc,48,Math.min(804,y+16))
     }
-    ctx.fillStyle='rgba(242,205,121,.95)';ctx.font='700 12px system-ui,sans-serif';
-    ctx.fillText(copy().shareText.toUpperCase(),48,850);
-    ctx.fillStyle='rgba(236,245,244,.55)';ctx.font='500 9px system-ui,sans-serif';
-    ctx.fillText('confluenceofminds.com/raluvaaa',48,874);
+    ctx.fillStyle='rgba(242,205,121,.95)';ctx.font='700 14px system-ui,sans-serif';
+    ctx.fillText(copy().shareText.toUpperCase(),48,842);
+    ctx.fillStyle='rgba(236,245,244,.72)';ctx.font='500 13px system-ui,sans-serif';
+    const cardUrl=shareUrl(m).replace(/^https?:\/\//,'');
+    ctx.fillText(cardUrl,48,870);
     const blob=await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error('PNG export failed')),'image/png',.94));
-    return new File([blob],'raluvaaa-'+sanitize(m.text)+'.png',{type:'image/png'})
+    const file=new File([blob],'raluvaaa-'+sanitize(m.text)+'.png',{type:'image/png'});
+    readyStillFiles.set(key,file);
+    return file
   })();
   stillFiles.set(key,job);return job
 }
@@ -322,49 +331,54 @@ function primeCurrent(){
   loadPoster(shareStyle);
   if(shareWish)buildStillFile(shareStyle,shareWish)
 }
-async function nativeShareNow(){
+function nativeShareNow(){
   if(!shareWish)return;
   const t=copy(),url=shareUrl(shareWish),text=shareCaption(shareWish);
   let file=null;
   if(shareMode==='animation'){
-    const candidate=videoBlobs.get(shareStyle);
-    if(candidate)file=await Promise.resolve(candidate).catch(()=>null)
+    file=readyVideoFiles.get(shareStyle)||null
   }else{
     const key=shareStyle+'|'+shareWish.semanticId+'|'+(shareWish.text||'')+'|'+(shareWish.loc||'');
-    const candidate=stillFiles.get(key);
-    if(candidate)file=await Promise.resolve(candidate).catch(()=>null)
+    file=readyStillFiles.get(key)||null
   }
   try{
     if(navigator.share){
-      if(file&&navigator.canShare?.({files:[file]})){
-        await navigator.share({title:'RALUVAAA · '+(shareWish.text||'Wish'),text,files:[file]});
-      }else{
-        await navigator.share({title:'RALUVAAA · '+(shareWish.text||'Wish'),text,url});
-      }
-      setStatus(t.shared);window.dispatchEvent(new CustomEvent('raluvaaa-share'));return
+      const canFiles=!!(file&&navigator.canShare?.({files:[file]}));
+      const payload=canFiles
+        ?{title:'RALUVAAA · '+(shareWish.text||'Wish'),text,files:[file]}
+        :{title:'RALUVAAA · '+(shareWish.text||'Wish'),text,url};
+      const sharing=navigator.share(payload);
+      Promise.resolve(sharing).then(()=>{
+        setStatus(t.shared);window.dispatchEvent(new CustomEvent('raluvaaa-share'))
+      }).catch(e=>{
+        if(e?.name==='AbortError')return;
+        console.warn('V45 native share failed',e);
+        copyUrl(url).then(()=>setStatus(t.fallback))
+      });
+      return
     }
   }catch(e){
-    if(e?.name==='AbortError')return;
     console.warn('V45 native share failed',e)
   }
-  await copyUrl(url);setStatus(t.fallback)
+  copyUrl(url).then(()=>setStatus(t.fallback))
 }
-async function downloadCurrent(){
+function downloadCurrent(){
   if(!shareWish)return;
   if(shareMode==='animation'){
-    const p=videoBlobs.get(shareStyle);
-    const file=p?await Promise.resolve(p).catch(()=>null):null;
+    const file=readyVideoFiles.get(shareStyle)||null;
     if(file)downloadFile(file);
     else directDownload(assetUrl('video',shareStyle),'raluvaaa-'+templateNames[shareStyle].toLowerCase()+'.mp4')
   }else{
-    const file=await buildStillFile(shareStyle,shareWish);
-    if(file)downloadFile(file);else directDownload(assetUrl('poster',shareStyle),'raluvaaa-'+templateNames[shareStyle].toLowerCase()+'.png')
+    const key=shareStyle+'|'+shareWish.semanticId+'|'+(shareWish.text||'')+'|'+(shareWish.loc||'');
+    const file=readyStillFiles.get(key)||null;
+    if(file)downloadFile(file);
+    else directDownload(assetUrl('poster',shareStyle),'raluvaaa-'+templateNames[shareStyle].toLowerCase()+'.png')
   }
   setStatus(copy().downloaded);window.dispatchEvent(new CustomEvent('raluvaaa-share'))
 }
 function mediaHtml(){
-  const overlay='<div class="v45-card-overlay"><div class="v45-card-type"></div><div class="v45-card-copy"><div class="v45-card-title"></div><div class="v45-card-loc"></div></div></div>';
-  if(shareMode==='animation')return '<video class="v45-media" playsinline loop preload="auto" src="'+assetUrl('video',shareStyle)+'"></video>'+overlay;
+  const overlay='<div class="v45-card-overlay"><div class="v45-card-type"></div><div class="v45-card-copy"><div class="v45-card-title"></div><div class="v45-card-loc"></div><div class="v45-card-url"></div></div></div>';
+  if(shareMode==='animation')return '<video class="v45-media" playsinline muted preload="auto" src="'+assetUrl('video',shareStyle)+'"></video>'+overlay;
   return '<img class="v45-media" alt="" src="'+assetUrl('poster',shareStyle)+'">'+overlay
 }
 function modalHtml(){
@@ -389,6 +403,7 @@ function syncPreview(){
   const type=host.querySelector('.v45-card-type');if(type)type.textContent=shareWish.simulated?(lang()==='en'?'SIMULATED WISH':'WISH SIMULÉ'):(shareWish.owner?(lang()==='en'?'LOCAL POC WISH':'WISH LOCAL POC'):(lang()==='en'?'HUMAN WISH':'WISH HUMAIN'));
   const title=host.querySelector('.v45-card-title');if(title)title.textContent=shareWish.text||'';
   const loc=host.querySelector('.v45-card-loc');if(loc)loc.textContent=shareWish.loc||'';
+  const cardUrl=host.querySelector('.v45-card-url');if(cardUrl)cardUrl.textContent=shareUrl(shareWish).replace(/^https?:\/\//,'');
 }
 function rebuildMedia(){
   const host=document.getElementById('v45ShareOverlay');if(!host)return;
@@ -398,8 +413,8 @@ function rebuildMedia(){
   syncPreview();
   const video=preview.querySelector('video');
   if(video&&shareMode==='animation'){
-    video.muted=false;video.volume=.38;video.currentTime=0;
-    const p=video.play();if(p?.catch)p.catch(()=>{video.muted=true;video.play().catch(()=>{})})
+    video.muted=true;video.volume=0;video.currentTime=0;
+    const p=video.play();if(p?.catch)p.catch(()=>{})
   }
 }
 function setShareStyle(next){
@@ -417,7 +432,7 @@ function bindShareSwipe(host){
   area.addEventListener('pointerdown',start);area.addEventListener('pointerup',end)
 }
 function openShare(m){
-  shareWish={...m};shareStyle=hash(m.semanticId+'|'+Date.now())%5;shareMode='image';shareStatus='';
+  shareWish={...m};shareStyle=hash(m.semanticId+'|'+Date.now())%5;shareMode='animation';shareStatus='';
   let host=document.getElementById('v45ShareOverlay');
   if(!host){host=document.createElement('div');host.id='v45ShareOverlay';document.body.appendChild(host)}
   host.innerHTML=modalHtml();host.classList.add('open');
@@ -452,7 +467,7 @@ function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queu
 new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-panel','data-open','data-v39-icon']});
 document.addEventListener('click',interceptShare,true);
 window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark();ensureMobileBookmark()});
-decorate();setTimeout(decorate,120);setTimeout(decorate,400);setTimeout(warmAllAssets,700);
+decorate();setTimeout(decorate,120);setTimeout(decorate,400);warmAllAssets();
 
 window.__RALUVAAA_V45__={
   version:45,
