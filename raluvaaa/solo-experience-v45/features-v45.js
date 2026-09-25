@@ -428,6 +428,7 @@ let preparedKey='';
 let preparingPromise=null;
 let preparationEpoch=0;
 let recorderBusy=false;
+let prewarmTimer=0;
 
 function hash(s){let h=2166136261;for(const ch of String(s||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function assetUrl(kind,style){return V45_ASSET_BASE+(kind==='video'?'template-':'poster-')+(style+1)+(kind==='video'?'.mp4':'.png')+'?build=v45-final-20260925-2'}
@@ -563,6 +564,7 @@ function mediaKey(){
 }
 function invalidatePrepared(){
   preparationEpoch++;
+  clearTimeout(prewarmTimer);prewarmTimer=0;
   preparedMedia=null;
   preparedKey='';
   preparingPromise=null
@@ -592,9 +594,13 @@ async function shareMusicTrack(durationMs){
 }
 async function recordPersonalizedClip(m,style){
   if(!supportsPersonalizedClip())throw new Error('animation-unsupported');
-  const mime=bestShareMime(),canvas=document.createElement('canvas');
-  canvas.width=W;canvas.height=H;
-  renderPrettyFrame(canvas,m,style,0,'animation');
+  const mime=bestShareMime();
+  let canvas=document.querySelector('#v45ShareOverlay canvas.v45-pretty-animation');
+  const isLive=!!canvas;
+  if(!canvas){
+    canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+    renderPrettyFrame(canvas,m,style,0,'animation')
+  }
   const video=canvas.captureStream(SHARE_CLIP_FPS);
   const music=await shareMusicTrack(SHARE_CLIP_DURATION);
   const tracks=[...video.getVideoTracks()];
@@ -607,15 +613,19 @@ async function recordPersonalizedClip(m,style){
     rec.onstop=()=>resolve({blob:new Blob(chunks,{type:mime}),mime,audioEmbedded:!!music?.track})
   });
   const began=performance.now();rec.start(200);
-  await new Promise(resolve=>{
-    const frame=now=>{
-      const elapsed=now-began;
-      const virtualTime=elapsed*(DURATION/SHARE_CLIP_DURATION);
-      renderPrettyFrame(canvas,m,style,virtualTime,'animation');
-      if(elapsed<SHARE_CLIP_DURATION)requestAnimationFrame(frame);else resolve()
-    };
-    requestAnimationFrame(frame)
-  });
+  if(isLive){
+    await new Promise(resolve=>setTimeout(resolve,SHARE_CLIP_DURATION+60))
+  }else{
+    await new Promise(resolve=>{
+      const frame=now=>{
+        const elapsed=now-began;
+        const virtualTime=elapsed*(DURATION/SHARE_CLIP_DURATION);
+        renderPrettyFrame(canvas,m,style,virtualTime,'animation');
+        if(elapsed<SHARE_CLIP_DURATION)requestAnimationFrame(frame);else resolve()
+      };
+      requestAnimationFrame(frame)
+    })
+  }
   rec.stop();music?.stop();video.getTracks().forEach(t=>t.stop());
   const out=await result,ext=out.mime.includes('mp4')?'mp4':'webm';
   return{
@@ -646,12 +656,14 @@ async function prepareCurrentMedia(){
 function prewarmCurrentMedia(){
   const key=mediaKey();
   if(!key)return;
-  setTimeout(()=>{
+  clearTimeout(prewarmTimer);
+  prewarmTimer=setTimeout(()=>{
+    prewarmTimer=0;
     if(key!==mediaKey())return;
     prepareCurrentMedia().catch(e=>{
       if(key===mediaKey())console.warn('V45 media prewarm failed',e)
     })
-  },80)
+  },450)
 }
 function setShareActionBusy(on){
   const btn=document.querySelector('#v45ShareOverlay [data-share-now]');
