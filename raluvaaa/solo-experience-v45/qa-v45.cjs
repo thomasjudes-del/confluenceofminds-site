@@ -3,6 +3,7 @@ const assert=require('node:assert/strict');
 
 const BASE=process.env.RALUVAAA_QA_BASE||'http://127.0.0.1:4173';
 const PATH='/raluvaaa/solo-experience-v45/';
+// Regression: short desktop share preview must keep a real media height.
 
 async function setup(){
   const browser=await chromium.launch({headless:true});
