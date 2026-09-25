@@ -26,16 +26,16 @@ function copy(){
     save:'Save',saved:'Saved',saveWish:'Save this wish',savedWish:'Saved',savedTitle:'Saved wishes',savedEmpty:'Save wishes you want to revisit, help or connect later.',
     entrusted:'Entrusted for now',remove:'Remove',unavailable:'Unavailable in this local session',
     shareTitle:'Share this wish',image:'Still image',animation:'Animated clip',style:'Style',preview:'Preview',
-    shareNow:'Share',download:'Download',copyLink:'Copy link',close:'Close',
-    copied:'Link copied',downloaded:'Downloaded',shared:'Share opened',copyFailed:'Copy failed. Select the link below.',fallback:'Sharing is unavailable here. The link has been copied.',
+    shareNow:'Share',download:'Download',copyLink:'Copy link',copiedButton:'✓ Link copied',close:'Close',
+    copied:'Link copied',downloaded:'Downloaded',shared:'Share opened',preparingClip:'Preparing clip…',copyFailed:'Copy failed. Select the link below.',fallback:'Sharing is unavailable here. The link has been copied.',
     shareText:'Discover this wish on RALUVAAA',simulated:'SIMULATED WISH',local:'LOCAL POC WISH',human:'HUMAN WISH',
     saveFailed:'Could not save this wish.'
   }:{
     save:'Sauvegarder',saved:'Sauvegardé',saveWish:'Sauvegarder ce wish',savedWish:'Sauvegardé',savedTitle:'Wishes sauvegardés',savedEmpty:'Sauvegarde les wishes que tu veux retrouver, aider ou connecter plus tard.',
     entrusted:'Confiés pour un temps',remove:'Retirer',unavailable:'Indisponible dans cette session locale',
     shareTitle:'Partager ce wish',image:'Image fixe',animation:'Clip animé',style:'Style',preview:'Aperçu',
-    shareNow:'Partager',download:'Télécharger',copyLink:'Copier le lien',close:'Fermer',
-    copied:'Lien copié',downloaded:'Téléchargé',shared:'Partage ouvert',copyFailed:'Copie impossible. Sélectionne le lien ci-dessous.',fallback:'Le partage natif est indisponible ici. Le lien a été copié.',
+    shareNow:'Partager',download:'Télécharger',copyLink:'Copier le lien',copiedButton:'✓ Lien copié',close:'Fermer',
+    copied:'Lien copié',downloaded:'Téléchargé',shared:'Partage ouvert',preparingClip:'Préparation du clip…',copyFailed:'Copie impossible. Sélectionne le lien ci-dessous.',fallback:'Le partage natif est indisponible ici. Le lien a été copié.',
     shareText:'Découvrir ce wish sur RALUVAAA',simulated:'WISH SIMULÉ',local:'WISH LOCAL POC',human:'WISH HUMAIN',
     saveFailed:"Impossible de sauvegarder ce wish."
   };
@@ -196,6 +196,10 @@ function decorateEntrustedFresh(){
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
 const W=720,H=900,DURATION=9000;
+const SHARE_CLIP_DURATION=4200;
+const SHARE_CLIP_FPS=24;
+const SHARE_MUSIC_URL='https://raw.githubusercontent.com/carolcarriazo/incarnation-game/main/public/music/Immersed.mp3';
+const SHARE_MUSIC_OFFSET=18;
 function seeded(seed){let x=hash(seed)||1;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return((x>>>0)%100000)/100000}}
 function lerp(a,b,t){return a+(b-a)*t}
 function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
@@ -419,20 +423,26 @@ let preloadStarted=false;
 let shareAnimationFrame=0;
 let shareStartedAt=performance.now();
 let sharePreviewFrames=0;
+let preparedMedia=null;
+let preparedKey='';
+let preparingPromise=null;
+let preparationEpoch=0;
+let recorderBusy=false;
 
 function hash(s){let h=2166136261;for(const ch of String(s||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function assetUrl(kind,style){return V45_ASSET_BASE+(kind==='video'?'template-':'poster-')+(style+1)+(kind==='video'?'.mp4':'.png')+'?build=v45-final-20260925-2'}
 function sanitize(s){return String(s||'wish').normalize('NFKD').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,42)||'wish'}
 function shareUrl(m){
-  const base=window.RALUVAAA_PUBLIC_BASE_URL||location.href;
-  const u=new URL(base,location.href);
-  ['actor','qa','soloqa','sharedqa','reset'].forEach(k=>u.searchParams.delete(k));
+  const base=window.RALUVAAA_PUBLIC_BASE_URL||(location.origin+location.pathname);
+  const u=new URL(base,location.origin);
+  u.search='';
   u.hash='wish='+encodeURIComponent(m.semanticId);
   return u.href
 }
-function shareCaption(m){
-  const t=copy();
-  return [m.text||'Wish',m.loc||'',t.shareText,shareUrl(m)].filter(Boolean).join('\n');
+function shareCaption(m,includeUrl=true){
+  const t=copy(),parts=[m.text||'Wish',m.loc||'',t.shareText];
+  if(includeUrl)parts.push(shareUrl(m));
+  return parts.filter(Boolean).join('\n');
 }
 function setStatus(msg){
   shareStatus=msg||'';
@@ -447,11 +457,18 @@ function legacyCopy(text){
   let ok=false;try{ok=document.execCommand('copy')}catch{}
   ta.remove();return ok
 }
+function setCopyButtonCopied(on){
+  const btn=document.querySelector('#v45ShareOverlay [data-share-copy]');
+  if(!btn)return;
+  btn.classList.toggle('copied',!!on);
+  btn.disabled=!!on;
+  btn.textContent=on?copy().copiedButton:copy().copyLink
+}
 async function copyUrl(url){
   let ok=false;
   try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);ok=true}}catch{}
   if(!ok)ok=legacyCopy(url);
-  if(ok){setStatus(copy().copied);toast(copy().copied);return true}
+  if(ok){shareStatus='';setStatus('');setCopyButtonCopied(true);return true}
   setStatus(copy().copyFailed);
   try{window.prompt(copy().copyLink,url)}catch{}
   return false
@@ -515,23 +532,8 @@ async function buildStillFile(style=shareStyle,m=shareWish){
   const key=style+'|'+m.semanticId+'|'+(m.text||'')+'|'+(m.loc||'');
   if(stillFiles.has(key))return stillFiles.get(key);
   const job=(async()=>{
-    const img=await loadPoster(style);if(!img)return null;
-    const c=document.createElement('canvas');c.width=720;c.height=900;
-    const ctx=c.getContext('2d');ctx.drawImage(img,0,0,720,900);
-    const grad=ctx.createLinearGradient(0,500,0,900);grad.addColorStop(0,'rgba(2,7,13,0)');grad.addColorStop(.34,'rgba(2,7,13,.66)');grad.addColorStop(1,'rgba(2,7,13,.90)');
-    ctx.fillStyle=grad;ctx.fillRect(0,470,720,430);
-    ctx.fillStyle='#f4f6f2';ctx.font='40px Georgia,serif';
-    const lines=wrapCanvasText(ctx,m.text||'',624,4);let y=635;
-    for(const line of lines){ctx.fillText(line,48,y);y+=48}
-    if(m.loc){
-      ctx.font='600 18px system-ui,sans-serif';ctx.fillStyle='rgba(224,233,236,.78)';
-      ctx.fillText(m.loc,48,Math.min(804,y+16))
-    }
-    ctx.fillStyle='rgba(242,205,121,.95)';ctx.font='700 14px system-ui,sans-serif';
-    ctx.fillText(copy().shareText.toUpperCase(),48,842);
-    ctx.fillStyle='rgba(236,245,244,.72)';ctx.font='500 13px system-ui,sans-serif';
-    const cardUrl=shareUrl(m).replace(/^https?:\/\//,'');
-    ctx.fillText(cardUrl,48,870);
+    const c=document.createElement('canvas');c.width=W;c.height=H;
+    renderPrettyFrame(c,m,style,DURATION*.64,'image');
     const blob=await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error('PNG export failed')),'image/png',.94));
     const file=new File([blob],'raluvaaa-'+sanitize(m.text)+'.png',{type:'image/png'});
     readyStillFiles.set(key,file);
@@ -539,60 +541,181 @@ async function buildStillFile(style=shareStyle,m=shareWish){
   })();
   stillFiles.set(key,job);return job
 }
-function primeCurrent(){
-  loadVideoBlob(shareStyle);
-  loadPoster(shareStyle);
-  if(shareWish)buildStillFile(shareStyle,shareWish)
+function bestShareMime(){
+  if(!window.MediaRecorder)return null;
+  const types=[
+    'video/mp4;codecs=h264,aac',
+    'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+    'video/mp4',
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm'
+  ];
+  return types.find(x=>MediaRecorder.isTypeSupported?.(x))||null
 }
-function nativeShareNow(){
-  if(!shareWish)return;
-  const t=copy(),url=shareUrl(shareWish),text=shareCaption(shareWish);
-  let file=null;
-  if(shareMode==='animation'){
-    file=readyVideoFiles.get(shareStyle)||null
-  }else{
-    const key=shareStyle+'|'+shareWish.semanticId+'|'+(shareWish.text||'')+'|'+(shareWish.loc||'');
-    file=readyStillFiles.get(key)||null
-  }
+function supportsPersonalizedClip(){
+  return !!(HTMLCanvasElement.prototype.captureStream&&window.MediaRecorder&&bestShareMime())
+}
+function mediaKey(){
+  return shareWish
+    ?shareMode+'|'+shareStyle+'|'+shareWish.semanticId+'|'+(shareWish.text||'')+'|'+(shareWish.loc||'')
+    :''
+}
+function invalidatePrepared(){
+  preparationEpoch++;
+  preparedMedia=null;
+  preparedKey='';
+  preparingPromise=null
+}
+async function shareMusicTrack(durationMs){
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)return null;
+  const ac=new AC();
   try{
-    if(navigator.share){
-      const canFiles=!!(file&&navigator.canShare?.({files:[file]}));
-      const payload=canFiles
-        ?{title:'RALUVAAA · '+(shareWish.text||'Wish'),text,url,files:[file]}
-        :{title:'RALUVAAA · '+(shareWish.text||'Wish'),text,url};
-      const sharing=navigator.share(payload);
-      Promise.resolve(sharing).then(()=>{
-        setStatus(t.shared);window.dispatchEvent(new CustomEvent('raluvaaa-share'))
-      }).catch(e=>{
-        if(e?.name==='AbortError')return;
-        console.warn('V45 native share failed',e);
-        copyUrl(url).then(()=>setStatus(t.fallback))
-      });
-      return
+    const res=await fetch(SHARE_MUSIC_URL,{mode:'cors',cache:'force-cache'});
+    if(!res.ok)throw new Error('music '+res.status);
+    const buffer=await ac.decodeAudioData(await res.arrayBuffer());
+    const dest=ac.createMediaStreamDestination(),src=ac.createBufferSource(),gain=ac.createGain();
+    gain.gain.value=.22;src.buffer=buffer;src.connect(gain);gain.connect(dest);
+    const maxOffset=Math.max(0,buffer.duration-durationMs/1000-.25);
+    const offset=Math.min(SHARE_MUSIC_OFFSET,maxOffset);
+    src.start(0,offset,durationMs/1000+.15);
+    return{
+      track:dest.stream.getAudioTracks()[0],
+      stop(){try{src.stop()}catch{}setTimeout(()=>ac.close().catch(()=>{}),50)}
     }
   }catch(e){
-    console.warn('V45 native share failed',e)
+    console.warn('V45 share music unavailable',e);
+    try{await ac.close()}catch{}
+    return null
   }
-  copyUrl(url).then(()=>setStatus(t.fallback))
 }
-function downloadCurrent(){
-  if(!shareWish)return;
-  if(shareMode==='animation'){
-    const file=readyVideoFiles.get(shareStyle)||null;
-    if(file)downloadFile(file);
-    else directDownload(assetUrl('video',shareStyle),'raluvaaa-'+templateNames[shareStyle].toLowerCase()+'.mp4')
-  }else{
-    const key=shareStyle+'|'+shareWish.semanticId+'|'+(shareWish.text||'')+'|'+(shareWish.loc||'');
-    const file=readyStillFiles.get(key)||null;
-    if(file)downloadFile(file);
-    else directDownload(assetUrl('poster',shareStyle),'raluvaaa-'+templateNames[shareStyle].toLowerCase()+'.png')
+async function recordPersonalizedClip(m,style){
+  if(!supportsPersonalizedClip())throw new Error('animation-unsupported');
+  const mime=bestShareMime(),canvas=document.createElement('canvas');
+  canvas.width=W;canvas.height=H;
+  renderPrettyFrame(canvas,m,style,0,'animation');
+  const video=canvas.captureStream(SHARE_CLIP_FPS);
+  const music=await shareMusicTrack(SHARE_CLIP_DURATION);
+  const tracks=[...video.getVideoTracks()];
+  if(music?.track)tracks.push(music.track);
+  const stream=new MediaStream(tracks),chunks=[];
+  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:3000000});
+  const result=new Promise((resolve,reject)=>{
+    rec.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
+    rec.onerror=e=>reject(e.error||new Error('recording failed'));
+    rec.onstop=()=>resolve({blob:new Blob(chunks,{type:mime}),mime,audioEmbedded:!!music?.track})
+  });
+  const began=performance.now();rec.start(200);
+  await new Promise(resolve=>{
+    const frame=now=>{
+      const elapsed=now-began;
+      const virtualTime=elapsed*(DURATION/SHARE_CLIP_DURATION);
+      renderPrettyFrame(canvas,m,style,virtualTime,'animation');
+      if(elapsed<SHARE_CLIP_DURATION)requestAnimationFrame(frame);else resolve()
+    };
+    requestAnimationFrame(frame)
+  });
+  rec.stop();music?.stop();video.getTracks().forEach(t=>t.stop());
+  const out=await result,ext=out.mime.includes('mp4')?'mp4':'webm';
+  return{
+    file:new File([out.blob],'raluvaaa-'+sanitize(m.text)+'.'+ext,{type:out.mime}),
+    audioEmbedded:out.audioEmbedded,
+    mode:'animation'
   }
-  setStatus(copy().downloaded);window.dispatchEvent(new CustomEvent('raluvaaa-share'))
+}
+async function prepareCurrentMedia(){
+  if(!shareWish)return null;
+  const key=mediaKey();
+  if(preparedMedia&&preparedKey===key)return preparedMedia;
+  if(preparingPromise&&preparedKey===key)return preparingPromise;
+  const epoch=++preparationEpoch,m={...shareWish},style=shareStyle,mode=shareMode;
+  preparedKey=key;preparedMedia=null;
+  preparingPromise=(async()=>{
+    if(mode==='image')return{file:await buildStillFile(style,m),audioEmbedded:false,mode:'image'};
+    return recordPersonalizedClip(m,style)
+  })();
+  try{
+    const result=await preparingPromise;
+    if(epoch===preparationEpoch&&key===mediaKey()){preparedMedia=result;preparedKey=key}
+    return result
+  }finally{
+    if(epoch===preparationEpoch)preparingPromise=null
+  }
+}
+function prewarmCurrentMedia(){
+  const key=mediaKey();
+  if(!key)return;
+  setTimeout(()=>{
+    if(key!==mediaKey())return;
+    prepareCurrentMedia().catch(e=>{
+      if(key===mediaKey())console.warn('V45 media prewarm failed',e)
+    })
+  },80)
+}
+function setShareActionBusy(on){
+  const btn=document.querySelector('#v45ShareOverlay [data-share-now]');
+  if(!btn)return;
+  btn.disabled=!!on;
+  btn.classList.toggle('busy',!!on);
+  btn.textContent=on?copy().preparingClip:copy().shareNow
+}
+async function nativeShareNow(){
+  if(!shareWish||recorderBusy)return;
+  const t=copy(),url=shareUrl(shareWish);
+  recorderBusy=true;setShareActionBusy(true);
+  try{
+    let media=(preparedMedia&&preparedKey===mediaKey())?preparedMedia:null;
+    if(!media)media=await prepareCurrentMedia();
+    const file=media?.file||null;
+    if(navigator.share){
+      if(file&&navigator.canShare?.({files:[file]})){
+        // URL appears once in the caption. Supplying both text-with-URL and url duplicated it in WhatsApp.
+        await navigator.share({
+          title:'RALUVAAA · '+(shareWish.text||'Wish'),
+          text:shareCaption(shareWish,true),
+          files:[file]
+        });
+      }else{
+        await navigator.share({
+          title:'RALUVAAA · '+(shareWish.text||'Wish'),
+          text:shareCaption(shareWish,false),
+          url
+        });
+      }
+      setStatus(t.shared);window.dispatchEvent(new CustomEvent('raluvaaa-share'));return
+    }
+    await copyUrl(url);setStatus(t.fallback)
+  }catch(e){
+    if(e?.name==='AbortError')return;
+    console.warn('V45 native share failed',e);
+    await copyUrl(url);setStatus(t.fallback)
+  }finally{
+    recorderBusy=false;setShareActionBusy(false)
+  }
+}
+async function downloadCurrent(){
+  if(!shareWish||recorderBusy)return;
+  recorderBusy=true;
+  const btn=document.querySelector('#v45ShareOverlay [data-share-download]');
+  const old=btn?.textContent;
+  if(btn){btn.disabled=true;btn.textContent=shareMode==='animation'?copy().preparingClip:copy().download}
+  try{
+    let media=(preparedMedia&&preparedKey===mediaKey())?preparedMedia:null;
+    if(!media)media=await prepareCurrentMedia();
+    if(media?.file)downloadFile(media.file);
+    setStatus(copy().downloaded);window.dispatchEvent(new CustomEvent('raluvaaa-share'))
+  }catch(e){
+    console.warn('V45 download failed',e);
+    setStatus(String(e?.message||e))
+  }finally{
+    recorderBusy=false;
+    if(btn){btn.disabled=false;btn.textContent=old||copy().download}
+  }
 }
 function mediaHtml(){
-  const overlay='<div class="v45-card-overlay"><div class="v45-card-type"></div><div class="v45-card-copy"><div class="v45-card-title"></div><div class="v45-card-loc"></div></div></div>';
-  if(shareMode==='animation')return '<canvas class="v45-media v45-pretty-animation" width="'+W+'" height="'+H+'"></canvas>';
-  return '<img class="v45-media" alt="" src="'+assetUrl('poster',shareStyle)+'">'+overlay
+  const cls=shareMode==='animation'?'v45-pretty-animation':'v45-pretty-still';
+  return '<canvas class="v45-media '+cls+'" width="'+W+'" height="'+H+'"></canvas>'
 }
 function modalHtml(){
   const t=copy();
@@ -603,31 +726,32 @@ function modalHtml(){
       '<button type="button" class="v45-style-nav prev" data-style-prev>‹</button><button type="button" class="v45-style-nav next" data-style-next>›</button>'+
       '<div class="v45-style-dots">'+templateNames.map((n,i)=>'<button type="button" data-style="'+i+'" aria-label="'+n+'"></button>').join('')+'</div>'+
       '<div class="v45-swipe-hint">‹ '+(lang()==='en'?'swipe':'glisser')+' ›</div></div>'+
-    '<div class="v45-share-meta"><span class="v45-template-name"></span><span class="v45-audio-note">Immersed · Kevin MacLeod · CC BY 4.0</span><span class="v45-share-status"></span></div>'+
+    '<div class="v45-share-meta"><span class="v45-audio-note">Immersed · Kevin MacLeod · CC BY 4.0</span><span class="v45-share-status"></span></div>'+
     '<footer><button type="button" data-share-copy>'+escapeHtml(t.copyLink)+'</button><button type="button" data-share-download>'+escapeHtml(t.download)+'</button><button type="button" class="primary" data-share-now>'+escapeHtml(t.shareNow)+'</button></footer></section>'
 }
 function syncPreview(){
   const host=document.getElementById('v45ShareOverlay');if(!host||!shareWish)return;
   host.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===shareMode));
   host.querySelectorAll('[data-style]').forEach(b=>b.classList.toggle('active',Number(b.dataset.style)===shareStyle));
-  const name=host.querySelector('.v45-template-name');if(name)name.textContent=templateNames[shareStyle];
   const note=host.querySelector('.v45-audio-note');if(note)note.classList.toggle('visible',shareMode==='animation');
-  const status=host.querySelector('.v45-share-status');if(status)status.textContent=shareStatus;
-  const type=host.querySelector('.v45-card-type');if(type)type.textContent=shareWish.simulated?(lang()==='en'?'SIMULATED WISH':'WISH SIMULÉ'):(shareWish.owner?(lang()==='en'?'LOCAL POC WISH':'WISH LOCAL POC'):(lang()==='en'?'HUMAN WISH':'WISH HUMAIN'));
-  const title=host.querySelector('.v45-card-title');if(title)title.textContent=shareWish.text||'';
-  const loc=host.querySelector('.v45-card-loc');if(loc)loc.textContent=shareWish.loc||'';
+  const status=host.querySelector('.v45-share-status');if(status)status.textContent=shareStatus
 }
 function startPrettyAnimation(){
   cancelAnimationFrame(shareAnimationFrame);
   const host=document.getElementById('v45ShareOverlay');
-  const canvas=host?.querySelector('canvas.v45-pretty-animation');
-  if(!canvas||shareMode!=='animation'||!shareWish)return;
+  const canvas=host?.querySelector('canvas.v45-media');
+  if(!canvas||!shareWish)return;
+  if(shareMode==='image'){
+    renderPrettyFrame(canvas,shareWish,shareStyle,DURATION*.64,'image');
+    sharePreviewFrames=1;return
+  }
   shareStartedAt=performance.now();sharePreviewFrames=0;
   const step=now=>{
     const live=document.getElementById('v45ShareOverlay');
     const c=live?.querySelector('canvas.v45-pretty-animation');
     if(!live?.classList.contains('open')||!c||shareMode!=='animation'||!shareWish)return;
-    renderPrettyFrame(c,shareWish,shareStyle,now-shareStartedAt,'animation');sharePreviewFrames++;
+    const virtualTime=(now-shareStartedAt)*(DURATION/SHARE_CLIP_DURATION);
+    renderPrettyFrame(c,shareWish,shareStyle,virtualTime,'animation');sharePreviewFrames++;
     shareAnimationFrame=requestAnimationFrame(step)
   };
   shareAnimationFrame=requestAnimationFrame(step)
@@ -638,14 +762,14 @@ function rebuildMedia(){
   old?.remove();overlay?.remove();
   preview.insertAdjacentHTML('afterbegin',mediaHtml());
   syncPreview();
-  if(shareMode==='animation')startPrettyAnimation()
+  startPrettyAnimation()
 }
 function setShareStyle(next){
   shareStyle=(Number(next)+templateNames.length)%templateNames.length;
-  shareStatus='';rebuildMedia();primeCurrent()
+  shareStatus='';invalidatePrepared();setCopyButtonCopied(false);rebuildMedia();prewarmCurrentMedia()
 }
 function setShareMode(mode){
-  shareMode=mode==='animation'?'animation':'image';shareStatus='';rebuildMedia();primeCurrent()
+  shareMode=mode==='animation'?'animation':'image';shareStatus='';invalidatePrepared();setCopyButtonCopied(false);rebuildMedia();prewarmCurrentMedia()
 }
 function bindShareSwipe(host){
   const area=host.querySelector('.v45-share-preview');let sx=null,sy=null;
@@ -667,12 +791,12 @@ function openShare(m){
   host.querySelector('[data-share-copy]').onclick=()=>copyUrl(shareUrl(shareWish));
   host.querySelector('[data-share-download]').onclick=()=>downloadCurrent();
   host.querySelector('[data-share-now]').onclick=()=>nativeShareNow();
-  bindShareSwipe(host);syncPreview();warmAllAssets();primeCurrent();if(shareMode==='animation')startPrettyAnimation()
+  bindShareSwipe(host);invalidatePrepared();setCopyButtonCopied(false);syncPreview();startPrettyAnimation();prewarmCurrentMedia()
 }
 function closeShare(){
   const host=document.getElementById('v45ShareOverlay');
   cancelAnimationFrame(shareAnimationFrame);
-  host?.classList.remove('open');shareWish=null
+  invalidatePrepared();host?.classList.remove('open');shareWish=null
 }
 function interceptShare(e){
   const button=e.target.closest?.('[data-act="share"],.v33-action-unit[data-v39-icon="share"] .v33-action-circle');
@@ -690,7 +814,7 @@ function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queu
 new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-panel','data-open','data-v39-icon']});
 document.addEventListener('click',interceptShare,true);
 window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark();ensureMobileBookmark()});
-decorate();setTimeout(decorate,120);setTimeout(decorate,400);warmAllAssets();
+decorate();setTimeout(decorate,120);setTimeout(decorate,400);
 
 window.__RALUVAAA_V45__={
   version:45,
