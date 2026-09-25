@@ -1,0 +1,52 @@
+name: Check RALUVAAA Experience V45
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-experience-v45/**'
+      - '.github/workflows/check-raluvaaa-experience-v45.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: raluvaaa-experience-v45-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/solo-experience-v45/features-v45.js
+          node --check raluvaaa/solo-experience-v45/qa-v45.cjs
+          grep -q 'data-feature-version="45"' raluvaaa/solo-experience-v45/index.html
+          grep -q 'features-v45.js' raluvaaa/solo-experience-v45/index.html
+          grep -q 'features-v45.css' raluvaaa/solo-experience-v45/index.html
+          ! grep -q 'MediaRecorder\|captureStream\|Preparing media\|Préparation du média' raluvaaa/solo-experience-v45/features-v45.js
+          for i in 1 2 3 4 5; do
+            test -s "raluvaaa/solo-experience-v45/share-assets/template-$i.mp4"
+            test -s "raluvaaa/solo-experience-v45/share-assets/poster-$i.png"
+          done
+      - name: Verify prebuilt MP4 audio
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg >/dev/null
+          for i in 1 2 3 4 5; do
+            ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "raluvaaa/solo-experience-v45/share-assets/template-$i.mp4" | grep -q aac
+          done
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run V45 QC
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v45-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          node raluvaaa/solo-experience-v45/qa-v45.cjs
