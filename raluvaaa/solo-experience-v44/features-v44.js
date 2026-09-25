@@ -535,7 +535,11 @@ async function prepareCurrentMedia(showBusy=false){
   if(!shareWish)return null;
   const key=mediaKey();
   if(preparedMedia&&preparedKey===key)return preparedMedia;
-  if(preparingPromise&&preparedKey===key)return preparingPromise;
+  if(preparingPromise&&preparedKey===key){
+    if(showBusy)setShareBusy(true,copy().preparing);
+    try{return await preparingPromise}
+    finally{if(showBusy)setShareBusy(false)}
+  }
   const epoch=++preparationEpoch;
   preparedKey=key;preparedMedia=null;
   if(showBusy)setShareBusy(true,copy().preparing);
