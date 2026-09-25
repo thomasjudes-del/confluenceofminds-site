@@ -892,6 +892,7 @@ window.__RALUVAAA_V46__={
   previewFrames:()=>sharePreviewFrames,
   mediaReady:()=>!!(preparedMedia?.file&&preparedKey===mediaKey()),
   mediaError:()=>!!mediaPrepareError,
+  mediaErrorMessage:()=>String(mediaPrepareError?.message||mediaPrepareError||''),
   setStyle:setShareStyle,
   setMode:setShareMode,
   saved:()=>loadSaved().map(x=>({...x})),
