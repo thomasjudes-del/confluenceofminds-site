@@ -56,9 +56,11 @@ async function testThreeButtons(page,id){
   assert.equal(await page.locator('.v45-share-modes [data-mode]').count(),2,'still and animation modes expected');
   assert.equal(await page.locator('#v45ShareOverlay').getByText(/Preparing|Préparation|Creating|Création/).count(),0,'V45 must never show a share-time rendering spinner');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_V45__.mode()),'animation','animated clip must be the default share mode');
-  await page.waitForSelector('.v45-share-preview video',{timeout:3000});
-  assert.equal(await page.locator('.v45-share-preview video').getAttribute('loop'),null,'share preview audio/video must not loop');
-  assert.equal(await page.locator('.v45-share-preview video').evaluate(v=>v.muted),true,'share preview must stay muted over world music');
+  await page.waitForSelector('.v45-share-preview canvas.v45-pretty-animation',{timeout:3000});
+  const frameA=await page.locator('.v45-share-preview canvas.v45-pretty-animation').evaluate(c=>c.toDataURL());
+  await page.waitForTimeout(180);
+  const frameB=await page.locator('.v45-share-preview canvas.v45-pretty-animation').evaluate(c=>c.toDataURL());
+  assert.notEqual(frameA,frameB,'animated preview must keep moving using the V44 organic renderer');
 
   const box=await page.locator('.v45-share-sheet').boundingBox();
   const footer=await page.locator('.v45-share-sheet footer').boundingBox();
@@ -69,7 +71,7 @@ async function testThreeButtons(page,id){
   assert(url.includes('#wish='+encodeURIComponent(id)),'share URL must deep-link to wish');
   assert(!url.includes('actor='),'share URL must not leak actor');
   assert(!url.includes('qa='),'share URL must not leak QA');
-  assert((await page.locator('.v45-card-url').innerText()).includes('#wish='),'visible share metadata must include the wish deep-link');
+  assert.equal(await page.locator('.v45-card-url').count(),0,'wish URL must not be visible in the artwork');
 
   await page.evaluate(()=>{
     window.__qaCopied='';
