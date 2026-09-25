@@ -1,0 +1,42 @@
+name: Check RALUVAAA Experience V46
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/solo-experience-v46/**'
+      - '.github/workflows/check-raluvaaa-experience-v46.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: raluvaaa-experience-v46-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/solo-experience-v46/features-v46.js
+          node --check raluvaaa/solo-experience-v46/qa-v46.cjs
+          grep -q 'data-feature-version="46"' raluvaaa/solo-experience-v46/index.html
+          grep -q 'features-v46.js' raluvaaa/solo-experience-v46/index.html
+          grep -q 'features-v46.css' raluvaaa/solo-experience-v46/index.html
+          grep -q 'function nativeShareNow()' raluvaaa/solo-experience-v46/features-v46.js
+          ! sed -n '/function nativeShareNow()/,/async function downloadCurrent()/p' raluvaaa/solo-experience-v46/features-v46.js | grep -q 'await prepareCurrentMedia'
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Run V46 QC
+        run: |
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/raluvaaa-v46-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          node raluvaaa/solo-experience-v46/qa-v46.cjs
