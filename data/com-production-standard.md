@@ -21,6 +21,7 @@ This file is the binding production standard for all future Confluence of Minds 
 - Do NOT use Background Music, Runway music generation, or any other pay-per-track / credit-consuming music service for routine Confluence social production unless Thomas explicitly approves that cost first.
 - When a specific free-library track is selected, integrate the exact original track file. Never recreate, imitate, approximate, synthesize or locally substitute it with a "similar" soundtrack.
 - If the exact selected track cannot be retrieved and muxed into the video, the asset is REWORK. Do not present an approximation as the chosen soundtrack.
+- The validated no-cost workflow is: select a suitable free track from a reputable library, verify the license, retrieve the exact source MP3/WAV, mux that exact file into the final MP4, and keep track title/author/source/license with the asset. This is the default method to reuse.
 - Soundtrack selection must fit the specific world and tone. Avoid generic corporate music, tourist-cliche "ethnic" music, or obvious stock cliches.
 - Check that music is clearly audible on phone playback and that the final mix has sensible loudness and no clipping.
 - Verify the final MP4 actually contains the selected source track, not an earlier placeholder or stale audio stream.
@@ -57,7 +58,13 @@ This file is the binding production standard for all future Confluence of Minds 
 - Use a typeface, size, spacing and placement that fit the world.
 - Avoid generic subtitles, ugly boxes, crude all-caps treatments and text pasted at the top of the frame without a visual reason.
 - Text must never be cropped, clipped, too close to UI zones or obstruct important imagery.
-- Check first, middle and final frames in a phone-sized 9:16 composition.
+- For 1080x1920 social masters, treat the lower ~300 px and the extreme side edges as protected UI/safety space. Keep editorial titles comfortably above that zone.
+- Build recurring titles as separate overlay layers with one consistent typographic template across all shots. Do not rely on ad-hoc text baked differently into each frame.
+- When a title is long, reduce font size or split it over two lines inside the safe title box. Never allow the renderer to clip the line at the frame edge.
+- The preferred title-safe construction is a centered lower-third panel around y≈1320-1620, with side margins around 90 px or more and a clear bottom margin around 300 px or more. Adapt only when the artwork requires it, never by pushing text outside safe bounds.
+- Never "fix" cropped titles by globally shrinking the already-rendered video. Rebuild the affected title layers shot by shot so visual quality and typography remain intentional.
+- After final export, inspect EVERY title-bearing shot at a representative timestamp, including transition-adjacent frames. Checking only the first and last frame is insufficient.
+- Any title clipped by even one character is an automatic QC FAIL.
 - Keep copy short and factual. Never invent plot, mechanics or meaning.
 - Do not overlay explanatory text on a final poster/title card when the poster already contains the intended title.
 
@@ -81,8 +88,8 @@ A candidate is approval-ready only if:
 - it is not a recent duplicate;
 - the rendered final asset itself has been inspected;
 - the video file is directly openable;
-- safe zones pass;
-- typography is intentional;
+- safe zones pass on every title-bearing shot;
+- typography is intentional and visually consistent across the whole piece;
 - pacing is readable;
 - music is a real editorial choice and audible;
 - the exact intended soundtrack source is confirmed in the final export;
