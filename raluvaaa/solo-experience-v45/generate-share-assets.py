@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from PIL import Image, ImageDraw, ImageFilter
-import math, random, os, subprocess, wave
+import math, random, os, subprocess, wave, shutil
 import numpy as np
 
 HERE=os.path.dirname(os.path.abspath(__file__))
@@ -180,6 +180,9 @@ def run():
     for idx in range(5):
         subprocess.run(['ffprobe','-v','error','-select_streams','a:0','-show_entries','stream=codec_name',
                         '-of','csv=p=0',os.path.join(OUT,f'template-{idx+1}.mp4')],check=True)
+    shutil.rmtree(work,ignore_errors=True)
+    try: os.remove(audio)
+    except FileNotFoundError: pass
     print('Generated five prebuilt V45 share videos + posters with embedded audio.')
 
 if __name__=='__main__':
