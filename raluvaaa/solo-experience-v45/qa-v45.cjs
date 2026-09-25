@@ -124,6 +124,16 @@ async function testBookmark(page,id){
   await page.waitForSelector('#v43MobileBookmarkBtn',{state:'visible',timeout:5000});
   assert(/Save this wish|Saved/.test((await page.locator('#v43MobileBookmarkBtn').innerText()).trim()));
 }
+async function testDesktopShortViewportPreview(page,id){
+  await page.setViewportSize({width:1328,height:558});
+  await openShare(page,id);
+  await page.waitForSelector('.v45-share-preview canvas.v45-pretty-animation',{timeout:3000});
+  const preview=await page.locator('.v45-share-preview').boundingBox();
+  const canvas=await page.locator('.v45-share-preview canvas.v45-pretty-animation').boundingBox();
+  assert(preview&&preview.height>220,'desktop short viewport preview must not collapse');
+  assert(canvas&&canvas.height>220,'organic canvas must remain visibly tall in a short desktop viewport');
+  await page.click('.v45-share-x');
+}
 (async()=>{
   const{browser,page}=await setup();
   try{
@@ -131,6 +141,7 @@ async function testBookmark(page,id){
     const id=await createWish(page,'V45 instant sharing test');
     await testBookmark(page,id);
     await testThreeButtons(page,id);
+    await testDesktopShortViewportPreview(page,id);
     console.log('RALUVAAA V45 instant prebuilt share QC passed');
   }finally{await browser.close()}
 })().catch(err=>{console.error(err);process.exit(1)});
