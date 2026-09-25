@@ -27,6 +27,10 @@ let shareStartedAt=performance.now();
 let shareWish=null;
 let shareStatus='';
 let recorderBusy=false;
+let preparedMedia=null;
+let preparedKey='';
+let preparingPromise=null;
+let preparationEpoch=0;
 
 function lang(){
   return document.querySelector('.lang button.active')?.dataset.lang==='en'?'en':'fr';
@@ -37,7 +41,7 @@ function copy(){
     entrusted:'Entrusted for now',remove:'Remove',unavailable:'Unavailable in this local session',
     shareTitle:'Share this wish',image:'Still image',animation:'Animated clip',style:'Style',preview:'Preview',
     shareNow:'Share',download:'Download',copyLink:'Copy link',close:'Close',creating:'Creating media…',
-    copied:'Link copied',fallback:'Your browser cannot export this animation. The still image is available.',
+    copied:'Link copied',copyFailed:'Copy failed. Select the link below.',readyShare:'Media ready. Tap Share again.',preparing:'Preparing media…',fallback:'Your browser cannot export this animation. The still image is available.',
     shareText:'Discover this wish on RALUVAAA',simulated:'SIMULATED WISH',local:'LOCAL POC WISH',human:'HUMAN WISH',
     audioFail:'Music could not be embedded in this browser. The clip will be silent.',saveFailed:'Could not save this wish.'
   }:{
@@ -45,7 +49,7 @@ function copy(){
     entrusted:'Confiés pour un temps',remove:'Retirer',unavailable:'Indisponible dans cette session locale',
     shareTitle:'Partager ce wish',image:'Image fixe',animation:'Clip animé',style:'Style',preview:'Aperçu',
     shareNow:'Partager',download:'Télécharger',copyLink:'Copier le lien',close:'Fermer',creating:'Création du média…',
-    copied:'Lien copié',fallback:"Ce navigateur ne peut pas exporter l'animation. L'image fixe reste disponible.",
+    copied:'Lien copié',copyFailed:'Copie impossible. Sélectionne le lien ci-dessous.',readyShare:'Média prêt. Appuie de nouveau sur Partager.',preparing:'Préparation du média…',fallback:"Ce navigateur ne peut pas exporter l'animation. L'image fixe reste disponible.",
     shareText:'Découvrir ce wish sur RALUVAAA',simulated:'WISH SIMULÉ',local:'WISH LOCAL POC',human:'WISH HUMAIN',
     audioFail:"La musique n'a pas pu être intégrée par ce navigateur. Le clip sera muet.",saveFailed:"Impossible de sauvegarder ce wish."
   };
@@ -460,32 +464,130 @@ async function recordAnimation(canvas,m,style,durationMs=DURATION){
   return result
 }
 async function shareFile(file,m){
-  const url=shareUrl(m),t=copy(),payload={title:'RALUVAAA · '+(m.text||'Wish'),text:t.shareText+'\n'+url,url,files:[file]};
+  const url=shareUrl(m),t=copy();
+  const withFile={title:'RALUVAAA · '+(m.text||'Wish'),text:t.shareText+'\n'+url,files:[file]};
+  const linkOnly={title:'RALUVAAA · '+(m.text||'Wish'),text:t.shareText,url};
   try{
-    if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share(payload);window.dispatchEvent(new CustomEvent('raluvaaa-share'));return'shared'}
-  }catch(e){if(e?.name==='AbortError')return'aborted'}
-  downloadFile(file);
-  await copyUrl(url);
+    if(navigator.share){
+      if(navigator.canShare?.({files:[file]})){
+        await navigator.share(withFile);
+        window.dispatchEvent(new CustomEvent('raluvaaa-share'));
+        return'shared-file';
+      }
+      await navigator.share(linkOnly);
+      window.dispatchEvent(new CustomEvent('raluvaaa-share'));
+      return'shared-link';
+    }
+  }catch(e){
+    if(e?.name==='AbortError')return'aborted';
+    console.warn('RALUVAAA native share failed',e);
+  }
+  const copied=await copyUrl(url);
+  if(!copied)downloadFile(file);
   window.dispatchEvent(new CustomEvent('raluvaaa-share'));
-  return'downloaded'
+  return copied?'copied-link':'downloaded';
 }
 function downloadFile(file){
-  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)
+  const url=URL.createObjectURL(file);
+  const a=document.createElement('a');
+  a.href=url;a.download=file.name;a.rel='noopener';
+  a.style.position='fixed';a.style.left='-9999px';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},4000);
+  return true
+}
+function legacyCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';ta.style.pointerEvents='none';
+  document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);
+  let ok=false;try{ok=document.execCommand('copy')}catch{}
+  ta.remove();return ok
 }
 async function copyUrl(url){
-  try{await navigator.clipboard.writeText(url);toast(copy().copied)}catch{prompt(copy().copyLink,url)}
+  let ok=false;
+  try{
+    if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);ok=true}
+  }catch{}
+  if(!ok)ok=legacyCopy(url);
+  if(ok){shareStatus=copy().copied;toast(copy().copied);syncShareUi();return true}
+  shareStatus=copy().copyFailed+' '+url;syncShareUi();
+  try{window.prompt(copy().copyLink,url)}catch{}
+  return false
 }
 function supportsAnimation(){return !!(HTMLCanvasElement.prototype.captureStream&&window.MediaRecorder&&bestMime())}
+function mediaKey(){
+  return shareWish?shareMode+'|'+shareStyle+'|'+shareWish.semanticId:''
+}
+function invalidatePrepared(){
+  preparationEpoch++;
+  preparedMedia=null;preparedKey='';preparingPromise=null
+}
+function setShareBusy(on,label){
+  const host=document.getElementById('v44ShareOverlay');
+  const busy=host?.querySelector('.v44-share-busy');
+  if(busy){
+    if(label)busy.textContent=label;
+    busy.classList.toggle('hidden',!on)
+  }
+}
+async function prepareCurrentMedia(showBusy=false){
+  if(!shareWish)return null;
+  const key=mediaKey();
+  if(preparedMedia&&preparedKey===key)return preparedMedia;
+  if(preparingPromise&&preparedKey===key)return preparingPromise;
+  const epoch=++preparationEpoch;
+  preparedKey=key;preparedMedia=null;
+  if(showBusy)setShareBusy(true,copy().preparing);
+  const m={...shareWish},style=shareStyle,mode=shareMode;
+  preparingPromise=(async()=>{
+    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+    if(mode==='image'){
+      renderFrame(canvas,m,style,DURATION*.64,'image');
+      const blob=await canvasBlob(canvas,'image/png');
+      return{file:new File([blob],fileName(m,'png'),{type:'image/png'}),audioEmbedded:false,mode,key}
+    }
+    if(!supportsAnimation())throw new Error('animation-unsupported');
+    const rec=await recordAnimation(canvas,m,style,DURATION);
+    const ext=rec.mime.includes('mp4')?'mp4':'webm';
+    return{file:new File([rec.blob],fileName(m,ext),{type:rec.mime}),audioEmbedded:rec.audioEmbedded,mode,key}
+  })();
+  try{
+    const result=await preparingPromise;
+    if(epoch===preparationEpoch&&key===mediaKey()){preparedMedia=result;preparedKey=key}
+    return result
+  }finally{
+    if(epoch===preparationEpoch)preparingPromise=null;
+    if(showBusy)setShareBusy(false)
+  }
+}
+function prewarmCurrentMedia(){
+  const key=mediaKey();
+  if(!key)return;
+  shareStatus=shareMode==='animation'?copy().preparing:'';
+  syncShareUi();
+  prepareCurrentMedia(false).then(result=>{
+    if(result&&key===mediaKey()){
+      if(shareMode==='animation'&&!result.audioEmbedded)shareStatus=copy().audioFail;
+      else if(shareStatus===copy().preparing)shareStatus='';
+      syncShareUi()
+    }
+  }).catch(e=>{
+    if(key!==mediaKey())return;
+    shareStatus=e?.message==='animation-unsupported'?copy().fallback:String(e?.message||e);
+    syncShareUi()
+  })
+}
 function modalHtml(){
   const t=copy();
   return '<div class="v44-share-scrim"></div><section class="v44-share-sheet" role="dialog" aria-modal="true" aria-label="'+escapeHtml(t.shareTitle)+'">'+
-    '<header><div><span class="v44-eyebrow">RALUVAAA SHARE</span><h3>'+escapeHtml(t.shareTitle)+'</h3></div><button class="v44-share-x" aria-label="'+escapeHtml(t.close)+'">×</button></header>'+
-    '<div class="v44-share-modes"><button data-mode="image">'+escapeHtml(t.image)+'</button><button data-mode="animation">'+escapeHtml(t.animation)+'</button></div>'+
-    '<div class="v44-share-preview"><canvas width="'+W+'" height="'+H+'"></canvas><button class="v44-style-nav prev" data-style-prev aria-label="Previous style">‹</button><button class="v44-style-nav next" data-style-next aria-label="Next style">›</button>'+
-      '<div class="v44-style-dots">'+templateNames.map((n,i)=>'<button data-style="'+i+'" aria-label="'+n+'"></button>').join('')+'</div>'+
+    '<header><div><span class="v44-eyebrow">RALUVAAA SHARE</span><h3>'+escapeHtml(t.shareTitle)+'</h3></div><button type="button" class="v44-share-x" aria-label="'+escapeHtml(t.close)+'">×</button></header>'+
+    '<div class="v44-share-modes"><button type="button" data-mode="image">'+escapeHtml(t.image)+'</button><button type="button" data-mode="animation">'+escapeHtml(t.animation)+'</button></div>'+
+    '<div class="v44-share-preview"><canvas width="'+W+'" height="'+H+'"></canvas><button type="button" class="v44-style-nav prev" data-style-prev aria-label="Previous style">‹</button><button type="button" class="v44-style-nav next" data-style-next aria-label="Next style">›</button>'+
+      '<div class="v44-style-dots">'+templateNames.map((n,i)=>'<button type="button" data-style="'+i+'" aria-label="'+n+'"></button>').join('')+'</div>'+
       '<div class="v44-swipe-hint">‹ '+(lang()==='en'?'swipe':'glisser')+' ›</div><div class="v44-share-busy hidden">'+escapeHtml(t.creating)+'</div></div>'+
     '<div class="v44-share-meta"><span class="v44-template-name"></span><span class="v44-share-credit">'+escapeHtml(MUSIC_CREDIT)+'</span><span class="v44-share-status"></span></div>'+
-    '<footer><button data-share-copy>'+escapeHtml(t.copyLink)+'</button><button data-share-download>'+escapeHtml(t.download)+'</button><button class="primary" data-share-now>'+escapeHtml(t.shareNow)+'</button></footer></section>';
+    '<footer><button type="button" data-share-copy>'+escapeHtml(t.copyLink)+'</button><button type="button" data-share-download>'+escapeHtml(t.download)+'</button><button type="button" class="primary" data-share-now>'+escapeHtml(t.shareNow)+'</button></footer></section>';
 }
 let previewAudio=null;
 function stopPreviewAudio(){
@@ -502,7 +604,7 @@ function startPreviewAudio(){
 }
 function setShareStyle(next){
   shareStyle=(Number(next)+templateNames.length)%templateNames.length;
-  shareStartedAt=performance.now();syncShareUi()
+  shareStartedAt=performance.now();invalidatePrepared();syncShareUi();prewarmCurrentMedia()
 }
 function bindShareSwipe(host){
   const area=host.querySelector('.v44-share-preview');let sx=null,sy=null;
@@ -523,7 +625,7 @@ function openShare(m){
       if(!supportsAnimation())shareStatus=copy().fallback;else shareStatus='';
       startPreviewAudio()
     }else{shareStatus='';stopPreviewAudio()}
-    shareStartedAt=performance.now();syncShareUi()
+    shareStartedAt=performance.now();invalidatePrepared();syncShareUi();prewarmCurrentMedia()
   });
   host.querySelectorAll('[data-style]').forEach(b=>b.onclick=()=>setShareStyle(Number(b.dataset.style)||0));
   host.querySelector('[data-style-prev]').onclick=()=>setShareStyle(shareStyle-1);
@@ -531,10 +633,10 @@ function openShare(m){
   host.querySelector('[data-share-copy]').onclick=()=>copyUrl(shareUrl(shareWish));
   host.querySelector('[data-share-download]').onclick=()=>createShareMedia(false);
   host.querySelector('[data-share-now]').onclick=()=>createShareMedia(true);
-  bindShareSwipe(host);syncShareUi();animatePreview()
+  bindShareSwipe(host);invalidatePrepared();syncShareUi();animatePreview();prewarmCurrentMedia()
 }
 function closeShare(){
-  const host=document.getElementById('v44ShareOverlay');host?.classList.remove('open');shareWish=null;stopPreviewAudio();cancelAnimationFrame(shareAnimationFrame)
+  const host=document.getElementById('v44ShareOverlay');host?.classList.remove('open');shareWish=null;invalidatePrepared();stopPreviewAudio();cancelAnimationFrame(shareAnimationFrame)
 }
 function syncShareUi(){
   const host=document.getElementById('v44ShareOverlay');if(!host||!shareWish)return;
@@ -558,22 +660,36 @@ function animatePreview(){
 }
 async function createShareMedia(doShare){
   if(recorderBusy||!shareWish)return;
-  const host=document.getElementById('v44ShareOverlay'),canvas=host.querySelector('canvas'),busy=host.querySelector('.v43-share-busy');
-  recorderBusy=true;busy.classList.remove('hidden');shareStatus='';syncShareUi();
+  const key=mediaKey();
+  recorderBusy=true;
   try{
-    if(shareMode==='image'){
-      renderFrame(canvas,shareWish,shareStyle,DURATION*.58,'image');
-      const blob=await canvasBlob(canvas,'image/png'),file=new File([blob],fileName(shareWish,'png'),{type:'image/png'});
-      if(doShare)await shareFile(file,shareWish);else{downloadFile(file);window.dispatchEvent(new CustomEvent('raluvaaa-share'))}
+    let media=(preparedMedia&&preparedKey===key)?preparedMedia:null;
+    if(!media){
+      media=await prepareCurrentMedia(true);
+      if(!media)return;
+      if(doShare){
+        shareStatus=copy().readyShare;
+        syncShareUi();
+        return
+      }
+    }
+    if(media.mode==='animation'&&!media.audioEmbedded)shareStatus=copy().audioFail;
+    if(doShare){
+      await shareFile(media.file,shareWish)
     }else{
-      if(!supportsAnimation())throw new Error('animation-unsupported');
-      const rec=await recordAnimation(canvas,shareWish,shareStyle,DURATION),ext=rec.mime.includes('mp4')?'mp4':'webm',file=new File([rec.blob],fileName(shareWish,ext),{type:rec.mime});
-      if(!rec.audioEmbedded)shareStatus=copy().audioFail;
-      if(doShare)await shareFile(file,shareWish);else{downloadFile(file);window.dispatchEvent(new CustomEvent('raluvaaa-share'))}
+      downloadFile(media.file);
+      shareStatus=copy().download+' ✓';
+      syncShareUi();
+      window.dispatchEvent(new CustomEvent('raluvaaa-share'))
     }
   }catch(e){
-    console.error(e);shareStatus=e?.message==='animation-unsupported'?copy().fallback:String(e?.message||e)
-  }finally{busy.classList.add('hidden');recorderBusy=false;syncShareUi()}
+    console.error(e);
+    shareStatus=e?.message==='animation-unsupported'?copy().fallback:String(e?.message||e);
+    syncShareUi()
+  }finally{
+    setShareBusy(false);
+    recorderBusy=false
+  }
 }
 function interceptShare(e){
   const button=e.target.closest?.('[data-act="share"],.v33-action-unit[data-v39-icon="share"] .v33-action-circle');
@@ -600,6 +716,8 @@ window.__RALUVAAA_V44__={
   duration:DURATION,
   style:()=>shareStyle,
   setStyle:setShareStyle,
+  prepareCurrentMedia,
+  copyUrl,
   palettes:palettes.map(x=>({...x})),
   supportsAnimation,
   saved:()=>loadSaved().map(x=>({...x})),
