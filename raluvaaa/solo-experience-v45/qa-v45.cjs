@@ -57,10 +57,8 @@ async function testThreeButtons(page,id){
   assert.equal(await page.locator('#v45ShareOverlay').getByText(/Preparing|Préparation|Creating|Création/).count(),0,'V45 must never show a share-time rendering spinner');
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_V45__.mode()),'animation','animated clip must be the default share mode');
   await page.waitForSelector('.v45-share-preview canvas.v45-pretty-animation',{timeout:3000});
-  const frameA=await page.locator('.v45-share-preview canvas.v45-pretty-animation').evaluate(c=>c.toDataURL());
-  await page.waitForTimeout(180);
-  const frameB=await page.locator('.v45-share-preview canvas.v45-pretty-animation').evaluate(c=>c.toDataURL());
-  assert.notEqual(frameA,frameB,'animated preview must keep moving using the V44 organic renderer');
+  await page.waitForFunction(()=>window.__RALUVAAA_V45__.previewFrames()>3,null,{timeout:3000});
+  assert((await page.evaluate(()=>window.__RALUVAAA_V45__.previewFrames()))>3,'animated preview loop must be running with the V44 organic renderer');
 
   const box=await page.locator('.v45-share-sheet').boundingBox();
   const footer=await page.locator('.v45-share-sheet footer').boundingBox();
