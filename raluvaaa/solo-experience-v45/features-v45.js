@@ -418,6 +418,7 @@ let shareStatus='';
 let preloadStarted=false;
 let shareAnimationFrame=0;
 let shareStartedAt=performance.now();
+let sharePreviewFrames=0;
 
 function hash(s){let h=2166136261;for(const ch of String(s||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function assetUrl(kind,style){return V45_ASSET_BASE+(kind==='video'?'template-':'poster-')+(style+1)+(kind==='video'?'.mp4':'.png')}
@@ -621,12 +622,12 @@ function startPrettyAnimation(){
   const host=document.getElementById('v45ShareOverlay');
   const canvas=host?.querySelector('canvas.v45-pretty-animation');
   if(!canvas||shareMode!=='animation'||!shareWish)return;
-  shareStartedAt=performance.now();
+  shareStartedAt=performance.now();sharePreviewFrames=0;
   const step=now=>{
     const live=document.getElementById('v45ShareOverlay');
     const c=live?.querySelector('canvas.v45-pretty-animation');
     if(!live?.classList.contains('open')||!c||shareMode!=='animation'||!shareWish)return;
-    renderPrettyFrame(c,shareWish,shareStyle,now-shareStartedAt,'animation');
+    renderPrettyFrame(c,shareWish,shareStyle,now-shareStartedAt,'animation');sharePreviewFrames++;
     shareAnimationFrame=requestAnimationFrame(step)
   };
   shareAnimationFrame=requestAnimationFrame(step)
@@ -697,6 +698,7 @@ window.__RALUVAAA_V45__={
   assetUrl,
   style:()=>shareStyle,
   mode:()=>shareMode,
+  previewFrames:()=>sharePreviewFrames,
   setStyle:setShareStyle,
   setMode:setShareMode,
   saved:()=>loadSaved().map(x=>({...x})),
