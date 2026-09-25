@@ -884,7 +884,7 @@ window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();e
 decorate();setTimeout(decorate,120);setTimeout(decorate,400);
 
 window.__RALUVAAA_V46__={
-  version:45,
+  version:46,
   templates:templateNames.slice(),
   assetUrl,
   style:()=>shareStyle,
