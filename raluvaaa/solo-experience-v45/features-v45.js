@@ -196,7 +196,6 @@ function decorateEntrustedFresh(){
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
 const V45_ASSET_BASE='./share-assets/';
-const templateNames=['Pulse','Branch','Bridge','Bloom','Awaken'];
 const videoBlobs=new Map();
 const posterImages=new Map();
 const stillFiles=new Map();
