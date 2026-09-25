@@ -70,7 +70,7 @@ async function testSavedFollowsEvolution(page,root){
   assert.equal(label,'V44 evolved current state','saved playlist must display the current evolved state');
 
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__RALUVAAA_V44__?.version===43&&window.__RV26_SOLO__?.state,null,{timeout:15000});
+  await page.waitForFunction(()=>window.__RALUVAAA_V44__?.version===44&&window.__RV26_SOLO__?.state,null,{timeout:15000});
   saved=await page.evaluate(()=>window.__RALUVAAA_V44__.saved());
   assert.equal(saved.length,1,'saved wishes must persist across reloads');
 
