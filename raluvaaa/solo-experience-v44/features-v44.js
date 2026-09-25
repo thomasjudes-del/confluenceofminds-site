@@ -429,7 +429,7 @@ function bestMime(){
   const types=['video/mp4;codecs=h264,aac','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
   return types.find(x=>MediaRecorder.isTypeSupported?.(x))||'video/webm';
 }
-async async function audioTrack(durationMs){
+async function audioTrack(durationMs){
   const AC=window.AudioContext||window.webkitAudioContext;
   if(!AC||!MUSIC_URL)return null;
   const ac=new AC();
