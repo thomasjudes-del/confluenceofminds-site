@@ -9,7 +9,7 @@ async function setup(){
   const context=await browser.newContext({viewport:{width:1440,height:1000}});
   const page=await context.newPage();
 
-  await page.goto(BASE+'/__raluvaaa_v43_seed__',{waitUntil:'domcontentloaded'}).catch(()=>{});
+  await page.goto(BASE+'/__raluvaaa_v44_seed__',{waitUntil:'domcontentloaded'}).catch(()=>{});
   await page.evaluate(()=>{
     localStorage.removeItem('raluvaaaSoloExperienceV44R1FreshStart');
     localStorage.removeItem('raluvaaaSavedWishesV1:A');
@@ -19,7 +19,7 @@ async function setup(){
   await page.route('https://ipapi.co/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({city:'Nantes',country_name:'France'})}));
 
   await page.goto(BASE+PATH+'?qa=1&actor=A',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__RALUVAAA_V44__?.version===43&&window.__RALUVAAA_V42__?.version===42&&window.__RV26_SOLO__?.state,null,{timeout:15000});
+  await page.waitForFunction(()=>window.__RALUVAAA_V44__?.version===44&&window.__RALUVAAA_V42__?.version===42&&window.__RV26_SOLO__?.state,null,{timeout:15000});
   return{browser,context,page};
 }
 async function createWish(page,text){
