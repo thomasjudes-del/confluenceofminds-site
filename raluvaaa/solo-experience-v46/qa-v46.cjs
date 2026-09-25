@@ -87,7 +87,9 @@ async function mobileShareContract(){
 
     await page.locator('[data-mode="image"]').click();
     assert.equal(await share.isDisabled(),true,'switching mode invalidates prior media');
-    await page.waitForFunction(()=>window.__RALUVAAA_V46__.mediaReady(),null,{timeout:4000});
+    await page.waitForFunction(()=>window.__RALUVAAA_V46__.mediaReady()||window.__RALUVAAA_V46__.mediaError(),null,{timeout:6000});
+    assert.equal(await page.evaluate(()=>window.__RALUVAAA_V46__.mediaErrorMessage()),'','still-image preparation failed');
+    assert.equal(await page.evaluate(()=>window.__RALUVAAA_V46__.mediaReady()),true,'still image must be prepared before sharing');
     await share.click();
     await page.waitForFunction(()=>window.__qaShares.length===2,null,{timeout:2000});
     const still=await page.evaluate(()=>window.__qaShares[1]);
