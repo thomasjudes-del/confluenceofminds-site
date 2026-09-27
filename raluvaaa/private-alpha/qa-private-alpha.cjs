@@ -11,10 +11,26 @@ async function pageFor(browser,mobile=false){
     isMobile:mobile,hasTouch:mobile
   });
   const page=await context.newPage();
+  page.on('console',msg=>console.log('[browser console]',msg.type(),msg.text()));
+  page.on('pageerror',err=>console.log('[browser pageerror]',err?.stack||err?.message||String(err)));
   await page.route('https://ipwho.is/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,city:'Nantes',country:'France'})}));
   await page.route('https://ipapi.co/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({city:'Nantes',country_name:'France'})}));
   await page.goto(URL,{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true&&window.__RALUVAAA_V46__?.version===46&&window.__RALUVAAA_PRIVATE_AUTH__,null,{timeout:30000});
+  try{
+    await page.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,null,{timeout:30000});
+    await page.waitForFunction(()=>!!window.__RALUVAAA_PRIVATE_AUTH__,null,{timeout:5000});
+    await page.waitForFunction(()=>window.__RALUVAAA_V46__?.version===46,null,{timeout:5000});
+  }catch(err){
+    const diag=await page.evaluate(()=>({
+      sharedReady:window.__RALUVAAA_SHARED_READY__,
+      privateAuth:!!window.__RALUVAAA_PRIVATE_AUTH__,
+      v46:window.__RALUVAAA_V46__?.version||null,
+      status:document.getElementById('sharedStatus')?.textContent||'',
+      account:!!document.getElementById('privateAccountBtn')
+    })).catch(()=>({evaluationFailed:true}));
+    console.error('[private-alpha readiness]',diag);
+    throw err
+  }
   return{context,page}
 }
 async function claimViaUi(page,email){
