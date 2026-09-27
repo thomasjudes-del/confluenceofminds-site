@@ -82,6 +82,19 @@ This file is the binding production standard for all future Confluence of Minds 
 - Create additional visuals when needed to enrich pacing and prevent a slideshow feel.
 - Favor a small number of strong, authored shots over many weak ones.
 
+## 8A. Motion, transitions and perceived production value
+- Default social video direction must feel authored in time, not like a sequence of static cards.
+- When the material supports it, build a coherent motion system using restrained camera movement, parallax, reveals, masks, animated data/UI, light sweeps, focus changes, or other world-specific motion.
+- Use transitions as narrative punctuation. Their design should follow the story arc and the world, not generic preset transitions added after the edit.
+- Avoid childish or cheap-looking vector illustration, schematic clip-art, oversimplified icons, flat boxes or generic infographic composition unless that visual language is explicitly canonical to the project.
+- Prefer high-authority source imagery, project key art, photographic or cinematic material, and newly authored visuals with sufficient detail and finish. Simple diagrams may support a scene but should not dominate the creative unless conceptually justified.
+- Each sequence should contain enough visual evolution to avoid a slideshow feel, while avoiding gratuitous motion. Movement should clarify attention, escalation, tension or transformation.
+- Favor one consistent transition language and one consistent motion grammar across a piece rather than a collection of unrelated effects.
+- Use effects to dramatize meaningful events. Examples include system takeover, threshold crossing, memory failure, impact, contamination or transformation. Do not add glitch, zoom, shake, bloom or particles merely because they are available.
+- Static shots remain acceptable when they are visually authoritative and intentionally held. Static-by-default is not acceptable for approval-ready social video when motion would materially improve it.
+- Inspect the final export for image quality as well as composition: source resolution, interpolation, aliasing, excessive sharpening, visible compression, banding, posterization and low-detail generated imagery are QC concerns.
+- A technically correct video that still feels visually cheap, childlike, under-designed or noticeably more static than the concept warrants is REWORK.
+
 ## 9. QC before approval
 A candidate is approval-ready only if:
 - source fidelity is verified;
