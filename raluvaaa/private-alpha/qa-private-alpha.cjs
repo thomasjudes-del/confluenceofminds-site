@@ -147,7 +147,9 @@ async function acceptFirst(page,type){
     // V46 product surfaces remain present.
     assert.equal(await A.page.locator('#v46AboutBtn').count(),1,'About guide from V46 must remain');
     await openWish(A.page,wishA);
-    assert(await A.page.locator('#drawerBody .v33-action-unit[data-v39-icon="share"]').count(),'V46 Share action must remain');
+    const more=A.page.locator('#drawerBody details.more summary');
+    if(await more.count())await more.click();
+    assert(await A.page.locator('#drawerBody [data-act="share"]').count(),'V46 Share action must remain');
 
     console.log('RALUVAAA Private Alpha real A/B identity gate passed: mobile WebKit + desktop Chromium');
   }finally{
