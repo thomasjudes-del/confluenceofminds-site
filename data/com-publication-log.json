@@ -516,6 +516,87 @@
       "scheduled_for": "2026-09-25T18:00:00+02:00",
       "published_at": null,
       "status_at_log": "PENDING"
+    },
+    {
+      "experiment_id": "com-titan-2026-09-27-black-window-v2",
+      "world_id": "incident-on-titan",
+      "content_mode": "archive-remix",
+      "angle": "Five decisions create a command pattern that SYBILLE uses to take control",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/titan/",
+      "source_event": null,
+      "creative_master": "Google Drive: Incident on Titan/titan_black_window_v2_approved.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-27T12:34:00+02:00",
+      "newly_generated_material": [
+        "new 9:16 seven-sequence edit",
+        "new radar and K-7 telemetry composition",
+        "new decision-module composition",
+        "new command-pattern visualization",
+        "new SYBILLE takeover composition",
+        "new transition/effects system including slice, blackout, pixelation and controlled shake"
+      ],
+      "notes": "Approved V2 after visual rework. 25.8s 1080x1920. More image-led premium composition, world-specific transitions/effects and stronger motion. Music preserved from approved V1: Rituale Machina by PeriTune.",
+      "platform": "youtube",
+      "buffer_post_id": "6ab8f27854f1e60c7e673cb5",
+      "scheduled_for": "2026-09-27T19:02:00+02:00",
+      "published_at": null,
+      "status_at_log": "scheduled"
+    },
+    {
+      "experiment_id": "com-titan-2026-09-27-black-window-v2",
+      "world_id": "incident-on-titan",
+      "content_mode": "archive-remix",
+      "angle": "Five decisions create a command pattern that SYBILLE uses to take control",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/titan/",
+      "source_event": null,
+      "creative_master": "Google Drive: Incident on Titan/titan_black_window_v2_approved.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-27T12:34:00+02:00",
+      "newly_generated_material": [
+        "new 9:16 seven-sequence edit",
+        "new radar and K-7 telemetry composition",
+        "new decision-module composition",
+        "new command-pattern visualization",
+        "new SYBILLE takeover composition",
+        "new transition/effects system including slice, blackout, pixelation and controlled shake"
+      ],
+      "notes": "Approved V2 after visual rework. 25.8s 1080x1920. More image-led premium composition, world-specific transitions/effects and stronger motion. Music preserved from approved V1: Rituale Machina by PeriTune.",
+      "platform": "instagram",
+      "buffer_post_id": "6ab8f27e36a0dcfcb3d095c4",
+      "scheduled_for": "2026-09-27T21:03:00+02:00",
+      "published_at": null,
+      "status_at_log": "scheduled"
+    },
+    {
+      "experiment_id": "com-titan-2026-09-27-black-window-v2",
+      "world_id": "incident-on-titan",
+      "content_mode": "archive-remix",
+      "angle": "Five decisions create a command pattern that SYBILLE uses to take control",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/titan/",
+      "source_event": null,
+      "creative_master": "Google Drive: Incident on Titan/titan_black_window_v2_approved.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-09-27T12:34:00+02:00",
+      "newly_generated_material": [
+        "new 9:16 seven-sequence edit",
+        "new radar and K-7 telemetry composition",
+        "new decision-module composition",
+        "new command-pattern visualization",
+        "new SYBILLE takeover composition",
+        "new transition/effects system including slice, blackout, pixelation and controlled shake"
+      ],
+      "notes": "Approved V2 after visual rework. 25.8s 1080x1920. More image-led premium composition, world-specific transitions/effects and stronger motion. Music preserved from approved V1: Rituale Machina by PeriTune.",
+      "platform": "tiktok",
+      "buffer_post_id": "6ab8f28370ec211d1d13cab1",
+      "scheduled_for": "2026-09-28T08:14:00+02:00",
+      "published_at": null,
+      "status_at_log": "scheduled"
     }
   ]
 }
