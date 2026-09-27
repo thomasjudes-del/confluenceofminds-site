@@ -239,6 +239,7 @@ async function assertNoOverflow(page,label){
   assert(resolvedInstant&&resolvedInstant!==localInstant,'share resolver must wait for the server id');
   assert((await A.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.world())).wishes.some(w=>w.id===resolvedInstant),'resolved share id must exist in shared world');
   await A.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(x=>x.semanticId===id),wishB,{timeout:9000});
+  await refresh(B);
   await openWish(B,wishB);
   const connectDebug=await B.evaluate(id=>({meta:window.__RV26_SHARED__.semantic().find(x=>x.semanticId===id),drawer:document.getElementById('drawerBody')?.innerText||'',html:document.getElementById('drawerBody')?.innerHTML||''}),wishB);
   const moreSummary=B.locator('details.more summary');
