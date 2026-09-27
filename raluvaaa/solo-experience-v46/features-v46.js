@@ -304,10 +304,8 @@ function closeSavedGraftPicker(){
   document.getElementById('v46SavedGraftOverlay')?.classList.remove('open')
 }
 function selectSavedGraftTarget(id){
-  if(window.__RV26_SHARED__?.select)return window.__RV26_SHARED__.select(id);
-  const m=semantic().find(x=>x.semanticId===id);
-  if(!m)return;
-  window.postMessage({type:'rv25-select',meta:m},location.origin)
+  if(window.__RALUVAAA_UI__?.select)return window.__RALUVAAA_UI__.select(id);
+  if(window.__RV26_SHARED__?.select)return window.__RV26_SHARED__.select(id)
 }
 function openSavedGraftPicker(){
   const source=semantic().find(x=>x.semanticId===graftSourceId);
