@@ -193,6 +193,171 @@ function decorateEntrustedFresh(){
   decorateEntrusted();
   ensureBookmark();
 }
+
+function aboutCopy(){
+  return lang()==='en'?{
+    button:'About RALUVAAA',
+    eyebrow:'HOW IT WORKS',
+    title:'A world of wishes, not a feed',
+    intro:'RALUVAAA is a living world made of things people hope to do, become, change, learn, create or accomplish.',
+    cards:[
+      ['Every light is a wish','A wish can evolve, split into smaller steps, bloom when it is fulfilled, or be let go. Its author keeps the final say.'],
+      ['Serendipity is intentional','There is no classic search, no For You feed, no personalised recommendation engine and no paid visibility. Drift, zoom and encounter wishes you would never have asked to see.'],
+      ['This world is not a map','A wish is not positioned by geography, theme, date or profile. Its visual place has no hidden meaning. You may see where it came from, such as a city and country, but not a public identity or contact details.'],
+      ['Three wishes are entrusted to you','They are temporary and selected without personalisation. They are not here because an algorithm thinks they will keep you scrolling. You can simply notice them, encourage them or help if something genuinely connects.'],
+      ['Nothing grows alone','Other people can encourage, offer help or suggest a branch, pivot or graft. They cannot impose a transformation or declare someone else\'s wish fulfilled.']
+    ],
+    foot:'Take your time. There is nothing to catch up on.',
+    close:'Lose yourself in the world'
+  }:{
+    button:'Comprendre RALUVAAA',
+    eyebrow:'COMMENT ÇA MARCHE',
+    title:'Un monde de wishes, pas un feed',
+    intro:'RALUVAAA est un monde vivant fait de choses que des humains aimeraient faire, devenir, changer, apprendre, créer ou accomplir.',
+    cards:[
+      ['Chaque lumière est un wish','Un wish peut évoluer, se décomposer en petites étapes, fleurir quand il est accompli ou être laissé. Son auteur garde toujours le dernier mot.'],
+      ['La sérendipité est volontaire','Pas de moteur de recherche classique, pas de feed « Pour toi », pas de recommandations personnalisées ni de visibilité achetée. Déplace-toi, zoome, dérive et rencontre des wishes que tu n\'aurais jamais pensé à chercher.'],
+      ['Ce monde n\'est pas une carte','Un wish n\'est pas placé selon sa géographie, son thème, sa date ou son profil. Sa position visuelle n\'a pas de sens caché. On peut savoir d\'où il vient, par exemple une ville et un pays, mais pas afficher une identité publique ou des coordonnées.'],
+      ['Trois wishes te sont confiés','Ils sont temporaires et choisis sans personnalisation. Ils ne sont pas là parce qu\'un algorithme pense qu\'ils te feront rester. Tu peux simplement les regarder, les encourager ou aider si quelque chose résonne vraiment.'],
+      ['Nothing grows alone','Les autres peuvent encourager, proposer une aide, une branche, un pivot ou une greffe. Ils ne peuvent ni imposer une transformation, ni déclarer le wish de quelqu\'un d\'autre accompli.']
+    ],
+    foot:'Prends ton temps. Il n\'y a rien à rattraper.',
+    close:'Se perdre dans le monde'
+  }
+}
+function aboutHtml(){
+  const t=aboutCopy();
+  return '<div class="v46-about-scrim"></div><section class="v46-about-panel" role="dialog" aria-modal="true" aria-label="'+escapeHtml(t.button)+'">'+
+    '<button class="v46-about-x" type="button" aria-label="Close">×</button>'+
+    '<div class="v46-about-eyebrow">'+escapeHtml(t.eyebrow)+'</div>'+
+    '<h2>'+escapeHtml(t.title)+'</h2>'+
+    '<p class="v46-about-intro">'+escapeHtml(t.intro)+'</p>'+
+    '<div class="v46-about-grid">'+t.cards.map((c,i)=>'<article><span>0'+(i+1)+'</span><h3>'+escapeHtml(c[0])+'</h3><p>'+escapeHtml(c[1])+'</p></article>').join('')+'</div>'+
+    '<div class="v46-about-foot"><p>'+escapeHtml(t.foot)+'</p><button type="button" class="v46-about-close">'+escapeHtml(t.close)+'</button></div>'+
+  '</section>'
+}
+function closeAbout(){
+  const host=document.getElementById('v46AboutOverlay');
+  host?.classList.remove('open')
+}
+function openAbout(){
+  let host=document.getElementById('v46AboutOverlay');
+  if(!host){host=document.createElement('div');host.id='v46AboutOverlay';document.body.appendChild(host)}
+  host.innerHTML=aboutHtml();host.classList.add('open');
+  host.querySelector('.v46-about-scrim').onclick=closeAbout;
+  host.querySelector('.v46-about-x').onclick=closeAbout;
+  host.querySelector('.v46-about-close').onclick=closeAbout
+}
+function refreshAbout(){
+  const host=document.getElementById('v46AboutOverlay');
+  if(!host?.classList.contains('open'))return;
+  openAbout()
+}
+function ensureAboutButton(){
+  const rail=document.getElementById('rail'),create=document.getElementById('createBtn');
+  if(!rail||!create)return;
+  let btn=document.getElementById('v46AboutBtn');
+  if(!btn){
+    btn=document.createElement('button');
+    btn.id='v46AboutBtn';btn.type='button';btn.className='rail-btn v46-about-btn';btn.textContent='?';
+    rail.insertBefore(btn,create);
+    btn.onclick=e=>{e.stopPropagation();openAbout()}
+  }
+  const t=aboutCopy();btn.title=t.button;btn.setAttribute('aria-label',t.button)
+}
+
+let graftSourceId=null;
+let graftUiPatched=false;
+function graftCopy(){
+  return lang()==='en'?{
+    mode:'Choose the other wish in the world, or open your saved wishes.',
+    saved:'Saved wishes',
+    title:'Graft to a saved wish',
+    hint:'Saved wishes stay here even when their story changes. Only wishes that can currently receive a graft are selectable.',
+    empty:'You have no saved wishes yet.',
+    same:'Same wish',
+    evolved:'Older state',
+    choose:'Choose this wish',
+    back:'Back to the world'
+  }:{
+    mode:'Choisis l’autre wish dans le monde, ou ouvre tes wishes sauvegardés.',
+    saved:'Wishes sauvegardés',
+    title:'Greffer à un wish sauvegardé',
+    hint:'Tes wishes sauvegardés restent ici même si leur histoire évolue. Seuls les wishes actuellement greffables peuvent être choisis.',
+    empty:'Tu n’as encore aucun wish sauvegardé.',
+    same:'Même wish',
+    evolved:'Ancien état',
+    choose:'Choisir ce wish',
+    back:'Retour au monde'
+  }
+}
+function graftEligibility(m,source){
+  if(!m)return{ok:false,label:'Indisponible'};
+  if(!source)return{ok:false,label:'Indisponible'};
+  if(m.semanticId===source.semanticId||m.lineageId===source.lineageId)return{ok:false,label:graftCopy().same};
+  if(m.state!=='alive')return{ok:false,label:stateLabel(m)};
+  if(workflow()?.isSuperseded?.(m.semanticId))return{ok:false,label:graftCopy().evolved};
+  if(window.__RALUVAAA_VITALITY_V42__?.isDormant?.(m.semanticId))return{ok:false,label:stateLabel(m)};
+  return{ok:true,label:stateLabel(m)}
+}
+function closeSavedGraftPicker(){
+  document.getElementById('v46SavedGraftOverlay')?.classList.remove('open')
+}
+function openSavedGraftPicker(){
+  const source=semantic().find(x=>x.semanticId===graftSourceId);
+  if(!source)return;
+  const t=graftCopy(),rows=loadSaved().map(row=>({row,m:resolveSaved(row)}));
+  let host=document.getElementById('v46SavedGraftOverlay');
+  if(!host){host=document.createElement('div');host.id='v46SavedGraftOverlay';document.body.appendChild(host)}
+  const items=rows.length?rows.map(({m,row})=>{
+    const e=graftEligibility(m,source),text=m?.text||row.text||'Wish',loc=m?.loc||row.loc||'',id=m?.semanticId||'';
+    return '<button type="button" class="v46-graft-saved-row'+(e.ok?'':' disabled')+'" data-v46-graft-target="'+escapeHtml(id)+'" '+(e.ok?'':'disabled')+'>'+
+      '<span class="v46-graft-saved-main"><b>'+escapeHtml(text)+'</b><small>'+escapeHtml([loc,e.label].filter(Boolean).join(' · '))+'</small></span>'+
+      '<span class="v46-graft-saved-arrow">'+(e.ok?'→':'')+'</span></button>'
+  }).join(''):'<div class="v46-graft-empty">'+escapeHtml(t.empty)+'</div>';
+  host.innerHTML='<div class="v46-graft-scrim"></div><section class="v46-graft-panel" role="dialog" aria-modal="true">'+
+    '<button class="v46-graft-x" type="button">×</button><div class="v46-graft-eyebrow">CONNECT / GRAFT</div><h3>'+escapeHtml(t.title)+'</h3><p>'+escapeHtml(t.hint)+'</p>'+
+    '<div class="v46-graft-list">'+items+'</div><button type="button" class="v46-graft-back">'+escapeHtml(t.back)+'</button></section>';
+  host.classList.add('open');
+  host.querySelector('.v46-graft-scrim').onclick=closeSavedGraftPicker;
+  host.querySelector('.v46-graft-x').onclick=closeSavedGraftPicker;
+  host.querySelector('.v46-graft-back').onclick=closeSavedGraftPicker;
+  host.querySelectorAll('[data-v46-graft-target]:not([disabled])').forEach(btn=>btn.onclick=()=>{
+    const id=btn.dataset.v46GraftTarget;closeSavedGraftPicker();window.__RALUVAAA_UI__?.select?.(id)
+  })
+}
+function decorateGraftMode(){
+  const bar=document.getElementById('modeBar'),text=document.getElementById('modeText');
+  let btn=document.getElementById('v46SavedGraftBtn');
+  if(!graftSourceId||!bar||bar.classList.contains('hidden')){
+    btn?.remove();
+    if(bar?.classList.contains('hidden')){graftSourceId=null;closeSavedGraftPicker()}
+    return
+  }
+  const source=semantic().find(x=>x.semanticId===graftSourceId);
+  if(!source){graftSourceId=null;btn?.remove();return}
+  const t=graftCopy();
+  if(text)text.textContent=t.mode;
+  if(!btn){
+    btn=document.createElement('button');btn.id='v46SavedGraftBtn';btn.type='button';btn.className='v46-saved-graft-btn';
+    const close=document.getElementById('modeClose');bar.insertBefore(btn,close||null);
+    btn.onclick=e=>{e.stopPropagation();openSavedGraftPicker()}
+  }
+  btn.textContent=t.saved
+}
+function installGraftSavedBridge(){
+  const ui=window.__RALUVAAA_UI__;
+  if(!ui||graftUiPatched)return;
+  const original=ui.action?.bind(ui);
+  if(typeof original!=='function')return;
+  ui.action=function(kind,...args){
+    if(kind==='connect')graftSourceId=current()?.semanticId||null;
+    const out=original(kind,...args);
+    if(kind==='connect')setTimeout(decorateGraftMode,0);
+    return out
+  };
+  graftUiPatched=true
+}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
 const W=720,H=900,DURATION=9000;
@@ -874,13 +1039,16 @@ function interceptShare(e){
 function decorate(){
   document.title='RALUVAAA · Experience V46';
   const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='EXPERIENCE V46';
-  ensureBookmark();ensureMobileBookmark();decorateEntrusted()
+  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();installGraftSavedBridge();decorateGraftMode()
 }
 let queued=false;
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;decorate()})}
 new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-panel','data-open','data-v39-icon']});
 document.addEventListener('click',interceptShare,true);
-window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark();ensureMobileBookmark()});
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('.lang button'))setTimeout(()=>{ensureAboutButton();refreshAbout();decorateGraftMode()},0)
+});
+window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark();ensureMobileBookmark();decorateGraftMode()});
 decorate();setTimeout(decorate,120);setTimeout(decorate,400);
 
 window.__RALUVAAA_V46__={
@@ -898,6 +1066,9 @@ window.__RALUVAAA_V46__={
   saved:()=>loadSaved().map(x=>({...x})),
   resolveSaved:id=>{const r=loadSaved().find(x=>x.semanticId===id);return r?resolveSaved(r):null},
   toggleSaved:id=>{const m=semantic().find(x=>x.semanticId===id);if(m)toggleSaved(m)},
+  openAbout,
+  openSavedGraftPicker,
+  graftSource:()=>graftSourceId,
   shareUrl:id=>{const m=semantic().find(x=>x.semanticId===id);return m?shareUrl(m):null},
   openShare:id=>{const m=semantic().find(x=>x.semanticId===id);if(m)openShare(m)},
   buildStillFile,
