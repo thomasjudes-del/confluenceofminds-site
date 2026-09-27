@@ -84,6 +84,7 @@ function decorate(){
   applyDeck();
   applyRoot();
   applyFlag();
+  document.body?.classList.add('v39-icons-ready');
 }
 
 let queued=false;

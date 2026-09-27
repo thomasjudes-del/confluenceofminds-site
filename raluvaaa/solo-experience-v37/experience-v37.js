@@ -22,7 +22,7 @@ const ASSET={
   revive:BASE+'revive.svg',
   report:BASE+'report.svg'
 };
-const img=(name,cls='v37-icon')=>'<img class="'+cls+'" src="'+ASSET[name]+'" alt="" aria-hidden="true" draggable="false">';
+const img=(name,cls='v37-icon')=>window.RALUVAAA_SKIP_V37_ICON_ASSETS?'<img class="'+cls+'" alt="" aria-hidden="true" draggable="false">':'<img class="'+cls+'" src="'+ASSET[name]+'" alt="" aria-hidden="true" draggable="false">';
 
 function semanticForAction(act){
   return ({

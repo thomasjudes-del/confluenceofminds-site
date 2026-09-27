@@ -21,11 +21,12 @@ function write(key,value){localStorage.setItem(key,JSON.stringify(value))}
 function hash(s){let h=2166136261>>>0;for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function randMs(band,slot,salt){const span=band.max-band.min;return band.min+(hash(`${salt}|${slot}`)%Math.max(1,span))}
 function validRoots(){
-  if(!window.RALUVAAA_SHARED)return roots.filter(x=>x&&x.simulated&&x.kind==='create').map(x=>x.semanticId);
+  const eligible=x=>x&&x.kind==='create'&&x.state==='alive';
+  if(!window.RALUVAAA_SHARED)return roots.filter(x=>eligible(x)&&x.simulated).map(x=>x.semanticId);
   const state=read(STORE),actor=window.RALUVAAA_ACTOR_ID,events=Array.isArray(state?.events)?state.events:[];
   const own=new Set(events.filter(e=>e.type==='create'&&e.actorId===actor).map(e=>e.semanticId));
-  const real=roots.filter(x=>x&&x.kind==='create'&&!x.simulated&&!own.has(x.semanticId)).map(x=>x.semanticId);
-  const simulated=roots.filter(x=>x&&x.kind==='create'&&x.simulated).map(x=>x.semanticId);
+  const real=roots.filter(x=>eligible(x)&&!x.simulated&&!own.has(x.semanticId)).map(x=>x.semanticId);
+  const simulated=roots.filter(x=>eligible(x)&&x.simulated).map(x=>x.semanticId);
   return [...real,...simulated];
 }
 function chooseReplacement(ids,slot,salt){const all=validRoots();if(!all.length)return ids[slot];const previous=ids[slot],blocked=new Set(ids);let idx=hash(`${salt}|replacement|${slot}`)%all.length;for(let i=0;i<all.length;i++){const id=all[(idx+i)%all.length];if(!blocked.has(id))return id}const fallback=all.find(id=>!ids.some((x,j)=>j!==slot&&x===id));return fallback||previous}
@@ -34,6 +35,7 @@ function sameEntrusted(a,b){return sameIds(a,b)&&a.every((x,i)=>Math.abs(x.expir
 
 function initialisePolicy(state){const now=Date.now();const current=(state.entrusted||[]).slice(0,3);if(current.length!==3)return null;const salt=`${Math.floor(now/(3*HOUR))}|${params.get('actor')||'A'}`;return{version:2,entries:current.map((x,i)=>({semanticId:x.semanticId,band:bands[i].name,assignedAt:now,expires:now+randMs(bands[i],i,salt)}))}}
 function syncPolicy(){
+  if(window.RALUVAAA_NATIVE_ENTRUSTED_V42)return;
   const state=read(STORE);if(!state||state.version!==26||!Array.isArray(state.entrusted)||state.entrusted.length!==3||!validRoots().length)return;
   let policy=read(POLICY);const now=Date.now();
   if(!policy||policy.version!==2||!Array.isArray(policy.entries)||policy.entries.length!==3){
@@ -55,6 +57,7 @@ function pad(n){return String(Math.max(0,n|0)).padStart(2,'0')}
 function remaining(ms){const total=Math.max(0,Math.floor(ms/1000)),s=total%60,m=Math.floor(total/60)%60,h=Math.floor(total/3600)%24,d=Math.floor(total/86400);return d?`${d}j ${pad(h)}:${pad(m)}:${pad(s)}`:`${pad(Math.floor(total/3600))}:${pad(m)}:${pad(s)}`}
 function bandFor(name){return bands.find(x=>x.name===name)||bands[1]}
 function decorateEntrusted(){
+  if(window.RALUVAAA_NATIVE_ENTRUSTED_V42)return;
   const policy=read(POLICY);if(!policy?.entries)return;
   const title=document.getElementById('drawerTitle');if(!title||!/^Wishes confiés$|^Entrusted wishes$/i.test(title.textContent.trim()))return;
   const items=[...document.querySelectorAll('#drawerBody [data-open]')];

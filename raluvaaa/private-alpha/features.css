@@ -912,3 +912,21 @@ body[data-feature-version="46"] .v43-saved-unavailable{
   .pa-request-wish{font-size:8px}
   .pa-activity-card{padding:10px 11px}
 }
+
+/* Private Alpha cleanup: stable navigation, exact-icon loading, visible state. */
+body[data-alpha="private-alpha"]:not(.v39-icons-ready) #rail{visibility:hidden!important}
+body[data-alpha="private-alpha"].v39-icons-ready #rail{visibility:visible!important;opacity:1!important}
+body[data-alpha="private-alpha"] #rail{pointer-events:auto!important}
+.pa-wish-status{
+  display:inline-flex;align-items:center;margin:8px 0 2px;min-height:25px;padding:0 9px;
+  border:1px solid rgba(185,215,228,.11);border-radius:999px;background:rgba(255,255,255,.025);
+  font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:rgba(230,239,241,.72)
+}
+.pa-wish-status.pa-state-bloom,.pa-wish-status.pa-state-bloomed{color:rgba(241,211,143,.92);border-color:rgba(241,211,143,.18)}
+.pa-wish-status.pa-state-abandoned{color:rgba(207,218,223,.48)}
+#sharedStatus[data-error="1"]{max-width:min(620px,calc(100vw - 24px))!important;line-height:1.45!important}
+@media(max-width:820px){
+  body[data-alpha="private-alpha"] #rail{display:flex!important;min-width:210px!important;max-width:calc(100vw - 18px)!important;opacity:1!important}
+  body[data-alpha="private-alpha"]:not(.v39-icons-ready) #rail{visibility:hidden!important}
+  #sharedStatus[data-error="1"]{top:max(70px,calc(env(safe-area-inset-top) + 52px))!important}
+}

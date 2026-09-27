@@ -89,6 +89,8 @@ async function acceptFirst(page,type){
     assert.equal(await A.page.locator('#rail #v46AboutBtn').count(),0,'About must not consume a main rail slot');
     assert.equal(await A.page.locator('#brand #v46AboutBtn').count(),1,'About must live in the RALUVAAA brand block');
     assert.equal(await A.page.locator('#rail #privateAccountBtn').count(),0,'Account must not have a separate main rail button');
+    assert(await A.page.locator('[data-lang="en"]').evaluate(el=>el.classList.contains('active')),'Private Alpha should default to English on a fresh session');
+    assert.equal(await A.page.locator('#rail .rail-btn').count(),4,'Private Alpha main rail must contain exactly four actions');
 
     const anonA=await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
     const anonB=await B.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
@@ -102,7 +104,28 @@ async function acceptFirst(page,type){
     await A.page.waitForSelector('#privateAccountSection',{timeout:3000});
     assert.match(await A.page.locator('#privateAccountSection').innerText(),/Ton espace|Your space/,'My Wishes must contain account identity');
     assert.equal(await A.page.locator('#rail #privateAccountBtn').count(),0,'Claimed account must not add a rail button');
-    await A.page.click('#myWorldBtn');
+    const mine=A.page.locator('#drawerBody [data-open="'+wishA+'"]');
+    assert.equal(await mine.count(),1,'My Wishes must list the owned wish');
+    await mine.click();
+    await A.page.waitForFunction(id=>window.__RALUVAAA_UI__?.current?.()?.semanticId===id,wishA,{polling:100,timeout:5000});
+    assert((await A.page.locator('#drawerBody .wish').innerText()).includes('A wants to learn coastal sailing'),'My Wishes click must open the exact wish');
+    await A.page.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{origin:location.origin,data:{type:'rv25-blank'}})));
+    await A.page.waitForSelector('#drawer',{state:'hidden',timeout:3000});
+    assert.equal(await A.page.locator('#rail .rail-btn:visible').count(),4,'blank-space close must leave the four-action rail visible');
+
+    // Fast branch -> bloom must resolve the server wish id and show a visible state.
+    await openWish(A.page,wishA);
+    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('split'));
+    await A.page.fill('#branchInput','First bloom test branch\nSecond live test branch');
+    await A.page.click('#confirm');
+    await A.page.waitForFunction(()=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.some(w=>w.text==='First bloom test branch'),null,{polling:100,timeout:10000});
+    const bloomChild=await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.world().wishes.find(w=>w.text==='First bloom test branch').id);
+    await openWish(A.page,bloomChild);
+    A.page.once('dialog',d=>d.accept());
+    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('bloom'));
+    await A.page.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='bloomed',bloomChild,{polling:100,timeout:10000});
+    await openWish(A.page,bloomChild);
+    assert.match(await A.page.locator('.pa-wish-status').innerText(),/Bloomed|Fleuri/,'node card must show its state');
 
     // B is still anonymous: exploration/encouragement works, but relationship actions do not.
     await B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.encourage(id),wishA);
@@ -196,6 +219,11 @@ async function acceptFirst(page,type){
     await openWish(A.page,wishA);
     assert(await A.page.locator('#drawerBody details.more').count(),'V46 More actions must remain');
     assert(await A.page.locator('#drawerBody [data-act="share"]').count(),'V46 Share action must remain');
+    const entrustedOk=await A.page.evaluate(()=>{
+      const sem=new Map(window.__RV26_SHARED__.semantic().map(x=>[x.semanticId,x]));
+      return window.__RV26_SHARED__.entrusted().every(x=>sem.get(x.semanticId)?.state==='alive')
+    });
+    assert.equal(entrustedOk,true,'entrusted wishes must never contain bloomed/abandoned nodes');
 
     console.log('RALUVAAA Private Alpha real A/B identity gate passed: mobile WebKit + desktop Chromium');
   }finally{

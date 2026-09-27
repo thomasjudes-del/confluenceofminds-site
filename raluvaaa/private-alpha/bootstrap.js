@@ -8,6 +8,7 @@ const STORE=window.RALUVAAA_STORE_KEY||('raluvaaaSharedAlphaV1:'+room);
 const maps={wish:new Map(),lineage:new Map(),proposal:new Map()};
 let client=null,lastWorld=null,lastMe=null,lastInbox=null,lastFingerprint='',mutating=0,refreshTimer=null,queue=Promise.resolve();
 let authMe=null,authResolver=null,savedSyncing=false,lastSavedServer=[];
+let preferredLang=(()=>{try{return JSON.parse(localStorage.getItem(STORE)||'null')?.lang||window.RALUVAAA_DEFAULT_LANG||((navigator.language||'en').toLowerCase().startsWith('fr')?'fr':'en')}catch{return window.RALUVAAA_DEFAULT_LANG||'en'}})();
 
 function status(text,error=false){
   let box=document.getElementById('sharedStatus');
@@ -16,7 +17,7 @@ function status(text,error=false){
     box.style.cssText='position:fixed;z-index:120;left:50%;top:18px;transform:translateX(-50%);max-width:min(560px,calc(100vw - 28px));padding:9px 13px;border:1px solid rgba(184,214,255,.15);border-radius:999px;background:rgba(3,9,18,.92);backdrop-filter:blur(14px);font:9px/1.35 Inter,system-ui,sans-serif;color:rgba(238,246,255,.82);text-align:center';
     document.body.appendChild(box);
   }
-  box.textContent=text;box.style.borderColor=error?'rgba(255,140,140,.32)':'rgba(184,214,255,.15)';
+  box.textContent=text;box.dataset.error=error?'1':'0';box.style.borderColor=error?'rgba(255,140,140,.42)':'rgba(184,214,255,.15)';box.style.fontSize=error?'13px':'9px';box.style.fontWeight=error?'680':'400';box.style.padding=error?'13px 16px':'9px 13px';box.style.borderRadius=error?'16px':'999px';box.style.background=error?'rgba(31,7,13,.96)':'rgba(3,9,18,.92)';box.style.boxShadow=error?'0 16px 48px rgba(0,0,0,.42)':'none';
 }
 function hideStatus(){const b=document.getElementById('sharedStatus');if(b)b.remove()}
 function installRoomBadge(){
@@ -72,7 +73,7 @@ function buildState(world,me,inbox,actorId){
   for(const p of inbox.sent||[])addProposal(p,'sent');
   for(const p of inbox.receivedHistory||[])addProposal(p,'received');
   events.sort((a,b)=>(a.at||0)-(b.at||0));
-  return{version:26,lang:(navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr',entrusted:null,notifications:(inbox.notifications||[]).map(x=>({...x})),events};
+  return{version:26,lang:preferredLang,entrusted:null,notifications:(inbox.notifications||[]).map(x=>({...x})),events};
 }
 function fp(state){return JSON.stringify({events:state.events.map(e=>[e.type,e.semanticId||'',e.parentSemanticId||'',e.proposalId||'',e.decision||'',e.serverStatus||'',e.aSemanticId||'',e.bSemanticId||'',e.text||'',e.loc||'',e.state||'',e.helpTitle||'',e.open===false?'closed':'',e.note||'',(e.suggestions||[]).join('|'),(e.children||[]).map(c=>[c.semanticId,c.text||'',c.loc||'']).join('|')]),notifications:(state.notifications||[]).map(n=>[n.id,n.kind,n.objectId,n.isRead,n.title||'',n.body||''])})}
 
@@ -156,8 +157,35 @@ function friendlyError(err){
   };
   return (lang==='en'?en:fr)[err?.code]||String(err?.message||err||'Unexpected error');
 }
-function showError(err){console.error(err);status(friendlyError(err),true);setTimeout(()=>{if(window.__RALUVAAA_SHARED_READY__)hideStatus()},4200)}
+function showError(err){console.error(err);status(friendlyError(err),true);setTimeout(()=>{if(window.__RALUVAAA_SHARED_READY__)hideStatus()},6500)}
 
+async function resolveWishId(localId,force=false){
+  const mapped=idOf(localId);
+  if(!force&&(mapped!==localId||lastWorld?.wishes?.some(w=>w.id===mapped)))return mapped;
+  const world=await client.world();lastWorld=world;
+  if((world.wishes||[]).some(w=>w.id===mapped))return mapped;
+  const meta=window.__RV26_SHARED__?.semantic?.().find(x=>x.semanticId===localId);
+  if(!meta)return mapped;
+  const parentId=meta.parentSemanticId?idOf(meta.parentSemanticId):null;
+  const candidates=(world.wishes||[]).filter(w=>
+    w.isMine&&w.text===meta.text&&
+    (!meta.loc||w.locationText===meta.loc)&&
+    (!parentId||w.parentWishId===parentId)
+  );
+  if(candidates.length===1){maps.wish.set(localId,candidates[0].id);return candidates[0].id}
+  return mapped
+}
+async function safeWishEvent(localId,payload){
+  let id=await resolveWishId(localId);
+  try{return await client.wishEvent(id,payload)}
+  catch(err){
+    if(err?.code!=='wish_not_found')throw err;
+    const recovered=await resolveWishId(localId,true);
+    if(recovered===id)throw err;
+    return client.wishEvent(recovered,payload)
+  }
+}
+async function safeEncourage(localId){return client.encourage(await resolveWishId(localId))}
 async function syncEvent(ev){
   mutating++;
   try{
@@ -165,32 +193,32 @@ async function syncEvent(ev){
     if(ev.type==='create'){
       out=await client.createWish({text:ev.text,locationText:ev.loc});maps.wish.set(ev.semanticId,out.wishId);maps.lineage.set(ev.lineageId,out.lineageId);
     }else if(ev.type==='evolve'){
-      out=await client.wishEvent(idOf(ev.parentSemanticId),{type:'evolve',text:ev.text});maps.wish.set(ev.semanticId,out.wishId);
+      out=await safeWishEvent(ev.parentSemanticId,{type:'evolve',text:ev.text});maps.wish.set(ev.semanticId,out.wishId);
     }else if((ev.type==='split'||ev.type==='branch_add')&&!ev.proposalId){
-      out=await client.wishEvent(idOf(ev.parentSemanticId),{type:ev.type==='split'?'split':'add_branch',children:(ev.children||[]).map(c=>c.text)});
+      out=await safeWishEvent(ev.parentSemanticId,{type:ev.type==='split'?'split':'add_branch',children:(ev.children||[]).map(c=>c.text)});
       (ev.children||[]).forEach((c,i)=>{if(out.wishIds?.[i])maps.wish.set(c.semanticId,out.wishIds[i])});
     }else if(ev.type==='close_branch'){
-      for(const sid of (ev.semanticIds||[ev.semanticId]))await client.wishEvent(idOf(sid),{type:'abandon'});
+      for(const sid of (ev.semanticIds||[ev.semanticId]))await safeWishEvent(sid,{type:'abandon'});
     }else if(ev.type==='resume_branch'){
-      for(const sid of (ev.semanticIds||[ev.semanticId]))await client.wishEvent(idOf(sid),{type:'resume'});
+      for(const sid of (ev.semanticIds||[ev.semanticId]))await safeWishEvent(sid,{type:'resume'});
     }else if(ev.type==='wake'){
-      await client.wishEvent(idOf(ev.semanticId),{type:'wake'});
+      await safeWishEvent(ev.semanticId,{type:'wake'});
     }else if(ev.type==='bloom'||ev.type==='abandon'||ev.type==='resume'||ev.type==='close_lineage'||ev.type==='resume_lineage'){
-      await client.wishEvent(idOf(ev.semanticId),{type:ev.type});
+      await safeWishEvent(ev.semanticId,{type:ev.type});
     }else if(ev.type==='correct'){
-      await client.wishEvent(idOf(ev.semanticId),{type:'correct',text:ev.text,locationText:ev.loc||''});
+      await safeWishEvent(ev.semanticId,{type:'correct',text:ev.text,locationText:ev.loc||''});
     }else if(ev.type==='reparent'){
-      await client.wishEvent(idOf(ev.semanticId),{type:'reparent',newParentWishId:idOf(ev.newParentSemanticId)});
+      await safeWishEvent(ev.semanticId,{type:'reparent',newParentWishId:idOf(ev.newParentSemanticId)});
     }else if(ev.type==='encourage'){
-      await client.encourage(idOf(ev.semanticId));
+      await safeEncourage(ev.semanticId);
     }else if(ev.type==='help_proposed'){
-      out=await client.proposeHelp(idOf(ev.semanticId),ev.helpTitle,ev.note);maps.proposal.set(ev.proposalId,out.proposalId);
+      out=await client.proposeHelp(await resolveWishId(ev.semanticId),ev.helpTitle,ev.note);maps.proposal.set(ev.proposalId,out.proposalId);
     }else if(ev.type==='help_setting'){
-      await client.wishEvent(idOf(ev.semanticId),{type:'set_help',open:ev.open!==false});
+      await safeWishEvent(ev.semanticId,{type:'set_help',open:ev.open!==false});
     }else if(ev.type==='suggest_proposed'){
-      out=await client.suggestBranches(idOf(ev.semanticId),ev.suggestions||[]);maps.proposal.set(ev.proposalId,out.proposalId);
+      out=await client.suggestBranches(await resolveWishId(ev.semanticId),ev.suggestions||[]);maps.proposal.set(ev.proposalId,out.proposalId);
     }else if(ev.type==='connect_proposed'){
-      out=await client.proposeConnect(idOf(ev.aSemanticId),idOf(ev.bSemanticId));maps.proposal.set(ev.proposalId,out.proposalId);
+      out=await client.proposeConnect(await resolveWishId(ev.aSemanticId),await resolveWishId(ev.bSemanticId));maps.proposal.set(ev.proposalId,out.proposalId);
     }else if(ev.type==='proposal_response'){
       try{await client.respondProposal(proposalOf(ev.proposalId),ev.decision)}catch(e){if(e.code!=='already_decided')throw e}
     }else if(ev.type==='proposal_cancelled'){
@@ -283,25 +311,29 @@ function decorateMyWorldAccount(){
   const drawer=document.getElementById('drawer'),body=document.getElementById('drawerBody'),my=document.getElementById('myWorldBtn');
   document.getElementById('privateAccountBtn')?.remove();
   if(!drawer||!body||!my?.classList.contains('active')||drawer.classList.contains('hidden'))return;
-  document.getElementById('privateAccountSection')?.remove();
-  const t=accountCopy(),section=document.createElement('section');
-  section.id='privateAccountSection';section.className='pa-myworld-account';
-  const identity=authMe?.claimed?String(authMe.email||''):t.anonymous;
-  section.innerHTML='<div class="pa-myworld-account-copy"><span>'+t.title+'</span><b>'+identity+'</b><small>'+t.note+'</small></div>'+
-    '<button type="button" class="pa-myworld-account-action">'+(authMe?.claimed?t.logout:t.connect)+'</button>';
-  const action=section.querySelector('.pa-myworld-account-action');
-  action.onclick=async e=>{
-    e.stopPropagation();
-    if(authMe?.claimed){
-      action.disabled=true;
-      try{
-        await client.logout();await client.ensureSession();authMe=await client.me();
-        window.RALUVAAA_ACTOR_ID=client.actorId;window.__RALUVAAA_UI__?.setActor?.(client.actorId);
-        await refreshSavedFromServer();await refresh(true);updateAccountButton()
-      }catch(err){showError(err);action.disabled=false}
-    }else showAccount()
-  };
-  body.prepend(section);
+  const t=accountCopy(),identity=authMe?.claimed?String(authMe.email||''):t.anonymous;
+  let section=document.getElementById('privateAccountSection');
+  if(!section){
+    section=document.createElement('section');section.id='privateAccountSection';section.className='pa-myworld-account';body.prepend(section)
+  }else if(section.parentElement===body&&body.firstElementChild!==section)body.prepend(section);
+  const signature=[t.title,identity,t.note,authMe?.claimed?'logout':'connect'].join('|');
+  if(section.dataset.signature!==signature){
+    section.dataset.signature=signature;
+    section.innerHTML='<div class="pa-myworld-account-copy"><span>'+t.title+'</span><b>'+identity+'</b><small>'+t.note+'</small></div>'+
+      '<button type="button" class="pa-myworld-account-action">'+(authMe?.claimed?t.logout:t.connect)+'</button>';
+    const action=section.querySelector('.pa-myworld-account-action');
+    action.onclick=async e=>{
+      e.stopPropagation();
+      if(authMe?.claimed){
+        action.disabled=true;
+        try{
+          await client.logout();await client.ensureSession();authMe=await client.me();
+          window.RALUVAAA_ACTOR_ID=client.actorId;window.__RALUVAAA_UI__?.setActor?.(client.actorId);
+          await refreshSavedFromServer();await refresh(true);updateAccountButton()
+        }catch(err){showError(err);action.disabled=false}
+      }else showAccount()
+    }
+  }
   const title=document.getElementById('drawerTitle');
   if(title)title.textContent=(window.__RV26_SHARED__?.state?.().lang==='en')?'My wishes':'Mes wishes'
 }
@@ -333,7 +365,7 @@ async function syncSavedFromLocal(){
 function installPrivateGuards(){
   window.__RALUVAAA_SHARED_REQUIRE_CLAIM__=requireClaim;
   document.addEventListener('click',e=>{
-    if(e.target.closest?.('#myWorldBtn,.lang button')){setTimeout(updateAccountButton,0);setTimeout(updateAccountButton,80)}
+    if(e.target.closest?.('#myWorldBtn,.lang button')){setTimeout(()=>{preferredLang=window.__RV26_SHARED__?.state?.().lang||preferredLang;updateAccountButton()},0);setTimeout(updateAccountButton,80)}
   });
   const drawerBody=document.getElementById('drawerBody');
   if(drawerBody)new MutationObserver(()=>{if(document.getElementById('myWorldBtn')?.classList.contains('active'))requestAnimationFrame(decorateMyWorldAccount)}).observe(drawerBody,{childList:true});
