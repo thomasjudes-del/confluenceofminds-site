@@ -5,6 +5,11 @@ compatibility_date = "2026-09-01"
 [vars]
 ALLOWED_ORIGINS = "https://confluenceofminds.com,http://localhost:8787,http://127.0.0.1:8787"
 
+# Production secrets are injected by the deployment workflow:
+# RESEND_API_KEY
+# AUTH_CODE_SECRET
+# RALUVAAA_EMAIL_FROM
+
 [[d1_databases]]
 binding = "DB"
 database_name = "raluvaaa-alpha"

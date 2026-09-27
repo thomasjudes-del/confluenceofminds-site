@@ -87,7 +87,11 @@ async function claimedActor(request,env){
   return row
 }
 function randomCode(){const a=new Uint32Array(1);crypto.getRandomValues(a);return String(a[0]%1000000).padStart(6,'0')}
-async function codeHash(env,email,code){return sha256((env.AUTH_CODE_SECRET||'raluvaaa-local-auth')+'|'+email+'|'+code)}
+async function codeHash(env,email,code){
+  const secret=env.AUTH_CODE_SECRET;
+  if(!secret&&env.AUTH_TEST_MODE!=='1')fail(503,'auth_not_configured','Authentication is not configured');
+  return sha256((secret||'ci-only-auth')+'|'+email+'|'+code)
+}
 async function issueSession(env,actorId){
   const token=randomToken(),hash=await sha256(token),t=now();
   await env.DB.prepare('INSERT INTO sessions (token_hash,actor_id,created_at,last_seen_at) VALUES (?,?,?,?)').bind(hash,actorId,t,t).run();
