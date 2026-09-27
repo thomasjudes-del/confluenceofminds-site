@@ -2,6 +2,9 @@ name: Deploy RALUVAAA Shared Alpha API
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'raluvaaa/alpha-api/deploy-trigger.txt'
 
 permissions:
   contents: write
