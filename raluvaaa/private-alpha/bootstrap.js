@@ -415,6 +415,7 @@ async function boot(){
   await loadScript('../solo-experience-v37/experience-v37.js?build=private-alpha-1');
   await loadScript('../solo-experience-v38/patch-v38.js?build=private-alpha-1');
   await loadScript('../solo-experience-v39/exact-icons-v39.js?build=private-alpha-1');
+  document.body.classList.add('v39-icons-ready');
   await loadScript('../solo-experience-v42/revive-sound-v42.js?build=private-alpha-1');
   await loadScript('../solo-experience-v42/ui-v42.js?build=private-alpha-1');
   await loadScript('features.js?build=private-alpha-1');
