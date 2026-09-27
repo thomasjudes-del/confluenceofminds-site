@@ -153,7 +153,7 @@ async function eventInsert(env,{wishId,lineageId,actorId,eventType,parentWishId=
 async function requestAuthCode(request,env,cors){
   const p=await body(request);await verifyTurnstile(request,env,p);
   const email=normalizeEmail(p.email),t=now(),anonymousActor=await actor(request,env,false);
-  const recent=await env.DB.prepare('SELECT created_at FROM auth_codes WHERE email=? ORDER BY created_at DESC LIMIT 1').bind(email).first();
+  const recent=await env.DB.prepare('SELECT created_at FROM auth_codes WHERE email=? AND consumed_at IS NULL AND expires_at>? ORDER BY created_at DESC LIMIT 1').bind(email,t).first();
   if(recent&&t-Number(recent.created_at)<60000)fail(429,'code_too_soon','Wait a minute before requesting another code');
   const hour=await env.DB.prepare('SELECT COUNT(*) AS n FROM auth_codes WHERE email=? AND created_at>?').bind(email,t-3600000).first();
   if(Number(hour?.n||0)>=5)fail(429,'code_rate_limited','Too many codes requested. Try again later');
@@ -225,7 +225,7 @@ async function getMe(request,env,cors){
 async function getWorld(request,env,cors){
   const actorId=await actor(request,env,false),room=roomKey(request);
   const rows=await env.DB.prepare("SELECT w.*,COUNT(e.actor_id) AS encouragement_count FROM wishes w LEFT JOIN encouragements e ON e.wish_id=w.id WHERE w.room_key=? AND w.is_public=1 AND w.state!='removed' GROUP BY w.id ORDER BY w.created_at DESC LIMIT 600").bind(room).all();
-  const events=await env.DB.prepare("SELECT we.id,we.wish_id,we.lineage_id,we.event_type,we.parent_wish_id,we.public_payload_json,we.created_at FROM wish_events we JOIN wishes w ON w.id=we.wish_id WHERE w.room_key=? AND we.event_type IN ('create','evolve','split','bloom','abandon','resume','help','connect','reparent') ORDER BY we.created_at ASC LIMIT 3000").bind(room).all();
+  const events=await env.DB.prepare("SELECT we.id,we.wish_id,we.lineage_id,we.event_type,we.parent_wish_id,we.public_payload_json,we.created_at FROM wish_events we JOIN wishes w ON w.id=we.wish_id WHERE w.room_key=? AND we.event_type IN ('create','evolve','split','bloom','abandon','resume','wake','help','connect','reparent') ORDER BY we.created_at ASC LIMIT 3000").bind(room).all();
   return json({room,wishes:(rows.results||[]).map(r=>publicWish(r,actorId&&r.owner_actor_id===actorId)),events:(events.results||[]).map(e=>({id:e.id,wishId:e.wish_id,lineageId:e.lineage_id,type:e.event_type,parentWishId:e.parent_wish_id,payload:parseJson(e.public_payload_json),createdAt:e.created_at}))},200,cors);
 }
 async function createWish(request,env,cors){
@@ -245,6 +245,7 @@ async function addWishEvent(request,env,cors,wishId){
   if(type==='split'||type==='add_branch')return split(env,cors,row,actorId,p,type);
   if(type==='bloom'||type==='abandon')return closeWish(env,cors,row,actorId,type);
   if(type==='resume')return resumeWish(env,cors,row,actorId);
+  if(type==='wake')return wakeWish(env,cors,row,actorId);
   if(type==='close_lineage')return setLineageState(env,cors,row,actorId,'abandoned');
   if(type==='resume_lineage')return setLineageState(env,cors,row,actorId,'alive');
   if(type==='correct')return correctWish(env,cors,row,actorId,p);
@@ -267,6 +268,15 @@ async function split(env,cors,row,actorId,p,type){
 }
 async function closeWish(env,cors,row,actorId,type){
   assertAlive(row);const state=type==='bloom'?'bloomed':'abandoned',t=now();await env.DB.batch([env.DB.prepare('UPDATE wishes SET state=?,updated_at=? WHERE id=?').bind(state,t,row.id),env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id),env.DB.prepare('INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?,?,?,\'{}\',\'{}\',?)').bind(id('evt'),row.id,row.lineage_id,actorId,type,row.parent_wish_id,t)]);return json({wishId:row.id,state},200,cors);
+}
+async function wakeWish(env,cors,row,actorId){
+  assertAlive(row);const t=now();
+  await env.DB.batch([
+    env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.id),
+    env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id),
+    env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'wake',?,'{}','{}',?)").bind(id('evt'),row.id,row.lineage_id,actorId,row.parent_wish_id,t)
+  ]);
+  return json({wishId:row.id,state:'alive',woken:true},200,cors)
 }
 async function correctWish(env,cors,row,actorId,p){
   const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION);if(!loc)fail(400,'location_required','Location is required');
