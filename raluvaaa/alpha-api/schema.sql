@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS actors (
   claimed_email TEXT,
   claimed_at INTEGER
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_actors_claimed_email ON actors(claimed_email) WHERE claimed_email IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS sessions (
   token_hash TEXT PRIMARY KEY,
@@ -116,3 +117,27 @@ CREATE TABLE IF NOT EXISTS reports (
   FOREIGN KEY (wish_id) REFERENCES wishes(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status, created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS auth_codes (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL,
+  code_hash TEXT NOT NULL,
+  requested_actor_id TEXT,
+  created_at INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  consumed_at INTEGER,
+  FOREIGN KEY (requested_actor_id) REFERENCES actors(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_auth_codes_email ON auth_codes(email, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS saved_wishes (
+  actor_id TEXT NOT NULL,
+  wish_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (actor_id, wish_id),
+  FOREIGN KEY (actor_id) REFERENCES actors(id) ON DELETE CASCADE,
+  FOREIGN KEY (wish_id) REFERENCES wishes(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_saved_wishes_actor ON saved_wishes(actor_id, created_at DESC);

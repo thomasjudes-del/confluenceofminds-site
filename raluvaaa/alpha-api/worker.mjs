@@ -10,6 +10,10 @@ export default {
       const url=new URL(request.url),path=url.pathname.replace(/\/+$/,'')||'/';
       if(path==='/v1/health'&&request.method==='GET')return json({ok:true,service:'raluvaaa-alpha-api',version:1},200,cors);
       if(path==='/v1/session'&&request.method==='POST')return await createSession(request,env,cors);
+      if(path==='/v1/auth/request-code'&&request.method==='POST')return await requestAuthCode(request,env,cors);
+      if(path==='/v1/auth/verify-code'&&request.method==='POST')return await verifyAuthCode(request,env,cors);
+      if(path==='/v1/auth/logout'&&request.method==='POST')return await logout(request,env,cors);
+      if(path==='/v1/saved'&&request.method==='GET')return await getSaved(request,env,cors);
       if(path==='/v1/world'&&request.method==='GET')return await getWorld(request,env,cors);
       if(path==='/v1/me'&&request.method==='GET')return await getMe(request,env,cors);
       if(path==='/v1/inbox'&&request.method==='GET')return await getInbox(request,env,cors);
@@ -27,6 +31,9 @@ export default {
       if(m&&request.method==='POST')return await cancelProposal(request,env,cors,decodeURIComponent(m[1]));
       m=path.match(/^\/v1\/notifications\/([^/]+)\/read$/);
       if(m&&request.method==='POST')return await readNotification(request,env,cors,decodeURIComponent(m[1]));
+      m=path.match(/^\/v1\/saved\/([^/]+)$/);
+      if(m&&request.method==='POST')return await saveWish(request,env,cors,decodeURIComponent(m[1]));
+      if(m&&request.method==='DELETE')return await unsaveWish(request,env,cors,decodeURIComponent(m[1]));
 
       return json({error:'not_found'},404,cors);
     }catch(err){
@@ -39,7 +46,7 @@ export default {
 
 function corsHeaders(origin,env){
   const allowed=(env.ALLOWED_ORIGINS||'https://confluenceofminds.com,http://localhost:8787,http://127.0.0.1:8787').split(',').map(x=>x.trim()).filter(Boolean);
-  const h={...JSON_HEADERS,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type,x-raluvaaa-room','vary':'Origin'};
+  const h={...JSON_HEADERS,'access-control-allow-methods':'GET,POST,DELETE,OPTIONS','access-control-allow-headers':'authorization,content-type,x-raluvaaa-room','vary':'Origin'};
   if(allowed.includes(origin))h['access-control-allow-origin']=origin;
   return h;
 }
@@ -64,6 +71,59 @@ async function actor(request,env,required=true){
   env.DB.prepare('UPDATE sessions SET last_seen_at=? WHERE token_hash=?').bind(now(),hash).run().catch(()=>{});
   return row.actor_id;
 }
+function normalizeEmail(v){
+  const e=String(v||'').trim().toLowerCase();
+  if(e.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))fail(400,'invalid_email','Enter a valid email address');
+  return e
+}
+function maskEmail(email){
+  const [a,b]=String(email||'').split('@');if(!a||!b)return'';
+  return a.slice(0,Math.min(2,a.length))+'***@'+b
+}
+async function actorRow(env,actorId){return env.DB.prepare('SELECT * FROM actors WHERE id=?').bind(actorId).first()}
+async function claimedActor(request,env){
+  const actorId=await actor(request,env,true),row=await actorRow(env,actorId);
+  if(!row?.claimed_email)fail(403,'claim_required','Verify your email to continue');
+  return row
+}
+function randomCode(){const a=new Uint32Array(1);crypto.getRandomValues(a);return String(a[0]%1000000).padStart(6,'0')}
+async function codeHash(env,email,code){return sha256((env.AUTH_CODE_SECRET||'raluvaaa-local-auth')+'|'+email+'|'+code)}
+async function issueSession(env,actorId){
+  const token=randomToken(),hash=await sha256(token),t=now();
+  await env.DB.prepare('INSERT INTO sessions (token_hash,actor_id,created_at,last_seen_at) VALUES (?,?,?,?)').bind(hash,actorId,t,t).run();
+  return token
+}
+async function sendAuthEmail(env,email,code){
+  if(env.AUTH_TEST_MODE==='1')return{test:true};
+  if(!env.RESEND_API_KEY)fail(503,'email_not_configured','Email delivery is not configured');
+  const from=env.RALUVAAA_EMAIL_FROM||'RALUVAAA <noreply@raluvaaa.com>';
+  const response=await fetch('https://api.resend.com/emails',{
+    method:'POST',
+    headers:{authorization:'Bearer '+env.RESEND_API_KEY,'content-type':'application/json'},
+    body:JSON.stringify({
+      from,to:[email],
+      subject:'Your RALUVAAA code: '+code,
+      text:'Your RALUVAAA verification code is '+code+'. It expires in 10 minutes.\n\nIf you did not request this code, you can ignore this email.',
+      html:'<div style="font-family:system-ui,sans-serif;background:#06111f;color:#edf6ff;padding:28px;border-radius:18px"><div style="letter-spacing:.22em;font-size:12px">RALUVAAA</div><p style="opacity:.72">Your verification code</p><div style="font-size:34px;letter-spacing:.18em;font-weight:700">'+code+'</div><p style="opacity:.58">It expires in 10 minutes.</p></div>'
+    })
+  });
+  if(!response.ok){console.error('Resend error',response.status,await response.text());fail(502,'email_delivery_failed','Could not send the verification email')}
+  return{test:false}
+}
+async function mergeAnonymousActor(env,fromActor,toActor){
+  if(!fromActor||fromActor===toActor)return;
+  const from=await actorRow(env,fromActor);if(!from||from.claimed_email)return;
+  await env.DB.batch([
+    env.DB.prepare('INSERT OR IGNORE INTO encouragements (wish_id,actor_id,created_at) SELECT wish_id,?,created_at FROM encouragements WHERE actor_id=?').bind(toActor,fromActor),
+    env.DB.prepare('DELETE FROM encouragements WHERE actor_id=?').bind(fromActor),
+    env.DB.prepare('INSERT OR IGNORE INTO saved_wishes (actor_id,wish_id,created_at) SELECT ?,wish_id,created_at FROM saved_wishes WHERE actor_id=?').bind(toActor,fromActor),
+    env.DB.prepare('DELETE FROM saved_wishes WHERE actor_id=?').bind(fromActor),
+    env.DB.prepare('UPDATE reports SET reporter_actor_id=? WHERE reporter_actor_id=?').bind(toActor,fromActor),
+    env.DB.prepare('DELETE FROM sessions WHERE actor_id=?').bind(fromActor)
+  ]);
+  await env.DB.prepare('DELETE FROM actors WHERE id=?').bind(fromActor).run()
+}
+
 async function verifyTurnstile(request,env,payload){
   if(!env.TURNSTILE_SECRET)return;
   const token=payload?.cfTurnstileToken;if(!token)fail(403,'turnstile_required','Human verification required');
@@ -89,6 +149,62 @@ async function eventInsert(env,{wishId,lineageId,actorId,eventType,parentWishId=
   const eid=id('evt'),t=now();await env.DB.prepare('INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?,?,?,?,?,?)').bind(eid,wishId,lineageId,actorId,eventType,parentWishId,JSON.stringify(payload),JSON.stringify(publicPayload),t).run();return eid;
 }
 
+
+async function requestAuthCode(request,env,cors){
+  const p=await body(request);await verifyTurnstile(request,env,p);
+  const email=normalizeEmail(p.email),t=now(),anonymousActor=await actor(request,env,false);
+  const recent=await env.DB.prepare('SELECT created_at FROM auth_codes WHERE email=? ORDER BY created_at DESC LIMIT 1').bind(email).first();
+  if(recent&&t-Number(recent.created_at)<60000)fail(429,'code_too_soon','Wait a minute before requesting another code');
+  const hour=await env.DB.prepare('SELECT COUNT(*) AS n FROM auth_codes WHERE email=? AND created_at>?').bind(email,t-3600000).first();
+  if(Number(hour?.n||0)>=5)fail(429,'code_rate_limited','Too many codes requested. Try again later');
+  const code=randomCode(),hash=await codeHash(env,email,code),cid=id('auth');
+  await env.DB.prepare('INSERT INTO auth_codes (id,email,code_hash,requested_actor_id,created_at,expires_at,attempts,consumed_at) VALUES (?,?,?,?,?,?,0,NULL)').bind(cid,email,hash,anonymousActor,t,t+10*60*1000).run();
+  const sent=await sendAuthEmail(env,email,code);
+  return json({sent:true,email:maskEmail(email),expiresInSeconds:600,...(sent.test?{testCode:code}:{})},200,cors)
+}
+async function verifyAuthCode(request,env,cors){
+  const p=await body(request),email=normalizeEmail(p.email),code=String(p.code||'').replace(/\D/g,'').slice(0,6);
+  if(code.length!==6)fail(400,'invalid_code','Enter the 6-digit code');
+  const row=await env.DB.prepare('SELECT * FROM auth_codes WHERE email=? AND consumed_at IS NULL ORDER BY created_at DESC LIMIT 1').bind(email).first();
+  if(!row||Number(row.expires_at)<now())fail(401,'code_expired','This code has expired');
+  if(Number(row.attempts||0)>=5)fail(429,'code_locked','Too many incorrect attempts');
+  const expected=await codeHash(env,email,code);
+  if(expected!==row.code_hash){
+    await env.DB.prepare('UPDATE auth_codes SET attempts=attempts+1 WHERE id=?').bind(row.id).run();
+    fail(401,'invalid_code','That code is not correct')
+  }
+  const currentActor=await actor(request,env,false);
+  let target=await env.DB.prepare('SELECT * FROM actors WHERE claimed_email=?').bind(email).first();
+  const t=now();
+  if(!target){
+    if(currentActor){
+      const cur=await actorRow(env,currentActor);
+      if(cur&&!cur.claimed_email){
+        await env.DB.prepare('UPDATE actors SET claimed_email=?,claimed_at=? WHERE id=?').bind(email,t,currentActor).run();
+        target={...cur,claimed_email:email,claimed_at:t}
+      }
+    }
+    if(!target){
+      const actorId=id('actor');
+      await env.DB.prepare('INSERT INTO actors (id,created_at,claimed_email,claimed_at) VALUES (?,?,?,?)').bind(actorId,t,email,t).run();
+      target={id:actorId,claimed_email:email,claimed_at:t}
+    }
+  }else if(currentActor&&currentActor!==target.id){
+    await mergeAnonymousActor(env,currentActor,target.id)
+  }
+  await env.DB.prepare('UPDATE auth_codes SET consumed_at=? WHERE id=?').bind(t,row.id).run();
+  const token=await issueSession(env,target.id);
+  return json({actorId:target.id,token,claimed:true,email:maskEmail(email)},200,cors)
+}
+async function logout(request,env,cors){
+  const auth=request.headers.get('authorization')||'';
+  if(auth.startsWith('Bearer ')){
+    const token=auth.slice(7).trim();
+    if(token){const hash=await sha256(token);await env.DB.prepare('DELETE FROM sessions WHERE token_hash=?').bind(hash).run()}
+  }
+  return json({ok:true},200,cors)
+}
+
 async function createSession(request,env,cors){
   const p=await body(request);await verifyTurnstile(request,env,p);
   const t=now(),actorId=id('actor'),token=randomToken(),hash=await sha256(token);
@@ -103,7 +219,8 @@ async function getMe(request,env,cors){
   const wishes=await env.DB.prepare("SELECT *,0 AS encouragement_count FROM wishes WHERE owner_actor_id=? AND room_key=? AND state!='removed' ORDER BY updated_at DESC LIMIT 200").bind(actorId,room).all();
   const unread=await env.DB.prepare('SELECT COUNT(*) AS n FROM notifications WHERE actor_id=? AND is_read=0').bind(actorId).first();
   const encouraged=await env.DB.prepare('SELECT e.wish_id FROM encouragements e JOIN wishes w ON w.id=e.wish_id WHERE e.actor_id=? AND w.room_key=? ORDER BY e.created_at DESC LIMIT 500').bind(actorId,room).all();
-  return json({actorId,room,wishes:(wishes.results||[]).map(r=>publicWish(r,true)),unread:Number(unread?.n||0),encouragedWishIds:(encouraged.results||[]).map(r=>r.wish_id)},200,cors);
+  const who=await actorRow(env,actorId);
+  return json({actorId,room,claimed:!!who?.claimed_email,email:who?.claimed_email?maskEmail(who.claimed_email):null,wishes:(wishes.results||[]).map(r=>publicWish(r,true)),unread:Number(unread?.n||0),encouragedWishIds:(encouraged.results||[]).map(r=>r.wish_id)},200,cors);
 }
 async function getWorld(request,env,cors){
   const actorId=await actor(request,env,false),room=roomKey(request);
@@ -112,7 +229,7 @@ async function getWorld(request,env,cors){
   return json({room,wishes:(rows.results||[]).map(r=>publicWish(r,actorId&&r.owner_actor_id===actorId)),events:(events.results||[]).map(e=>({id:e.id,wishId:e.wish_id,lineageId:e.lineage_id,type:e.event_type,parentWishId:e.parent_wish_id,payload:parseJson(e.public_payload_json),createdAt:e.created_at}))},200,cors);
 }
 async function createWish(request,env,cors){
-  const actorId=await actor(request,env,true),room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);
+  const who=await claimedActor(request,env),actorId=who.id,room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);
   const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION);if(!loc)fail(400,'location_required','Location is required');
   const wid=id('wish'),t=now();
   await env.DB.batch([
@@ -206,7 +323,7 @@ async function encourage(request,env,cors,wishId){
 }
 
 async function createProposal(request,env,cors){
-  const proposer=await actor(request,env,true),room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);const type=String(p.type||'');if(!['help','suggest_branch','connect'].includes(type))fail(400,'invalid_proposal','Unsupported proposal type');
+  const who=await claimedActor(request,env),proposer=who.id,room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);const type=String(p.type||'');if(!['help','suggest_branch','connect'].includes(type))fail(400,'invalid_proposal','Unsupported proposal type');
   const target=await wishById(env,String(p.targetWishId||''));if(!target||target.room_key!==room||!target.is_public||target.state!=='alive')fail(404,'target_not_available','Target wish is not available');
   let other=null;if(type==='connect'){other=await wishById(env,String(p.otherWishId||''));if(!other||other.room_key!==room||!other.is_public||other.state!=='alive')fail(404,'other_not_available','Other wish is not available');if(other.lineage_id===target.lineage_id)fail(409,'same_lineage','Connection must link independent lineages')}
   const privatePayload={};if(type==='help'){const note=cleanText(p.note,MAX_HELP);if(note.length<2)fail(400,'help_note_required','Describe the concrete help');validateNoContact(note);privatePayload.note=note}if(type==='suggest_branch'){const steps=(Array.isArray(p.steps)?p.steps:[]).map(x=>cleanText(x,MAX_WISH)).filter(Boolean).slice(0,5);if(!steps.length)fail(400,'steps_required','Suggest at least one branch');steps.forEach(validatePublicText);privatePayload.steps=steps}
@@ -238,7 +355,7 @@ function proposalView(p){
   return{id:p.id,type:p.proposal_type,proposerActorId:p.proposer_actor_id,targetWishId:p.target_wish_id,otherWishId:p.other_wish_id,targetOwnerActorId:p.target_owner_actor_id||null,otherOwnerActorId:p.other_owner_actor_id||null,privatePayload:parseJson(p.private_payload_json),status:p.status,decision:p.decision||null,createdAt:p.created_at,updatedAt:p.updated_at};
 }
 async function getInbox(request,env,cors){
-  const actorId=await actor(request,env,true),room=roomKey(request);
+  const who=await claimedActor(request,env),actorId=who.id,room=roomKey(request);
   const notes=await env.DB.prepare('SELECT * FROM notifications WHERE actor_id=? ORDER BY created_at DESC LIMIT 100').bind(actorId).all();
   const base=" FROM proposals p JOIN wishes tw ON tw.id=p.target_wish_id LEFT JOIN wishes ow ON ow.id=p.other_wish_id ";
   const pending=await env.DB.prepare("SELECT p.*,c.decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"JOIN proposal_consents c ON c.proposal_id=p.id WHERE c.actor_id=? AND tw.room_key=? AND p.status='pending' AND c.decision IS NULL ORDER BY p.created_at DESC LIMIT 100").bind(actorId,room).all();
@@ -246,5 +363,23 @@ async function getInbox(request,env,cors){
   const received=await env.DB.prepare("SELECT p.*,c.decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"JOIN proposal_consents c ON c.proposal_id=p.id WHERE c.actor_id=? AND tw.room_key=? AND (p.status!='pending' OR c.decision IS NOT NULL) ORDER BY p.updated_at DESC LIMIT 100").bind(actorId,room).all();
   return json({room,notifications:(notes.results||[]).map(n=>({id:n.id,kind:n.kind,objectId:n.object_id,title:n.title,body:n.body,isRead:!!n.is_read,createdAt:n.created_at})),pending:(pending.results||[]).map(proposalView),sent:(sent.results||[]).map(proposalView),receivedHistory:(received.results||[]).map(proposalView)},200,cors);
 }
+
+async function getSaved(request,env,cors){
+  const who=await claimedActor(request,env),room=roomKey(request);
+  const rows=await env.DB.prepare("SELECT w.*,s.created_at AS saved_at,0 AS encouragement_count FROM saved_wishes s JOIN wishes w ON w.id=s.wish_id WHERE s.actor_id=? AND w.room_key=? AND w.state!='removed' ORDER BY s.created_at DESC LIMIT 250").bind(who.id,room).all();
+  return json({saved:(rows.results||[]).map(r=>({...publicWish(r,r.owner_actor_id===who.id),savedAt:r.saved_at}))},200,cors)
+}
+async function saveWish(request,env,cors,wishId){
+  const who=await claimedActor(request,env),room=roomKey(request),w=await wishById(env,wishId);
+  if(!w||w.room_key!==room||!w.is_public||w.state==='removed')fail(404,'wish_not_found','Wish not found');
+  await env.DB.prepare('INSERT OR REPLACE INTO saved_wishes (actor_id,wish_id,created_at) VALUES (?,?,?)').bind(who.id,wishId,now()).run();
+  return json({wishId,saved:true},201,cors)
+}
+async function unsaveWish(request,env,cors,wishId){
+  const who=await claimedActor(request,env);
+  await env.DB.prepare('DELETE FROM saved_wishes WHERE actor_id=? AND wish_id=?').bind(who.id,wishId).run();
+  return json({wishId,saved:false},200,cors)
+}
+
 async function readNotification(request,env,cors,nid){const actorId=await actor(request,env,true);const r=await env.DB.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND actor_id=?').bind(nid,actorId).run();if(!r.meta?.changes)fail(404,'notification_not_found','Notification not found');return json({id:nid,isRead:true},200,cors)}
 async function createReport(request,env,cors){const actorId=await actor(request,env,false),room=roomKey(request),p=await body(request),wishId=String(p.wishId||''),reason=cleanText(p.reason,80),details=cleanText(p.details,500);if(!reason)fail(400,'reason_required','Report reason required');const w=await wishById(env,wishId);if(!w||w.room_key!==room)fail(404,'wish_not_found','Wish not found');const rid=id('report');await env.DB.prepare("INSERT INTO reports (id,reporter_actor_id,wish_id,reason,details,status,created_at) VALUES (?,?,?,?,?,'open',?)").bind(rid,actorId,wishId,reason,details||null,now()).run();return json({reportId:rid},201,cors)}

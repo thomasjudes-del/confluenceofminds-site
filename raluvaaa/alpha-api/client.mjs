@@ -19,13 +19,24 @@ export class RaluvaaaAlphaClient {
     return data;
   }
   async ensureSession(cfTurnstileToken){
-    if(this.token&&this.actorId){try{await this.me();return{actorId:this.actorId,token:this.token,reused:true}}catch(e){if(e.status!==401)throw e}}
+    if(this.token&&this.actorId){try{const me=await this.me();return{actorId:this.actorId,token:this.token,reused:true,claimed:!!me.claimed,email:me.email||null}}catch(e){if(e.status!==401)throw e}}
     const s=await this.request('/v1/session',{method:'POST',auth:false,body:{cfTurnstileToken}});
     this.storage.setItem(this.tokenKey,s.token);this.storage.setItem(this.actorKey,s.actorId);return{...s,reused:false};
+  }
+  async requestCode(email,cfTurnstileToken){return this.request('/v1/auth/request-code',{method:'POST',body:{email,cfTurnstileToken}})}
+  async verifyCode(email,code){
+    const s=await this.request('/v1/auth/verify-code',{method:'POST',body:{email,code}});
+    this.storage.setItem(this.tokenKey,s.token);this.storage.setItem(this.actorKey,s.actorId);return s
+  }
+  async logout(){
+    try{if(this.token)await this.request('/v1/auth/logout',{method:'POST',body:{}})}finally{this.storage.removeItem(this.tokenKey);this.storage.removeItem(this.actorKey)}
   }
   world(){return this.request('/v1/world',{auth:!!this.token})}
   me(){return this.request('/v1/me')}
   inbox(){return this.request('/v1/inbox')}
+  saved(){return this.request('/v1/saved')}
+  saveWish(wishId){return this.request(`/v1/saved/${encodeURIComponent(wishId)}`,{method:'POST',body:{}})}
+  unsaveWish(wishId){return this.request(`/v1/saved/${encodeURIComponent(wishId)}`,{method:'DELETE'})}
   createWish({text,locationText,cfTurnstileToken}){return this.request('/v1/wishes',{method:'POST',body:{text,locationText,cfTurnstileToken}})}
   wishEvent(wishId,payload){return this.request(`/v1/wishes/${encodeURIComponent(wishId)}/events`,{method:'POST',body:payload})}
   encourage(wishId){return this.request(`/v1/wishes/${encodeURIComponent(wishId)}/encourage`,{method:'POST',body:{}})}
