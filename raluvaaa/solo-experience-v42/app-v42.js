@@ -297,6 +297,7 @@ window.__RALUVAAA_UI__={
   action(kind){if(current)action(kind,current)},
   current(){return current?{...current}:null},
   navigateWish(id,opts){return navigateWish(id,opts)},
+  select(id){const m=byId.get(id);if(!m)return;if(connectSource&&m.semanticId!==connectSource.semanticId){proposeConnection(m);return}openWish(m)},
   recenter(){if(current)focusLineage(current)}
 };
 if(params.has('qa'))window.__RV26_TEST__={open:id=>send({type:'rv25-focus',semanticId:id}),state:()=>JSON.parse(JSON.stringify(state)),persona:PERSONA,focus:()=>focusLineageId,reset:resetTest,semantic:()=>semantic.map(x=>({...x}))};
