@@ -15,12 +15,32 @@ const A=make(),B=make(),C=make(),D=make(otherRoom);
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function retry(fn,tries=30){let last;for(let i=0;i<tries;i++){try{return await fn()}catch(e){last=e;await wait(150)}}throw last}
 async function rejects(fn,code){await assert.rejects(fn,e=>e&&e.code===code)}
+async function claim(client,email){
+  const sent=await client.requestCode(email);
+  assert.match(sent.testCode,/^\d{6}$/,'test mode must return a six-digit OTP');
+  const verified=await client.verifyCode(email,sent.testCode);
+  assert.equal(verified.claimed,true);
+  assert(verified.actorId&&verified.token);
+  const me=await client.me();
+  assert.equal(me.claimed,true);
+  return verified
+}
 function hasEvent(world,type,pred=()=>true){return world.events.some(e=>e.type===type&&pred(e))}
 function wish(world,id){return world.wishes.find(w=>w.id===id)}
 
 await retry(()=>A.request('/v1/health',{auth:false}));
 const sessions=await Promise.all([A.ensureSession(),B.ensureSession(),C.ensureSession(),D.ensureSession()]);
-assert.equal(new Set(sessions.map(x=>x.actorId)).size,4,'independent sessions required');
+assert.equal(new Set(sessions.map(x=>x.actorId)).size,4,'independent anonymous sessions required');
+await rejects(()=>A.createWish({text:'Anonymous publish must fail.',locationText:'Nantes, France'}),'claim_required');
+
+const stamp=Date.now().toString(36);
+await Promise.all([
+  claim(A,'a+'+stamp+'@raluvaaa.test'),
+  claim(B,'b+'+stamp+'@raluvaaa.test'),
+  claim(C,'c+'+stamp+'@raluvaaa.test'),
+  claim(D,'d+'+stamp+'@raluvaaa.test')
+]);
+assert.equal(new Set([A.actorId,B.actorId,C.actorId,D.actorId]).size,4,'claimed identities must remain independent');
 
 // Publication validation.
 await rejects(()=>A.createWish({text:'x'}),'invalid_wish');
@@ -31,6 +51,17 @@ await rejects(()=>A.createWish({text:'I need a medical diagnosis'}),'outside_alp
 const wa=await A.createWish({text:'I want to learn coastal sailing.',locationText:'Nantes, France'});
 const wb=await B.createWish({text:'I want to create a shared neighbourhood garden.',locationText:'Nantes, France'});
 assert(wa.wishId&&wb.wishId&&wa.wishId!==wb.wishId);
+
+await A.saveWish(wb.wishId);
+assert((await A.saved()).saved.some(w=>w.id===wb.wishId),'saved wish must persist server-side');
+
+const A2=make();
+await A2.ensureSession();
+const loginAgain=await A2.requestCode('a+'+stamp+'@raluvaaa.test');
+await A2.verifyCode('a+'+stamp+'@raluvaaa.test',loginAgain.testCode);
+assert.equal(A2.actorId,A.actorId,'same verified email must restore the same actor on another browser');
+assert((await A2.me()).wishes.some(w=>w.id===wa.wishId),'same account on another browser must recover owned wishes');
+assert((await A2.saved()).saved.some(w=>w.id===wb.wishId),'same account on another browser must recover saved wishes');
 
 let world=await B.world();
 assert(wish(world,wa.wishId),'B must see A public wish');
@@ -191,8 +222,10 @@ world=await C.world();
 assert(wish(world,concurrent[0].wishId)&&wish(world,concurrent[1].wishId),'concurrent writes must both survive');
 
 const meA=await A.me(),meB=await B.me();
-assert.equal(meA.actorId,sessions[0].actorId);
-assert.equal(meB.actorId,sessions[1].actorId);
+assert.equal(meA.actorId,A.actorId);
+assert.equal(meB.actorId,B.actorId);
+assert.equal(meA.claimed,true);
+assert.equal(meB.claimed,true);
 assert.equal(meA.room,room);
 assert.equal(meB.room,room);
 console.log('RALUVAAA exhaustive shared product gate passed');

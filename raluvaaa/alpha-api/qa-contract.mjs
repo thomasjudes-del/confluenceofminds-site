@@ -13,12 +13,30 @@ const A=make(),B=make(),C=make(),ISO=make('OTHER');
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function retry(fn,tries=30){let last;for(let i=0;i<tries;i++){try{return await fn()}catch(e){last=e;await wait(150)}}throw last}
 async function rejectsCode(fn,code){await assert.rejects(fn,e=>e?.code===code,'expected '+code)}
+async function claim(client,email){
+  const sent=await client.requestCode(email);
+  assert.match(sent.testCode,/^\d{6}$/,'test mode must return a six-digit OTP');
+  const verified=await client.verifyCode(email,sent.testCode);
+  assert.equal(verified.claimed,true);
+  assert(verified.actorId&&verified.token);
+  const me=await client.me();
+  assert.equal(me.claimed,true);
+  return verified
+}
 async function pending(client,id){return (await client.inbox()).pending.find(p=>p.id===id)}
 async function note(client,objectId){return (await client.inbox()).notifications.find(n=>n.objectId===objectId)}
 
 await retry(()=>A.request('/v1/health',{auth:false}));
 await Promise.all([A.ensureSession(),B.ensureSession(),C.ensureSession(),ISO.ensureSession()]);
 assert.equal(new Set([A.actorId,B.actorId,C.actorId,ISO.actorId]).size,4);
+await rejectsCode(()=>A.createWish({text:'Anonymous publishing is blocked.',locationText:'Nantes, France'}),'claim_required');
+const authStamp=Date.now().toString(36);
+await Promise.all([
+  claim(A,'contract-a+'+authStamp+'@raluvaaa.test'),
+  claim(B,'contract-b+'+authStamp+'@raluvaaa.test'),
+  claim(C,'contract-c+'+authStamp+'@raluvaaa.test'),
+  claim(ISO,'contract-iso+'+authStamp+'@raluvaaa.test')
+]);
 
 await rejectsCode(()=>A.createWish({text:'Email me at test@example.com',locationText:'Nantes'}),'contact_or_url');
 
@@ -33,6 +51,10 @@ await rejectsCode(()=>A.wishEvent(located.wishId,{type:'correct',text:'Reach me 
 
 const root=await A.createWish({text:'I want to learn coastal sailing.',locationText:'Nantes, France'});
 assert((await B.world()).wishes.some(w=>w.id===root.wishId));
+await B.saveWish(root.wishId);
+assert((await B.saved()).saved.some(w=>w.id===root.wishId),'saved wish should persist');
+await B.unsaveWish(root.wishId);
+assert(!(await B.saved()).saved.some(w=>w.id===root.wishId),'unsave should persist');
 assert(!(await ISO.world()).wishes.some(w=>w.id===root.wishId));
 await rejectsCode(()=>ISO.encourage(root.wishId),'wish_not_found');
 await rejectsCode(()=>B.wishEvent(root.wishId,{type:'bloom'}),'owner_required');

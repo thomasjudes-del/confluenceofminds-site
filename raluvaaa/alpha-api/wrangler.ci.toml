@@ -4,6 +4,8 @@ compatibility_date = "2026-09-01"
 
 [vars]
 ALLOWED_ORIGINS = "http://127.0.0.1:8787,http://localhost:8787,http://127.0.0.1:4173,http://localhost:4173"
+AUTH_TEST_MODE = "1"
+AUTH_CODE_SECRET = "ci-only-raluvaaa-auth-secret"
 
 [[d1_databases]]
 binding = "DB"
