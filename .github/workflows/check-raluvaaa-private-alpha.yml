@@ -1,0 +1,59 @@
+name: Check RALUVAAA Private Alpha
+
+on:
+  push:
+    paths:
+      - 'raluvaaa/private-alpha/**'
+      - 'raluvaaa/alpha-api/**'
+      - 'raluvaaa/solo-experience-v42/app-v42.js'
+      - 'raluvaaa/solo-experience-v46/**'
+      - '.github/workflows/check-raluvaaa-private-alpha.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: raluvaaa-private-alpha-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static checks
+        run: |
+          node --check raluvaaa/private-alpha/bootstrap.js
+          node --check raluvaaa/private-alpha/features.js
+          node --check raluvaaa/private-alpha/qa-private-alpha.cjs
+          node --check raluvaaa/alpha-api/worker.mjs
+          node --check raluvaaa/alpha-api/client.mjs
+          grep -q "RALUVAAA_SHARED=true" raluvaaa/private-alpha/index.html
+          grep -q "RALUVAAA_ROOM='WORLD'" raluvaaa/private-alpha/index.html
+          grep -q "__RALUVAAA_SHARED_REQUIRE_CLAIM__" raluvaaa/private-alpha/bootstrap.js
+          grep -q "requestCode" raluvaaa/alpha-api/client.mjs
+          grep -q "saved_wishes" raluvaaa/alpha-api/schema.sql
+      - name: Install browsers and Worker
+        run: |
+          npm install --no-save playwright@1.55.0 wrangler@4 >/dev/null 2>&1
+          npx playwright install --with-deps chromium webkit >/dev/null 2>&1
+      - name: Run real two-browser identity QA
+        run: |
+          cd raluvaaa/alpha-api
+          npx wrangler d1 execute raluvaaa-alpha --local --file=schema.sql --config=wrangler.ci.toml >/tmp/private-alpha-d1.log 2>&1
+          npx wrangler dev --local --config=wrangler.ci.toml --ip 127.0.0.1 --port 8787 >/tmp/private-alpha-worker.log 2>&1 &
+          WORKER_PID=$!
+          cd "$GITHUB_WORKSPACE"
+          python3 -m http.server 4173 --directory "$GITHUB_WORKSPACE" >/tmp/private-alpha-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $WORKER_PID $HTTP_PID || true' EXIT
+          sleep 2
+          if ! node raluvaaa/private-alpha/qa-private-alpha.cjs; then
+            echo '--- Worker log ---'
+            cat /tmp/private-alpha-worker.log || true
+            echo '--- Static log ---'
+            cat /tmp/private-alpha-http.log || true
+            exit 1
+          fi
