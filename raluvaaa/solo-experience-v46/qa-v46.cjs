@@ -122,8 +122,62 @@ async function desktopFallback(){
     assert(box&&box.height>220,'still preview must remain visible on desktop');
   }finally{await browser.close()}
 }
+async function aboutAndSavedGraft(){
+  const{browser,page}=await setup();
+  try{
+    await page.evaluate(()=>document.querySelector('.lang button[data-lang="fr"]')?.click());
+    await page.waitForFunction(()=>document.querySelector('.lang button[data-lang="fr"]')?.classList.contains('active'),null,{timeout:2000});
+
+    await page.click('#v46AboutBtn');
+    await page.waitForSelector('#v46AboutOverlay.open',{timeout:2000});
+    const aboutFr=await page.locator('.v46-about-panel').innerText();
+    assert.match(aboutFr,/sérendipité/i,'French about must explain serendipity');
+    assert.match(aboutFr,/pas un feed/i,'French about must position RALUVAAA against feed mechanics');
+    assert.match(aboutFr,/Trois wishes te sont confiés/i,'French about must explain entrusted wishes');
+    assert.match(aboutFr,/pas de moteur de recherche classique/i,'French about must explain no classic search');
+    assert.match(aboutFr,/pas de recommandations personnalisées/i,'French about must explain no personalised recommendations');
+    const aboutBox=await page.locator('.v46-about-panel').boundingBox();
+    assert(aboutBox&&aboutBox.y>=0&&aboutBox.y+aboutBox.height<=844,'About panel must fit mobile viewport');
+
+    await page.evaluate(()=>document.querySelector('.lang button[data-lang="en"]')?.click());
+    await page.waitForFunction(()=>/Serendipity is intentional/i.test(document.querySelector('.v46-about-panel')?.innerText||''),null,{timeout:2000});
+    const aboutEn=await page.locator('.v46-about-panel').innerText();
+    assert.match(aboutEn,/not a feed/i);
+    assert.match(aboutEn,/not a map/i);
+    await page.click('.v46-about-close');
+
+    const target=await createWish(page,'V46 saved graft target');
+    await page.evaluate(id=>window.__RALUVAAA_V46__.toggleSaved(id),target);
+    assert.equal(await page.evaluate(()=>window.__RALUVAAA_V46__.saved().length),1,'bookmark must be stored');
+
+    const source=await createWish(page,'V46 graft source');
+    await open(page,source);
+    await page.evaluate(()=>window.__RALUVAAA_UI__.action('connect'));
+    await page.waitForFunction(()=>!document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:2000});
+    await page.waitForSelector('#v46SavedGraftBtn',{state:'visible',timeout:2000});
+    const modeText=await page.locator('#modeText').innerText();
+    assert.match(modeText,/saved wishes|wishes sauvegardés/i,'graft mode must explicitly offer saved wishes as an alternative to world selection');
+
+    await page.click('#v46SavedGraftBtn');
+    await page.waitForSelector('#v46SavedGraftOverlay.open',{timeout:2000});
+    const targetRow=page.locator('[data-v46-graft-target="'+target+'"]');
+    assert.equal(await targetRow.count(),1,'saved target must appear in graft picker');
+    assert.equal(await targetRow.isDisabled(),false,'eligible saved target must be selectable');
+    assert.match(await targetRow.innerText(),/V46 saved graft target/);
+
+    await targetRow.click();
+    await page.waitForSelector('#overlay #confirm',{timeout:2000});
+    const confirmText=await page.locator('#overlay').innerText();
+    assert.match(confirmText,/V46 graft source/);
+    assert.match(confirmText,/V46 saved graft target/);
+    await page.click('#overlay #cancel');
+    await page.waitForFunction(()=>document.getElementById('modeBar').classList.contains('hidden'),null,{timeout:2000});
+  }finally{await browser.close()}
+}
+
 (async()=>{
   await mobileShareContract();
   await desktopFallback();
-  console.log('RALUVAAA V46 mobile/desktop share QC passed');
+  await aboutAndSavedGraft();
+  console.log('RALUVAAA V46 share + about + saved graft QC passed');
 })().catch(err=>{console.error(err);process.exit(1)});
