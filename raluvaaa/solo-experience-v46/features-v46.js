@@ -303,6 +303,12 @@ function graftEligibility(m,source){
 function closeSavedGraftPicker(){
   document.getElementById('v46SavedGraftOverlay')?.classList.remove('open')
 }
+function selectSavedGraftTarget(id){
+  if(window.__RV26_SHARED__?.select)return window.__RV26_SHARED__.select(id);
+  const m=semantic().find(x=>x.semanticId===id);
+  if(!m)return;
+  window.postMessage({type:'rv25-select',meta:m},location.origin)
+}
 function openSavedGraftPicker(){
   const source=semantic().find(x=>x.semanticId===graftSourceId);
   if(!source)return;
@@ -323,7 +329,7 @@ function openSavedGraftPicker(){
   host.querySelector('.v46-graft-x').onclick=closeSavedGraftPicker;
   host.querySelector('.v46-graft-back').onclick=closeSavedGraftPicker;
   host.querySelectorAll('[data-v46-graft-target]:not([disabled])').forEach(btn=>btn.onclick=()=>{
-    const id=btn.dataset.v46GraftTarget;closeSavedGraftPicker();window.__RALUVAAA_UI__?.select?.(id)
+    const id=btn.dataset.v46GraftTarget;closeSavedGraftPicker();selectSavedGraftTarget(id)
   })
 }
 function decorateGraftMode(){
@@ -1068,6 +1074,7 @@ window.__RALUVAAA_V46__={
   toggleSaved:id=>{const m=semantic().find(x=>x.semanticId===id);if(m)toggleSaved(m)},
   openAbout,
   openSavedGraftPicker,
+  selectSavedGraftTarget,
   graftSource:()=>graftSourceId,
   shareUrl:id=>{const m=semantic().find(x=>x.semanticId===id);return m?shareUrl(m):null},
   openShare:id=>{const m=semantic().find(x=>x.semanticId===id);if(m)openShare(m)},
