@@ -86,6 +86,9 @@ async function acceptFirst(page,type){
   try{
     assert.equal(await A.page.locator('#qaStrip').count(),0,'Private Alpha must not expose fake A/B controls');
     assert.equal(await B.page.locator('#qaStrip').count(),0,'Desktop must not expose fake A/B controls');
+    assert.equal(await A.page.locator('#rail #v46AboutBtn').count(),0,'About must not consume a main rail slot');
+    assert.equal(await A.page.locator('#brand #v46AboutBtn').count(),1,'About must live in the RALUVAAA brand block');
+    assert.equal(await A.page.locator('#rail #privateAccountBtn').count(),0,'Account must not have a separate main rail button');
 
     const anonA=await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
     const anonB=await B.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
@@ -95,6 +98,11 @@ async function acceptFirst(page,type){
     const wishA=await createWish(A.page,'A wants to learn coastal sailing '+stamp,emailA);
     const actorA=await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
     assert.equal(await A.page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.me().claimed),true);
+    await A.page.click('#myWorldBtn');
+    await A.page.waitForSelector('#privateAccountSection',{timeout:3000});
+    assert.match(await A.page.locator('#privateAccountSection').innerText(),/Ton espace|Your space/,'My Wishes must contain account identity');
+    assert.equal(await A.page.locator('#rail #privateAccountBtn').count(),0,'Claimed account must not add a rail button');
+    await A.page.click('#myWorldBtn');
 
     // B is still anonymous: exploration/encouragement works, but relationship actions do not.
     await B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.encourage(id),wishA);

@@ -272,11 +272,40 @@ function requireClaim(reason){
   if(authResolver)return Promise.resolve(false);
   return new Promise(resolve=>{authResolver=resolve;renderEmailStep(reason)})
 }
+function accountCopy(){
+  return (window.__RV26_SHARED__?.state?.().lang||((navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr'))==='en'
+    ?{title:'Your space',anonymous:'Not signed in',connect:'Continue with email',logout:'Sign out',note:'Private identity · no public profile'}
+    :{title:'Ton espace',anonymous:'Non connecté',connect:'Continuer avec email',logout:'Se déconnecter',note:'Identité privée · aucun profil public'}
+}
+function decorateMyWorldAccount(){
+  const drawer=document.getElementById('drawer'),body=document.getElementById('drawerBody'),my=document.getElementById('myWorldBtn');
+  document.getElementById('privateAccountBtn')?.remove();
+  if(!drawer||!body||!my?.classList.contains('active')||drawer.classList.contains('hidden'))return;
+  document.getElementById('privateAccountSection')?.remove();
+  const t=accountCopy(),section=document.createElement('section');
+  section.id='privateAccountSection';section.className='pa-myworld-account';
+  const identity=authMe?.claimed?String(authMe.email||''):t.anonymous;
+  section.innerHTML='<div class="pa-myworld-account-copy"><span>'+t.title+'</span><b>'+identity+'</b><small>'+t.note+'</small></div>'+
+    '<button type="button" class="pa-myworld-account-action">'+(authMe?.claimed?t.logout:t.connect)+'</button>';
+  const action=section.querySelector('.pa-myworld-account-action');
+  action.onclick=async e=>{
+    e.stopPropagation();
+    if(authMe?.claimed){
+      action.disabled=true;
+      try{
+        await client.logout();await client.ensureSession();authMe=await client.me();
+        window.RALUVAAA_ACTOR_ID=client.actorId;window.__RALUVAAA_UI__?.setActor?.(client.actorId);
+        await refreshSavedFromServer();await refresh(true);updateAccountButton()
+      }catch(err){showError(err);action.disabled=false}
+    }else showAccount()
+  };
+  body.prepend(section);
+  const title=document.getElementById('drawerTitle');
+  if(title)title.textContent=(window.__RV26_SHARED__?.state?.().lang==='en')?'My wishes':'Mes wishes'
+}
 function updateAccountButton(){
-  const rail=document.getElementById('rail'),create=document.getElementById('createBtn');if(!rail||!create)return;
-  let btn=document.getElementById('privateAccountBtn');
-  if(!btn){btn=document.createElement('button');btn.id='privateAccountBtn';btn.type='button';btn.className='rail-btn';btn.textContent='○';rail.insertBefore(btn,create);btn.onclick=e=>{e.stopPropagation();showAccount()}}
-  btn.classList.toggle('claimed',!!authMe?.claimed);btn.textContent=authMe?.claimed?'●':'○';btn.title=authText().account;btn.setAttribute('aria-label',authText().account)
+  document.getElementById('privateAccountBtn')?.remove();
+  decorateMyWorldAccount()
 }
 function localSavedKey(){return'raluvaaaSavedWishesV1:local'}
 function writeSavedLocal(rows){
@@ -301,6 +330,12 @@ async function syncSavedFromLocal(){
 }
 function installPrivateGuards(){
   window.__RALUVAAA_SHARED_REQUIRE_CLAIM__=requireClaim;
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('#myWorldBtn,.lang button')){setTimeout(updateAccountButton,0);setTimeout(updateAccountButton,80)}
+  });
+  const drawerBody=document.getElementById('drawerBody');
+  if(drawerBody)new MutationObserver(()=>{if(document.getElementById('myWorldBtn')?.classList.contains('active'))requestAnimationFrame(decorateMyWorldAccount)}).observe(drawerBody,{childList:true});
+
   document.addEventListener('click',async e=>{
     const b=e.target.closest?.('#v43BookmarkBtn,#v43MobileBookmarkBtn');
     if(!b||authMe?.claimed)return;

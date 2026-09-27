@@ -540,10 +540,22 @@ body[data-feature-version="46"] .v43-saved-unavailable{
 
 /* V46 about / philosophy */
 .v46-about-btn{
+  pointer-events:auto;
+  flex:0 0 auto;
+  width:25px;
+  height:25px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(184,214,255,.12);
+  border-radius:999px;
+  background:rgba(255,255,255,.025);
   font-family:Georgia,"Times New Roman",serif;
-  font-size:17px!important;
-  color:rgba(238,244,248,.82)!important;
+  font-size:14px!important;
+  line-height:1;
+  color:rgba(238,244,248,.70)!important;
+  padding:0;
 }
+.v46-about-btn:hover{background:rgba(89,206,255,.06);color:#fff!important}
 #v46AboutOverlay,
 #v46SavedGraftOverlay{
   position:fixed;
@@ -819,9 +831,24 @@ body[data-feature-version="46"] .v43-saved-unavailable{
   }
 }
 
-/* Private Alpha identity: private email only, no public profile. */
-#privateAccountBtn{font-size:17px}
-#privateAccountBtn.claimed{background:rgba(101,214,207,.075);border-color:rgba(101,214,207,.20)}
+/* Private Alpha identity: private email only, integrated into My Wishes. */
+.pa-myworld-account{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:0 0 13px;
+  padding:10px 11px;
+  border:1px solid rgba(185,215,228,.10);
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+}
+.pa-myworld-account-copy{min-width:0;display:grid;gap:2px}
+.pa-myworld-account-copy span{font-size:7px;letter-spacing:.11em;text-transform:uppercase;color:rgba(220,232,237,.43)}
+.pa-myworld-account-copy b{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pa-myworld-account-copy small{font-size:7px;color:rgba(220,232,237,.42)}
+.pa-myworld-account-action{flex:0 0 auto;min-height:31px;border:1px solid rgba(185,215,228,.11);border-radius:9px;background:rgba(255,255,255,.03);padding:0 9px;font-size:7px;color:rgba(237,245,247,.72)}
+.pa-myworld-account-action:hover{background:rgba(89,206,255,.06)}
 #raluvaaaAuthOverlay{position:fixed;inset:0;z-index:180;display:none}
 #raluvaaaAuthOverlay.open{display:block}
 .pa-auth-scrim{position:absolute;inset:0;background:rgba(1,5,12,.76);backdrop-filter:blur(14px)}

@@ -254,14 +254,16 @@ function refreshAbout(){
   openAbout()
 }
 function ensureAboutButton(){
-  const rail=document.getElementById('rail'),create=document.getElementById('createBtn');
-  if(!rail||!create)return;
+  const brand=document.querySelector('#brand .brand-row'),lang=document.querySelector('#brand .lang');
+  if(!brand||!lang)return;
   let btn=document.getElementById('v46AboutBtn');
   if(!btn){
     btn=document.createElement('button');
-    btn.id='v46AboutBtn';btn.type='button';btn.className='rail-btn v46-about-btn';btn.textContent='?';
-    rail.insertBefore(btn,create);
+    btn.id='v46AboutBtn';btn.type='button';btn.className='v46-about-btn';btn.textContent='?';
+    lang.insertAdjacentElement('beforebegin',btn);
     btn.onclick=e=>{e.stopPropagation();openAbout()}
+  }else if(btn.parentElement!==brand){
+    lang.insertAdjacentElement('beforebegin',btn)
   }
   const t=aboutCopy();btn.title=t.button;btn.setAttribute('aria-label',t.button)
 }
