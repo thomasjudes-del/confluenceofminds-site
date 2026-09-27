@@ -62,7 +62,8 @@ jobs:
           echo "Worker: $WORKER_URL" >> "$GITHUB_STEP_SUMMARY"
       - name: Verify production health
         run: |
-          curl --retry 6 --retry-delay 2 --fail --silent --show-error "$WORKER_URL/v1/health"
+          sleep 3
+          curl --retry 8 --retry-delay 2 --retry-all-errors --fail --silent --show-error "$WORKER_URL/v1/health"
           echo
       - name: Wire Shared and Private Alpha to deployed Worker
         run: |
