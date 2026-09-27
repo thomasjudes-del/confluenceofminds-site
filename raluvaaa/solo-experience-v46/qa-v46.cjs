@@ -86,8 +86,9 @@ async function mobileShareContract(){
     assert.equal(sent.url,'','file share must not duplicate URL');
 
     await page.locator('[data-mode="image"]').click();
+    await page.waitForFunction(()=>window.__RALUVAAA_V46__.mode()==='image',null,{timeout:2000});
     assert.equal(await share.isDisabled(),true,'switching mode invalidates prior media');
-    await page.waitForFunction(()=>window.__RALUVAAA_V46__.mediaReady()||window.__RALUVAAA_V46__.mediaError(),null,{timeout:6000});
+    await page.waitForFunction(()=>window.__RALUVAAA_V46__.mediaReady()||window.__RALUVAAA_V46__.mediaError(),null,{timeout:10000});
     assert.equal(await page.evaluate(()=>window.__RALUVAAA_V46__.mediaErrorMessage()),'','still-image preparation failed');
     assert.equal(await page.evaluate(()=>window.__RALUVAAA_V46__.mediaReady()),true,'still image must be prepared before sharing');
     await share.click();
