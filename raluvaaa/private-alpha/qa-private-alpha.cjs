@@ -17,9 +17,9 @@ async function pageFor(browser,mobile=false){
   await page.route('https://ipapi.co/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({city:'Nantes',country_name:'France'})}));
   await page.goto(URL,{waitUntil:'domcontentloaded'});
   try{
-    await page.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,null,{timeout:30000});
-    await page.waitForFunction(()=>!!window.__RALUVAAA_PRIVATE_AUTH__,null,{timeout:5000});
-    await page.waitForFunction(()=>window.__RALUVAAA_V46__?.version===46,null,{timeout:5000});
+    await page.waitForFunction(()=>window.__RALUVAAA_SHARED_READY__===true,null,{polling:100,timeout:30000});
+    await page.waitForFunction(()=>!!window.__RALUVAAA_PRIVATE_AUTH__,null,{polling:100,timeout:5000});
+    await page.waitForFunction(()=>window.__RALUVAAA_V46__?.version===46,null,{polling:100,timeout:5000});
   }catch(err){
     const diag=await page.evaluate(()=>({
       sharedReady:window.__RALUVAAA_SHARED_READY__,
@@ -38,11 +38,11 @@ async function claimViaUi(page,email){
   await page.waitForSelector('#raluvaaaAuthOverlay.open');
   await page.fill('[data-pa-email]',email);
   await page.click('[data-pa-send]');
-  await page.waitForSelector('[data-pa-code]',{timeout:5000});
+  await page.waitForSelector('[data-pa-code]',{polling:100,timeout:5000});
   const code=await page.inputValue('[data-pa-code]');
   assert.match(code,/^\d{6}$/,'CI auth code should autofill in test mode');
   await page.click('[data-pa-verify]');
-  await page.waitForFunction(()=>window.__RALUVAAA_PRIVATE_AUTH__?.me?.()?.claimed===true,null,{timeout:7000});
+  await page.waitForFunction(()=>window.__RALUVAAA_PRIVATE_AUTH__?.me?.()?.claimed===true,null,{polling:100,timeout:7000});
   await page.waitForSelector('#raluvaaaAuthOverlay.open',{state:'hidden',timeout:3000}).catch(()=>{});
 }
 async function createWish(page,text,emailIfNeeded){
@@ -51,26 +51,26 @@ async function createWish(page,text,emailIfNeeded){
   await page.fill('#locInput','Nantes, France');
   await page.click('#confirm');
   if(emailIfNeeded){
-    await page.waitForSelector('#raluvaaaAuthOverlay.open',{timeout:3000});
+    await page.waitForSelector('#raluvaaaAuthOverlay.open',{polling:100,timeout:3000});
     await page.fill('[data-pa-email]',emailIfNeeded);
     await page.click('[data-pa-send]');
-    await page.waitForSelector('[data-pa-code]',{timeout:5000});
+    await page.waitForSelector('[data-pa-code]',{polling:100,timeout:5000});
     assert.match(await page.inputValue('[data-pa-code]'),/^\d{6}$/);
     await page.click('[data-pa-verify]');
   }
-  await page.waitForFunction(t=>window.__RALUVAAA_SHARED_DEBUG__?.world()?.wishes?.some(w=>w.text===t),text,{timeout:12000});
+  await page.waitForFunction(t=>window.__RALUVAAA_SHARED_DEBUG__?.world()?.wishes?.some(w=>w.text===t),text,{polling:100,timeout:12000});
   return page.evaluate(t=>window.__RALUVAAA_SHARED_DEBUG__.world().wishes.find(w=>w.text===t).id,text)
 }
 async function refresh(page){await page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh())}
 async function openWish(page,id){
   await refresh(page);
   await page.evaluate(id=>window.__RV26_SHARED__.open(id),id);
-  await page.waitForFunction(id=>window.__RALUVAAA_UI__?.current?.()?.semanticId===id,id,{timeout:5000})
+  await page.waitForFunction(id=>window.__RALUVAAA_UI__?.current?.()?.semanticId===id,id,{polling:100,timeout:5000})
 }
 async function acceptFirst(page,type){
   await refresh(page);
   await page.click('#inboxBtn');
-  await page.waitForFunction(type=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type===type),type,{timeout:8000});
+  await page.waitForFunction(type=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type===type),type,{polling:100,timeout:8000});
   const p=await page.evaluate(type=>window.__RALUVAAA_SHARED_DEBUG__.inbox().pending.find(p=>p.type===type),type);
   const btn=page.locator('[data-accept="'+p.id+'"]');
   await btn.click();
@@ -114,7 +114,7 @@ async function acceptFirst(page,type){
     await openWish(A.page,wishB);
     const saveA=A.page.locator('#v43MobileBookmarkBtn:visible,#v43BookmarkBtn:visible').first();
     await saveA.click();
-    await A.page.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.client.saved().then(x=>x.saved.some(w=>w.id===id)),wishB,{timeout:8000});
+    await A.page.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.client.saved().then(x=>x.saved.some(w=>w.id===id)),wishB,{polling:100,timeout:8000});
 
     // B offers help to A; A receives a real notification and accepts.
     await openWish(B.page,wishA);
@@ -122,32 +122,32 @@ async function acceptFirst(page,type){
     await B.page.waitForSelector('#helpInput');
     await B.page.fill('#helpInput','I can share a practical first sailing checklist.');
     await B.page.click('#confirm');
-    await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{timeout:10000});
+    await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{polling:100,timeout:10000});
     await acceptFirst(A.page,'help');
-    await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help')},null,{timeout:10000});
+    await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help')},null,{polling:100,timeout:10000});
 
     // A proposes a graft from its own wish to B's saved wish via the exact Saved UX.
     await openWish(A.page,wishA);
     await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('connect'));
-    await A.page.waitForSelector('#v46SavedGraftBtn',{timeout:3000});
+    await A.page.waitForSelector('#v46SavedGraftBtn',{polling:100,timeout:3000});
     await A.page.click('#v46SavedGraftBtn');
-    await A.page.waitForSelector('[data-v46-graft-target="'+wishB+'"]',{timeout:3000});
+    await A.page.waitForSelector('[data-v46-graft-target="'+wishB+'"]',{polling:100,timeout:3000});
     await A.page.click('[data-v46-graft-target="'+wishB+'"]');
-    await A.page.waitForSelector('#overlay #confirm',{timeout:3000});
+    await A.page.waitForSelector('#overlay #confirm',{polling:100,timeout:3000});
     await A.page.click('#overlay #confirm');
-    await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='connect')},null,{timeout:10000});
+    await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='connect')},null,{polling:100,timeout:10000});
     await acceptFirst(B.page,'connect');
-    await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='connect')},null,{timeout:10000});
+    await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='connect')},null,{polling:100,timeout:10000});
 
     // Reverse roles: A helps B.
     await openWish(A.page,wishB);
     await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('help'));
     await A.page.fill('#helpInput','I can help organise a first neighbourhood planting day.');
     await A.page.click('#confirm');
-    await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{timeout:10000});
+    await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{polling:100,timeout:10000});
     assert.notEqual((await B.page.locator('#inboxBadge').innerText()).trim(),'0','B must see an unread notification badge');
     await acceptFirst(B.page,'help');
-    await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===id)},wishB,{timeout:10000});
+    await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===id)},wishB,{polling:100,timeout:10000});
 
     // A logs in from a fresh desktop browser profile: same actor, wishes and Saved come back.
     const A2=await pageFor(chrome,false);
