@@ -40,7 +40,10 @@ export class RaluvaaaAlphaClient {
   createWish({text,locationText,cfTurnstileToken}){return this.request('/v1/wishes',{method:'POST',body:{text,locationText,cfTurnstileToken}})}
   wishEvent(wishId,payload){return this.request(`/v1/wishes/${encodeURIComponent(wishId)}/events`,{method:'POST',body:payload})}
   encourage(wishId){return this.request(`/v1/wishes/${encodeURIComponent(wishId)}/encourage`,{method:'POST',body:{}})}
-  proposeHelp(targetWishId,title,note,cfTurnstileToken){return this.request('/v1/proposals',{method:'POST',body:{type:'help',targetWishId,title,note,cfTurnstileToken}})}
+  proposeHelp(targetWishId,title,note,cfTurnstileToken){
+    if(note===undefined){note=String(title||'');title=note.slice(0,60)||'Help offer'}
+    return this.request('/v1/proposals',{method:'POST',body:{type:'help',targetWishId,title,note,cfTurnstileToken}})
+  }
   suggestBranches(targetWishId,steps,cfTurnstileToken){return this.request('/v1/proposals',{method:'POST',body:{type:'suggest_branch',targetWishId,steps,cfTurnstileToken}})}
   proposeConnect(targetWishId,otherWishId,cfTurnstileToken){return this.request('/v1/proposals',{method:'POST',body:{type:'connect',targetWishId,otherWishId,cfTurnstileToken}})}
   respondProposal(proposalId,decision){return this.request(`/v1/proposals/${encodeURIComponent(proposalId)}/respond`,{method:'POST',body:{decision}})}
