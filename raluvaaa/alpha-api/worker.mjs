@@ -160,7 +160,7 @@ async function requestAuthCode(request,env,cors){
   const recent=await env.DB.prepare('SELECT created_at FROM auth_codes WHERE email=? AND consumed_at IS NULL AND expires_at>? ORDER BY created_at DESC LIMIT 1').bind(email,t).first();
   if(recent&&t-Number(recent.created_at)<60000)fail(429,'code_too_soon','Wait a minute before requesting another code');
   const hour=await env.DB.prepare('SELECT COUNT(*) AS n FROM auth_codes WHERE email=? AND created_at>?').bind(email,t-3600000).first();
-  if(Number(hour?.n||0)>=5)fail(429,'code_rate_limited','Too many codes requested. Try again later');
+  if(Number(hour?.n||0)>=12)fail(429,'code_rate_limited','Too many codes requested. Try again later');
   const code=randomCode(),hash=await codeHash(env,email,code),cid=id('auth');
   await env.DB.prepare('INSERT INTO auth_codes (id,email,code_hash,requested_actor_id,created_at,expires_at,attempts,consumed_at) VALUES (?,?,?,?,?,?,0,NULL)').bind(cid,email,hash,anonymousActor,t,t+10*60*1000).run();
   const sent=await sendAuthEmail(env,email,code);
