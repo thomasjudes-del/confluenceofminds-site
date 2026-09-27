@@ -80,8 +80,16 @@ async function acceptFirst(page,type){
     const actorA=await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
     assert.equal(await A.page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.me().claimed),true);
 
-    // B claims explicitly, then creates a wish using the same UI without another auth wall.
+    // B is still anonymous: exploration/encouragement works, but relationship actions do not.
+    await B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.encourage(id),wishA);
+    await assert.rejects(
+      ()=>B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.proposeHelp(id,'Anonymous help must be gated.'),wishA),
+      /claim_required|Verify your email|HTTP 403/
+    );
+
+    // B claims explicitly. The encouragement made anonymously must follow the newly claimed identity.
     await claimViaUi(B.page,emailB);
+    assert(await B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.me().then(m=>m.encouragedWishIds.includes(id)),wishA),'anonymous encouragement must survive account claim');
     const actorB=await B.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
     assert.notEqual(actorA,actorB,'A and B must remain different real accounts');
     const wishB=await createWish(B.page,'B wants to create a neighbourhood garden '+stamp);
