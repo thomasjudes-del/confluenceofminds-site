@@ -34,7 +34,7 @@ async function pageFor(browser,mobile=false){
   return{context,page}
 }
 async function claimViaUi(page,email){
-  await page.click('#privateAccountBtn');
+  await page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.showAccount());
   await page.waitForSelector('#raluvaaaAuthOverlay.open');
   await page.fill('[data-pa-email]',email);
   await page.click('[data-pa-send]');
@@ -106,6 +106,9 @@ async function acceptFirst(page,type){
 
     // B is still anonymous: exploration/encouragement works, but relationship actions do not.
     await B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.encourage(id),wishA);
+    await refresh(A.page);
+    await openWish(A.page,wishA);
+    assert.match(await A.page.locator('.pa-encouragement-count').innerText(),/1/,'owner must see a private encouragement count');
     await assert.rejects(
       ()=>B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.proposeHelp(id,'Anonymous help must be gated.'),wishA),
       /claim_required|Verify your email|HTTP 403/
@@ -127,12 +130,31 @@ async function acceptFirst(page,type){
     // B offers help to A; A receives a real notification and accepts.
     await openWish(B.page,wishA);
     await B.page.evaluate(()=>window.__RALUVAAA_UI__.action('help'));
-    await B.page.waitForSelector('#helpInput');
+    await B.page.waitForSelector('#helpTitleInput');
+    await B.page.fill('#helpTitleInput','First sailing checklist');
     await B.page.fill('#helpInput','I can share a practical first sailing checklist.');
     await B.page.click('#confirm');
     await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{polling:100,timeout:10000});
-    await acceptFirst(A.page,'help');
+    await A.page.click('#inboxBtn');
+    await A.page.waitForSelector('.pa-request-card',{timeout:3000});
+    const requestText=await A.page.locator('.pa-request-card').first().innerText();
+    assert.match(requestText,/First sailing checklist/);
+    assert.match(requestText,/practical first sailing checklist/i);
+    assert(!/ACTOR_/i.test(requestText),'raw actor IDs must never appear in human inbox UI');
+    assert.equal(await A.page.getByText('Someone offered help',{exact:true}).count(),0,'server proposal notification must not duplicate the help card');
+    await A.page.click('[data-accept]');
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help')},null,{polling:100,timeout:10000});
+
+    // Owner can close a wish to new help offers; helper can no longer send one.
+    await openWish(A.page,wishA);
+    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
+    await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world().events.some(e=>e.type==='help_setting'&&e.wishId===id&&e.payload?.open===false)},wishA,{polling:100,timeout:8000});
+    await assert.rejects(
+      ()=>B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.proposeHelp(id,'Blocked title','Blocked help'),wishA),
+      /help_closed|not accepting/i
+    );
+    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
+    await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();const ev=window.__RALUVAAA_SHARED_DEBUG__.world().events.filter(e=>e.type==='help_setting'&&e.wishId===id).pop();return ev?.payload?.open===true},wishA,{polling:100,timeout:8000});
 
     // A proposes a graft from its own wish to B's saved wish via the exact Saved UX.
     await openWish(A.page,wishA);
@@ -150,6 +172,7 @@ async function acceptFirst(page,type){
     // Reverse roles: A helps B.
     await openWish(A.page,wishB);
     await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('help'));
+    await A.page.fill('#helpTitleInput','First planting day');
     await A.page.fill('#helpInput','I can help organise a first neighbourhood planting day.');
     await A.page.click('#confirm');
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{polling:100,timeout:10000});
