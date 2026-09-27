@@ -76,7 +76,8 @@ function buildState(world,me,inbox,actorId){
 function fp(state){return JSON.stringify({events:state.events.map(e=>[e.type,e.semanticId||'',e.parentSemanticId||'',e.proposalId||'',e.decision||'',e.serverStatus||'',e.aSemanticId||'',e.bSemanticId||'',e.text||'',e.loc||'',e.state||'',(e.suggestions||[]).join('|'),(e.children||[]).map(c=>[c.semanticId,c.text||'',c.loc||'']).join('|')]),notifications:(state.notifications||[]).map(n=>[n.id,n.kind,n.objectId,n.isRead,n.title||'',n.body||''])})}
 
 async function fetchState(){
-  const [world,me,inbox]=await Promise.all([client.world(),client.me(),client.inbox()]);
+  const [world,me]=await Promise.all([client.world(),client.me()]);
+  const inbox=me.claimed?await client.inbox():{notifications:[],pending:[],sent:[],receivedHistory:[]};
   lastWorld=world;lastMe=me;lastInbox=inbox;
   const next=buildState(world,me,inbox,client.actorId);
   return next;
@@ -205,6 +206,14 @@ async function boot(){
   const mod=await import('/raluvaaa/alpha-api/client.mjs');
   client=new mod.RaluvaaaAlphaClient({baseUrl:apiBase,room});
   await client.ensureSession();
+  if(params.has('sharedqa')){
+    const me=await client.me();
+    if(!me.claimed){
+      const email=('qa-'+room+'-'+client.actorId.slice(-8)+'@raluvaaa.test').toLowerCase();
+      const sent=await client.requestCode(email);
+      if(sent.testCode)await client.verifyCode(email,sent.testCode)
+    }
+  }
   window.RALUVAAA_ACTOR_ID=client.actorId;
   window.__RALUVAAA_SHARED_COMMIT__=enqueue;
   window.__RALUVAAA_SHARED_REMOVE__=removeShared;
