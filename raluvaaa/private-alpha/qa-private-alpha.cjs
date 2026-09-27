@@ -129,6 +129,9 @@ async function acceptFirst(page,type){
     await A.page.fill('#helpInput','I can help organise a first neighbourhood planting day.');
     await A.page.click('#confirm');
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{timeout:10000});
+    assert.notEqual((await B.page.locator('#inboxBadge').innerText()).trim(),'0','B must see an unread notification badge');
+    await acceptFirst(B.page,'help');
+    await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===id)},wishB,{timeout:10000});
 
     // A logs in from a fresh desktop browser profile: same actor, wishes and Saved come back.
     const A2=await pageFor(chrome,false);
