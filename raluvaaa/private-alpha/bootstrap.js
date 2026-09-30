@@ -435,7 +435,7 @@ async function boot(){
   document.body.classList.add('v39-icons-ready');
   await loadScript('../solo-experience-v42/revive-sound-v42.js?build=private-alpha-1');
   await loadScript('../solo-experience-v42/ui-v42.js?build=private-alpha-1');
-  await loadScript('features.js?build=private-alpha-1');
+  await loadScript('features.js?build=private-alpha-ship-3');
 
   window.__RALUVAAA_SHARED_READY__=true;
   window.__RALUVAAA_SHARED_ERROR__=friendlyError;
