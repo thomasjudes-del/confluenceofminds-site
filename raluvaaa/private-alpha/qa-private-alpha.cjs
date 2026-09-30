@@ -233,7 +233,7 @@ async function acceptFirst(page,type){
     assert(await A.page.locator('#drawerBody [data-act="share"]').count(),'V46 Share action must remain');
     const entrustedOk=await A.page.evaluate(()=>{
       const sem=new Map(window.__RV26_SHARED__.semantic().map(x=>[x.semanticId,x]));
-      return window.__RV26_SHARED__.entrusted().every(x=>sem.get(x.semanticId)?.state==='alive')
+      return window.__RALUVAAA_VITALITY_V42__.entrusted().every(x=>sem.get(x.semanticId)?.state==='alive')
     });
     assert.equal(entrustedOk,true,'entrusted wishes must never contain bloomed/abandoned nodes');
     await A.page.click('#entrustedBtn');

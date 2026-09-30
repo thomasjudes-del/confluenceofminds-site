@@ -59,7 +59,7 @@ function bandFor(name){return bands.find(x=>x.name===name)||bands[1]}
 function decorateEntrusted(){
   const native=!!window.RALUVAAA_NATIVE_ENTRUSTED_V42;
   const source=native
-    ?(window.__RV26_SHARED__?.entrusted?.()||[]).map((x,i)=>({...x,band:bands[i]?.name||'medium'}))
+    ?(window.__RALUVAAA_VITALITY_V42__?.entrusted?.()||[]).map((x,i)=>({...x,band:bands[i]?.name||'medium'}))
     :(read(POLICY)?.entries||[]);
   if(!source.length)return;
   const title=document.getElementById('drawerTitle');if(!title||!/^Wishes confiés$|^Entrusted wishes$/i.test(title.textContent.trim()))return;
