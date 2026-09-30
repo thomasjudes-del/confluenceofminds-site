@@ -420,16 +420,16 @@ async function boot(){
 
   const initial=await fetchState();lastFingerprint=fp(initial);localStorage.setItem(STORE,JSON.stringify(initial));
 
-  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-help-1');
+  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-ship-2');
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=private-alpha-1');
   await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-1');
   await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-1');
   await loadScript('../solo-organic-v27/ambient-playlist-v27.js?build=private-alpha-1');
   await loadScript('../solo-organic-v27/organic-v27.js?build=private-alpha-1');
-  await loadScript('../solo-mobile-v28/mobile-v28.js?build=private-alpha-1');
+  await loadScript('../solo-mobile-v28/mobile-v28.js?build=private-alpha-ship-2');
   await loadScript('../solo-experience-v30/experience-v30.js?build=private-alpha-1');
   await loadScript('../solo-experience-v33/experience-v33.js?build=private-alpha-1');
-  await loadScript('../solo-experience-v37/experience-v37.js?build=private-alpha-1');
+  await loadScript('../solo-experience-v37/experience-v37.js?build=private-alpha-ship-2');
   await loadScript('../solo-experience-v38/patch-v38.js?build=private-alpha-1');
   await loadScript('../solo-experience-v39/exact-icons-v39.js?build=private-alpha-1');
   document.body.classList.add('v39-icons-ready');
