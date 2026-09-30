@@ -267,6 +267,13 @@ function ensureAboutButton(){
   }
   const t=aboutCopy();btn.title=t.button;btn.setAttribute('aria-label',t.button)
 }
+function ensureMusicPlacement(){
+  const brand=document.querySelector('#brand .brand-row'),lang=document.querySelector('#brand .lang'),btn=document.getElementById('musicBtn');
+  if(!brand||!lang||!btn)return;
+  if(btn.parentElement!==brand)lang.insertAdjacentElement('beforebegin',btn);
+  btn.classList.remove('rail-btn');
+  btn.classList.add('pa-brand-music');
+}
 
 let graftSourceId=null;
 let graftUiPatched=false;
@@ -1045,7 +1052,7 @@ function interceptShare(e){
 function decorate(){
   document.title='RALUVAAA · Private Alpha';
   const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='PRIVATE ALPHA';
-  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();installGraftSavedBridge();decorateGraftMode()
+  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();ensureMusicPlacement();installGraftSavedBridge();decorateGraftMode()
 }
 let queued=false;
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;decorate()})}
