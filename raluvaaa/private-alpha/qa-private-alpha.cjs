@@ -191,6 +191,7 @@ async function acceptFirst(page,type){
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='connect')},null,{polling:100,timeout:10000});
     await acceptFirst(B.page,'connect');
     await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='connect')},null,{polling:100,timeout:10000});
+    if(await B.page.locator('#inboxBtn').evaluate(el=>el.classList.contains('active')))await B.page.click('#inboxBtn');
 
     // Reverse roles: A helps B.
     await openWish(A.page,wishB);
