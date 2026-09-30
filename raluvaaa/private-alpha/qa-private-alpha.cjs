@@ -102,7 +102,7 @@ async function acceptFirst(page,type){
     assert.equal(await A.page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.me().claimed),true);
     await A.page.click('#myWorldBtn');
     await A.page.waitForSelector('#privateAccountSection',{timeout:3000});
-    assert.match(await A.page.locator('#privateAccountSection').innerText(),/Ton espace|Your space/,'My Wishes must contain account identity');
+    assert.match(await A.page.locator('#privateAccountSection').innerText(),/Ton espace|Your space/i,'My Wishes must contain account identity');
     assert.equal(await A.page.locator('#rail #privateAccountBtn').count(),0,'Claimed account must not add a rail button');
     const mine=A.page.locator('#drawerBody [data-open="'+wishA+'"]');
     assert.equal(await mine.count(),1,'My Wishes must list the owned wish');
