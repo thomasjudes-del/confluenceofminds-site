@@ -220,19 +220,29 @@ function helpOpenFor(id){
 }
 function excerpt(s,n=92){s=String(s||'').trim();return s.length>n?s.slice(0,n-1).trimEnd()+'…':s}
 function pendingForMe(){return proposalEvents().filter(p=>proposalStatus(p)==='pending'&&(p.requiredActors||[]).includes(PERSONA)&&!responseFor(p.proposalId,PERSONA)&&proposalTargetAlive(p))}
+function inboxSeenKey(){return 'raluvaaaInboxSeenV1:'+String(PERSONA||'anonymous')}
+function seenPendingIds(){try{return new Set(JSON.parse(localStorage.getItem(inboxSeenKey())||'[]'))}catch{return new Set()}}
+function rememberPendingSeen(ids){
+  const seen=seenPendingIds();for(const id of ids)if(id)seen.add(id);
+  try{localStorage.setItem(inboxSeenKey(),JSON.stringify([...seen].slice(-250)))}catch{}
+}
 function inboxCount(){
-  if(window.RALUVAAA_INBOX_BADGE_UNREAD_ONLY)return (state.notifications||[]).filter(n=>!n.isRead).length;
+  if(window.RALUVAAA_INBOX_BADGE_UNREAD_ONLY){
+    const unread=(state.notifications||[]).filter(n=>!n.isRead),unreadObjects=new Set(unread.map(n=>n.objectId).filter(Boolean)),seen=seenPendingIds();
+    const unseenPending=pendingForMe().filter(p=>!seen.has(p.proposalId)&&!unreadObjects.has(p.proposalId)).length;
+    return unread.length+unseenPending
+  }
   const pending=pendingForMe(),pendingIds=new Set(pending.map(p=>p.proposalId));
   const unread=(state.notifications||[]).filter(n=>!n.isRead&&!(n.kind==='proposal'&&pendingIds.has(n.objectId))).length;
   return pending.length+unread
 }
 function markInboxSeen(){
   if(!window.RALUVAAA_INBOX_BADGE_UNREAD_ONLY)return;
-  const unread=(state.notifications||[]).filter(n=>!n.isRead);
-  if(!unread.length)return;
+  const pending=pendingForMe(),unread=(state.notifications||[]).filter(n=>!n.isRead);
+  rememberPendingSeen(pending.map(p=>p.proposalId));
   for(const n of unread)n.isRead=true;
   save();updateBadges();
-  if(SHARED&&typeof window.__RALUVAAA_SHARED_MARK_READ__==='function'){
+  if(unread.length&&SHARED&&typeof window.__RALUVAAA_SHARED_MARK_READ__==='function'){
     Promise.allSettled(unread.map(n=>window.__RALUVAAA_SHARED_MARK_READ__(n.id))).catch(()=>{})
   }
 }
