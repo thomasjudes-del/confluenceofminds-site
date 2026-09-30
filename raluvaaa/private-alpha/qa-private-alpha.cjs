@@ -125,7 +125,7 @@ async function acceptFirst(page,type){
     await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('bloom'));
     await A.page.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='bloomed',bloomChild,{polling:100,timeout:10000});
     await openWish(A.page,bloomChild);
-    assert.match(await A.page.locator('.pa-wish-status').innerText(),/Bloomed|Fleuri/,'node card must show its state');
+    assert.match(await A.page.locator('.pa-wish-status').innerText(),/Bloomed|Fleuri/i,'node card must show its state');
 
     // B is still anonymous: exploration/encouragement works, but relationship actions do not.
     await B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.encourage(id),wishA);
