@@ -373,9 +373,9 @@ async function refreshSavedFromServer(){
 async function syncSavedFromLocal(){
   if(savedSyncing||!authMe?.claimed)return;
   let desired=[];try{desired=JSON.parse(localStorage.getItem(localSavedKey())||'[]')}catch{}
-  const desiredIds=new Set(desired.map(r=>idOf(r.semanticId)));
+  const desiredIds=new Set(desired.map(r=>r.semanticId).filter(id=>!localSemantic(id)?.simulated).map(id=>idOf(id)).filter(Boolean));
   const serverIds=new Set(lastSavedServer.map(w=>w.id));
-  for(const id of desiredIds)if(id&&!serverIds.has(id))await client.saveWish(id);
+  for(const id of desiredIds)if(!serverIds.has(id))await client.saveWish(id);
   for(const id of serverIds)if(!desiredIds.has(id))await client.unsaveWish(id);
   await refreshSavedFromServer()
 }
