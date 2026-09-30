@@ -420,7 +420,7 @@ async function boot(){
 
   const initial=await fetchState();lastFingerprint=fp(initial);localStorage.setItem(STORE,JSON.stringify(initial));
 
-  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-ship-2');
+  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-ship-4');
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=private-alpha-1');
   await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-1');
   await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-1');
