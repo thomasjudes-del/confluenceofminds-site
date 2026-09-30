@@ -200,6 +200,12 @@ async function acceptFirst(page,type){
     await A.page.click('#confirm');
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{polling:100,timeout:10000});
     assert.notEqual((await B.page.locator('#inboxBadge').innerText()).trim(),'0','B must see an unread notification badge');
+    const unreadBefore=Number((await B.page.locator('#inboxBadge').innerText()).trim()||0);
+    await B.page.click('#inboxBtn');
+    await B.page.waitForFunction(()=>Number(document.getElementById('inboxBadge')?.textContent||0)===0,null,{polling:100,timeout:5000});
+    const unreadAfter=Number((await B.page.locator('#inboxBadge').innerText()).trim()||0);
+    assert(unreadAfter<unreadBefore,'reading the inbox must decrement the unread badge');
+    await B.page.click('#inboxBtn');
     await acceptFirst(B.page,'help');
     await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===id)},wishB,{polling:100,timeout:10000});
 
@@ -217,6 +223,12 @@ async function acceptFirst(page,type){
     // V46 product surfaces remain present.
     assert.equal(await A.page.locator('#v46AboutBtn').count(),1,'About guide from V46 must remain');
     await openWish(A.page,wishA);
+    const cameraBefore=await A.page.locator('#engine').evaluate(f=>({x:f.contentWindow.camera?.x,y:f.contentWindow.camera?.y,zoom:f.contentWindow.camera?.zoom}));
+    await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh());
+    await A.page.waitForTimeout(250);
+    const cameraAfter=await A.page.locator('#engine').evaluate(f=>({x:f.contentWindow.camera?.x,y:f.contentWindow.camera?.y,zoom:f.contentWindow.camera?.zoom}));
+    assert(Math.abs(cameraAfter.zoom-cameraBefore.zoom)<0.0001,'server refresh must not change camera zoom');
+    assert(Math.abs(cameraAfter.x-cameraBefore.x)<0.01&&Math.abs(cameraAfter.y-cameraBefore.y)<0.01,'server refresh must not move camera');
     assert(await A.page.locator('#drawerBody details.more').count(),'V46 More actions must remain');
     assert(await A.page.locator('#drawerBody [data-act="share"]').count(),'V46 Share action must remain');
     const entrustedOk=await A.page.evaluate(()=>{
@@ -224,6 +236,12 @@ async function acceptFirst(page,type){
       return window.__RV26_SHARED__.entrusted().every(x=>sem.get(x.semanticId)?.state==='alive')
     });
     assert.equal(entrustedOk,true,'entrusted wishes must never contain bloomed/abandoned nodes');
+    await A.page.click('#entrustedBtn');
+    await A.page.waitForSelector('#drawerBody [data-open]',{timeout:3000});
+    const firstEntrusted=A.page.locator('#drawerBody [data-open]').first();
+    assert(await firstEntrusted.getAttribute('data-entrusted-band'),'entrusted wish must retain its visual duration band');
+    assert.match((await firstEntrusted.locator('.m').innerText()).trim(),/\d{2}:\d{2}:\d{2}|\d+[jd] \d{2}:\d{2}:\d{2}/,'entrusted wish must show a live timer');
+    assert.notEqual(await firstEntrusted.evaluate(el=>getComputedStyle(el).borderColor),'rgba(0, 0, 0, 0)','entrusted wish must retain its color cue');
 
     console.log('RALUVAAA Private Alpha real A/B identity gate passed: mobile WebKit + desktop Chromium');
   }finally{

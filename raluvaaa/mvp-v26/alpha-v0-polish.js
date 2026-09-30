@@ -77,11 +77,11 @@ const nativeSet=Storage.prototype.setItem;
 Storage.prototype.setItem=function(key,value){
   let before=null;if(key===STORE){try{before=JSON.parse(this.getItem(key)||'null')}catch{}}
   nativeSet.call(this,key,value);
-  if(key!==STORE)return;
+  if(key!==STORE||window.__RALUVAAA_SUPPRESS_STORAGE_RITUAL__)return;
   let after=null;try{after=JSON.parse(value||'null')}catch{}
   const oldLen=Array.isArray(before?.events)?before.events.length:0,newEvents=Array.isArray(after?.events)?after.events.slice(oldLen):[];
   if(newEvents.length){
-    if(newEvents.some(ev=>!ev.quiet&&structuralTypes.has(ev.type)))revealMap();
+    if(!window.RALUVAAA_STAY_IN_CONTEXT&&newEvents.some(ev=>!ev.quiet&&structuralTypes.has(ev.type)))revealMap();
     let delay=220;for(const ev of newEvents){setTimeout(()=>ritual(ev),delay);delay+=120}
   }
 };

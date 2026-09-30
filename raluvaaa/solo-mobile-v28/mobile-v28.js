@@ -180,7 +180,7 @@ Storage.prototype.setItem=function(key,value){
   let before=null;
   if(key===STORE){try{before=JSON.parse(this.getItem(key)||'null')}catch{}}
   previousSet.call(this,key,value);
-  if(key!==STORE)return;
+  if(key!==STORE||window.RALUVAAA_STAY_IN_CONTEXT)return;
   let after=null;try{after=JSON.parse(value||'null')}catch{}
   const n=Array.isArray(before?.events)?before.events.length:0;
   const fresh=Array.isArray(after?.events)?after.events.slice(n):[];

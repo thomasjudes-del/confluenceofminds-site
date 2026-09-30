@@ -159,7 +159,10 @@ function friendlyError(err){
 }
 function showError(err){console.error(err);status(friendlyError(err),true);setTimeout(()=>{if(window.__RALUVAAA_SHARED_READY__)hideStatus()},6500)}
 
+function localSemantic(localId){return window.__RV26_SHARED__?.semantic?.().find(x=>x.semanticId===localId)||null}
 async function resolveWishId(localId,force=false){
+  const local=localSemantic(localId);
+  if(local?.simulated)return null;
   const mapped=idOf(localId);
   if(!force&&(mapped!==localId||lastWorld?.wishes?.some(w=>w.id===mapped)))return mapped;
   const world=await client.world();lastWorld=world;
@@ -177,15 +180,29 @@ async function resolveWishId(localId,force=false){
 }
 async function safeWishEvent(localId,payload){
   let id=await resolveWishId(localId);
+  if(!id)return{simulated:true};
   try{return await client.wishEvent(id,payload)}
   catch(err){
     if(err?.code!=='wish_not_found')throw err;
     const recovered=await resolveWishId(localId,true);
+    if(!recovered)return{simulated:true};
     if(recovered===id)throw err;
     return client.wishEvent(recovered,payload)
   }
 }
-async function safeEncourage(localId){return client.encourage(await resolveWishId(localId))}
+async function safeEncourage(localId){
+  let id=await resolveWishId(localId);
+  if(!id)return{simulated:true};
+  try{return await client.encourage(id)}
+  catch(err){
+    if(err?.code==='already_encouraged')return{id,encouraged:true,existing:true};
+    if(err?.code!=='wish_not_found')throw err;
+    const recovered=await resolveWishId(localId,true);
+    if(!recovered)return{simulated:true};
+    if(recovered===id)throw err;
+    return client.encourage(recovered)
+  }
+}
 async function syncEvent(ev){
   mutating++;
   try{
@@ -212,13 +229,13 @@ async function syncEvent(ev){
     }else if(ev.type==='encourage'){
       await safeEncourage(ev.semanticId);
     }else if(ev.type==='help_proposed'){
-      out=await client.proposeHelp(await resolveWishId(ev.semanticId),ev.helpTitle,ev.note);maps.proposal.set(ev.proposalId,out.proposalId);
+      const target=await resolveWishId(ev.semanticId);if(!target)return;out=await client.proposeHelp(target,ev.helpTitle,ev.note);maps.proposal.set(ev.proposalId,out.proposalId);
     }else if(ev.type==='help_setting'){
       await safeWishEvent(ev.semanticId,{type:'set_help',open:ev.open!==false});
     }else if(ev.type==='suggest_proposed'){
-      out=await client.suggestBranches(await resolveWishId(ev.semanticId),ev.suggestions||[]);maps.proposal.set(ev.proposalId,out.proposalId);
+      const target=await resolveWishId(ev.semanticId);if(!target)return;out=await client.suggestBranches(target,ev.suggestions||[]);maps.proposal.set(ev.proposalId,out.proposalId);
     }else if(ev.type==='connect_proposed'){
-      out=await client.proposeConnect(await resolveWishId(ev.aSemanticId),await resolveWishId(ev.bSemanticId));maps.proposal.set(ev.proposalId,out.proposalId);
+      const a=await resolveWishId(ev.aSemanticId),b=await resolveWishId(ev.bSemanticId);if(!a||!b)return;out=await client.proposeConnect(a,b);maps.proposal.set(ev.proposalId,out.proposalId);
     }else if(ev.type==='proposal_response'){
       try{await client.respondProposal(proposalOf(ev.proposalId),ev.decision)}catch(e){if(e.code!=='already_decided')throw e}
     }else if(ev.type==='proposal_cancelled'){

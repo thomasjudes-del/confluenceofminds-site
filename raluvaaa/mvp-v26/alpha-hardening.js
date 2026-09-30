@@ -57,12 +57,15 @@ function pad(n){return String(Math.max(0,n|0)).padStart(2,'0')}
 function remaining(ms){const total=Math.max(0,Math.floor(ms/1000)),s=total%60,m=Math.floor(total/60)%60,h=Math.floor(total/3600)%24,d=Math.floor(total/86400);return d?`${d}j ${pad(h)}:${pad(m)}:${pad(s)}`:`${pad(Math.floor(total/3600))}:${pad(m)}:${pad(s)}`}
 function bandFor(name){return bands.find(x=>x.name===name)||bands[1]}
 function decorateEntrusted(){
-  if(window.RALUVAAA_NATIVE_ENTRUSTED_V42)return;
-  const policy=read(POLICY);if(!policy?.entries)return;
+  const native=!!window.RALUVAAA_NATIVE_ENTRUSTED_V42;
+  const source=native
+    ?(window.__RV26_SHARED__?.entrusted?.()||[]).map((x,i)=>({...x,band:bands[i]?.name||'medium'}))
+    :(read(POLICY)?.entries||[]);
+  if(!source.length)return;
   const title=document.getElementById('drawerTitle');if(!title||!/^Wishes confiés$|^Entrusted wishes$/i.test(title.textContent.trim()))return;
-  const items=[...document.querySelectorAll('#drawerBody [data-open]')];
-  items.slice(0,3).forEach((item,i)=>{
-    const e=policy.entries[i];if(!e)return;const b=bandFor(e.band),root=roots.find(x=>x.semanticId===e.semanticId);
+  const items=[...document.querySelectorAll('#drawerBody [data-open]')].slice(0,3);
+  items.forEach((item,i)=>{
+    const e=source[i];if(!e)return;const b=bandFor(e.band),root=roots.find(x=>x.semanticId===e.semanticId);
     item.dataset.open=e.semanticId;item.style.borderColor=b.soft;item.style.boxShadow=`inset 3px 0 0 ${b.color}`;item.dataset.entrustedBand=e.band;
     const text=item.querySelector('.t');if(text&&root?.text&&text.textContent!==root.text)text.textContent=root.text;
     const meta=item.querySelector('.m'),label=remaining(e.expires-Date.now());if(meta){if(meta.textContent!==label)meta.textContent=label;meta.style.fontFamily='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';meta.style.fontSize='12px';meta.style.fontWeight='720';meta.style.letterSpacing='.04em';meta.style.color=b.color;meta.style.fontVariantNumeric='tabular-nums'}

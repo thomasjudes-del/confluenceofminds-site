@@ -220,10 +220,25 @@ function helpOpenFor(id){
 }
 function excerpt(s,n=92){s=String(s||'').trim();return s.length>n?s.slice(0,n-1).trimEnd()+'…':s}
 function pendingForMe(){return proposalEvents().filter(p=>proposalStatus(p)==='pending'&&(p.requiredActors||[]).includes(PERSONA)&&!responseFor(p.proposalId,PERSONA)&&proposalTargetAlive(p))}
-function inboxCount(){const pending=pendingForMe();const pendingIds=new Set(pending.map(p=>p.proposalId));const unread=(state.notifications||[]).filter(n=>!n.isRead&&!(n.kind==='proposal'&&pendingIds.has(n.objectId))).length;return pending.length+unread}
+function inboxCount(){
+  if(window.RALUVAAA_INBOX_BADGE_UNREAD_ONLY)return (state.notifications||[]).filter(n=>!n.isRead).length;
+  const pending=pendingForMe(),pendingIds=new Set(pending.map(p=>p.proposalId));
+  const unread=(state.notifications||[]).filter(n=>!n.isRead&&!(n.kind==='proposal'&&pendingIds.has(n.objectId))).length;
+  return pending.length+unread
+}
+function markInboxSeen(){
+  if(!window.RALUVAAA_INBOX_BADGE_UNREAD_ONLY)return;
+  const unread=(state.notifications||[]).filter(n=>!n.isRead);
+  if(!unread.length)return;
+  for(const n of unread)n.isRead=true;
+  save();updateBadges();
+  if(SHARED&&typeof window.__RALUVAAA_SHARED_MARK_READ__==='function'){
+    Promise.allSettled(unread.map(n=>window.__RALUVAAA_SHARED_MARK_READ__(n.id))).catch(()=>{})
+  }
+}
 function updateBadges(){const ib=document.getElementById('inboxBadge'),eb=document.getElementById('entrustedBadge'),entrustedCount=Array.isArray(state.entrusted)?state.entrusted.length:3;ib.textContent=String(inboxCount());ib.classList.toggle('zero',!inboxCount());eb.textContent=String(entrustedCount);eb.classList.toggle('zero',entrustedCount===0)}
 function renderStats(s){if(SHARED&&typeof window.__RALUVAAA_SHARED_STATS__==='function')s=window.__RALUVAAA_SHARED_STATS__()||s;stats.innerHTML=[[T('roots'),s.roots||0],[T('states'),s.states||0],[T('blooms'),s.blooms||0],[T('abandons'),s.abandoned||0],[T('helps'),s.helps||0],[T('warps'),s.warps||0],[T('local'),SHARED?(s.localRoots||0):semantic.filter(m=>owned(m)&&m.kind==='create').length]].map(([k,v])=>`<span>${esc(k)}</span><b>${v}</b>`).join('')}
-function openDrawer(kind){drawerKind=kind;current=null;drawer.classList.remove('hidden');document.querySelectorAll('[data-panel]').forEach(b=>b.classList.toggle('active',b.dataset.panel===kind));renderDrawer()}
+function openDrawer(kind){drawerKind=kind;current=null;drawer.classList.remove('hidden');document.querySelectorAll('[data-panel]').forEach(b=>b.classList.toggle('active',b.dataset.panel===kind));renderDrawer();if(kind==='inbox')setTimeout(markInboxSeen,0)}
 function openWish(m){current=normalizeMeta(m);drawerKind='wish';drawer.classList.remove('hidden');document.querySelectorAll('[data-panel]').forEach(b=>b.classList.remove('active'));renderDrawer()}
 function navigateWish(id,{focus=true}={}){const m=byId.get(id);if(!m)return false;if(focus)send({type:'rv25-focus',semanticId:id});openWish(m);return true}
 function openHashWish(){if(!location.hash.startsWith('#wish='))return false;const id=decodeURIComponent(location.hash.slice(6));if(!byId.has(id))return false;if(hashOpenedId!==id){hashOpenedId=id;navigateWish(id)}else send({type:'rv25-focus',semanticId:id});return true}
@@ -369,7 +384,13 @@ window.__RALUVAAA_UI__={
 if(params.has('qa'))window.__RV26_TEST__={open:id=>send({type:'rv25-focus',semanticId:id}),state:()=>JSON.parse(JSON.stringify(state)),persona:PERSONA,focus:()=>focusLineageId,reset:resetTest,semantic:()=>semantic.map(x=>({...x}))};
 if(SOLO)window.__RV26_SOLO__={state:()=>JSON.parse(JSON.stringify(state)),semantic:()=>semantic.map(x=>({...x})),open:id=>{const m=byId.get(id);if(m)openWish(m)},reset:()=>{const lang=state.lang;state=fresh(lang);save();location.hash='';send({type:'rv25-rebuild',events:state.events});updateAll()}};
 if(SHARED)window.__RV26_SHARED__={
-  replace(next){const lang=state.lang,entrusted=state.entrusted;state={...next,version:26,lang,entrusted};save();send({type:'rv25-rebuild',events:state.events})},
+  replace(next){
+    const lang=state.lang,entrusted=state.entrusted;state={...next,version:26,lang,entrusted};
+    const suppress=!!window.RALUVAAA_SUPPRESS_SYNC_RITUALS;
+    if(suppress)window.__RALUVAAA_SUPPRESS_STORAGE_RITUAL__=true;
+    try{save()}finally{if(suppress)window.__RALUVAAA_SUPPRESS_STORAGE_RITUAL__=false}
+    send({type:'rv25-rebuild',events:state.events,preserveCamera:!!window.RALUVAAA_PRESERVE_CAMERA_ON_SYNC})
+  },
   state:()=>JSON.parse(JSON.stringify(state)),
   open(id){const m=byId.get(id);if(m)openWish(m)},
   select(id){const m=byId.get(id);if(!m)return;if(connectSource&&m.semanticId!==connectSource.semanticId){proposeConnection(m);return}openWish(m)},
