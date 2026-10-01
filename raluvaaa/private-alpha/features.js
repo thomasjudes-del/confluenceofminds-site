@@ -167,6 +167,7 @@ function decorateEntrusted(){
       if(m){
         const open=document.createElement('button');
         open.className='drawer-item v43-saved-open';
+        open.dataset.v47Wish=m.semanticId;
         open.innerHTML='<span><div class="t">'+escapeHtml(m.text||row.text||'')+'</div><div class="m">'+escapeHtml(m.loc||row.loc||'')+'</div></span><span class="state">'+escapeHtml(stateLabel(m))+'</span>';
         open.onclick=()=>window.__RALUVAAA_UI__?.navigateWish?.(m.semanticId);
         item.appendChild(open);
@@ -332,6 +333,7 @@ function openSavedGraftPicker(){
     '<button class="v46-graft-x" type="button">×</button><div class="v46-graft-eyebrow">CONNECT / GRAFT</div><h3>'+escapeHtml(t.title)+'</h3><p>'+escapeHtml(t.hint)+'</p>'+
     '<div class="v46-graft-list">'+items+'</div><button type="button" class="v46-graft-back">'+escapeHtml(t.back)+'</button></section>';
   host.classList.add('open');
+  decorateWishPreviews();
   host.querySelector('.v46-graft-scrim').onclick=closeSavedGraftPicker;
   host.querySelector('.v46-graft-x').onclick=closeSavedGraftPicker;
   host.querySelector('.v46-graft-back').onclick=closeSavedGraftPicker;
@@ -403,6 +405,32 @@ function requestWishTranslation(m,target){
   }).catch(err=>{console.warn('Wish translation unavailable',err);return null}).finally(()=>wishTranslationInflight.delete(key));
   wishTranslationInflight.set(key,job);
   return job
+}
+function decorateWishTextNode(el,m,target){
+  if(!el||!m?.text)return;
+  const signature=translationKey(m,target);
+  if(el.dataset.v47TranslationSignature===signature)return;
+  el.dataset.v47TranslationSignature=signature;
+  el.dataset.v47Original=String(m.text||'');
+  el.textContent=m.text||'';
+  requestWishTranslation(m,target).then(result=>{
+    if(!result||lang()!==target||el.dataset.v47TranslationSignature!==signature||!el.isConnected)return;
+    const translated=String(result.translation||'').trim(),original=String(m.text||'').trim();
+    if(translated&&translated!==original)el.textContent=translated
+  })
+}
+function decorateWishPreviews(){
+  const target=lang(),by=new Map(semantic().map(m=>[m.semanticId,m]));
+  const body=document.getElementById('drawerBody');
+  if(body){
+    [...body.querySelectorAll('[data-open]')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('.t'),by.get(btn.dataset.open),target));
+    [...body.querySelectorAll('[data-nav-wish]')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('b'),by.get(btn.dataset.navWish),target));
+    [...body.querySelectorAll('.v43-saved-open[data-v47-wish]')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('.t'),by.get(btn.dataset.v47Wish),target))
+  }
+  const graft=document.getElementById('v46SavedGraftOverlay');
+  if(graft?.classList.contains('open')){
+    [...graft.querySelectorAll('[data-v46-graft-target]')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('b'),by.get(btn.dataset.v46GraftTarget),target))
+  }
 }
 function decorateWishTranslation(){
   const body=document.getElementById('drawerBody'),m=current();
@@ -1117,16 +1145,16 @@ function interceptShare(e){
 function decorate(){
   document.title='RALUVAAA · Private Alpha';
   const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='PRIVATE ALPHA';
-  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();ensureMusicPlacement();installGraftSavedBridge();decorateGraftMode();decorateWishTranslation()
+  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();ensureMusicPlacement();installGraftSavedBridge();decorateGraftMode();decorateWishTranslation();decorateWishPreviews()
 }
 let queued=false;
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;decorate()})}
 new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-panel','data-open','data-v39-icon']});
 document.addEventListener('click',interceptShare,true);
 document.addEventListener('click',e=>{
-  if(e.target.closest?.('.lang button'))setTimeout(()=>{ensureAboutButton();refreshAbout();decorateGraftMode();decorateWishTranslation()},0)
+  if(e.target.closest?.('.lang button'))setTimeout(()=>{ensureAboutButton();refreshAbout();decorateGraftMode();decorateWishTranslation();decorateWishPreviews()},0)
 });
-window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark();ensureMobileBookmark();decorateGraftMode()});
+window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark();ensureMobileBookmark();decorateGraftMode();decorateWishPreviews()});
 decorate();setTimeout(decorate,120);setTimeout(decorate,400);
 
 window.__RALUVAAA_V46__={
