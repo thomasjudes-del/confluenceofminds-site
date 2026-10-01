@@ -50,4 +50,5 @@ export class RaluvaaaAlphaClient {
   cancelProposal(proposalId){return this.request(`/v1/proposals/${encodeURIComponent(proposalId)}/cancel`,{method:'POST',body:{}})}
   markRead(notificationId){return this.request(`/v1/notifications/${encodeURIComponent(notificationId)}/read`,{method:'POST',body:{}})}
   report({wishId,reason,details}){return this.request('/v1/reports',{method:'POST',body:{wishId,reason,details}})}
+  translate(text,targetLang){return this.request('/v1/translate',{method:'POST',body:{text,targetLang}})}
 }
