@@ -2,7 +2,7 @@
 
 This is the minimum shared persistence layer required to move from the deterministic local A/B sandbox to a real multi-browser private alpha.
 
-It deliberately does **not** add AI, MCP, public profiles or a feed.
+It deliberately does **not** add visible generative AI, MCP, public profiles or a feed. Workers AI is used only as invisible translation infrastructure so a reader can see a wish in the interface language while the original remains the source text.
 
 ## What it provides
 
@@ -15,6 +15,7 @@ It deliberately does **not** add AI, MCP, public profiles or a feed.
 - private inbox/notifications;
 - public events that never expose private help text;
 - basic Report storage;
+- cached FR/EN wish translation through Workers AI, with the original wish text kept canonical;
 - a basic publication-scope guard for URLs/contact details and categories excluded from the alpha.
 
 The alpha session identity is intentionally lighter than the later email + magic-link claim flow. Clearing the browser can lose management access until claim/recovery exists.
@@ -51,6 +52,7 @@ npx wrangler deploy
 - `POST /v1/proposals/:id/cancel`
 - `POST /v1/notifications/:id/read`
 - `POST /v1/reports`
+- `POST /v1/translate`
 
 Authenticated calls use `Authorization: Bearer <session token>`.
 
