@@ -141,3 +141,15 @@ CREATE TABLE IF NOT EXISTS saved_wishes (
   FOREIGN KEY (wish_id) REFERENCES wishes(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_saved_wishes_actor ON saved_wishes(actor_id, created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS translation_cache (
+  cache_key TEXT PRIMARY KEY,
+  source_text TEXT NOT NULL,
+  source_lang TEXT NOT NULL DEFAULT 'und',
+  target_lang TEXT NOT NULL,
+  translated_text TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_translation_cache_target ON translation_cache(target_lang, updated_at DESC);
