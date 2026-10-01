@@ -80,19 +80,7 @@ jobs:
             -H 'x-raluvaaa-room: SMOKE' \
             -H "authorization: Bearer $TOKEN" \
             --data '{"text":"我想学会航海","targetLang":"fr"}')
-          printf '%s' "$OUT" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const x=JSON.parse(s);if(!x.translation||x.translation==='我想学会航海')process.exit(6);console.log('Translation smoke:',x.translation)})"
-      - name: Record successful alpha deploy
-        run: |
-          printf 'last-success: %s\ncommit: %s\ntranslation-smoke: ok\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$GITHUB_SHA" > raluvaaa/alpha-api/deploy-status.txt
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add raluvaaa/alpha-api/deploy-status.txt
-          if git diff --cached --quiet; then
-            echo "Deploy status already current."
-          else
-            git commit -m "Record successful RALUVAAA alpha deploy"
-            git push
-          fi
+          printf '%s' "$OUT" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const x=JSON.parse(s),t=String(x.translation||'').trim();if(!t||t==='我想学会航海'||t.length<5||/^[{}[\\]]+$/.test(t)||!/(apprendre|navig)/i.test(t)){console.error('Bad translation:',t);process.exit(6)}console.log('Translation smoke:',t)})"
       - name: Wire Shared and Private Alpha to deployed Worker
         run: |
           printf "window.RALUVAAA_ALPHA_API_BASE='%s';\n" "$WORKER_URL" > raluvaaa/shared-alpha/api-config.js
