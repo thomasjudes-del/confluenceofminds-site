@@ -956,3 +956,26 @@ body[data-alpha="private-alpha"] #rail{pointer-events:auto!important}
 .pa-entrusted.pa-band-medium .pa-entrusted-timer,.pa-entrusted.pa-band-medium .state{color:#f6c56f!important}
 .pa-entrusted.pa-band-long{border-color:rgba(120,226,179,.20)!important;box-shadow:inset 3px 0 0 #78e2b3!important}
 .pa-entrusted.pa-band-long .pa-entrusted-timer,.pa-entrusted.pa-band-long .state{color:#78e2b3!important}
+
+
+/* Private Alpha: wish content follows the reader language while keeping the original one tap away. */
+.v47-translation-note{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin:4px 0 9px;
+  font-size:7px;
+  line-height:1.35;
+  letter-spacing:.04em;
+  color:rgba(219,230,246,.38)
+}
+.v47-translation-note button{
+  border:0;
+  border-bottom:1px solid rgba(151,215,236,.22);
+  background:transparent;
+  padding:0 0 1px;
+  color:rgba(190,226,240,.62);
+  font-size:7px;
+  cursor:pointer
+}
+.v47-translation-note button:hover{color:rgba(232,247,255,.88);border-bottom-color:rgba(151,215,236,.46)}
