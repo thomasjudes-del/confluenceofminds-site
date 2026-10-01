@@ -272,6 +272,11 @@ async function acceptFirst(page,type){
     assert.match((await A.page.locator('#drawerBody .wish').innerText()).trim(),/^TRADUIT: /,'wish body must be translated for the reader');
     await A.page.click('.v47-translation-note button');
     assert.equal((await A.page.locator('#drawerBody .wish').innerText()).trim(),'A wants to learn coastal sailing '+stamp,'reader must be able to reveal the canonical original wish');
+    await A.page.click('#entrustedBtn');
+    await A.page.waitForSelector('#drawerBody [data-open] .t',{timeout:3000});
+    await A.page.waitForFunction(()=>[...document.querySelectorAll('#drawerBody [data-open] .t')].some(el=>/^TRADUIT: /.test(el.textContent||'')),null,{polling:100,timeout:5000});
+    await A.page.waitForSelector('#drawerBody .v43-saved-open .t',{timeout:3000});
+    await A.page.waitForFunction(()=>[...document.querySelectorAll('#drawerBody .v43-saved-open .t')].some(el=>/^TRADUIT: /.test(el.textContent||'')),null,{polling:100,timeout:5000});
 
     console.log('RALUVAAA Private Alpha real A/B identity gate passed: mobile WebKit + desktop Chromium');
   }finally{
