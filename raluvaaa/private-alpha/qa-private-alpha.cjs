@@ -31,6 +31,9 @@ async function pageFor(browser,mobile=false){
     console.error('[private-alpha readiness]',diag);
     throw err
   }
+  await page.evaluate(()=>{
+    if(window.__RALUVAAA_TRANSLATION__)window.__RALUVAAA_TRANSLATION__.translate=async text=>({translation:text,sourceLang:'und'})
+  });
   return{context,page}
 }
 async function claimViaUi(page,email){
@@ -207,6 +210,7 @@ async function acceptFirst(page,type){
     await A.page.fill('#helpInput','I can help organise a first neighbourhood planting day.');
     await A.page.click('#confirm');
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{polling:100,timeout:10000});
+    await B.page.waitForFunction(()=>Number(document.getElementById('inboxBadge')?.textContent||0)>0,null,{polling:100,timeout:5000});
     assert.notEqual((await B.page.locator('#inboxBadge').innerText()).trim(),'0','B must see an unread notification badge');
     const unreadBefore=Number((await B.page.locator('#inboxBadge').innerText()).trim()||0);
     await B.page.click('#inboxBtn');
