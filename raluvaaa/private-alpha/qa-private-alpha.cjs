@@ -225,6 +225,12 @@ async function acceptFirst(page,type){
     assert.equal(await A.page.locator('#v46AboutBtn').count(),1,'About guide from V46 must remain');
     await openWish(A.page,wishA);
     const cameraBefore=await A.page.locator('#engine').evaluate(f=>({x:f.contentWindow.camera?.x,y:f.contentWindow.camera?.y,zoom:f.contentWindow.camera?.zoom}));
+    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
+    await A.page.waitForTimeout(180);
+    const cameraAfterLocalAction=await A.page.locator('#engine').evaluate(f=>({x:f.contentWindow.camera?.x,y:f.contentWindow.camera?.y,zoom:f.contentWindow.camera?.zoom}));
+    assert(Math.abs(cameraAfterLocalAction.zoom-cameraBefore.zoom)<0.0001,'local action must not change camera zoom');
+    assert(Math.abs(cameraAfterLocalAction.x-cameraBefore.x)<0.01&&Math.abs(cameraAfterLocalAction.y-cameraBefore.y)<0.01,'local action must not move camera');
+    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
     await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh());
     await A.page.waitForTimeout(250);
     const cameraAfter=await A.page.locator('#engine').evaluate(f=>({x:f.contentWindow.camera?.x,y:f.contentWindow.camera?.y,zoom:f.contentWindow.camera?.zoom}));
@@ -241,6 +247,7 @@ async function acceptFirst(page,type){
     await A.page.waitForSelector('#drawerBody [data-open]',{timeout:3000});
     const firstEntrusted=A.page.locator('#drawerBody [data-open]').first();
     assert(await firstEntrusted.getAttribute('data-entrusted-band'),'entrusted wish must retain its visual duration band');
+    assert.equal(await firstEntrusted.locator('.pa-entrusted-timer').count(),1,'entrusted timer must be rendered natively');
     assert.match((await firstEntrusted.locator('.m').innerText()).trim(),/\d{2}:\d{2}:\d{2}|\d+[jd] \d{2}:\d{2}:\d{2}/,'entrusted wish must show a live timer');
     assert.notEqual(await firstEntrusted.evaluate(el=>getComputedStyle(el).borderColor),'rgba(0, 0, 0, 0)','entrusted wish must retain its color cue');
 

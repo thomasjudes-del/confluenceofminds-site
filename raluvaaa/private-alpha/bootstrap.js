@@ -164,43 +164,52 @@ async function resolveWishId(localId,force=false){
   const local=localSemantic(localId);
   if(local?.simulated)return null;
   const mapped=idOf(localId);
-  if(!force&&(mapped!==localId||lastWorld?.wishes?.some(w=>w.id===mapped)))return mapped;
-  const world=await client.world();lastWorld=world;
-  if((world.wishes||[]).some(w=>w.id===mapped))return mapped;
-  const meta=window.__RV26_SHARED__?.semantic?.().find(x=>x.semanticId===localId);
-  if(!meta)return mapped;
-  const parentId=meta.parentSemanticId?idOf(meta.parentSemanticId):null;
-  const candidates=(world.wishes||[]).filter(w=>
-    w.isMine&&w.text===meta.text&&
-    (!meta.loc||w.locationText===meta.loc)&&
-    (!parentId||w.parentWishId===parentId)
+  const world=force||!lastWorld?await client.world():lastWorld;
+  lastWorld=world;
+  const wishes=world?.wishes||[];
+  if(wishes.some(w=>w.id===mapped))return mapped;
+  if(wishes.some(w=>w.id===localId)){maps.wish.set(localId,localId);return localId}
+  const meta=localSemantic(localId);
+  if(!meta)return null;
+  const parentMapped=meta.parentSemanticId?idOf(meta.parentSemanticId):null;
+  const mine=!!meta.owner;
+  const candidates=wishes.filter(w=>
+    !!w.isMine===mine &&
+    w.text===meta.text &&
+    (!meta.loc||w.locationText===meta.loc) &&
+    (!meta.kind||w.kind===meta.kind) &&
+    (!parentMapped||w.parentWishId===parentMapped)
   );
   if(candidates.length===1){maps.wish.set(localId,candidates[0].id);return candidates[0].id}
-  return mapped
+  return null
 }
 async function safeWishEvent(localId,payload){
   let id=await resolveWishId(localId);
-  if(!id)return{simulated:true};
+  if(!id){scheduleRefresh(0);return{stale:true}}
   try{return await client.wishEvent(id,payload)}
   catch(err){
     if(err?.code!=='wish_not_found')throw err;
     const recovered=await resolveWishId(localId,true);
-    if(!recovered)return{simulated:true};
-    if(recovered===id)throw err;
-    return client.wishEvent(recovered,payload)
+    if(!recovered){scheduleRefresh(0);return{stale:true}}
+    try{return await client.wishEvent(recovered,payload)}
+    catch(second){if(second?.code==='wish_not_found'){scheduleRefresh(0);return{stale:true}}throw second}
   }
 }
 async function safeEncourage(localId){
   let id=await resolveWishId(localId);
-  if(!id)return{simulated:true};
+  if(!id){scheduleRefresh(0);return{stale:true}}
   try{return await client.encourage(id)}
   catch(err){
     if(err?.code==='already_encouraged')return{id,encouraged:true,existing:true};
     if(err?.code!=='wish_not_found')throw err;
     const recovered=await resolveWishId(localId,true);
-    if(!recovered)return{simulated:true};
-    if(recovered===id)throw err;
-    return client.encourage(recovered)
+    if(!recovered){scheduleRefresh(0);return{stale:true}}
+    try{return await client.encourage(recovered)}
+    catch(second){
+      if(second?.code==='already_encouraged')return{id:recovered,encouraged:true,existing:true};
+      if(second?.code==='wish_not_found'){scheduleRefresh(0);return{stale:true}}
+      throw second
+    }
   }
 }
 async function syncEvent(ev){
