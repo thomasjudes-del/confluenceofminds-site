@@ -364,12 +364,77 @@ function installGraftSavedBridge(){
   const original=ui.action?.bind(ui);
   if(typeof original!=='function')return;
   ui.action=function(kind,...args){
-    if(kind==='connect')graftSourceId=current()?.semanticId||null;
+    if(kind!=='connect')return original(kind,...args);
+    const sourceId=current()?.semanticId||null;
+    graftSourceId=null;
     const out=original(kind,...args);
-    if(kind==='connect')setTimeout(decorateGraftMode,0);
+    Promise.resolve(out).then(()=>{
+      const bar=document.getElementById('modeBar');
+      if(sourceId&&bar&&!bar.classList.contains('hidden'))graftSourceId=sourceId;
+      decorateGraftMode()
+    }).catch(()=>{
+      graftSourceId=null;
+      decorateGraftMode()
+    });
     return out
   };
   graftUiPatched=true
+}
+const wishTranslationCache=new Map(),wishTranslationInflight=new Map();
+function translationCopy(){
+  return lang()==='en'
+    ?{auto:'Automatically translated',original:'View original',translated:'View translation'}
+    :{auto:'Traduit automatiquement',original:"Voir l’original",translated:'Voir la traduction'}
+}
+function translationKey(m,target){return target+'|'+m.semanticId+'|'+String(m.text||'')}
+function requestWishTranslation(m,target){
+  if(!m?.text||!['fr','en'].includes(target))return Promise.resolve(null);
+  const key=translationKey(m,target);
+  if(wishTranslationCache.has(key))return Promise.resolve(wishTranslationCache.get(key));
+  if(wishTranslationInflight.has(key))return wishTranslationInflight.get(key);
+  const api=window.__RALUVAAA_TRANSLATION__;
+  if(!api?.translate)return Promise.resolve(null);
+  const job=Promise.resolve(api.translate(m.text,target)).then(r=>{
+    const translated=String(r?.translation||'').trim();
+    if(!translated)return null;
+    const value={translation:translated,sourceLang:String(r?.sourceLang||'und')};
+    wishTranslationCache.set(key,value);
+    return value
+  }).catch(err=>{console.warn('Wish translation unavailable',err);return null}).finally(()=>wishTranslationInflight.delete(key));
+  wishTranslationInflight.set(key,job);
+  return job
+}
+function decorateWishTranslation(){
+  const body=document.getElementById('drawerBody'),m=current();
+  if(!body||!m||document.getElementById('drawer')?.classList.contains('hidden'))return;
+  const wish=body.querySelector('.wish');
+  if(!wish)return;
+  const target=lang(),signature=m.semanticId+'|'+String(m.text||'')+'|'+target;
+  if(wish.dataset.v47TranslationSignature===signature)return;
+  wish.dataset.v47TranslationSignature=signature;
+  wish.textContent=m.text||'';
+  body.querySelector('.v47-translation-note')?.remove();
+  requestWishTranslation(m,target).then(result=>{
+    if(!result||current()?.semanticId!==m.semanticId||lang()!==target)return;
+    const translated=String(result.translation||'').trim(),original=String(m.text||'').trim();
+    if(!translated||translated===original)return;
+    const live=document.getElementById('drawerBody')?.querySelector('.wish');
+    if(!live||current()?.semanticId!==m.semanticId)return;
+    live.textContent=translated;
+    live.dataset.v47Translation=translated;
+    live.dataset.v47Original=original;
+    live.dataset.v47Mode='translated';
+    const t=translationCopy(),note=document.createElement('div');
+    note.className='v47-translation-note';
+    note.innerHTML='<span>'+escapeHtml(t.auto)+'</span><button type="button">'+escapeHtml(t.original)+'</button>';
+    note.querySelector('button').onclick=()=>{
+      const translatedMode=live.dataset.v47Mode==='translated';
+      live.dataset.v47Mode=translatedMode?'original':'translated';
+      live.textContent=translatedMode?live.dataset.v47Original:live.dataset.v47Translation;
+      note.querySelector('button').textContent=translatedMode?t.translated:t.original
+    };
+    live.insertAdjacentElement('afterend',note)
+  })
 }
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
@@ -1052,14 +1117,14 @@ function interceptShare(e){
 function decorate(){
   document.title='RALUVAAA · Private Alpha';
   const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='PRIVATE ALPHA';
-  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();ensureMusicPlacement();installGraftSavedBridge();decorateGraftMode()
+  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();ensureMusicPlacement();installGraftSavedBridge();decorateGraftMode();decorateWishTranslation()
 }
 let queued=false;
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;decorate()})}
 new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-panel','data-open','data-v39-icon']});
 document.addEventListener('click',interceptShare,true);
 document.addEventListener('click',e=>{
-  if(e.target.closest?.('.lang button'))setTimeout(()=>{ensureAboutButton();refreshAbout();decorateGraftMode()},0)
+  if(e.target.closest?.('.lang button'))setTimeout(()=>{ensureAboutButton();refreshAbout();decorateGraftMode();decorateWishTranslation()},0)
 });
 window.addEventListener('raluvaaa-saved-changed',()=>{decorateEntrustedFresh();ensureBookmark();ensureMobileBookmark();decorateGraftMode()});
 decorate();setTimeout(decorate,120);setTimeout(decorate,400);
