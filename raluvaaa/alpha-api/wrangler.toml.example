@@ -5,6 +5,9 @@ compatibility_date = "2026-09-01"
 [vars]
 ALLOWED_ORIGINS = "https://confluenceofminds.com,http://localhost:8787,http://127.0.0.1:8787"
 
+[ai]
+binding = "AI"
+
 # Production secrets are injected by the deployment workflow:
 # RESEND_API_KEY
 # AUTH_CODE_SECRET
