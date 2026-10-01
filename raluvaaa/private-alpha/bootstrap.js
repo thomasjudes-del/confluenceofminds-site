@@ -418,7 +418,7 @@ async function boot(){
   if(!apiBase){status('Private Alpha backend is not deployed yet.',true);return}
   localStorage.setItem('raluvaaaAlphaApiBaseV1',apiBase);
   status('Connecting RALUVAAA…');
-  const mod=await import('/raluvaaa/alpha-api/client.mjs');
+  const mod=await import('/raluvaaa/alpha-api/client.mjs?build=private-alpha-graft-i18n-1');
   client=new mod.RaluvaaaAlphaClient({baseUrl:apiBase,room});
   await client.ensureSession();authMe=await client.me();
   window.RALUVAAA_ACTOR_ID=client.actorId;
