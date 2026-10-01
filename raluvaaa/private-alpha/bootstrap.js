@@ -6,7 +6,7 @@ const apiBase=params.get('api')||localStorage.getItem('raluvaaaAlphaApiBaseV1')|
 const room=window.RALUVAAA_ROOM||String(params.get('room')||'ALPHA').toUpperCase();
 const STORE=window.RALUVAAA_STORE_KEY||('raluvaaaSharedAlphaV1:'+room);
 const maps={wish:new Map(),lineage:new Map(),proposal:new Map()};
-let client=null,lastWorld=null,lastMe=null,lastInbox=null,lastFingerprint='',mutating=0,refreshTimer=null,queue=Promise.resolve();
+let client=null,lastWorld=null,lastMe=null,lastInbox=null,lastFingerprint='',mutating=0,refreshTimer=null,queue=Promise.resolve(),knownConnectIds=null;
 let authMe=null,authResolver=null,savedSyncing=false,lastSavedServer=[];
 let preferredLang=(()=>{try{return JSON.parse(localStorage.getItem(STORE)||'null')?.lang||window.RALUVAAA_DEFAULT_LANG||((navigator.language||'en').toLowerCase().startsWith('fr')?'fr':'en')}catch{return window.RALUVAAA_DEFAULT_LANG||'en'}})();
 
@@ -88,6 +88,12 @@ async function fetchState(){
 async function refresh(force=false){
   if(mutating)return;
   const next=await fetchState(),fingerprint=fp(next);
+  const connectIds=new Set(next.events.filter(e=>e.type==='connect').map(e=>e.proposalId||[e.aSemanticId,e.bSemanticId].sort().join('|')));
+  if(knownConnectIds){
+    const added=[...connectIds].filter(id=>!knownConnectIds.has(id));
+    if(added.length)try{window.__RALUVAAA_ACTION_AUDIO__?.playNamed?.('graft')}catch{}
+  }
+  knownConnectIds=connectIds;
   if(fingerprint===lastFingerprint)return;
   lastFingerprint=fingerprint;
   if(window.__RV26_SHARED__)window.__RV26_SHARED__.replace(next);
@@ -426,13 +432,14 @@ async function boot(){
     return{roots:wishes.filter(w=>w.kind==='create').length,states:wishes.length,blooms:wishes.filter(w=>w.state==='bloomed').length,abandoned:wishes.filter(w=>w.state==='abandoned').length,helps:events.filter(e=>e.type==='help').length,warps:events.filter(e=>e.type==='connect').length,localRoots:(lastMe?.wishes||[]).filter(w=>w.kind==='create').length}
   };
   window.__RALUVAAA_SHARED_REPORT__=async(localId,reason,details)=>{await queue;return client.report({wishId:idOf(localId),reason,details})};
+  window.__RALUVAAA_TRANSLATION__={translate:(text,targetLang)=>client.translate(text,targetLang)};
 
-  const initial=await fetchState();lastFingerprint=fp(initial);localStorage.setItem(STORE,JSON.stringify(initial));
+  const initial=await fetchState();lastFingerprint=fp(initial);knownConnectIds=new Set(initial.events.filter(e=>e.type==='connect').map(e=>e.proposalId||[e.aSemanticId,e.bSemanticId].sort().join('|')));localStorage.setItem(STORE,JSON.stringify(initial));
 
   await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-ship-4');
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=private-alpha-1');
   await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-1');
-  await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-1');
+  await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-graft-i18n-1');
   await loadScript('../solo-organic-v27/ambient-playlist-v27.js?build=private-alpha-1');
   await loadScript('../solo-organic-v27/organic-v27.js?build=private-alpha-1');
   await loadScript('../solo-mobile-v28/mobile-v28.js?build=private-alpha-ship-2');
@@ -444,7 +451,7 @@ async function boot(){
   document.body.classList.add('v39-icons-ready');
   await loadScript('../solo-experience-v42/revive-sound-v42.js?build=private-alpha-1');
   await loadScript('../solo-experience-v42/ui-v42.js?build=private-alpha-1');
-  await loadScript('features.js?build=private-alpha-ship-3');
+  await loadScript('features.js?build=private-alpha-graft-i18n-1');
 
   window.__RALUVAAA_SHARED_READY__=true;
   window.__RALUVAAA_SHARED_ERROR__=friendlyError;
