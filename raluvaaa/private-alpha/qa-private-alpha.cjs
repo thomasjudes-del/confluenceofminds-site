@@ -191,6 +191,13 @@ async function acceptFirst(page,type){
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='connect')},null,{polling:100,timeout:10000});
     await acceptFirst(B.page,'connect');
     await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='connect')},null,{polling:100,timeout:10000});
+    await A.page.waitForFunction(()=>document.getElementById('engine')?.contentWindow?.__RV42_RUNTIME__?.warpCount?.()>0,null,{polling:100,timeout:5000});
+    const graftVisual=await A.page.locator('#engine').evaluate(f=>({count:f.contentWindow.__RV42_RUNTIME__.warpCount(),dash:f.contentWindow.__RV42_RUNTIME__.warpDash}));
+    assert(graftVisual.count>0,'accepted graft must materialise as a warp');
+    assert.deepEqual(graftVisual.dash,[4.5,7],'graft warp must use the dotted rendering contract');
+    const graftSound=await A.page.evaluate(()=>({sample:window.__RALUVAAA_SOUND_V38__?.sampleForEvent?.({type:'connect_proposed'}),url:window.__RALUVAAA_SOUND_V38__?.samples?.graft||''}));
+    assert.equal(graftSound.sample,'graft','graft proposal must map to the graft sound');
+    assert.match(graftSound.url,/graft\.wav$/,'graft sound asset must remain wired');
     if(await B.page.locator('#inboxBtn').evaluate(el=>el.classList.contains('active')))await B.page.click('#inboxBtn');
 
     // Reverse roles: A helps B.
@@ -250,6 +257,17 @@ async function acceptFirst(page,type){
     assert.equal(await firstEntrusted.locator('.pa-entrusted-timer').count(),1,'entrusted timer must be rendered natively');
     assert.match((await firstEntrusted.locator('.m').innerText()).trim(),/\d{2}:\d{2}:\d{2}|\d+[jd] \d{2}:\d{2}:\d{2}/,'entrusted wish must show a live timer');
     assert.notEqual(await firstEntrusted.evaluate(el=>getComputedStyle(el).borderColor),'rgba(0, 0, 0, 0)','entrusted wish must retain its color cue');
+
+    // Wish content, not only chrome, follows the reader language while the original stays accessible.
+    await A.page.evaluate(()=>{
+      window.__RALUVAAA_TRANSLATION__.translate=async text=>({translation:'TRADUIT: '+text,sourceLang:'en'});
+      document.querySelector('[data-lang="fr"]')?.click()
+    });
+    await openWish(A.page,wishA);
+    await A.page.waitForSelector('.v47-translation-note',{polling:100,timeout:5000});
+    assert.match((await A.page.locator('#drawerBody .wish').innerText()).trim(),/^TRADUIT: /,'wish body must be translated for the reader');
+    await A.page.click('.v47-translation-note button');
+    assert.equal((await A.page.locator('#drawerBody .wish').innerText()).trim(),'A wants to learn coastal sailing '+stamp,'reader must be able to reveal the canonical original wish');
 
     console.log('RALUVAAA Private Alpha real A/B identity gate passed: mobile WebKit + desktop Chromium');
   }finally{
