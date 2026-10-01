@@ -65,6 +65,22 @@ jobs:
           sleep 3
           curl --retry 8 --retry-delay 2 --retry-all-errors --fail --silent --show-error "$WORKER_URL/v1/health"
           echo
+      - name: Smoke-test wish translation
+        run: |
+          SESSION=$(curl --retry 5 --retry-delay 2 --retry-all-errors --fail --silent --show-error \
+            -X POST "$WORKER_URL/v1/session" \
+            -H 'content-type: application/json' \
+            -H 'x-raluvaaa-room: SMOKE' \
+            --data '{}')
+          TOKEN=$(printf '%s' "$SESSION" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>process.stdout.write(JSON.parse(s).token||''))")
+          test -n "$TOKEN" || { echo "Could not create smoke session"; exit 5; }
+          OUT=$(curl --retry 3 --retry-delay 2 --retry-all-errors --fail --silent --show-error \
+            -X POST "$WORKER_URL/v1/translate" \
+            -H 'content-type: application/json' \
+            -H 'x-raluvaaa-room: SMOKE' \
+            -H "authorization: Bearer $TOKEN" \
+            --data '{"text":"我想学会航海","targetLang":"fr"}')
+          printf '%s' "$OUT" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const x=JSON.parse(s);if(!x.translation||x.translation==='我想学会航海')process.exit(6);console.log('Translation smoke:',x.translation)})"
       - name: Wire Shared and Private Alpha to deployed Worker
         run: |
           printf "window.RALUVAAA_ALPHA_API_BASE='%s';\n" "$WORKER_URL" > raluvaaa/shared-alpha/api-config.js
