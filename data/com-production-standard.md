@@ -37,6 +37,17 @@ This file is the binding production standard for all future Confluence of Minds 
 - Create new images, shots, motion pieces, compositions or audio when existing material is insufficient.
 - Existing assets should serve as canon, art direction and ingredients for new work.
 
+## 3A. Anti-recycling threshold for daily production
+- A daily creative must not merely reframe, crop, re-caption or re-sequence the same small pool of project images. If a world has already been used recently, the next approval candidate must include materially new visual authorship: newly created hero imagery, new motion scenes, new composites, newly generated shots, or another genuinely new visual device.
+- Reuse of existing canon assets is allowed for continuity, but they should function as anchors or ingredients, not constitute nearly the whole visual payload by default.
+- If the candidate would still feel recognizably like the same montage after removing the new text layer, it is REWORK.
+- Before approving a reused world, explicitly compare the candidate against the last published or queued creative for that world and identify what is visually new, not only what is editorially new.
+- Do not repeatedly recycle the same project stills simply because they are convenient. When the Drive library is too thin, create new project-specific imagery rather than lowering the visual bar.
+- Repeated soundtrack reuse is also a form of recycling. Do not default to the same embedded project music across multiple social edits just because it is available.
+- Unless a piece is intentionally part of one coherent campaign with a recurring musical motif, avoid reusing the same soundtrack in consecutive creatives for a world and avoid using a track again when it has already become perceptibly familiar in recent CoM posts.
+- If a previously used track is reused, the approval pack must state when it was last used and why reuse is editorially justified. Otherwise source a different owned or properly licensed track.
+- A technically competent remix that still gives the impression of "the same images and the same music again" is REWORK.
+
 ## 4. Trailer editing: condense, never truncate
 - Inspect the entire source master before editing.
 - A social cut must be a true remontage using the strongest material from across the whole source.
