@@ -698,6 +698,84 @@
       "published_at": null,
       "approved_in_chat": true,
       "status_at_log": "scheduled"
+    },
+    {
+      "experiment_id": "com-authentic-victims-2026-10-03-opaline-thought-weight",
+      "world_id": "authentic-victims",
+      "content_mode": "archive-remix",
+      "angle": "Opaline asks how much a thought weighs, then imagines exchanging heavy thoughts for lighter ones",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/authentiques-victimes/",
+      "source_event": null,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-03/opaline-loud-final.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-03T09:34:00+02:00",
+      "newly_generated_material": [
+        "new 9:16 kinetic typography master centered on Opaline's thought-weight passage",
+        "new transition system using pixelation, impact cuts, squeeze, slide, motion trails, blur and flash",
+        "new visual compositions built for this angle rather than recycled project stills",
+        "new sound design for falls, impacts, swaps and whooshes",
+        "final loudness-reworked mobile mix"
+      ],
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "User explicitly asked to place this revised master in Buffer after the loudness rework. Creative was accepted with a qualitative caveat ('a little better though strange'); exact loud master scheduled. Buffer plan was already at its scheduled-post limit, so existing slots were repurposed rather than adding more distant posts.",
+      "platform": "instagram",
+      "buffer_post_id": "6abbca8667bf5738855a4a34",
+      "scheduled_for": "2026-10-04T18:00:00+02:00"
+    },
+    {
+      "experiment_id": "com-authentic-victims-2026-10-03-opaline-thought-weight",
+      "world_id": "authentic-victims",
+      "content_mode": "archive-remix",
+      "angle": "Opaline asks how much a thought weighs, then imagines exchanging heavy thoughts for lighter ones",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/authentiques-victimes/",
+      "source_event": null,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-03/opaline-loud-final.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-03T09:34:00+02:00",
+      "newly_generated_material": [
+        "new 9:16 kinetic typography master centered on Opaline's thought-weight passage",
+        "new transition system using pixelation, impact cuts, squeeze, slide, motion trails, blur and flash",
+        "new visual compositions built for this angle rather than recycled project stills",
+        "new sound design for falls, impacts, swaps and whooshes",
+        "final loudness-reworked mobile mix"
+      ],
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "User explicitly asked to place this revised master in Buffer after the loudness rework. Creative was accepted with a qualitative caveat ('a little better though strange'); exact loud master scheduled. Buffer plan was already at its scheduled-post limit, so existing slots were repurposed rather than adding more distant posts.",
+      "platform": "tiktok",
+      "buffer_post_id": "6abc01ca945e596c7039ffb7",
+      "scheduled_for": "2026-10-05T18:30:00+02:00"
+    },
+    {
+      "experiment_id": "com-authentic-victims-2026-10-03-opaline-thought-weight",
+      "world_id": "authentic-victims",
+      "content_mode": "archive-remix",
+      "angle": "Opaline asks how much a thought weighs, then imagines exchanging heavy thoughts for lighter ones",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "confluence_url": "https://confluenceofminds.com/authentiques-victimes/",
+      "source_event": null,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-03/opaline-loud-final.mp4",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-03T09:34:00+02:00",
+      "newly_generated_material": [
+        "new 9:16 kinetic typography master centered on Opaline's thought-weight passage",
+        "new transition system using pixelation, impact cuts, squeeze, slide, motion trails, blur and flash",
+        "new visual compositions built for this angle rather than recycled project stills",
+        "new sound design for falls, impacts, swaps and whooshes",
+        "final loudness-reworked mobile mix"
+      ],
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "User explicitly asked to place this revised master in Buffer after the loudness rework. Creative was accepted with a qualitative caveat ('a little better though strange'); exact loud master scheduled. Buffer plan was already at its scheduled-post limit, so existing slots were repurposed rather than adding more distant posts.",
+      "platform": "youtube",
+      "buffer_post_id": "6abc02368db23fcd3a35f54e",
+      "scheduled_for": "2026-10-06T17:30:00+02:00"
     }
   ]
 }
