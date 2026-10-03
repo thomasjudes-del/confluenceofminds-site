@@ -681,6 +681,23 @@
       "scheduled_for": "2026-10-20T20:30:00+02:00",
       "published_at": null,
       "status_at_log": "scheduled"
+    },
+    {
+      "world_id": "chronicles-of-kashgar",
+      "content_mode": "archive-remix",
+      "angle": "Three friends before the fantasy: race, lake, then Gildwin stops smiling",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://static.metricool.com/planner/202610/7019567-file-4492255432868225205.mp4",
+      "newly_generated_material": [
+        "Approved 2026-10-02 Kashgar friendship creative"
+      ],
+      "platform": "tiktok",
+      "buffer_post_id": "6ac09e36ca55406b4b24e068",
+      "scheduled_for": "2026-10-12T20:30:00+02:00",
+      "published_at": null,
+      "approved_in_chat": true,
+      "status_at_log": "scheduled"
     }
   ]
 }
