@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-21-v2",
+  "version": "2026-10-05-v1",
   "purpose": "Automatic learning layer for Confluence of Minds content performance. Updated by the weekly performance analyst and read by the autonomous editor before future publishing decisions.",
   "site_analytics": {
     "status": "not_instrumented",
@@ -400,28 +400,214 @@
     }
   ],
   "editor_feedback": {
-    "updated_at": "2026-09-21",
-    "status": "reset_due_to_execution_confounds",
+    "updated_at": "2026-10-05",
+    "status": "monthly_operating_model_pivot",
     "current_priority": [
-      "authored world-specific visual language",
-      "intentional music/audio",
-      "non-template motion and composition",
-      "less repetitive hook grammar",
-      "daily human approval before scheduling"
+      "approval-only publication integrity",
+      "authored world-specific visual and audio language",
+      "10-14 s platform-native narrative mutations for TikTok tests",
+      "premise-driven YouTube Shorts with close descendants of strong signals",
+      "selective high-quality Instagram publishing",
+      "website analytics and UTM instrumentation"
     ],
-    "do_not_infer_yet": [
-      "Titan vs SILMEA vs RALUVAAA relative strength",
-      "TikTok vs YouTube vs Instagram vs Facebook fit",
-      "duration family winners",
-      "positioning pivot"
+    "stop": [
+      "generic engagement-bait prompts and quote cards",
+      "legacy queue items that bypass explicit approval",
+      "treating posting volume as experimental evidence",
+      "identical long-master distribution across every platform without testing duration fit"
     ],
-    "evidence_rule": "Only QC-passed, user-approved creatives count as clean experiments for future family/platform decisions."
+    "evidence_rule": "Only QC-passed, user-approved creatives with verified live status count as clean family/platform experiments. Very fresh posts remain provisional until metrics mature."
   },
   "methodology_corrections": [
     {
       "date": "2026-09-21",
       "correction": "Weekly inference reset after user review",
       "detail": "The 2026-09-21 weekly snapshot keeps raw metrics but its family/platform conclusions are superseded because recent posts were below the intended creative-quality standard. Treat them as execution-confounded."
+    }
+  ],
+  "monthly_snapshots": [
+    {
+      "date": "2026-10-05",
+      "current_window": "2026-09-05/2026-10-05",
+      "previous_window": "2026-08-06/2026-09-04",
+      "data_sources": {
+        "primary": "Metricool brand 7019567",
+        "secondary": "Buffer organization My Organization",
+        "publication_log": "data/com-publication-log.json",
+        "content_map": "data/com-content-map.json",
+        "outreach_log": "data/com-outreach-queue.json"
+      },
+      "comparison_quality": {
+        "status": "LOW / NON-DIAGNOSTIC FOR PERIOD-OVER-PERIOD",
+        "reason": "Metricool first connected the Confluence brand on 2026-09-18, so the previous 30-day window is incomplete and has no TikTok/Facebook activity and almost no YouTube activity. Buffer has only five Instagram posts in the previous window. Do not treat current-vs-previous percentage growth as a real trend."
+      },
+      "experiment_quality": {
+        "clean_user_approved_master_experiments": 6,
+        "pre_qc_or_unapproved_master_experiments_in_publication_log": 5,
+        "note": "Six master experiments in the window were explicitly approved in chat under the QC process: Shattered Dragons, Snow White v6, Anjin/Omotenashi, Authentic Victims prompter, Titan Black Window v2, and Authentic Victims/Opaline. Several approved masters still carried explicit user quality caveats. Legacy/unapproved queue items continued to publish and must remain excluded from family-strength inference."
+      },
+      "platform_trends": {
+        "instagram": {
+          "metricool": {
+            "reels": 9,
+            "reels_views": 341,
+            "reels_reach": 304,
+            "reels_interactions": 5,
+            "reels_shares": 0,
+            "feed_posts": 4,
+            "feed_post_views": 45,
+            "followers_last_observed": 1041,
+            "followers_gained": 3,
+            "followers_lost": 5
+          },
+          "buffer_secondary": {
+            "sent_posts": 14,
+            "views": 393,
+            "reach": 334,
+            "reactions": 7,
+            "comments": 0,
+            "shares": 0,
+            "saves": 1,
+            "post_attributed_follows": 0
+          },
+          "interpretation": "Distribution is weak and conversion is absent. Net follower change in Metricool is -2 over the measured period. Instagram should be treated as a high-quality portfolio/identity surface, not a volume channel. Fewer stronger posts are preferable to filler."
+        },
+        "tiktok": {
+          "metricool": {
+            "videos": 12,
+            "views": 1575,
+            "likes": 5,
+            "comments": 0,
+            "shares": 0,
+            "new_followers": 2,
+            "followers_last_observed": 9
+          },
+          "buffer_secondary": {
+            "sent_posts": 14,
+            "views": 1578,
+            "reach": 1214,
+            "reactions": 5,
+            "comments": 0,
+            "shares": 0,
+            "mean_average_watch_time_sec": 3.17
+          },
+          "interpretation": "TikTok is currently the strongest discovery surface by raw views, but propagation is effectively zero. Clean 20-26 s masters usually retain only about 1.35-3.27 s on average, while 8-12 s legacy cuts retain a much larger fraction of duration but still generate no sharing/commenting. Use TikTok as a discovery lab and test authored 10-14 s cuts rather than simply reposting long masters."
+        },
+        "youtube": {
+          "metricool": {
+            "video_views": 354,
+            "subscribers_last_observed": 1,
+            "subscriber_gains": 0,
+            "subscriber_losses": 0,
+            "revenue": 0,
+            "per_video_rows_available": false
+          },
+          "buffer_secondary": {
+            "sent_posts": 12,
+            "views": 503,
+            "reactions": 1,
+            "comments": 0
+          },
+          "interpretation": "YouTube is spiky rather than consistently weak: the original Titan Short reached 179 Buffer views and the fresh Opaline/Authentic Victims Short reached 164 within roughly a day, while most others remained below 30. Strong self-contained premises can break out relative to the account baseline, but there is no subscriber conversion yet."
+        },
+        "facebook": {
+          "metricool": {
+            "reels": 2,
+            "reel_views": 213,
+            "reel_likes": 4,
+            "reel_comments": 1,
+            "followers_gained": 2,
+            "followers_last_observed": 2
+          },
+          "interpretation": "Only two early, pre-QC reels exist. Titan strongly outperformed SILMEA and Facebook is the only platform with measurable follower acquisition, but the sample is too small and execution-confounded for a reallocation. One controlled clean retest is justified before any decision."
+        }
+      },
+      "creative_family_decisions": [
+        {
+          "family": "generic brand prompts / quote cards / engagement-bait filler",
+          "decision": "KILL",
+          "confidence": "medium",
+          "evidence": "Four recent Instagram filler posts from 2026-09-30 to 2026-10-03 produced only 47 total views and 27 total reach, with 3 reactions and zero comments, shares, saves or follows. They also dilute the authored Confluence identity.",
+          "action": "Remove this family from the editorial system and stop legacy queue items of this type from bypassing approval."
+        },
+        {
+          "family": "Titan concrete impossible-reality / decision-SF",
+          "decision": "MUTATE",
+          "confidence": "medium",
+          "evidence": "Titan repeatedly earns disproportionate discovery on TikTok/YouTube, including 179 YouTube views on the original Short and 248 TikTok views on the clean Black Window v2, but retention on the 25.8 s v2 is only 2.79 s average on TikTok and there are no shares/comments.",
+          "action": "Keep the concrete premise and world-specific production quality, but compress the next test to roughly 10-14 s with an immediate visual payoff and one narrative turn."
+        },
+        {
+          "family": "Authentic Victims literary micro-excerpts",
+          "decision": "HOLD",
+          "confidence": "low",
+          "evidence": "The clean Opaline Short is a notable early YouTube signal at 164 Buffer views within about a day, but the earlier manuscript-duplicate creative was weak on Instagram/TikTok and the Opaline metrics are still too fresh for cross-platform judgment.",
+          "action": "Run one close descendant on YouTube before scaling the family. Preserve the literary specificity and sound design; do not generalize into generic quote content."
+        },
+        {
+          "family": "Shattered Dragons cinematic/worldbuilding",
+          "decision": "HOLD",
+          "confidence": "low",
+          "evidence": "The first approved master produced 60 YouTube views, 51 TikTok views and only 6 Instagram views, with very weak TikTok watch time. A substantially revised form experiment is scheduled but has not yet generated comparable performance.",
+          "action": "Wait for the redesigned form experiment. Do not infer world weakness from the first approved master."
+        },
+        {
+          "family": "Snow White and Anjin cinematic world trailers",
+          "decision": "HOLD",
+          "confidence": "low",
+          "evidence": "Both were user-approved but carried explicit quality caveats. Snow White reached 190 TikTok views but only 23 Instagram and 9 YouTube; Anjin reached 81 TikTok, 58 Instagram and 10 YouTube. No propagation signal exists.",
+          "action": "Do not repeat the same trailer pattern. Revisit only with a stronger authored first-frame idea or a sharply specific cultural/narrative fragment."
+        },
+        {
+          "family": "abstract concept-first 8-12 s legacy cuts (RALUVAAA / SILMEA)",
+          "decision": "INSUFFICIENT CLEAN EVIDENCE",
+          "confidence": "low",
+          "evidence": "Legacy TikTok cuts show materially better watched-duration ratios than long masters and RALUVAAA once reached 253 views, but they were produced before the current quality gate and generated zero propagation.",
+          "action": "No family-level scale/kill decision until an authored QC-passed version is tested."
+        }
+      ],
+      "editorial_system_audit": {
+        "thematic_diversity": "GOOD. The recent feed spans science fiction, dragons, dark fantasy, Japanese culture, literary fiction, audio fiction, social-design experiments and broader speculative ideas. Topic diversity is not the current bottleneck.",
+        "ai_overuse": "NOT A CURRENT PROBLEM. AI appears inside some worlds, but the feed is not dominated by generic AI-news/editorial content.",
+        "hooks": "Improved after 2026-09-22: declarative and narrative hooks such as 'They were not born. They were made.', 'Five decisions...' and 'His manuscript already exists...' replaced much of the earlier What if / Why / Can repetition. Generic question/prompt syntax has nevertheless re-entered through legacy filler.",
+        "visual_identity": "Improved materially after the QC reset through owned cinematic assets, project-specific motion, music and sound design. However Snow White, Anjin and the Opaline piece were explicitly approved with quality caveats, so the system has not yet reached a consistently premium recognisable visual standard.",
+        "storytelling_depth": "Stronger in the approved 20-26 s masters, but those durations are currently poorly retained on TikTok. The next design problem is not 'shorter at any cost'; it is compressing a real narrative beat into a shorter authored object.",
+        "authored_vs_automated": "The approval/QC loop is moving the feed toward authored work, but unapproved generic queue items still make the system look automated and contaminate performance learning."
+      },
+      "system_reliability": {
+        "status": "NEEDS INTERVENTION",
+        "issues": [
+          "Publication-log state is drifting from actual network state: some entries remain PENDING/scheduled after posts are already live, and rescheduled dates are stale.",
+          "Buffer shows 40 sent posts in the current window while the publication log contains fewer tracked platform entries, so not every live item is mapped cleanly to an experiment.",
+          "Legacy/unapproved filler continues to publish despite the intended approval-only workflow.",
+          "Metricool is lagging or incomplete for some latest rows, especially YouTube per-video data and very fresh Instagram/TikTok posts; Buffer must remain a secondary freshness check."
+        ],
+        "consequence": "Until the queue and log are reconciled, raw monthly totals overstate the amount of usable experimentation and make family-level learning noisier than it should be."
+      },
+      "owned_audience_and_monetization": {
+        "website_clicks": "not measurable because site analytics remain not_instrumented",
+        "social_growth": "TikTok +2 followers, Facebook +2 followers, Instagram +3 gained / 5 lost (net -2), no measured YouTube subscriber gain",
+        "comments_and_shares": "effectively zero across the current Buffer-connected channels",
+        "revenue": "Metricool reports 0 YouTube revenue; no other social revenue signal is logged",
+        "outreach": "No qualified outreach action was executed in the current outreach log; all three logged SILMEA leads are explicit SKIP items.",
+        "conclusion": "Attention is not yet converting into owned audience, community interaction, collaboration or revenue at a meaningful level."
+      },
+      "strategic_conclusions": [
+        "There is no clean cross-platform winner yet. Do not pivot the overall Confluence positioning from this sample.",
+        "There is a real platform effect: TikTok supplies the most baseline discovery, Instagram is currently a weak conversion/distribution surface, and YouTube can produce isolated premise-driven spikes.",
+        "The next optimization target is not more volume. It is combining authored production quality with shorter platform-native narrative compression, then measuring propagation and conversion.",
+        "The biggest system problem is legacy queue contamination: generic and unapproved posts are still publishing, which weakens brand identity and corrupts the learning loop."
+      ],
+      "next_month_allocation_principles": [
+        "Zero generic brand prompt/quote-card filler. Every published item should map to a world, a strong real-world curiosity bridge, or a genuinely authored Confluence idea.",
+        "Keep one master concept per production cycle, but allow platform-native duration edits when evidence supports it. Do not force identical 20-30 s cuts onto TikTok.",
+        "Prioritize one Titan 10-14 s authored mutation on TikTok, one close Opaline/Authentic Victims descendant on YouTube, and wait for the redesigned Shattered Dragons test before further world-level allocation.",
+        "Use Instagram selectively for the strongest visual objects rather than daily volume.",
+        "Run one clean Facebook retest before deciding whether the early follower-conversion signal is real.",
+        "Instrument confluenceofminds.com with basic analytics and UTM discipline so social attention can finally be linked to owned-audience behavior.",
+        "Reconcile Buffer/Metricool/live-network state into the publication log and prevent any unapproved legacy queue item from publishing."
+      ],
+      "monthly_decision": "STRATEGIC PIVOT IN OPERATING MODEL, NOT POSITIONING: fewer/no filler posts, approval-only queue integrity, authored short-form variants by platform, and conversion instrumentation. No world should be SCALEd or KILLed yet except the generic filler family."
     }
   ]
 }
