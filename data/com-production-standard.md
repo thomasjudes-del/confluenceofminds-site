@@ -132,3 +132,20 @@ If any of these fail, mark REWORK and fix before asking Thomas to approve.
 
 ## Core principle
 A Confluence social asset must feel authored, world-specific and premium. It is better to ship one strong piece than a fast recycled montage with weak typography, poor framing, generic music or broken delivery.
+
+## 8B. Mandatory image-first narrative production, clarified 2026-10-07
+- Preserve successful manuscript extracts, narrative angles and pacing when Thomas requests a visual/audio rework. Replace the weak execution without silently changing the concept or language.
+- Before building the timeline, write the narrative shot list and create or source the actual imagery for every substantial scene. For a 20-40 second piece, normally prepare 5-8 distinct strong keyframes, with a concrete reason for each shot.
+- When project imagery does not cover the scene, use image generation first. Do not substitute local primitive drawing, flat vector characters, crude infographic rooms, boxes or template gradients for narrative imagery.
+- Generate keyframes without baked text and with usable space for typography; inspect them before animation. Maintain consistent characters, clothing, setting, light and art direction across related shots, using references/edits when needed.
+- A single recycled still with effects is not a complete visual treatment. Alternate authored viewpoints, detail shots, scene progression and meaningful visual metaphors.
+- Only after the imagery passes inspection, animate/composite it, add typography and assemble the actual MP4. Use internal motion and motivated cuts as well as camera movement. Do not stop at keyframes unless Thomas specifically asks for their validation.
+- If image generation fails, retry a relevant generation or source comparably strong rights-cleared imagery. If neither succeeds, deliver the candidate as REWORK; never lower the visual standard and call it PASS.
+- Specific feedback: Le Jury / Katéphomi and 100000 heures / Kashgar had promising manuscript-based ideas and improved motion, but poor visual authority and boring soundtracks. Keep their narrative value and replace imagery/music. Rogue Waves V6 remains an execution reference, not a template.
+
+## 8C. Music must have a short-form dramatic arc
+- Select a fresh exact licensed track for each unrelated creative. Listen when supported; otherwise report the actual limitation and never mark artistic sound PASS from loudness alone.
+- Choose an active musical phrase that provides rhythm, variation and a build/reveal within the actual short duration. Do not use a long empty intro or generic ambient bed merely because the source file is available.
+- Plan entry point, musical accents, deliberate pauses and final cadence against the narrative before muxing. A gain increase does not fix a boring musical choice.
+- Check stereo and mono compatibility, integrated loudness and decoded true peak on the exact delivered MP4; preserve natural transients and avoid aggressive limiting as a substitute for a good mix.
+- Record track/author, exact source, excerpt start/end, adaptations, license and required attribution. Carry required music credit into every platform caption/description. User manuscript citations must not be pasted into social copy.
