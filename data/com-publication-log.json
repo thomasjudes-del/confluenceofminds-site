@@ -776,6 +776,294 @@
       "platform": "youtube",
       "buffer_post_id": "6abc02368db23fcd3a35f54e",
       "scheduled_for": "2026-10-06T17:30:00+02:00"
+    },
+    {
+      "experiment_id": "com-2026-10-07-katephomi-jury-v2",
+      "world_id": "katephomi-kitembe",
+      "content_mode": "new-authored-visuals",
+      "angle": "A jury seeks the most important person in history; an unexpected name makes Hakim weep",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Katephomi_Le_Jury_V2.mp4",
+      "master_filename": "Katephomi_Le_Jury_V2.mp4",
+      "master_sha256": "b74dce73733d9093d518e6373db5f335f101e38bfe0f0174269b396f3540361b",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "5 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "Origami",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/origami/",
+        "credit_in_all_captions": true
+      },
+      "platform": "instagram",
+      "buffer_post_id": "6ac61ed890fcf9e63fb52ae0",
+      "scheduled_for": "2026-10-07T17:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
+    },
+    {
+      "experiment_id": "com-2026-10-07-kashgar-100000-v2",
+      "world_id": "chronicles-of-kashgar",
+      "content_mode": "new-authored-visuals",
+      "angle": "The old mariner counts life in hours; his countdown leaves Argan with 100000 hours",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Kashgar_100000_Heures_V2.mp4",
+      "master_filename": "Kashgar_100000_Heures_V2.mp4",
+      "master_sha256": "7f8db75190ba20c7a52d1a586d4a3a118a53858dc9b9fe28a606dcefda563294",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "6 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "The Climb",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/the-climb/",
+        "credit_in_all_captions": true
+      },
+      "platform": "instagram",
+      "buffer_post_id": "6ac61efd90fcf9e63fb52f0a",
+      "scheduled_for": "2026-10-08T17:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
+    },
+    {
+      "experiment_id": "com-2026-10-07-kashgar-archives",
+      "world_id": "chronicles-of-kashgar",
+      "content_mode": "new-authored-visuals",
+      "angle": "Forbidden Guild libraries and ancestral archives frame the chronicle as past and future",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Kashgar_Archives_20261007.mp4",
+      "master_filename": "Kashgar_Archives_20261007.mp4",
+      "master_sha256": "03b6f8c3ab318d48de05a22b1d5cc9aab7ac520611dec824d2c7dbfa55afcd4e",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "5 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "Catalyst",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/catalyst/",
+        "credit_in_all_captions": true
+      },
+      "platform": "instagram",
+      "buffer_post_id": "6ac61f0a93d42c6319f8adf9",
+      "scheduled_for": "2026-10-09T17:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
+    },
+    {
+      "experiment_id": "com-2026-10-07-katephomi-jury-v2",
+      "world_id": "katephomi-kitembe",
+      "content_mode": "new-authored-visuals",
+      "angle": "A jury seeks the most important person in history; an unexpected name makes Hakim weep",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Katephomi_Le_Jury_V2.mp4",
+      "master_filename": "Katephomi_Le_Jury_V2.mp4",
+      "master_sha256": "b74dce73733d9093d518e6373db5f335f101e38bfe0f0174269b396f3540361b",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "5 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "Origami",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/origami/",
+        "credit_in_all_captions": true
+      },
+      "platform": "tiktok",
+      "buffer_post_id": "6ac61f1433884235d9d72575",
+      "scheduled_for": "2026-10-09T16:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
+    },
+    {
+      "experiment_id": "com-2026-10-07-kashgar-100000-v2",
+      "world_id": "chronicles-of-kashgar",
+      "content_mode": "new-authored-visuals",
+      "angle": "The old mariner counts life in hours; his countdown leaves Argan with 100000 hours",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Kashgar_100000_Heures_V2.mp4",
+      "master_filename": "Kashgar_100000_Heures_V2.mp4",
+      "master_sha256": "7f8db75190ba20c7a52d1a586d4a3a118a53858dc9b9fe28a606dcefda563294",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "6 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "The Climb",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/the-climb/",
+        "credit_in_all_captions": true
+      },
+      "platform": "tiktok",
+      "buffer_post_id": "6ac61f1e20048411f0efa3a7",
+      "scheduled_for": "2026-10-10T16:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
+    },
+    {
+      "experiment_id": "com-2026-10-07-kashgar-archives",
+      "world_id": "chronicles-of-kashgar",
+      "content_mode": "new-authored-visuals",
+      "angle": "Forbidden Guild libraries and ancestral archives frame the chronicle as past and future",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Kashgar_Archives_20261007.mp4",
+      "master_filename": "Kashgar_Archives_20261007.mp4",
+      "master_sha256": "03b6f8c3ab318d48de05a22b1d5cc9aab7ac520611dec824d2c7dbfa55afcd4e",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "5 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "Catalyst",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/catalyst/",
+        "credit_in_all_captions": true
+      },
+      "platform": "tiktok",
+      "buffer_post_id": "6ac61f2993d42c6319f8b0f6",
+      "scheduled_for": "2026-10-11T16:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
+    },
+    {
+      "experiment_id": "com-2026-10-07-katephomi-jury-v2",
+      "world_id": "katephomi-kitembe",
+      "content_mode": "new-authored-visuals",
+      "angle": "A jury seeks the most important person in history; an unexpected name makes Hakim weep",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Katephomi_Le_Jury_V2.mp4",
+      "master_filename": "Katephomi_Le_Jury_V2.mp4",
+      "master_sha256": "b74dce73733d9093d518e6373db5f335f101e38bfe0f0174269b396f3540361b",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "5 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "Origami",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/origami/",
+        "credit_in_all_captions": true
+      },
+      "platform": "youtube",
+      "buffer_post_id": "6ac61f3690fcf9e63fb5410d",
+      "scheduled_for": "2026-10-10T15:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
+    },
+    {
+      "experiment_id": "com-2026-10-07-kashgar-100000-v2",
+      "world_id": "chronicles-of-kashgar",
+      "content_mode": "new-authored-visuals",
+      "angle": "The old mariner counts life in hours; his countdown leaves Argan with 100000 hours",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Kashgar_100000_Heures_V2.mp4",
+      "master_filename": "Kashgar_100000_Heures_V2.mp4",
+      "master_sha256": "7f8db75190ba20c7a52d1a586d4a3a118a53858dc9b9fe28a606dcefda563294",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "6 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "The Climb",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/the-climb/",
+        "credit_in_all_captions": true
+      },
+      "platform": "youtube",
+      "buffer_post_id": "6ac61f3f90fcf9e63fb54876",
+      "scheduled_for": "2026-10-11T15:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
+    },
+    {
+      "experiment_id": "com-2026-10-07-kashgar-archives",
+      "world_id": "chronicles-of-kashgar",
+      "content_mode": "new-authored-visuals",
+      "angle": "Forbidden Guild libraries and ancestral archives frame the chronicle as past and future",
+      "asset_type": "reel-video",
+      "news_driven": false,
+      "creative_master": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/social/approval/2026-10-07/Kashgar_Archives_20261007.mp4",
+      "master_filename": "Kashgar_Archives_20261007.mp4",
+      "master_sha256": "03b6f8c3ab318d48de05a22b1d5cc9aab7ac520611dec824d2c7dbfa55afcd4e",
+      "approved_in_chat": true,
+      "approved_at": "2026-10-07",
+      "language": "fr",
+      "newly_generated_material": [
+        "5 new project-specific cinematic keyframes",
+        "New vertical edit, motion, transitions and layered typography",
+        "Exact licensed music excerpt edit and final mix"
+      ],
+      "music": {
+        "title": "Catalyst",
+        "author": "Scott Buckley",
+        "license": "CC BY 4.0",
+        "source": "https://www.scottbuckley.com.au/library/catalyst/",
+        "credit_in_all_captions": true
+      },
+      "platform": "youtube",
+      "buffer_post_id": "6ac61f4490fcf9e63fb549f5",
+      "scheduled_for": "2026-10-12T15:00:00.000Z",
+      "published_at": null,
+      "status_at_log": "scheduled",
+      "notes": "Thomas approved these three existing French videos unchanged, acknowledging remaining image reuse and music quality limitations. Future new content English-only; book-led production paused. Exact upload SHA256 matched local approved master; Buffer schedule and media source re-read and confirmed."
     }
   ]
 }
