@@ -184,3 +184,10 @@ A Confluence social asset must feel authored, world-specific and premium. It is 
 - Give each sentence enough reading time, even if the introduction exceeds 33 seconds. Scrolling through real manuscript pages should support the explanation.
 - Verify researchers' platform-specific accounts before adding mentions. Distinguish confirmed accounts from names, and never invent handles or assume that tagging guarantees reach.
 - RALUVAAA V2 is also pending review. Thomas questioned whether the telescope example explains the project at all. Re-read the canonical concept before any further revision; wait for his stated forthcoming RALUVAAA feedback. Do not reduce RALUVAAA to a task list or equipment-sharing service. The canon describes a shared living world of intentions, independent lineages, branching, support, connections and traces of fulfilled wishes.
+
+
+## 15. Voynich teaser correction, 2026-10-07
+- Thomas finds V3 (58 seconds) too long, particularly with Chopin. Condense the explanation into an approximately 35–40 second teaser while preserving one readable sentence per screen and progressive comprehension.
+- This supersedes the earlier Chopin direction for Voynich: use a dynamic cinematic cipher/quest/adventure soundtrack, with an active excerpt and short-form development. Do not accelerate the old music or substitute loudness for rhythm.
+- Remove promises to document every step. State modestly that Confluence of Minds is exploring patterns and possible readings; a clear 'Stay tuned' ending is appropriate. Never imply successful decipherment or unverified progress.
+- V4 remains a revision for approval, not a new approved publication. RALUVAAA remains pending feedback; existing approved schedules remain unchanged.
