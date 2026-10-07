@@ -149,3 +149,10 @@ A Confluence social asset must feel authored, world-specific and premium. It is 
 - Plan entry point, musical accents, deliberate pauses and final cadence against the narrative before muxing. A gain increase does not fix a boring musical choice.
 - Check stereo and mono compatibility, integrated loudness and decoded true peak on the exact delivered MP4; preserve natural transients and avoid aggressive limiting as a substitute for a good mix.
 - Record track/author, exact source, excerpt start/end, adaptations, license and required attribution. Carry required music credit into every platform caption/description. User manuscript citations must not be pasted into social copy.
+
+## 11. Editorial direction approved 2026-10-07
+- All NEW social creatives must be in English: on-screen text, voiceover when present, hooks, titles, captions and descriptions. Keep official French book titles where appropriate; never imply an English edition exists without verification. Conversation and approval explanations to Thomas may remain French.
+- Exception: Thomas explicitly approved the three existing French masters Katephomi_Le_Jury_V2.mp4, Kashgar_100000_Heures_V2.mp4 and Kashgar_Archives_20261007.mp4 for publication unchanged on the connected Instagram, TikTok and YouTube channels. This is not blanket approval of future work.
+- Pause new book-led creatives. Next production priorities, in order: RALUVAAA (participation/help around a wish), Thomas's sound experience (identify exact canonical audio, SILMEA if confirmed), CENTAURO / bring your own AI competition concept. Ground every claim and demonstration in current canonical sources; never invent features, an event date or registration availability.
+- Improve scene coverage: eliminate weak visual gaps and repetitive reuse within a master. Retain the image-first workflow and strengthen musical selection.
+- Orient new pieces toward participation and conversation: one meaningful audience action per piece. Assess qualified comments, shares, profile visits and follower/member conversion as well as retention and reach; publishing volume alone is not success.
