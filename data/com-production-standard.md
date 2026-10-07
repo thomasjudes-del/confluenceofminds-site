@@ -175,3 +175,12 @@ A Confluence social asset must feel authored, world-specific and premium. It is 
 - RALUVAAA must stay close to the actual platform aesthetic. Reject the fantasy/elf/Lord-of-the-Rings treatment. Prefer actual interface demonstrations and clearly labelled simulated examples; show what a person can do. Keep the soundtrack more moderate.
 - Drop the Stromae/Jamel meme exploration for now. CENTAURO remains outside this batch.
 - Only these two revisions are commissioned; no new subject or publication is authorized by this feedback.
+
+
+## 14. Clarity correction from Thomas, 2026-10-07 18:21 Europe/Paris
+- Voynich V2 is NOT approved. The main failure is comprehension, not merely pace: competing headers, tiny subject labels and a large unexplained hook obscured the subject.
+- Introduce the object by name, period, unresolved writing, then hypotheses, previous research and concrete clues. Do not open with an unexplained 'Try reading this'.
+- Normally show one complete, intelligible sentence per screen. The subject title must be visually dominant when introducing the subject. Remove technical/source labels from the video; keep provenance and music attribution in captions and the approval pack.
+- Give each sentence enough reading time, even if the introduction exceeds 33 seconds. Scrolling through real manuscript pages should support the explanation.
+- Verify researchers' platform-specific accounts before adding mentions. Distinguish confirmed accounts from names, and never invent handles or assume that tagging guarantees reach.
+- RALUVAAA V2 is also pending review. Thomas questioned whether the telescope example explains the project at all. Re-read the canonical concept before any further revision; wait for his stated forthcoming RALUVAAA feedback. Do not reduce RALUVAAA to a task list or equipment-sharing service. The canon describes a shared living world of intentions, independent lineages, branching, support, connections and traces of fulfilled wishes.
