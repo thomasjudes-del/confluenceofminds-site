@@ -161,3 +161,9 @@ A Confluence social asset must feel authored, world-specific and premium. It is 
 - Indicative next approval-pack sequence, adjustable for sources and quality: Voynich context; surprising phenomenon (supercell candidate); RALUVAAA actual experience; playful two-character meme; SILMEA original French sound with English framing; one book scene; audience perception experiment; documented Voynich test. CENTAURO stays in concept development, not an automatically committed publishing slot.
 - Improve scene coverage and musical choices: avoid image-reuse gaps and repetitive filler while keeping the image-first workflow.
 - New candidates require explicit approval. Keep the existing three approved publication schedules unchanged. Evaluate reach, retention, shares, substantive interactions and follower/participant conversion, not volume alone.
+
+## 12. Current commissioned batch, 2026-10-07 13:27 Europe/Paris
+- Thomas commissioned ONLY two new introductions for now: Voynich and RALUVAAA, in English. These are approval candidates, not approved publications.
+- Do not independently start the other proposed subjects yet. CENTAURO is being produced by Thomas elsewhere; do not produce another CENTAURO video.
+- For the Stromae/Jamel meme, current scope is feasibility and concept exploration tied to CoM worlds but understandable without knowledge of its characters. Do not automatically render, spend on or publish the meme before the concept is selected.
+- After delivering the two introductions, retain them as pending review. Do not generate duplicate introductions or advance the earlier eight-item tentative sequence without new direction. Continue to require explicit approval before publishing any new candidate.
