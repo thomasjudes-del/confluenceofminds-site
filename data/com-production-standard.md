@@ -167,3 +167,11 @@ A Confluence social asset must feel authored, world-specific and premium. It is 
 - Do not independently start the other proposed subjects yet. CENTAURO is being produced by Thomas elsewhere; do not produce another CENTAURO video.
 - For the Stromae/Jamel meme, current scope is feasibility and concept exploration tied to CoM worlds but understandable without knowledge of its characters. Do not automatically render, spend on or publish the meme before the concept is selected.
 - After delivering the two introductions, retain them as pending review. Do not generate duplicate introductions or advance the earlier eight-item tentative sequence without new direction. Continue to require explicit approval before publishing any new candidate.
+
+
+## 13. Revision direction from Thomas, 2026-10-07 16:03 Europe/Paris
+- The first Voynich and RALUVAAA introductions were NOT approved. Revise both with shorter, more forceful social-video writing, visible concrete examples and more dynamic text choreography.
+- Voynich should convey the discovery of a real, still-undeciphered manuscript. Piano in a Chopin-like register is an explicit musical direction; preserve factual precision and credit scholarship.
+- RALUVAAA must stay close to the actual platform aesthetic. Reject the fantasy/elf/Lord-of-the-Rings treatment. Prefer actual interface demonstrations and clearly labelled simulated examples; show what a person can do. Keep the soundtrack more moderate.
+- Drop the Stromae/Jamel meme exploration for now. CENTAURO remains outside this batch.
+- Only these two revisions are commissioned; no new subject or publication is authorized by this feedback.
