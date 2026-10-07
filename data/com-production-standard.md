@@ -191,3 +191,11 @@ A Confluence social asset must feel authored, world-specific and premium. It is 
 - This supersedes the earlier Chopin direction for Voynich: use a dynamic cinematic cipher/quest/adventure soundtrack, with an active excerpt and short-form development. Do not accelerate the old music or substitute loudness for rhythm.
 - Remove promises to document every step. State modestly that Confluence of Minds is exploring patterns and possible readings; a clear 'Stay tuned' ending is appropriate. Never imply successful decipherment or unverified progress.
 - V4 remains a revision for approval, not a new approved publication. RALUVAAA remains pending feedback; existing approved schedules remain unchanged.
+
+
+## 16. Mandatory prompting and animated closing logo, 2026-10-07
+- Thomas requires prompter-style text on ALL future audiovisual productions: progressively reveal or highlight words to guide reading. Keep readable pacing and a full-sentence hold; do not show an entire static sentence by default.
+- Add intentional completion/exit accents to prompted titles to energize transitions without clipping or obscuring reading. Apply this to the final title too.
+- Always conclude with a dedicated closing shot animating the authentic Confluence of Minds logo, including during 'Stay tuned' where appropriate. Use the user-supplied transparent logo, preserve proportions and ensure contrast. Reference asset: Library libfile_9032248ee82481919fb1c33c63b1ab83, confluence of minds logo détouré.png.
+- Voynich hypotheses must read: 'A cipher? An unknown language? An elaborate hoax?' as three separate questions.
+- Apply these rules to current revisions and future productions. They do not authorize publication or changing previously approved scheduled masters.
