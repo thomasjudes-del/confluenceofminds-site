@@ -199,3 +199,11 @@ A Confluence social asset must feel authored, world-specific and premium. It is 
 - Always conclude with a dedicated closing shot animating the authentic Confluence of Minds logo, including during 'Stay tuned' where appropriate. Use the user-supplied transparent logo, preserve proportions and ensure contrast. Reference asset: Library libfile_9032248ee82481919fb1c33c63b1ab83, confluence of minds logo détouré.png.
 - Voynich hypotheses must read: 'A cipher? An unknown language? An elaborate hoax?' as three separate questions.
 - Apply these rules to current revisions and future productions. They do not authorize publication or changing previously approved scheduled masters.
+
+
+## 17. RALUVAAA introduction correction from Thomas, 2026-10-07
+- RALUVAAA V2 was not approved. Newcomers still do not understand the concept; rewrite it simply, attractively and for social discovery.
+- Create additional relevant, distinct visuals showing the experience, starting with the creation of a wish. Show how that wish becomes a living seed, branches, receives human support, connects by mutual choice and leaves a flowering trace.
+- Preserve the actual platform's contemporary luminous branching-world aesthetic. Illustrative examples must be identified in accompanying copy; do not pass generated scenes off as actual application captures or real community activity.
+- The earlier Saturn/telescope example is not the required direction. Keep the shared living world central rather than presenting a checklist or equipment-sharing service.
+- Continue mandatory prompted reading, title completion/exit accents and the authentic animated closing logo. This remains a revision for explicit approval, not permission to publish.
