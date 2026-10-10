@@ -58,6 +58,32 @@
       "subject": "Neat interactive web project: RALUVAAA, a map of wishes",
       "url": "https://confluenceofminds.com/raluvaaa/world/",
       "notes": "Curated web curiosities tip; contact address found in historical published site page; delivery to inbox or interest unconfirmed."
+    },
+    {
+      "date": "2026-10-10",
+      "entity": "The Rundown / Supertools",
+      "channel": "email",
+      "address": "support@therundown.ai",
+      "world_id": "chat-margin",
+      "action_type": "TOOL_DIRECTORY_SUBMISSION",
+      "status": "sent",
+      "message_id": "1a127d3381f23a56",
+      "subject": "AI tool submission | ChatMargin (free, local-first ChatGPT companion)",
+      "url": "https://chatmargin.app/",
+      "notes": "Chrome extension listing pitched with Chrome Web Store URL; not yet accepted or verified as listed."
+    },
+    {
+      "date": "2026-10-10",
+      "entity": "The Browser",
+      "channel": "email",
+      "address": "editors@thebrowser.com",
+      "world_id": "authentiques-victimes",
+      "action_type": "EDITORIAL_ESSAY_SUBMISSION",
+      "status": "sent",
+      "message_id": "1a127d33f00ff1fa",
+      "subject": "Reading suggestion: AI-generated books before ChatGPT (6-minute essay)",
+      "url": "https://confluenceofminds.com/confluences/ai-generated-books-before-chatgpt/",
+      "notes": "Own Confluence essay disclosed; no acceptance or reply confirmed."
     }
   ]
 }
