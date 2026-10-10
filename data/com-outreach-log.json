@@ -45,6 +45,19 @@
       "subject": "Creative submission: RALUVAAA, an internet of wishes instead of profiles",
       "url": "https://confluenceofminds.com/raluvaaa/world/",
       "notes": "Prototype status disclosed. Submission for editorial consideration; no feature or reply confirmed."
+    },
+    {
+      "date": "2026-10-10",
+      "entity": "Neatorama",
+      "channel": "email",
+      "address": "tips@neatorama.com",
+      "world_id": "raluvaaa",
+      "action_type": "CURIOSITY_LINK_SUBMISSION",
+      "status": "sent",
+      "message_id": "1a127c9b222db93e",
+      "subject": "Neat interactive web project: RALUVAAA, a map of wishes",
+      "url": "https://confluenceofminds.com/raluvaaa/world/",
+      "notes": "Curated web curiosities tip; contact address found in historical published site page; delivery to inbox or interest unconfirmed."
     }
   ]
 }
