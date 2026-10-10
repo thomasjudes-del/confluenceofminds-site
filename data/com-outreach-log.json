@@ -1,10 +1,37 @@
 {
-  "version": "2026-09-19",
+  "version": "2026-10-10",
   "purpose": "Log of lightweight Confluence of Minds distribution and outreach actions.",
   "rules": [
     "Record only specific qualified outreach or exceptional distribution leads.",
     "Never store guessed or private contact details.",
     "Do not chase the same contact repeatedly without a meaningful new reason."
   ],
-  "entries": []
+  "entries": [
+    {
+      "date": "2026-10-10",
+      "entity": "Alpha Beta Gamer",
+      "channel": "email",
+      "address": "admin@alphabetagamer.com",
+      "world_id": "incident-on-titan",
+      "action_type": "EDITORIAL_PITCH",
+      "status": "sent",
+      "message_id": "1a127a96332cbb96",
+      "subject": "Game submission: Incident on Titan | free browser-based sci-fi decision game",
+      "url": "https://confluenceofminds.com/titan/",
+      "notes": "Individually tailored submission. No coverage or reply confirmed."
+    },
+    {
+      "date": "2026-10-10",
+      "entity": "SlowDen",
+      "channel": "email",
+      "address": "slowden.official@gmail.com",
+      "world_id": "incident-on-titan",
+      "action_type": "LISTING_PITCH",
+      "status": "sent",
+      "message_id": "1a127a96a29dbd4d",
+      "subject": "Browser game submission: Incident on Titan | Confluence of Minds",
+      "url": "https://confluenceofminds.com/titan/",
+      "notes": "Individually tailored non-exclusive listing proposal. No listing or reply confirmed."
+    }
+  ]
 }
