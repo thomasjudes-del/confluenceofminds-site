@@ -337,12 +337,15 @@ function updateHero() {
     const progress = clamp(-rect.top / travel, 0, 1);
     const mobile = window.innerWidth <= 820;
 
-    const absorb = smootherstep(.12, .78, progress);
-    const burst = smootherstep(.38, .88, progress);
-    const exit = smoothstep(.88, 1, progress);
-    const copyFade = 1 - smoothstep(.14, .39, progress);
-    const echo = smoothstep(.26, .55, progress) * (1 - smoothstep(.88, .985, progress));
-    const paper = smoothstep(.31, .56, progress) * (1 - smoothstep(.84, .97, progress));
+    // Keep the desktop introduction fully readable before the visual transition.
+    // Preserve the established animation timing on mobile.
+    const motionProgress = mobile ? progress : clamp((progress - .22) / .78, 0, 1);
+    const absorb = smootherstep(.12, .78, motionProgress);
+    const burst = smootherstep(.38, .88, motionProgress);
+    const exit = smoothstep(.88, 1, motionProgress);
+    const copyFade = 1 - smoothstep(mobile ? .14 : .32, mobile ? .39 : .55, progress);
+    const echo = smoothstep(.26, .55, motionProgress) * (1 - smoothstep(.88, .985, motionProgress));
+    const paper = smoothstep(.31, .56, motionProgress) * (1 - smoothstep(.84, .97, motionProgress));
 
     const scale = mobile
       ? .9 + absorb * 3.25 + burst * 1.05
@@ -361,7 +364,7 @@ function updateHero() {
     hero.style.setProperty('--immersive-rotate', `${rotate.toFixed(2)}deg`);
     hero.style.setProperty('--art-opacity', (1 - smoothstep(.93, 1, progress)).toFixed(3));
     hero.style.setProperty('--copy-opacity', copyFade.toFixed(3));
-    hero.style.setProperty('--copy-y', `${(-progress * 82).toFixed(1)}px`);
+    hero.style.setProperty('--copy-y', `${(-(mobile ? progress : smoothstep(.30, .60, progress)) * 82).toFixed(1)}px`);
     hero.style.setProperty('--scroll-opacity', (1 - smoothstep(.02, .16, progress)).toFixed(3));
     hero.style.setProperty('--void-opacity', smoothstep(.91, .995, progress).toFixed(3));
 
