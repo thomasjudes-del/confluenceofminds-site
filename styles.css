@@ -770,3 +770,23 @@ button { color: inherit; }
   .primary-button { margin-top: 15px; padding: 11px 17px; }
   .social-links--hero { margin-top: 10px; }
 }
+
+
+/* Full-color social platform artwork, served locally */
+.social-link img {
+  display: block;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+.social-link--youtube img { width: 28px; height: 26px; }
+.social-links--footer .social-link img { width: 25px; height: 25px; }
+.social-links--footer .social-link--youtube img { width: 27px; height: 25px; }
+
+@media (max-width: 520px) {
+  .social-link img,
+  .social-links--footer .social-link img { width: 24px; height: 24px; }
+  .social-link--youtube img,
+  .social-links--footer .social-link--youtube img { width: 26px; height: 24px; }
+}
