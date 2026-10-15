@@ -18,7 +18,7 @@ function fake({differentLatest=false,mode,unexpectedBindings=false}={}){
     if(path.endsWith('/deployments'))result={deployments:[{id:DEPLOY,versions:[{version_id:VERSION,percentage:100}],author_email:VALUE,annotations:{message:VALUE}}]};
     else if(path.endsWith('/versions'))result={items:[{id:differentLatest?LATEST:VERSION}]};
     else if(path.includes('/versions/'))result={id:path.split('/').at(-1),metadata:{author_email:VALUE},resources:{bindings:unexpectedBindings?{}:bindings,script:{etag:VALUE},script_runtime:{compatibility_date:'2026-09-01',compatibility_flags:[],limits:{secret:VALUE}}}};
-    else if(path.endsWith('/settings'))result={logpush:false,observability:{secret:VALUE},tags:[VALUE]};
+    else if(path.endsWith('/settings'))result={logpush:false,observability:{secret:VALUE},tags:[VALUE],bindings,annotations:{'workers/test_field':VALUE,'\n::error::':VALUE},placement:{mode:'off'}};
     else if(path.endsWith('/schedules'))result={schedules:[{cron:VALUE}]};
     else if(path.endsWith('/subdomain'))result={enabled:true,previews_enabled:false,token:VALUE};
     else if(path.endsWith('/routes'))result=[{pattern:VALUE,secret:VALUE}];
@@ -44,6 +44,8 @@ test('only GET calls reach the fixed Cloudflare host; output omits raw values',a
   assert.deepEqual(summary.blockers,[]);
   assert.deepEqual(summary.versions[0].bindings.find(b=>b.name==='DB'),{name:'DB',type:'d1',fields:[{name:'id',type:'string'},{name:'name',type:'string'},{name:'type',type:'string'}]});
   assert.equal(summary.triggers.routeCount,1);
+  assert.deepEqual(summary.settingsNestedFields.annotations,[{name:'[redacted-name]',type:'string'},{name:'workers/test_field',type:'string'}]);
+  assert.deepEqual(summary.settingsBindingFields,summary.versions[0].bindings);
 });
 
 test('sanitizer whitelists binding name/type and rejects log-control names',()=>{

@@ -16,7 +16,7 @@ const array=(v,label)=>{if(!Array.isArray(v))fail('Unexpected metadata shape: '+
 const identifier=(v,label)=>{if(typeof v!=='string'||!UUID.test(v))fail('Unexpected identifier: '+label);return v};
 const name=v=>typeof v==='string'&&NAME.test(v)?v:'[redacted-name]';
 const type=v=>v===null?'null':Array.isArray(v)?'array':typeof v;
-const fieldTypes=v=>Object.entries(object(v,'field inventory')).map(([key,value])=>({name:name(key),type:type(value)})).sort((a,b)=>a.name.localeCompare(b.name));
+const fieldTypes=v=>Object.entries(object(v,'field inventory')).map(([key,value])=>({name:typeof key==='string'&&/^[A-Za-z_][A-Za-z0-9_./-]{0,127}$/.test(key)?key:'[redacted-name]',type:type(value)})).sort((a,b)=>a.name.localeCompare(b.name));
 
 export function sanitizeBindings(bindings){
   return array(bindings,'bindings').map(binding=>{
@@ -113,6 +113,8 @@ export async function inspectRuntime({fetchImpl=fetch,accountId,token,workerName
     latestVersionId:latestId,latestMatchesActive:active.length===1&&active[0].versionId===latestId,
     versions:summaries,authModes:modes,
     settingsFields:fieldTypes(settings),
+    settingsBindingFields:sanitizeBindings(settings.bindings),
+    settingsNestedFields:{annotations:fieldTypes(settings.annotations),placement:settings.placement===null?null:fieldTypes(settings.placement)},
     triggers:{scheduleCount:array(schedules.schedules,'schedule list').length,routeCount:routes.length,customDomainCount:domains.length,
       workersDevEnabled:typeof subdomain.enabled==='boolean'?subdomain.enabled:null,
       previewsEnabled:typeof subdomain.previews_enabled==='boolean'?subdomain.previews_enabled:null},
