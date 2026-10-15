@@ -226,7 +226,11 @@ async function acceptFirst(page,type){
     const graftSound=await A.page.evaluate(()=>({sample:window.__RALUVAAA_SOUND_V38__?.sampleForEvent?.({type:'connect_proposed'}),url:window.__RALUVAAA_SOUND_V38__?.samples?.graft||''}));
     assert.equal(graftSound.sample,'graft','graft proposal must map to the graft sound');
     assert.match(graftSound.url,/graft\.wav$/,'graft sound asset must remain wired');
-    if(await B.page.locator('#inboxBtn').evaluate(el=>el.classList.contains('active')))await B.page.click('#inboxBtn');
+    // Explicitly close the previous GRAFT drawer. A toggle click can reopen it
+    // if a pending engine selection changes the drawer during click scheduling.
+    if(await B.page.locator('#drawer').isVisible())await B.page.click('#drawerClose');
+    await B.page.waitForSelector('#drawer',{state:'hidden',timeout:3000});
+    assert.equal(await B.page.locator('#inboxBtn').evaluate(el=>el.classList.contains('active')),false);
 
     // Reverse roles: A helps B.
     await openWish(A.page,wishB);
@@ -238,10 +242,20 @@ async function acceptFirst(page,type){
     await B.page.waitForFunction(()=>Number(document.getElementById('inboxBadge')?.textContent||0)>0,null,{polling:100,timeout:5000});
     assert.notEqual((await B.page.locator('#inboxBadge').innerText()).trim(),'0','B must see an unread notification badge');
     const unreadBefore=Number((await B.page.locator('#inboxBadge').innerText()).trim()||0);
+    const inboxDiagnostic=()=>B.page.evaluate(()=>({visibility:document.visibilityState,active:document.getElementById('inboxBtn')?.classList.contains('active'),hidden:document.getElementById('drawer')?.classList.contains('hidden'),badge:document.getElementById('inboxBadge')?.textContent,notifications:window.__RV26_SHARED__.state().notifications,pending:window.__RALUVAAA_SHARED_DEBUG__.inbox().pending.map(p=>p.id)}));
+    console.log('Unread inbox before click',JSON.stringify(await inboxDiagnostic()));
+    assert.equal(await B.page.locator('#inboxBtn').evaluate(el=>el.classList.contains('active')),false,'badge test must open, not close, Notifications');
     await B.page.click('#inboxBtn');
-    await B.page.waitForFunction(()=>Number(document.getElementById('inboxBadge')?.textContent||0)===0,null,{polling:100,timeout:5000});
+    await B.page.waitForSelector('#drawer:not(.hidden) .pa-inbox',{timeout:3000});
+    try{await B.page.waitForFunction(()=>Number(document.getElementById('inboxBadge')?.textContent||0)===0,null,{polling:100,timeout:5000})}catch(error){
+      console.error('Unread inbox after click',JSON.stringify(await inboxDiagnostic()));
+      console.error('Unread inbox server',JSON.stringify(await B.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.inbox().then(x=>x.notifications))));
+      throw error
+    }
     const unreadAfter=Number((await B.page.locator('#inboxBadge').innerText()).trim()||0);
     assert(unreadAfter<unreadBefore,'reading the inbox must decrement the unread badge');
+    await B.page.waitForFunction(()=>window.__RALUVAAA_SHARED_DEBUG__.client.inbox().then(x=>x.notifications.every(n=>n.isRead)),null,{polling:100,timeout:5000});
+    console.log('Unread inbox cleared locally and server-side',JSON.stringify(await inboxDiagnostic()));
     await B.page.click('#inboxBtn');
     await acceptFirst(B.page,'help');
     await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===id)},wishB,{polling:100,timeout:10000});

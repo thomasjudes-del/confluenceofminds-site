@@ -337,13 +337,15 @@ async function assertNoOverflow(page,label){
   await A.click('[data-act="resume_lineage"]');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='alive',wholeRoot,{timeout:10000});
 
-  // Mistake removal through the UI must really remove an untouched wish.
+  // Legacy MVP26 no longer renders a removal button. Exercise its existing
+  // shared removal adapter and verify that the untouched wish leaves the UI.
   const mistake=await createWish(A,'QA accidental untouched wish '+stamp);
   await refresh(A);await openWish(A,mistake);
   await openMore(A);
-  A.once('dialog',d=>d.accept());
-  await A.click('[data-act="remove"]');
+  assert.equal(await A.locator('[data-act="remove"]').count(),0,'legacy UI must not expose the retired removal control');
+  await A.evaluate(id=>window.__RALUVAAA_SHARED_REMOVE__(id),mistake);
   await A.waitForFunction(id=>!window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.some(w=>w.id===id),mistake,{timeout:10000});
+  await A.waitForFunction(id=>!window.__RV26_SHARED__.semantic().some(w=>w.semanticId===id),mistake,{timeout:10000});
 
   // Concurrent independent writes must survive and converge.
   const concurrentA='QA concurrent '+stamp+' gamma';
