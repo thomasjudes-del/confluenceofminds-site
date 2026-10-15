@@ -1,0 +1,40 @@
+name: Release reviewed RALUVAAA Worker code only
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'dot/raluvaaa-code-only-release-20261015'
+    paths:
+      - 'raluvaaa/alpha-api/release-plan.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: raluvaaa-code-only-production-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/dot/raluvaaa-code-only-release-20261015' && github.repository == 'thomasjudes-del/confluenceofminds-site'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify release guards without credentials
+        run: |
+          node --check raluvaaa/alpha-api/release-code-only.mjs
+          node --test raluvaaa/alpha-api/release-code-only.test.mjs raluvaaa/alpha-api/inspect-release-runtime.test.mjs
+          node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/private-alpha/qa-bootstrap-security.cjs
+      - name: Release exact reviewed source after remote CI and drift checks
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node raluvaaa/alpha-api/release-code-only.mjs
