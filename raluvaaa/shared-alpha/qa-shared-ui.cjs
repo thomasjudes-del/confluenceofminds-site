@@ -174,9 +174,9 @@ async function assertNoOverflow(page,label){
   await openWish(B,wishA);
   assert(await B.locator('[data-act="encourage"]').isDisabled(),'encourage must remain disabled after reload');
 
-  // HELP proposal and consent.
+  // Legacy shared-alpha uses the MVP26 single-note Help form (no title field).
+  // Proposal and consent assertions still exercise the same server contract.
   await B.click('[data-act="help"]');
-  await B.fill('#helpTitleInput','One concrete first step');
   await B.fill('#helpInput','I can help with one concrete first step.');
   await B.click('#confirm');
   await acceptPending(A,'help');
@@ -185,7 +185,6 @@ async function assertNoOverflow(page,label){
   // Decline path must persist in both people's activity after refresh/reload.
   await refresh(B);await openWish(B,wishA);
   await B.click('[data-act="help"]');
-  await B.fill('#helpTitleInput','Second help offer');
   await B.fill('#helpInput','This second offer should be declined.');
   await B.click('#confirm');
   await refresh(A);
@@ -208,7 +207,6 @@ async function assertNoOverflow(page,label){
   // Helper can cancel a still-pending offer from the UI; recipient must lose the request.
   await openWish(B,wishA);
   await B.click('[data-act="help"]');
-  await B.fill('#helpTitleInput','Offer to cancel');
   await B.fill('#helpInput','This offer will be cancelled by the helper.');
   await B.click('#confirm');
   await B.waitForFunction(()=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.sent?.some(p=>p.type==='help'&&p.status==='pending'),{timeout:10000});

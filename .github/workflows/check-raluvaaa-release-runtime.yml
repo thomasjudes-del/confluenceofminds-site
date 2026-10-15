@@ -1,0 +1,31 @@
+name: Inspect RALUVAAA release runtime (read only)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/check-raluvaaa-release-runtime.yml'
+      - 'raluvaaa/alpha-api/inspect-release-runtime.mjs'
+      - 'raluvaaa/alpha-api/inspect-release-runtime.test.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify GET-only requests and output sanitization
+        run: node --test raluvaaa/alpha-api/inspect-release-runtime.test.mjs
+      - name: Inspect current runtime metadata without mutation
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node raluvaaa/alpha-api/inspect-release-runtime.mjs
