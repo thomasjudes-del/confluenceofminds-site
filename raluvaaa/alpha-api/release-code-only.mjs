@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 // https://developers.cloudflare.com/api/resources/workers/subresources/scripts/subresources/deployments/methods/create/
 // Wrangler 4.151.0 versions upload explicitly omits non-versioned logpush/observability;
 // this helper never writes settings, triggers, secrets, D1 schema or D1 contents.
-export const APPROVED_SOURCE_SHA='20914b49d834160d947c60115aaf560bd7786f2c';
+export const APPROVED_SOURCE_SHA='b2488e66d502721e004baf02bd721dfb8507492b';
 export const APPROVED_CODE_SHA256='03218e265bc9c483dc183606fa03f2a6b838b2536744cf2e5baa44415f8c7eb5';
 export const BASELINE_VERSION='be8ae250-463a-43da-bf3f-902d7fc5c8bd';
 export const BASELINE_DEPLOYMENT='4ecb828a-b1e6-48e2-963a-444e1b4be760';
