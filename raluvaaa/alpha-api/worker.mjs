@@ -139,7 +139,16 @@ async function verifyTurnstile(request,env,payload){
 }
 function validateNoContact(text){
   if(/https?:\/\/|www\.|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(text))fail(400,'contact_or_url','Links or contact details are not allowed here');
-  if(/(?:\+?\d[\s().-]*){8,}/.test(text))fail(400,'contact_or_url','Phone numbers are not allowed here');
+  const numericRuns=text.match(/(?:\+?\d[\s().-]*){8,}/g)||[];
+  const containsPhone=numericRuns.some(run=>{
+    // A complete, valid ISO date is not a phone number. Do not strip dates out
+    // of longer numeric runs: that would hide phone-like contact details.
+    const candidate=run.trim().replace(/[.)]+$/,'');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(candidate))return true;
+    const date=new Date(candidate+'T00:00:00.000Z');
+    return !Number.isFinite(date.getTime())||date.toISOString().slice(0,10)!==candidate;
+  });
+  if(containsPhone)fail(400,'contact_or_url','Phone numbers are not allowed here');
 }
 function validatePublicText(text){
   if(text.length<3||text.length>MAX_WISH)fail(400,'invalid_wish','Wish must contain 3 to 280 characters');
@@ -170,34 +179,38 @@ async function requestAuthCode(request,env,cors){
 async function verifyAuthCode(request,env,cors){
   const p=await body(request),email=normalizeEmail(p.email),code=String(p.code||'').replace(/\D/g,'').slice(0,6);
   if(code.length!==6)fail(400,'invalid_code','Enter the 6-digit code');
-  const row=await env.DB.prepare('SELECT * FROM auth_codes WHERE email=? AND consumed_at IS NULL ORDER BY created_at DESC LIMIT 1').bind(email).first();
-  if(!row||Number(row.expires_at)<now())fail(401,'code_expired','This code has expired');
+  const row=await env.DB.prepare('SELECT * FROM auth_codes WHERE email=? ORDER BY created_at DESC LIMIT 1').bind(email).first();
+  if(!row||row.consumed_at!==null||Number(row.expires_at)<now())fail(401,'code_expired','This code has expired');
   if(Number(row.attempts||0)>=5)fail(429,'code_locked','Too many incorrect attempts');
   const expected=await codeHash(env,email,code);
   if(expected!==row.code_hash){
     await env.DB.prepare('UPDATE auth_codes SET attempts=attempts+1 WHERE id=?').bind(row.id).run();
     fail(401,'invalid_code','That code is not correct')
   }
+  // Claim this code atomically before issuing or changing account identity.
+  const t=now();
+  const consumed=await env.DB.prepare('UPDATE auth_codes SET consumed_at=? WHERE id=? AND consumed_at IS NULL AND expires_at>=? AND attempts<5').bind(t,row.id,t).run();
+  if(!consumed.meta?.changes)fail(401,'code_expired','This code has expired');
   const currentActor=await actor(request,env,false);
   let target=await env.DB.prepare('SELECT * FROM actors WHERE claimed_email=?').bind(email).first();
-  const t=now();
   if(!target){
     if(currentActor){
       const cur=await actorRow(env,currentActor);
       if(cur&&!cur.claimed_email){
-        await env.DB.prepare('UPDATE actors SET claimed_email=?,claimed_at=? WHERE id=?').bind(email,t,currentActor).run();
-        target={...cur,claimed_email:email,claimed_at:t}
+        const claimed=await env.DB.prepare('UPDATE OR IGNORE actors SET claimed_email=?,claimed_at=? WHERE id=? AND claimed_email IS NULL').bind(email,t,currentActor).run();
+        if(claimed.meta?.changes)target={...cur,claimed_email:email,claimed_at:t}
       }
     }
     if(!target){
       const actorId=id('actor');
-      await env.DB.prepare('INSERT INTO actors (id,created_at,claimed_email,claimed_at) VALUES (?,?,?,?)').bind(actorId,t,email,t).run();
-      target={id:actorId,claimed_email:email,claimed_at:t}
+      // Another request may have claimed this browser or created this email's
+      // account. Resolve the verified email without replacing any claimed actor.
+      await env.DB.prepare('INSERT OR IGNORE INTO actors (id,created_at,claimed_email,claimed_at) VALUES (?,?,?,?)').bind(actorId,t,email,t).run();
+      target=await env.DB.prepare('SELECT * FROM actors WHERE claimed_email=?').bind(email).first();
     }
   }else if(currentActor&&currentActor!==target.id){
     await mergeAnonymousActor(env,currentActor,target.id)
   }
-  await env.DB.prepare('UPDATE auth_codes SET consumed_at=? WHERE id=?').bind(t,row.id).run();
   const token=await issueSession(env,target.id);
   return json({actorId:target.id,token,claimed:true,email:maskEmail(email)},200,cors)
 }
@@ -222,7 +235,7 @@ async function createSession(request,env,cors){
 async function getMe(request,env,cors){
   const actorId=await actor(request,env,true),room=roomKey(request);
   const wishes=await env.DB.prepare("SELECT w.*,COUNT(e.actor_id) AS encouragement_count FROM wishes w LEFT JOIN encouragements e ON e.wish_id=w.id WHERE w.owner_actor_id=? AND w.room_key=? AND w.state!='removed' GROUP BY w.id ORDER BY w.updated_at DESC LIMIT 200").bind(actorId,room).all();
-  const unread=await env.DB.prepare('SELECT COUNT(*) AS n FROM notifications WHERE actor_id=? AND is_read=0').bind(actorId).first();
+  const unread=await env.DB.prepare('SELECT COUNT(*) AS n FROM notifications n JOIN proposals p ON p.id=n.object_id JOIN wishes w ON w.id=p.target_wish_id WHERE n.actor_id=? AND n.is_read=0 AND w.room_key=?').bind(actorId,room).first();
   const encouraged=await env.DB.prepare('SELECT e.wish_id FROM encouragements e JOIN wishes w ON w.id=e.wish_id WHERE e.actor_id=? AND w.room_key=? ORDER BY e.created_at DESC LIMIT 500').bind(actorId,room).all();
   const who=await actorRow(env,actorId);
   return json({actorId,room,claimed:!!who?.claimed_email,email:who?.claimed_email?maskEmail(who.claimed_email):null,wishes:(wishes.results||[]).map(r=>publicWish(r,true)),unread:Number(unread?.n||0),encouragedWishIds:(encouraged.results||[]).map(r=>r.wish_id)},200,cors);
@@ -235,7 +248,7 @@ async function getWorld(request,env,cors){
 }
 async function createWish(request,env,cors){
   const who=await claimedActor(request,env),actorId=who.id,room=roomKey(request),p=await body(request);await verifyTurnstile(request,env,p);
-  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION);if(!loc)fail(400,'location_required','Location is required');
+  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION);if(!loc)fail(400,'location_required','Location is required');validateNoContact(loc);
   const wid=id('wish'),t=now();
   await env.DB.batch([
     env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,?,'create',?,?, 'alive',1,?,?)").bind(wid,wid,actorId,room,null,wid,text,loc,t,t),
@@ -262,11 +275,13 @@ async function addWishEvent(request,env,cors,wishId){
 async function evolve(env,cors,row,actorId,p){
   assertAlive(row);const text=cleanText(p.text,MAX_WISH);validatePublicText(text);if(text.toLowerCase()===row.text.toLowerCase())fail(409,'same_text','Evolution must change the wish');
   const existing=await env.DB.prepare("SELECT id FROM wishes WHERE parent_wish_id=? AND kind='evolve' AND state!='removed' LIMIT 1").bind(row.id).first();if(existing)fail(409,'already_continued','This state already has a continuation');
-  const wid=id('wish'),t=now();await env.DB.batch([
-    env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,?,'evolve',?,?, 'alive',1,?,?)").bind(wid,row.lineage_id,actorId,row.room_key,row.id,row.root_wish_id,text,row.location_text,t,t),
-    env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'evolve',?,?,?,?)").bind(id('evt'),wid,row.lineage_id,actorId,row.id,JSON.stringify({fromWishId:row.id}),JSON.stringify({fromWishId:row.id}),t),
-    env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=?').bind(t,row.root_wish_id)
-  ]);return json({wishId:wid},201,cors);
+  const wid=id('wish'),t=now();const result=await env.DB.batch([
+    env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) SELECT ?,?,?,?,?,?,'evolve',?,?,'alive',1,?,? WHERE NOT EXISTS (SELECT 1 FROM wishes WHERE parent_wish_id=? AND kind='evolve' AND state!='removed') AND EXISTS (SELECT 1 FROM wishes WHERE id=? AND state='alive')").bind(wid,row.lineage_id,actorId,row.room_key,row.id,row.root_wish_id,text,row.location_text,t,t,row.id,row.id),
+    env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) SELECT ?,?,?,?,'evolve',?,?,?,? WHERE EXISTS (SELECT 1 FROM wishes WHERE id=?)").bind(id('evt'),wid,row.lineage_id,actorId,row.id,JSON.stringify({fromWishId:row.id}),JSON.stringify({fromWishId:row.id}),t,wid),
+    env.DB.prepare('UPDATE wishes SET updated_at=? WHERE id=? AND EXISTS (SELECT 1 FROM wishes WHERE id=?)').bind(t,row.root_wish_id,wid)
+  ]);
+  if(!result[0].meta?.changes){assertAlive(await wishById(env,row.id));fail(409,'already_continued','This state already has a continuation')}
+  return json({wishId:wid},201,cors);
 }
 async function split(env,cors,row,actorId,p,type){
   assertAlive(row);const raw=Array.isArray(p.children)?p.children:[];const children=raw.map(x=>cleanText(typeof x==='string'?x:x?.text,MAX_WISH)).filter(Boolean).slice(0,8);if(type==='split'&&children.length<2)fail(400,'need_two_branches','Initial split needs at least two branches');if(type==='add_branch'&&children.length<1)fail(400,'need_branch','Add at least one branch');children.forEach(validatePublicText);
@@ -285,7 +300,7 @@ async function wakeWish(env,cors,row,actorId){
   return json({wishId:row.id,state:'alive',woken:true},200,cors)
 }
 async function correctWish(env,cors,row,actorId,p){
-  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION);if(!loc)fail(400,'location_required','Location is required');
+  const text=cleanText(p.text,MAX_WISH);validatePublicText(text);const loc=cleanText(p.locationText,MAX_LOCATION);if(!loc)fail(400,'location_required','Location is required');validateNoContact(loc);
   if(text===row.text&&loc===(row.location_text||''))fail(409,'nothing_to_correct','Nothing changed');
   const t=now(),before={text:row.text,locationText:row.location_text},after={text,locationText:loc};
   await env.DB.batch([
@@ -364,18 +379,75 @@ function proposalTitle(type){return type==='help'?'Someone offered help':type===
 async function proposalRow(env,pid){return env.DB.prepare('SELECT * FROM proposals WHERE id=?').bind(pid).first()}
 async function requiredConsents(env,pid){const r=await env.DB.prepare('SELECT actor_id,decision FROM proposal_consents WHERE proposal_id=?').bind(pid).all();return r.results||[]}
 async function respondProposal(request,env,cors,pid){
-  const actorId=await actor(request,env,true),room=roomKey(request),p=await body(request),decision=String(p.decision||'');if(!['accept','decline'].includes(decision))fail(400,'invalid_decision','Decision must be accept or decline');const proposal=await proposalRow(env,pid);if(!proposal)fail(404,'proposal_not_found','Proposal not found');const target=await wishById(env,proposal.target_wish_id);if(!target||target.room_key!==room)fail(404,'proposal_not_found','Proposal not found');if(proposal.status!=='pending')fail(409,'proposal_not_pending','Proposal is not pending');const consent=await env.DB.prepare('SELECT decision FROM proposal_consents WHERE proposal_id=? AND actor_id=?').bind(pid,actorId).first();if(!consent)fail(403,'consent_not_required','This proposal does not require your consent');if(consent.decision)fail(409,'already_decided','You already responded');const t=now();await env.DB.batch([env.DB.prepare('UPDATE proposal_consents SET decision=?,decided_at=? WHERE proposal_id=? AND actor_id=?').bind(decision,t,pid,actorId),env.DB.prepare('UPDATE notifications SET is_read=1 WHERE actor_id=? AND kind=\'proposal\' AND object_id=?').bind(actorId,pid)]);if(decision==='decline'){await env.DB.prepare("UPDATE proposals SET status='declined',updated_at=? WHERE id=?").bind(t,pid).run();await notify(env,proposal.proposer_actor_id,'proposal_result',pid,'A proposal was declined');return json({proposalId:pid,status:'declined'},200,cors)}await maybeMaterialize(env,pid);const current=await proposalRow(env,pid);return json({proposalId:pid,status:current.status},200,cors);
-}
-async function cancelProposal(request,env,cors,pid){const actorId=await actor(request,env,true),room=roomKey(request),p=await proposalRow(env,pid);if(!p)fail(404,'proposal_not_found','Proposal not found');const target=await wishById(env,p.target_wish_id);if(!target||target.room_key!==room)fail(404,'proposal_not_found','Proposal not found');if(p.proposer_actor_id!==actorId)fail(403,'proposer_required','Only the proposer can cancel');if(p.status!=='pending')fail(409,'proposal_not_pending','Only pending proposals can be cancelled');await env.DB.batch([env.DB.prepare("UPDATE proposals SET status='cancelled',updated_at=? WHERE id=?").bind(now(),pid),env.DB.prepare("UPDATE notifications SET is_read=1 WHERE kind='proposal' AND object_id=?").bind(pid)]);return json({proposalId:pid,status:'cancelled'},200,cors)}
-async function maybeMaterialize(env,pid){
-  const p=await proposalRow(env,pid);if(!p||p.status!=='pending')return;const consents=await requiredConsents(env,pid);if(!consents.length||consents.some(x=>x.decision!=='accept'))return;const target=await wishById(env,p.target_wish_id);if(!target||target.state!=='alive'){await env.DB.prepare("UPDATE proposals SET status='expired',updated_at=? WHERE id=?").bind(now(),pid).run();return}if(p.proposal_type==='connect'){const other=await wishById(env,p.other_wish_id);if(!other||other.state!=='alive'){await env.DB.prepare("UPDATE proposals SET status='expired',updated_at=? WHERE id=?").bind(now(),pid).run();return}}
-  const payload=parseJson(p.private_payload_json),t=now();
-  if(p.proposal_type==='help')await eventInsert(env,{wishId:target.id,lineageId:target.lineage_id,actorId:p.proposer_actor_id,eventType:'help',payload:{proposalId:pid,title:payload.title,note:payload.note},publicPayload:{proposalId:pid}});
-  if(p.proposal_type==='connect')await eventInsert(env,{wishId:target.id,lineageId:target.lineage_id,actorId:p.proposer_actor_id,eventType:'connect',payload:{proposalId:pid,otherWishId:p.other_wish_id},publicPayload:{proposalId:pid,otherWishId:p.other_wish_id}});
-  if(p.proposal_type==='suggest_branch'){
-    const stmts=[];for(const text of payload.steps||[]){const wid=id('wish');stmts.push(env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) VALUES (?,?,?,?,?,?,'split',?,?, 'alive',1,?,?)").bind(wid,target.lineage_id,target.owner_actor_id,target.room_key,target.id,target.root_wish_id,text,target.location_text,t,t));stmts.push(env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) VALUES (?,?,?,?, 'split',?,?,?,?)").bind(id('evt'),wid,target.lineage_id,target.owner_actor_id,target.id,JSON.stringify({proposalId:pid,suggestedBy:p.proposer_actor_id}),JSON.stringify({proposalId:pid}),t))}if(stmts.length)await env.DB.batch(stmts)
+  const actorId=await actor(request,env,true),room=roomKey(request),p=await body(request),decision=String(p.decision||'');
+  if(!['accept','decline'].includes(decision))fail(400,'invalid_decision','Decision must be accept or decline');
+  const proposal=await proposalRow(env,pid);if(!proposal)fail(404,'proposal_not_found','Proposal not found');
+  const target=await wishById(env,proposal.target_wish_id);if(!target||target.room_key!==room)fail(404,'proposal_not_found','Proposal not found');
+  if(proposal.status!=='pending')fail(409,'proposal_not_pending','Proposal is not pending');
+  const consent=await env.DB.prepare('SELECT decision FROM proposal_consents WHERE proposal_id=? AND actor_id=?').bind(pid,actorId).first();
+  if(!consent)fail(403,'consent_not_required','This proposal does not require your consent');
+  if(consent.decision&&consent.decision!==decision)fail(409,'already_decided','You already responded');
+  const t=now();
+  if(!consent.decision){
+    const result=await env.DB.batch([
+      env.DB.prepare("UPDATE proposal_consents SET decision=?,decided_at=? WHERE proposal_id=? AND actor_id=? AND decision IS NULL AND EXISTS (SELECT 1 FROM proposals WHERE id=? AND status='pending')").bind(decision,t,pid,actorId,pid),
+      env.DB.prepare("UPDATE notifications SET is_read=1 WHERE actor_id=? AND kind='proposal' AND object_id=?").bind(actorId,pid)
+    ]);
+    if(!result[0].meta?.changes){
+      const current=await proposalRow(env,pid);if(current?.status!=='pending')fail(409,'proposal_not_pending','Proposal is not pending');
+      const decided=await env.DB.prepare('SELECT decision FROM proposal_consents WHERE proposal_id=? AND actor_id=?').bind(pid,actorId).first();
+      if(decided?.decision!==decision)fail(409,'already_decided','You already responded');
+    }
   }
-  await env.DB.prepare("UPDATE proposals SET status='accepted',updated_at=? WHERE id=?").bind(t,pid).run();await notify(env,p.proposer_actor_id,'proposal_result',pid,'A proposal was accepted');
+  // Retrying the same consent can finish a transaction that previously failed.
+  if(decision==='decline'){
+    const result=await env.DB.batch([
+      env.DB.prepare("INSERT INTO notifications (id,actor_id,kind,object_id,title,body,is_read,created_at) SELECT ?,?,'proposal_result',?,'A proposal was declined',NULL,0,? WHERE EXISTS (SELECT 1 FROM proposals WHERE id=? AND status='pending')").bind(id('note'),proposal.proposer_actor_id,pid,t,pid),
+      env.DB.prepare("UPDATE proposals SET status='declined',updated_at=? WHERE id=? AND status='pending'").bind(t,pid),
+      env.DB.prepare("UPDATE notifications SET is_read=1 WHERE kind='proposal' AND object_id=?").bind(pid)
+    ]);
+    if(!result[1].meta?.changes)fail(409,'proposal_not_pending','Proposal is not pending');
+    return json({proposalId:pid,status:'declined'},200,cors);
+  }
+  await maybeMaterialize(env,pid);const current=await proposalRow(env,pid);return json({proposalId:pid,status:current.status},200,cors);
+}
+async function cancelProposal(request,env,cors,pid){
+  const actorId=await actor(request,env,true),room=roomKey(request),p=await proposalRow(env,pid);if(!p)fail(404,'proposal_not_found','Proposal not found');
+  const target=await wishById(env,p.target_wish_id);if(!target||target.room_key!==room)fail(404,'proposal_not_found','Proposal not found');
+  if(p.proposer_actor_id!==actorId)fail(403,'proposer_required','Only the proposer can cancel');
+  if(p.status!=='pending')fail(409,'proposal_not_pending','Only pending proposals can be cancelled');
+  const result=await env.DB.batch([
+    env.DB.prepare("UPDATE proposals SET status='cancelled',updated_at=? WHERE id=? AND status='pending'").bind(now(),pid),
+    env.DB.prepare("UPDATE notifications SET is_read=1 WHERE kind='proposal' AND object_id=?").bind(pid)
+  ]);
+  if(!result[0].meta?.changes)fail(409,'proposal_not_pending','Only pending proposals can be cancelled');
+  return json({proposalId:pid,status:'cancelled'},200,cors);
+}
+async function maybeMaterialize(env,pid){
+  const p=await proposalRow(env,pid);if(!p||p.status!=='pending')return;
+  const consents=await requiredConsents(env,pid);if(!consents.length||consents.some(x=>x.decision!=='accept'))return;
+  const target=await wishById(env,p.target_wish_id),payload=parseJson(p.private_payload_json),t=now();
+  // Every effect and the terminal state commit together. Re-check consent and
+  // wish availability inside the batch; concurrent accept/cancel cannot win twice.
+  const ready="EXISTS (SELECT 1 FROM proposals p JOIN wishes tw ON tw.id=p.target_wish_id LEFT JOIN wishes ow ON ow.id=p.other_wish_id WHERE p.id=? AND p.status='pending' AND tw.state='alive' AND (p.proposal_type!='connect' OR ow.state='alive') AND NOT EXISTS (SELECT 1 FROM proposal_consents c WHERE c.proposal_id=p.id AND (c.decision IS NULL OR c.decision!='accept')))";
+  const stmts=[];
+  if(target&&(p.proposal_type==='help'||p.proposal_type==='connect')){
+    const privatePayload=p.proposal_type==='help'?{proposalId:pid,title:payload.title,note:payload.note}:{proposalId:pid,otherWishId:p.other_wish_id};
+    const publicPayload=p.proposal_type==='help'?{proposalId:pid}:{proposalId:pid,otherWishId:p.other_wish_id};
+    stmts.push(env.DB.prepare('INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) SELECT ?,?,?,?,?,NULL,?,?,? WHERE '+ready).bind(id('evt'),target.id,target.lineage_id,p.proposer_actor_id,p.proposal_type,JSON.stringify(privatePayload),JSON.stringify(publicPayload),t,pid));
+  }
+  if(target&&p.proposal_type==='suggest_branch'){
+    for(const text of payload.steps||[]){
+      const wid=id('wish');
+      stmts.push(env.DB.prepare("INSERT INTO wishes (id,lineage_id,owner_actor_id,room_key,parent_wish_id,root_wish_id,kind,text,location_text,state,is_public,created_at,updated_at) SELECT ?,?,?,?,?,?,'split',?,?,'alive',1,?,? WHERE "+ready).bind(wid,target.lineage_id,target.owner_actor_id,target.room_key,target.id,target.root_wish_id,text,target.location_text,t,t,pid));
+      stmts.push(env.DB.prepare("INSERT INTO wish_events (id,wish_id,lineage_id,actor_id,event_type,parent_wish_id,payload_json,public_payload_json,created_at) SELECT ?,?,?,?,'split',?,?,?,? WHERE "+ready).bind(id('evt'),wid,target.lineage_id,target.owner_actor_id,target.id,JSON.stringify({proposalId:pid,suggestedBy:p.proposer_actor_id}),JSON.stringify({proposalId:pid}),t,pid));
+    }
+  }
+  stmts.push(env.DB.prepare("INSERT INTO notifications (id,actor_id,kind,object_id,title,body,is_read,created_at) SELECT ?,?,'proposal_result',?,'A proposal was accepted',NULL,0,? WHERE "+ready).bind(id('note'),p.proposer_actor_id,pid,t,pid));
+  stmts.push(env.DB.prepare("UPDATE proposals SET status='accepted',updated_at=? WHERE id=? AND "+ready).bind(t,pid,pid));
+  // If a wish closed while consent was arriving, expire instead of materializing.
+  stmts.push(env.DB.prepare("UPDATE proposals SET status='expired',updated_at=? WHERE id=? AND status='pending' AND (NOT EXISTS (SELECT 1 FROM wishes WHERE id=proposals.target_wish_id AND state='alive') OR (proposal_type='connect' AND NOT EXISTS (SELECT 1 FROM wishes WHERE id=proposals.other_wish_id AND state='alive')))").bind(t,pid));
+  await env.DB.batch(stmts);
 }
 async function notify(env,actorId,kind,objectId,title){return env.DB.prepare('INSERT INTO notifications (id,actor_id,kind,object_id,title,body,is_read,created_at) VALUES (?,?,?,?,?,NULL,0,?)').bind(id('note'),actorId,kind,objectId,title,now()).run()}
 function proposalView(p){
@@ -383,7 +455,7 @@ function proposalView(p){
 }
 async function getInbox(request,env,cors){
   const who=await claimedActor(request,env),actorId=who.id,room=roomKey(request);
-  const notes=await env.DB.prepare('SELECT * FROM notifications WHERE actor_id=? ORDER BY created_at DESC LIMIT 100').bind(actorId).all();
+  const notes=await env.DB.prepare('SELECT n.* FROM notifications n JOIN proposals p ON p.id=n.object_id JOIN wishes w ON w.id=p.target_wish_id WHERE n.actor_id=? AND w.room_key=? ORDER BY n.created_at DESC LIMIT 100').bind(actorId,room).all();
   const base=" FROM proposals p JOIN wishes tw ON tw.id=p.target_wish_id LEFT JOIN wishes ow ON ow.id=p.other_wish_id ";
   const pending=await env.DB.prepare("SELECT p.*,c.decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"JOIN proposal_consents c ON c.proposal_id=p.id WHERE c.actor_id=? AND tw.room_key=? AND p.status='pending' AND c.decision IS NULL ORDER BY p.created_at DESC LIMIT 100").bind(actorId,room).all();
   const sent=await env.DB.prepare("SELECT p.*,NULL AS decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"WHERE p.proposer_actor_id=? AND tw.room_key=? ORDER BY p.created_at DESC LIMIT 100").bind(actorId,room).all();
@@ -408,7 +480,7 @@ async function unsaveWish(request,env,cors,wishId){
   return json({wishId,saved:false},200,cors)
 }
 
-async function readNotification(request,env,cors,nid){const actorId=await actor(request,env,true);const r=await env.DB.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND actor_id=?').bind(nid,actorId).run();if(!r.meta?.changes)fail(404,'notification_not_found','Notification not found');return json({id:nid,isRead:true},200,cors)}
+async function readNotification(request,env,cors,nid){const actorId=await actor(request,env,true),room=roomKey(request);const r=await env.DB.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND actor_id=? AND EXISTS (SELECT 1 FROM proposals p JOIN wishes w ON w.id=p.target_wish_id WHERE p.id=notifications.object_id AND w.room_key=?)').bind(nid,actorId,room).run();if(!r.meta?.changes)fail(404,'notification_not_found','Notification not found');return json({id:nid,isRead:true},200,cors)}
 async function createReport(request,env,cors){const actorId=await actor(request,env,false),room=roomKey(request),p=await body(request),wishId=String(p.wishId||''),reason=cleanText(p.reason,80),details=cleanText(p.details,500);if(!reason)fail(400,'reason_required','Report reason required');const w=await wishById(env,wishId);if(!w||w.room_key!==room)fail(404,'wish_not_found','Wish not found');const rid=id('report');await env.DB.prepare("INSERT INTO reports (id,reporter_actor_id,wish_id,reason,details,status,created_at) VALUES (?,?,?,?,?,'open',?)").bind(rid,actorId,wishId,reason,details||null,now()).run();return json({reportId:rid},201,cors)}
 
 

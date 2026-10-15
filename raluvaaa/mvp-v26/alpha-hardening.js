@@ -67,7 +67,11 @@ function decorateEntrusted(){
   items.forEach((item,i)=>{
     const e=source[i];if(!e)return;const b=bandFor(e.band),root=roots.find(x=>x.semanticId===e.semanticId);
     item.dataset.open=e.semanticId;item.style.borderColor=b.soft;item.style.boxShadow=`inset 3px 0 0 ${b.color}`;item.dataset.entrustedBand=e.band;
-    const text=item.querySelector('.t');if(text&&root?.text&&text.textContent!==root.text)text.textContent=root.text;
+    const text=item.querySelector('.t');
+    // Native previews own their translated label. Keep it while it still refers
+    // to this canonical source; source edits and legacy previews still refresh.
+    const translated=native&&text?.dataset.v47TranslationSignature&&text.dataset.v47Original===root?.text;
+    if(text&&root?.text&&text.textContent!==root.text&&!translated)text.textContent=root.text;
     const meta=item.querySelector('.m'),label=remaining(e.expires-Date.now());if(meta){if(meta.textContent!==label)meta.textContent=label;meta.style.fontFamily='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';meta.style.fontSize='12px';meta.style.fontWeight='720';meta.style.letterSpacing='.04em';meta.style.color=b.color;meta.style.fontVariantNumeric='tabular-nums'}
     const st=item.querySelector('.state');if(st){if(st.textContent!=='●')st.textContent='●';st.style.color=b.color;if(st.title!==e.band)st.title=e.band}
   });

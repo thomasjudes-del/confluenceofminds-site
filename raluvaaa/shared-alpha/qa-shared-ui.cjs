@@ -86,9 +86,13 @@ async function assertNoOverflow(page,label){
   const A=await ctxA.newPage(),B=await ctxB.newPage(),M=await ctxM.newPage(),ISO=await ctxIso.newPage();
   const pages=[['chrome',A],['firefox',B],['mobile',M],['isolated',ISO]],errors=[];
   for(const [label,page] of pages){
+    // External approximate-location services are not under test. Keep the
+    // same deterministic location boundary as the private-alpha browser suite.
+    await page.route('https://ipwho.is/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,city:'Nantes',country:'France'})}));
+    await page.route('https://ipapi.co/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({city:'Nantes',country_name:'France'})}));
     page.on('pageerror',e=>errors.push(label+' pageerror: '+String(e)));
-    page.on('console',m=>{if(m.type()==='error')errors.push(label+' console: '+m.text())});
-    page.on('response',r=>{if(r.status()>=500)errors.push(label+' HTTP '+r.status()+': '+r.url())});
+    page.on('console',m=>{if(m.type()==='error')errors.push(label+' console: '+m.text()+' '+JSON.stringify(m.location()))});
+    page.on('response',r=>{if(r.status()>=400)errors.push(label+' HTTP '+r.status()+': '+r.url())});
   }
 
   const room='QC'+Date.now().toString(36).toUpperCase().slice(-4);
@@ -174,9 +178,9 @@ async function assertNoOverflow(page,label){
   await openWish(B,wishA);
   assert(await B.locator('[data-act="encourage"]').isDisabled(),'encourage must remain disabled after reload');
 
-  // HELP proposal and consent.
+  // Legacy shared-alpha uses the MVP26 single-note Help form (no title field).
+  // Proposal and consent assertions still exercise the same server contract.
   await B.click('[data-act="help"]');
-  await B.fill('#helpTitleInput','One concrete first step');
   await B.fill('#helpInput','I can help with one concrete first step.');
   await B.click('#confirm');
   await acceptPending(A,'help');
@@ -185,7 +189,6 @@ async function assertNoOverflow(page,label){
   // Decline path must persist in both people's activity after refresh/reload.
   await refresh(B);await openWish(B,wishA);
   await B.click('[data-act="help"]');
-  await B.fill('#helpTitleInput','Second help offer');
   await B.fill('#helpInput','This second offer should be declined.');
   await B.click('#confirm');
   await refresh(A);
@@ -208,7 +211,6 @@ async function assertNoOverflow(page,label){
   // Helper can cancel a still-pending offer from the UI; recipient must lose the request.
   await openWish(B,wishA);
   await B.click('[data-act="help"]');
-  await B.fill('#helpTitleInput','Offer to cancel');
   await B.fill('#helpInput','This offer will be cancelled by the helper.');
   await B.click('#confirm');
   await B.waitForFunction(()=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.sent?.some(p=>p.type==='help'&&p.status==='pending'),{timeout:10000});
@@ -339,13 +341,15 @@ async function assertNoOverflow(page,label){
   await A.click('[data-act="resume_lineage"]');
   await A.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='alive',wholeRoot,{timeout:10000});
 
-  // Mistake removal through the UI must really remove an untouched wish.
+  // Legacy MVP26 no longer renders a removal button. Exercise its existing
+  // shared removal adapter and verify that the untouched wish leaves the UI.
   const mistake=await createWish(A,'QA accidental untouched wish '+stamp);
   await refresh(A);await openWish(A,mistake);
   await openMore(A);
-  A.once('dialog',d=>d.accept());
-  await A.click('[data-act="remove"]');
+  assert.equal(await A.locator('[data-act="remove"]').count(),0,'legacy UI must not expose the retired removal control');
+  await A.evaluate(id=>window.__RALUVAAA_SHARED_REMOVE__(id),mistake);
   await A.waitForFunction(id=>!window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.some(w=>w.id===id),mistake,{timeout:10000});
+  await A.waitForFunction(id=>!window.__RV26_SHARED__.semantic().some(w=>w.semanticId===id),mistake,{timeout:10000});
 
   // Concurrent independent writes must survive and converge.
   const concurrentA='QA concurrent '+stamp+' gamma';

@@ -396,8 +396,10 @@ async function testForeignActionSmoke(page,ownRoot){
 
   await open(page,foreign);
   await action(page,'help');
+  await page.fill('#helpTitleInput','QA concrete first step');
   await page.fill('#helpInput','QA concrete help');
   await page.click('#confirm');
+  await page.waitForFunction(id=>window.__RV26_SOLO__.state().events.some(e=>e.type==='help_proposed'&&e.semanticId===id),foreign,{timeout:4000});
   assert((await state(page)).events.some(e=>e.type==='help_proposed'&&e.semanticId===foreign),'help proposal must be recorded');
 
   await open(page,foreign);

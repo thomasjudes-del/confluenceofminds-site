@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'raluvaaa/alpha-api/**'
+      - 'raluvaaa/private-alpha/qa-*'
+      - 'raluvaaa/shared-alpha/qa-*'
       - '.github/workflows/check-raluvaaa-alpha-api.yml'
   workflow_dispatch:
 
@@ -26,6 +28,8 @@ jobs:
           grep -q "public_payload_json" raluvaaa/alpha-api/worker.mjs
           grep -q "already_encouraged" raluvaaa/alpha-api/worker.mjs
           grep -q "RaluvaaaAlphaClient" raluvaaa/alpha-api/client.mjs
+      - name: Run isolated security and concurrency regressions
+        run: node --test raluvaaa/alpha-api/qa-security.mjs
       - name: Validate D1 schema with SQLite
         run: |
           python3 - <<'PY'
