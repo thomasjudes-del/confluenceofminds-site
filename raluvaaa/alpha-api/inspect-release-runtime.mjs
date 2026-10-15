@@ -21,7 +21,7 @@ const fieldTypes=v=>Object.entries(object(v,'field inventory')).map(([key,value]
 export function sanitizeBindings(bindings){
   return array(bindings,'bindings').map(binding=>{
     object(binding,'binding');
-    return{name:name(binding.name),type:name(binding.type)};
+    return{name:name(binding.name),type:name(binding.type),fields:fieldTypes(binding)};
   }).sort((a,b)=>a.name.localeCompare(b.name));
 }
 function runtimeSummary(version){
@@ -37,7 +37,8 @@ function runtimeSummary(version){
     compatibilityFlags:[...flags].sort(),
     bindings:sanitizeBindings(resources.bindings),
     runtimeFields:fieldTypes(runtime),
-    resourceFields:fieldTypes(resources)
+    resourceFields:fieldTypes(resources),
+    scriptFields:fieldTypes(resources.script)
   };
 }
 function authMode(bindings){

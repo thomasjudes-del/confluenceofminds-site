@@ -42,13 +42,14 @@ test('only GET calls reach the fixed Cloudflare host; output omits raw values',a
   for(const value of [VALUE,TOKEN,ACCOUNT,'"author_email":','"hostname":','"pattern":','"text":','"value":'])assert(!output.includes(value),value+' must not be printed');
   assert.equal(summary.latestVersionId,VERSION);assert.equal(summary.releaseReady,false);
   assert.deepEqual(summary.blockers,[]);
-  assert.deepEqual(summary.versions[0].bindings.find(b=>b.name==='DB'),{name:'DB',type:'d1'});
+  assert.deepEqual(summary.versions[0].bindings.find(b=>b.name==='DB'),{name:'DB',type:'d1',fields:[{name:'id',type:'string'},{name:'name',type:'string'},{name:'type',type:'string'}]});
   assert.equal(summary.triggers.routeCount,1);
 });
 
 test('sanitizer whitelists binding name/type and rejects log-control names',()=>{
   assert.deepEqual(sanitizeBindings([{name:'AUTH_CODE_SECRET',type:'secret_text',text:VALUE,secret:{value:VALUE}},{name:'\n::error::'+VALUE,type:'plain_text'}]),[
-    {name:'[redacted-name]',type:'plain_text'},{name:'AUTH_CODE_SECRET',type:'secret_text'}]);
+    {name:'[redacted-name]',type:'plain_text',fields:[{name:'name',type:'string'},{name:'type',type:'string'}]},
+    {name:'AUTH_CODE_SECRET',type:'secret_text',fields:[{name:'name',type:'string'},{name:'secret',type:'object'},{name:'text',type:'string'},{name:'type',type:'string'}]}]);
 });
 
 test('latest upload drift and live test auth are explicit release blockers',async()=>{
