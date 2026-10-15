@@ -48,7 +48,9 @@ function checkedBindings(value){
     seen.add(b.name);
     if(b.type==='plain_text'){keys(b,['name','type','text'],'plain text binding');if(typeof b.text!=='string')fail('Unreadable plain text binding')}
     if(b.type==='secret_text')keys(b,['name','type'],'secret binding');
-    if(b.type==='ai')keys(b,['name','type'],'AI binding');
+    // Observed GET metadata includes an opaque project identity. Inherit it
+    // and compare it unchanged; never log or resubmit its value explicitly.
+    if(b.type==='ai'){keys(b,['name','type','project'],'AI binding');if(typeof b.project!=='string')fail('Unreadable AI project identity')}
     if(b.type==='d1'){
       keys(b,['name','type','id','database_id'],'D1 binding');
       id(b.database_id??b.id,'D1 database');

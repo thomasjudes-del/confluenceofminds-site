@@ -10,7 +10,7 @@ const CODE=readFileSync(new URL('./worker.mjs',import.meta.url));
 const PLAN={enabled:true,sourceSha:APPROVED_SOURCE_SHA,codeSha256:APPROVED_CODE_SHA256,baselineVersionId:BASELINE_VERSION,baselineDeploymentId:BASELINE_DEPLOYMENT};
 function fake(change=()=>{}){
   const calls=[],checkpoints=[];let uploaded=false,promoted=false,snapshot=0;
-  const bindings=[{name:'AI',type:'ai'},{name:'DB',type:'d1',id:'44444444-4444-4444-8444-444444444444'},{name:'ALLOWED_ORIGINS',type:'plain_text',text:VALUE},...['AUTH_CODE_SECRET','RALUVAAA_EMAIL_FROM','RESEND_API_KEY'].map(name=>({name,type:'secret_text'}))];
+  const bindings=[{name:'AI',type:'ai',project:VALUE},{name:'DB',type:'d1',id:'44444444-4444-4444-8444-444444444444'},{name:'ALLOWED_ORIGINS',type:'plain_text',text:VALUE},...['AUTH_CODE_SECRET','RALUVAAA_EMAIL_FROM','RESEND_API_KEY'].map(name=>({name,type:'secret_text'}))];
   const runtime={compatibility_date:'2026-09-01',usage_model:'standard'};
   const fetchImpl=async(url,options)=>{
     const u=new URL(url),path=u.pathname;calls.push({url,options,snapshot});
@@ -102,6 +102,13 @@ test('candidate binding drop, D1 swap, plain variable change and runtime change 
   for(const mutate of [v=>v.resources.bindings.pop(),v=>v.resources.bindings.find(b=>b.name==='DB').id=OTHER,v=>v.resources.bindings.find(b=>b.name==='ALLOWED_ORIGINS').text='changed',v=>v.resources.script_runtime.usage_model='bundled']){
     const f=fake(c=>{if(c.path.endsWith('/versions/'+CANDIDATE))mutate(c.result)});await blocked(f,/binding inventory|candidate bindings/,1);assert.equal(f.checkpoints.at(-1).stage,'candidate-uploaded');
   }
+});
+
+test('observed AI project identity is inherited and must not change or disappear',async()=>{
+  for(const mutate of [b=>b.project='changed-project',b=>delete b.project,b=>b.project={secret:VALUE}]){
+    await blocked(fake(c=>{if(c.path.endsWith('/versions/'+CANDIDATE))mutate(c.result.resources.bindings.find(b=>b.name==='AI'))}),/AI project|candidate bindings/,1);
+  }
+  await blocked(fake(c=>{if(c.path.includes('/versions/'))c.result.resources.bindings.find(b=>b.name==='AI').unreviewed=VALUE}),/Unknown/);
 });
 
 test('pre-promotion deployment, settings and latest drift stop after upload only',async()=>{
