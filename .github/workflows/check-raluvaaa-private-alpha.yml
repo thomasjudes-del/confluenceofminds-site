@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'raluvaaa/private-alpha/**'
+      - 'raluvaaa/shared-alpha/**'
       - 'raluvaaa/alpha-api/**'
       - 'raluvaaa/solo-experience-v42/app-v42.js'
       - 'raluvaaa/solo-experience-v46/**'
@@ -28,6 +29,9 @@ jobs:
           node --check raluvaaa/private-alpha/bootstrap.js
           node --check raluvaaa/private-alpha/features.js
           node --check raluvaaa/private-alpha/qa-private-alpha.cjs
+          node --check raluvaaa/private-alpha/qa-bootstrap-security.cjs
+          node --check raluvaaa/shared-alpha/shared-bootstrap.js
+          node --check raluvaaa/solo-experience-v42/app-v42.js
           node --check raluvaaa/alpha-api/worker.mjs
           node --check raluvaaa/alpha-api/client.mjs
           grep -q "RALUVAAA_SHARED=true" raluvaaa/private-alpha/index.html
@@ -35,6 +39,8 @@ jobs:
           grep -q "__RALUVAAA_SHARED_REQUIRE_CLAIM__" raluvaaa/private-alpha/bootstrap.js
           grep -q "requestCode" raluvaaa/alpha-api/client.mjs
           grep -q "saved_wishes" raluvaaa/alpha-api/schema.sql
+      - name: Check security and concurrent request regressions
+        run: node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/private-alpha/qa-bootstrap-security.cjs
       - name: Install browsers and Worker
         run: |
           npm install --no-save playwright@1.55.0 wrangler@4 >/dev/null 2>&1

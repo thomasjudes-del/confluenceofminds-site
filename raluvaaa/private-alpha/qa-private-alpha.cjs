@@ -8,7 +8,7 @@ const URL=BASE+'/raluvaaa/private-alpha/?api='+encodeURIComponent(API);
 async function pageFor(browser,mobile=false){
   const context=await browser.newContext({
     viewport:mobile?{width:390,height:844}:{width:1280,height:800},
-    isMobile:mobile,hasTouch:mobile
+    isMobile:mobile,hasTouch:mobile,locale:mobile?'fr-FR':'en-US'
   });
   const page=await context.newPage();
   page.on('console',msg=>console.log('[browser console]',msg.type(),msg.text()));
@@ -37,10 +37,16 @@ async function pageFor(browser,mobile=false){
   return{context,page}
 }
 async function claimViaUi(page,email){
+  await page.bringToFront();
   await page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.showAccount());
   await page.waitForSelector('#raluvaaaAuthOverlay.open');
+  await page.waitForFunction(()=>document.activeElement?.matches('[data-pa-email]'),null,{timeout:3000});
   await page.fill('[data-pa-email]',email);
+  assert.equal(await page.inputValue('[data-pa-email]'),email,'claim form must retain the requested test email');
+  const sent=page.waitForResponse(r=>r.url().endsWith('/v1/auth/request-code')&&r.request().method()==='POST');
   await page.click('[data-pa-send]');
+  const delivery=await sent;
+  assert.equal(delivery.status(),200,'test-mode code request failed: '+JSON.stringify(await delivery.json()));
   await page.waitForSelector('[data-pa-code]',{polling:100,timeout:5000});
   const code=await page.inputValue('[data-pa-code]');
   assert.match(code,/^\d{6}$/,'CI auth code should autofill in test mode');
@@ -65,6 +71,14 @@ async function createWish(page,text,emailIfNeeded){
   return page.evaluate(t=>window.__RALUVAAA_SHARED_DEBUG__.world().wishes.find(w=>w.text===t).id,text)
 }
 async function refresh(page){await page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh())}
+async function cameraState(page){
+  const frame=page.frames().find(f=>f.url().includes('/v22/engine-v03-locked.html'));
+  assert(frame,'the actual visual engine frame must exist');
+  // The engine camera is a top-level lexical const, not window.camera.
+  const value=await frame.evaluate(()=>({x:camera.x,y:camera.y,zoom:camera.zoom}));
+  for(const key of ['x','y','zoom'])assert(Number.isFinite(value[key]),'camera '+key+' must be a finite number');
+  return value
+}
 async function openWish(page,id){
   await refresh(page);
   await page.evaluate(id=>window.__RV26_SHARED__.open(id),id);
@@ -81,7 +95,9 @@ async function acceptFirst(page,type){
 }
 
 (async()=>{
-  const chrome=await chromium.launch({headless:true});
+  const desktopEngine=process.env.RALUVAAA_QA_DESKTOP_ENGINE||'chromium';
+  assert(['chromium','webkit'].includes(desktopEngine),'unsupported desktop browser');
+  const chrome=await ({chromium,webkit}[desktopEngine]).launch({headless:true});
   const safari=await webkit.launch({headless:true});
   const stamp=Date.now().toString(36);
   const emailA='a+'+stamp+'@raluvaaa.test',emailB='b+'+stamp+'@raluvaaa.test';
@@ -94,10 +110,19 @@ async function acceptFirst(page,type){
     assert.equal(await A.page.locator('#rail #privateAccountBtn').count(),0,'Account must not have a separate main rail button');
     assert(await A.page.locator('[data-lang="en"]').evaluate(el=>el.classList.contains('active')),'Private Alpha should default to English on a fresh session');
     assert.equal(await A.page.locator('#rail .rail-btn').count(),4,'Private Alpha main rail must contain exactly four actions');
+    // App language overrides the browser language, including account dialogs.
+    await A.page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.showAccount());
+    assert.equal(await A.page.locator('[data-pa-send]').innerText(),'Send my code');
+    await A.page.click('[data-pa-cancel]');
+    await A.page.click('[data-lang="fr"]');
+    await A.page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.showAccount());
+    assert.equal(await A.page.locator('[data-pa-send]').innerText(),'Envoyer mon code');
+    await A.page.click('[data-pa-cancel]');
+    await A.page.click('[data-lang="en"]');
 
     const anonA=await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
     const anonB=await B.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.client.actorId);
-    assert.notEqual(anonA,anonB,'mobile Safari and desktop Chrome need independent anonymous sessions');
+    assert.notEqual(anonA,anonB,'mobile and desktop browser contexts need independent anonymous sessions');
 
     // A writes first, and the publish action itself asks for identity.
     const wishA=await createWish(A.page,'A wants to learn coastal sailing '+stamp,emailA);
@@ -235,18 +260,19 @@ async function acceptFirst(page,type){
     // V46 product surfaces remain present.
     assert.equal(await A.page.locator('#v46AboutBtn').count(),1,'About guide from V46 must remain');
     await openWish(A.page,wishA);
-    const cameraBefore=await A.page.locator('#engine').evaluate(f=>({x:f.contentWindow.camera?.x,y:f.contentWindow.camera?.y,zoom:f.contentWindow.camera?.zoom}));
+    const cameraBefore=await cameraState(A.page);
     await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
     await A.page.waitForTimeout(180);
-    const cameraAfterLocalAction=await A.page.locator('#engine').evaluate(f=>({x:f.contentWindow.camera?.x,y:f.contentWindow.camera?.y,zoom:f.contentWindow.camera?.zoom}));
+    const cameraAfterLocalAction=await cameraState(A.page);
     assert(Math.abs(cameraAfterLocalAction.zoom-cameraBefore.zoom)<0.0001,'local action must not change camera zoom');
     assert(Math.abs(cameraAfterLocalAction.x-cameraBefore.x)<0.01&&Math.abs(cameraAfterLocalAction.y-cameraBefore.y)<0.01,'local action must not move camera');
     await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
     await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh());
     await A.page.waitForTimeout(250);
-    const cameraAfter=await A.page.locator('#engine').evaluate(f=>({x:f.contentWindow.camera?.x,y:f.contentWindow.camera?.y,zoom:f.contentWindow.camera?.zoom}));
+    const cameraAfter=await cameraState(A.page);
     assert(Math.abs(cameraAfter.zoom-cameraBefore.zoom)<0.0001,'server refresh must not change camera zoom');
     assert(Math.abs(cameraAfter.x-cameraBefore.x)<0.01&&Math.abs(cameraAfter.y-cameraBefore.y)<0.01,'server refresh must not move camera');
+    console.log('Camera stability verified',JSON.stringify({before:cameraBefore,local:cameraAfterLocalAction,synced:cameraAfter}));
     assert(await A.page.locator('#drawerBody details.more').count(),'V46 More actions must remain');
     assert(await A.page.locator('#drawerBody [data-act="share"]').count(),'V46 Share action must remain');
     const entrustedOk=await A.page.evaluate(()=>{
@@ -278,7 +304,28 @@ async function acceptFirst(page,type){
     await A.page.waitForSelector('#drawerBody .v43-saved-open .t',{timeout:3000});
     await A.page.waitForFunction(()=>[...document.querySelectorAll('#drawerBody .v43-saved-open .t')].some(el=>/^TRADUIT: /.test(el.textContent||'')),null,{polling:100,timeout:5000});
 
-    console.log('RALUVAAA Private Alpha real A/B identity gate passed: mobile WebKit + desktop Chromium');
+    // A rejected publish must not remain as an apparently saved wish until reload.
+    const rejectedText='Rejected contact test contact@example.com';
+    await B.page.click('#createBtn');
+    await B.page.fill('#wishInput',rejectedText);
+    await B.page.fill('#locInput','Nantes, France');
+    const rejected=B.page.waitForResponse(r=>r.url().endsWith('/v1/wishes')&&r.request().method()==='POST');
+    await B.page.click('#confirm');
+    assert.equal((await rejected).status(),400);
+    await B.page.waitForFunction(text=>!window.__RV26_SHARED__.state().events.some(e=>e.text===text),rejectedText,{polling:100,timeout:5000});
+    await B.page.waitForFunction(text=>!window.__RV26_SHARED__.semantic().some(w=>w.text===text),rejectedText,{polling:100,timeout:5000});
+    assert(!await B.page.evaluate(text=>window.__RALUVAAA_SHARED_DEBUG__.world().wishes.some(w=>w.text===text),rejectedText));
+    console.log('Rejected optimistic publish correctly rolled back');
+    // A shared deep link opens once; subsequent sync must leave the inbox open.
+    await B.page.goto(URL+'#wish='+encodeURIComponent(wishA),{waitUntil:'domcontentloaded'});
+    await B.page.waitForFunction(id=>window.__RALUVAAA_SHARED_READY__===true&&window.__RALUVAAA_UI__?.current?.()?.semanticId===id,wishA,{polling:100,timeout:30000});
+    await B.page.click('#inboxBtn');
+    await refresh(B.page);
+    await B.page.waitForTimeout(600);
+    assert(await B.page.locator('#inboxBtn').evaluate(el=>el.classList.contains('active')),'consumed deep link must not close Notifications after synchronization');
+    assert.equal(await B.page.locator('#drawerBody .wish').count(),0,'deep link must not reopen the wish over Notifications');
+    console.log('One-shot deep link preserves subsequent Notifications navigation');
+    console.log('RALUVAAA Private Alpha A/B identity gate passed: mobile WebKit + desktop '+desktopEngine+' (local test-mode OTP)');
   }finally{
     await Promise.all([A.context.close(),B.context.close()]);
     await Promise.all([safari.close(),chrome.close()]);

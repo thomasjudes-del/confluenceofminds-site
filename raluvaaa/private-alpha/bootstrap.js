@@ -2,7 +2,11 @@
 'use strict';
 
 const params=new URLSearchParams(location.search);
-const apiBase=params.get('api')||localStorage.getItem('raluvaaaAlphaApiBaseV1')||window.RALUVAAA_ALPHA_API_BASE||'';
+// QA can target a local Worker; published pages must never send their stored
+// session token to a URL supplied by a link or a previously saved override.
+const localDevelopment=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+const apiBase=(localDevelopment&&(params.get('api')||localStorage.getItem('raluvaaaAlphaApiBaseV1')))||window.RALUVAAA_ALPHA_API_BASE||'';
+if(!localDevelopment)localStorage.removeItem('raluvaaaAlphaApiBaseV1');
 const room=window.RALUVAAA_ROOM||String(params.get('room')||'ALPHA').toUpperCase();
 const STORE=window.RALUVAAA_STORE_KEY||('raluvaaaSharedAlphaV1:'+room);
 const maps={wish:new Map(),lineage:new Map(),proposal:new Map()};
@@ -94,7 +98,9 @@ async function refresh(force=false){
     if(added.length)try{window.__RALUVAAA_ACTION_AUDIO__?.playNamed?.('graft')}catch{}
   }
   knownConnectIds=connectIds;
-  if(fingerprint===lastFingerprint)return;
+  // A rejected optimistic mutation leaves server data unchanged. Forced refreshes
+  // must still replace local state, or the rejected wish survives until reload.
+  if(!force&&fingerprint===lastFingerprint)return;
   lastFingerprint=fingerprint;
   if(window.__RV26_SHARED__)window.__RV26_SHARED__.replace(next);
   else localStorage.setItem(STORE,JSON.stringify(next));
@@ -271,7 +277,7 @@ async function removeShared(localId){
 
 
 function authText(){
-  const en=(navigator.language||'').toLowerCase().startsWith('en');
+  const en=(window.__RV26_SHARED__?.state?.().lang||preferredLang)==='en';
   return en?{
     account:'Your space',title:'Keep this yours',body:'Use your email to publish and manage wishes, save them across devices, help people and receive replies. No password. No public profile.',
     email:'Email',send:'Send my code',codeTitle:'Enter your code',codeBody:'We sent a 6-digit code to your email. It expires in 10 minutes.',code:'6-digit code',verify:'Continue',
@@ -416,7 +422,7 @@ function loadScript(src){return new Promise((resolve,reject)=>{const s=document.
 
 async function boot(){
   if(!apiBase){status('Private Alpha backend is not deployed yet.',true);return}
-  localStorage.setItem('raluvaaaAlphaApiBaseV1',apiBase);
+  if(localDevelopment)localStorage.setItem('raluvaaaAlphaApiBaseV1',apiBase);
   status('Connecting RALUVAAA…');
   const mod=await import('/raluvaaa/alpha-api/client.mjs?build=private-alpha-graft-i18n-1');
   client=new mod.RaluvaaaAlphaClient({baseUrl:apiBase,room});
@@ -436,7 +442,7 @@ async function boot(){
 
   const initial=await fetchState();lastFingerprint=fp(initial);knownConnectIds=new Set(initial.events.filter(e=>e.type==='connect').map(e=>e.proposalId||[e.aSemanticId,e.bSemanticId].sort().join('|')));localStorage.setItem(STORE,JSON.stringify(initial));
 
-  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-ship-4');
+  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-readiness-20261015');
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=private-alpha-1');
   await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-1');
   await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-graft-i18n-1');

@@ -2,7 +2,11 @@
 'use strict';
 
 const params=new URLSearchParams(location.search);
-const apiBase=params.get('api')||localStorage.getItem('raluvaaaAlphaApiBaseV1')||window.RALUVAAA_ALPHA_API_BASE||'';
+// Shared and private alpha use the same origin/session store. Keep arbitrary
+// Worker overrides strictly in local development on both entry points.
+const localDevelopment=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+const apiBase=(localDevelopment&&(params.get('api')||localStorage.getItem('raluvaaaAlphaApiBaseV1')))||window.RALUVAAA_ALPHA_API_BASE||'';
+if(!localDevelopment)localStorage.removeItem('raluvaaaAlphaApiBaseV1');
 const room=window.RALUVAAA_ROOM||String(params.get('room')||'ALPHA').toUpperCase();
 const STORE=window.RALUVAAA_STORE_KEY||('raluvaaaSharedAlphaV1:'+room);
 const maps={wish:new Map(),lineage:new Map(),proposal:new Map()};
@@ -203,7 +207,7 @@ function loadScript(src){return new Promise((resolve,reject)=>{const s=document.
 
 async function boot(){
   if(!apiBase){status('Shared Alpha backend is not deployed yet. Use the Alpha V0 candidate for product review.',true);return}
-  localStorage.setItem('raluvaaaAlphaApiBaseV1',apiBase);
+  if(localDevelopment)localStorage.setItem('raluvaaaAlphaApiBaseV1',apiBase);
   status('Connecting RALUVAAA shared world…');
   const mod=await import('/raluvaaa/alpha-api/client.mjs');
   client=new mod.RaluvaaaAlphaClient({baseUrl:apiBase,room});
