@@ -86,9 +86,13 @@ async function assertNoOverflow(page,label){
   const A=await ctxA.newPage(),B=await ctxB.newPage(),M=await ctxM.newPage(),ISO=await ctxIso.newPage();
   const pages=[['chrome',A],['firefox',B],['mobile',M],['isolated',ISO]],errors=[];
   for(const [label,page] of pages){
+    // External approximate-location services are not under test. Keep the
+    // same deterministic location boundary as the private-alpha browser suite.
+    await page.route('https://ipwho.is/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,city:'Nantes',country:'France'})}));
+    await page.route('https://ipapi.co/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({city:'Nantes',country_name:'France'})}));
     page.on('pageerror',e=>errors.push(label+' pageerror: '+String(e)));
-    page.on('console',m=>{if(m.type()==='error')errors.push(label+' console: '+m.text())});
-    page.on('response',r=>{if(r.status()>=500)errors.push(label+' HTTP '+r.status()+': '+r.url())});
+    page.on('console',m=>{if(m.type()==='error')errors.push(label+' console: '+m.text()+' '+JSON.stringify(m.location()))});
+    page.on('response',r=>{if(r.status()>=400)errors.push(label+' HTTP '+r.status()+': '+r.url())});
   }
 
   const room='QC'+Date.now().toString(36).toUpperCase().slice(-4);

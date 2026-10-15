@@ -26,6 +26,23 @@ test('a consumed wish deep link cannot override later drawer navigation',()=>{
   assert.deepEqual(visits,['wish-a','wish-b']);
 });
 
+test('legacy Entrusted decoration preserves native translations without hiding source edits',()=>{
+  const source=readFileSync(resolve(__dirname,'../mvp-v26/alpha-hardening.js'),'utf8');
+  const start=source.indexOf('function decorateEntrusted()'),end=source.indexOf('function isFrench()',start);
+  assert(start>=0&&end>start);
+  const text={textContent:'TRADUIT: Canonical wish',dataset:{v47TranslationSignature:'fr|wish-a|Canonical wish',v47Original:'Canonical wish'}};
+  const item={dataset:{},style:{},querySelector:s=>s==='.t'?text:null};
+  const entries=[{semanticId:'wish-a',expires:Date.now()+10000,band:'short'}];
+  const context={window:{RALUVAAA_NATIVE_ENTRUSTED_V42:true,__RALUVAAA_VITALITY_V42__:{entrusted:()=>entries}},document:{getElementById:()=>({textContent:'Entrusted wishes'}),querySelectorAll:()=>[item]},roots:[{semanticId:'wish-a',text:'Canonical wish'}],bands:[{name:'short'}],bandFor:()=>({color:'blue',soft:'cyan'}),remaining:()=>'',read:()=>({entries}),POLICY:'test',Date};
+  vm.createContext(context);vm.runInContext(source.slice(start,end),context);
+  context.decorateEntrusted();context.decorateEntrusted();
+  assert.equal(text.textContent,'TRADUIT: Canonical wish','periodic legacy decoration must not erase a current translation');
+  context.roots[0].text='Edited canonical wish';context.decorateEntrusted();
+  assert.equal(text.textContent,'Edited canonical wish','changed canonical text must invalidate the old translated preview');
+  context.window.RALUVAAA_NATIVE_ENTRUSTED_V42=false;text.textContent='Stale legacy label';context.decorateEntrusted();
+  assert.equal(text.textContent,'Edited canonical wish','legacy preview canonical refresh remains intact');
+});
+
 // Execute the actual bootstrap configuration, then the real API client with a
 // synthetic stored session and a network-free fetch recorder. No real tokens.
 const marker='function status(';

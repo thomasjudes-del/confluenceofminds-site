@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'raluvaaa/alpha-api/**'
+      - 'raluvaaa/private-alpha/qa-*'
+      - 'raluvaaa/shared-alpha/qa-*'
       - '.github/workflows/check-raluvaaa-alpha-api.yml'
   workflow_dispatch:
 
