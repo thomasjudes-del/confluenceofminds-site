@@ -27,7 +27,7 @@ function fake(change=()=>{}){
       snapshot++;result={deployments:[{id:promoted?NEW_DEPLOYMENT:BASELINE_DEPLOYMENT,versions:[{version_id:promoted?CANDIDATE:BASELINE_VERSION,percentage:100}],author_email:VALUE}]};
     }else if(path.endsWith('/versions'))result={items:[{id:uploaded?CANDIDATE:BASELINE_VERSION}]};
     else if(path.includes('/versions/'))result={id:path.split('/').at(-1),resources:{bindings:structuredClone(bindings),script_runtime:structuredClone(runtime),script:{etag:uploaded?'new-content-etag':'old-content-etag',handlers:['fetch']}},metadata:{author_email:VALUE}};
-    else if(path.endsWith('/settings'))result={annotations:{},bindings:structuredClone(bindings),compatibility_date:'2026-09-01',compatibility_flags:[],usage_model:'standard',logpush:false,placement:{mode:'off'},tags:[],tail_consumers:[]};
+    else if(path.endsWith('/settings'))result={annotations:{'workers/triggered_by':'version_upload','workers/message':'retained note'},bindings:structuredClone(bindings),compatibility_date:'2026-09-01',compatibility_flags:[],usage_model:'standard',logpush:false,placement:{mode:'off'},tags:[],tail_consumers:[]};
     else if(path.endsWith('/schedules'))result={schedules:[]};
     else if(path.endsWith('/subdomain'))result={enabled:true,previews_enabled:true};
     else if(path.endsWith('/routes'))result=[];
@@ -51,6 +51,7 @@ test('only exact strict-inheritance upload and exact candidate100 promotion can 
   const metadata=JSON.parse(upload.options.body.get('metadata'));
   assert.deepEqual(Object.keys(metadata).sort(),['annotations','bindings','compatibility_date','main_module','usage_model']);
   assert.equal(metadata.main_module,'worker.mjs');
+  assert.deepEqual(metadata.annotations,{'workers/message':'retained note'});
   assert.equal(metadata.bindings.length,6);assert(metadata.bindings.every(b=>Object.keys(b).sort().join() === 'name,type'&&b.type==='inherit'));
   assert.equal(await upload.options.body.get('worker.mjs').text(),CODE.toString());
   assert(!JSON.stringify(metadata).includes(VALUE));assert(!JSON.stringify(metadata).includes(TOKEN));
@@ -92,6 +93,20 @@ test('unsupported placement and settings shape fail before upload',async()=>{
   for(const mutate of [s=>s.placement.mode='smart',s=>s.observability={enabled:true},s=>s.bindings.find(b=>b.type==='secret_text').text=VALUE]){
     await blocked(fake(c=>{if(c.path.endsWith('/settings'))mutate(c.result)}),/placement|Unknown/);
   }
+});
+
+test('server-generated trigger annotation is omitted from upload and may change after promotion',async()=>{
+  const f=fake(c=>{if(c.promoted&&c.path.endsWith('/settings'))c.result.annotations['workers/triggered_by']='api_deployment'});
+  assert.equal((await run(f)).status,'release-verified');
+  assert.deepEqual(JSON.parse(posts(f)[0].options.body.get('metadata')).annotations,{'workers/message':'retained note'});
+});
+
+test('annotation validation and writable annotation preservation remain strict',async()=>{
+  for(const mutate of [a=>a['workers/triggered_by']={},a=>a.unreviewed=VALUE]){
+    await blocked(fake(c=>{if(c.path.endsWith('/settings'))mutate(c.result.annotations)}),/annotations|Unknown/);
+  }
+  await blocked(fake(c=>{if(c.snapshot===2&&c.path.endsWith('/settings'))c.result.annotations['workers/triggered_by']='external_operation'}),/pre-upload/);
+  await blocked(fake(c=>{if(c.promoted&&c.path.endsWith('/settings'))c.result.annotations['workers/message']='changed note'}),/promoted settings/,2);
 });
 
 test('pre-upload settings drift is rejected without writes',async()=>{

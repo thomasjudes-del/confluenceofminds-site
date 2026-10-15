@@ -86,10 +86,16 @@ function checkedSettings(settings,version){
   // Refuse it rather than guessing how to copy a potentially versioned setting.
   if(settings.placement!==null){keys(settings.placement,['mode'],'placement');if(settings.placement.mode!==undefined&&settings.placement.mode!=='off')fail('Non-default placement requires separate review')}
   const annotations=obj(settings.annotations,'annotations');
-  keys(annotations,['workers/alias','workers/commit_sha','workers/message','workers/pull_request_number','workers/pull_request_title','workers/pull_request_url','workers/repository_url','workers/tag'],'annotations');
+  keys(annotations,['workers/alias','workers/commit_sha','workers/message','workers/pull_request_number','workers/pull_request_title','workers/pull_request_url','workers/repository_url','workers/tag','workers/triggered_by'],'annotations');
   if(Object.values(annotations).some(v=>typeof v!=='string'))fail('Unsupported annotations');
   return settings;
 }
+
+// Cloudflare documents workers/triggered_by as read-only operation metadata:
+// https://developers.cloudflare.com/api/typescript/resources/workers/subresources/scripts/subresources/script_and_version_settings/methods/get/
+// Do not resubmit it. All user annotations and runtime settings stay exact.
+const writableAnnotations=annotations=>Object.fromEntries(Object.entries(annotations).filter(([key])=>key!=='workers/triggered_by'));
+const promotionSettings=settings=>({...settings,annotations:writableAnnotations(settings.annotations)});
 
 export async function releaseCodeOnly({fetchImpl=fetch,accountId,token,plan,ref,repository,code,runId,onCheckpoint=()=>{}}={}){
   validatePlan(plan,{ref,repository});
@@ -179,7 +185,7 @@ export async function releaseCodeOnly({fetchImpl=fetch,accountId,token,plan,ref,
   checkpoint('baseline-verified');
   const immediatelyBeforeUpload=await current();assertBaseline(immediatelyBeforeUpload);
   same(immediatelyBeforeUpload,baseline,'pre-upload runtime settings and triggers');
-  const metadata={main_module:'worker.mjs',bindings:baseline.version.bindings.map(b=>({name:b.name,type:'inherit'})),...baseline.version.runtime,compatibility_date:baseline.version.runtime.compatibility_date.slice(0,10),annotations:baseline.settings.annotations};
+  const metadata={main_module:'worker.mjs',bindings:baseline.version.bindings.map(b=>({name:b.name,type:'inherit'})),...baseline.version.runtime,compatibility_date:baseline.version.runtime.compatibility_date.slice(0,10),annotations:writableAnnotations(baseline.settings.annotations)};
   const form=new FormData();form.set('metadata',JSON.stringify(metadata));form.set('worker.mjs',new Blob([code],{type:'application/javascript+module'}),'worker.mjs');
   await verifyNoOtherDeployments();
   checkpoint('upload-request-starting');
@@ -202,7 +208,7 @@ export async function releaseCodeOnly({fetchImpl=fetch,accountId,token,plan,ref,
   phase='read-only';deploymentId=id(deployed.id,'new deployment');checkpoint('promotion-response-received');
   const after=await current();
   same(after.deployment.id,deployed.id,'promoted deployment');same(after.activeId,candidateId,'promoted version');same(after.latestId,candidateId,'latest version after promotion');
-  same(after.version,baseline.version,'promoted runtime');same(after.settings,baseline.settings,'promoted settings');same(after.triggers,baseline.triggers,'promoted triggers');
+  same(after.version,baseline.version,'promoted runtime');same(promotionSettings(after.settings),promotionSettings(baseline.settings),'promoted settings');same(after.triggers,baseline.triggers,'promoted triggers');
   checkpoint('release-verified');
   return{status:'release-verified',sourceSha:APPROVED_SOURCE_SHA,codeSha256:APPROVED_CODE_SHA256,baselineVersionId:BASELINE_VERSION,candidateVersionId:candidateId,deploymentId:deployed.id};
 }
