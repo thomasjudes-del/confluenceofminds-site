@@ -13,6 +13,8 @@ on:
       - 'raluvaaa/mvp-v26/alpha-hardening.js'
       - 'raluvaaa/solo-experience-v46/**'
       - '.github/workflows/check-raluvaaa-private-alpha.yml'
+      - '.github/workflows/check-raluvaaa-alpha-api.yml'
+      - '.github/workflows/check-raluvaaa-shared-ui.yml'
   workflow_dispatch:
 
 concurrency:

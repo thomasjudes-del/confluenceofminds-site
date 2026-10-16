@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'raluvaaa/shared-alpha/**'
+      - 'raluvaaa/private-alpha/**'
+      - 'raluvaaa/solo-experience-v42/app-v42.js'
       - 'raluvaaa/mvp-v26/app.js'
       - 'raluvaaa/mvp-v26/alpha-hardening.js'
       - 'raluvaaa/mvp-v26/alpha-v0-polish.js'
@@ -11,6 +13,8 @@ on:
       - 'raluvaaa/mvp-v26/alpha-sound.js'
       - 'raluvaaa/alpha-api/**'
       - '.github/workflows/check-raluvaaa-shared-ui.yml'
+      - '.github/workflows/check-raluvaaa-private-alpha.yml'
+      - '.github/workflows/check-raluvaaa-alpha-api.yml'
   workflow_dispatch:
 
 jobs:

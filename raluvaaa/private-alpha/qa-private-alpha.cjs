@@ -6,7 +6,7 @@ const API=process.env.RALUVAAA_ALPHA_BASE||'http://127.0.0.1:8787';
 const URL=BASE+'/raluvaaa/private-alpha/?api='+encodeURIComponent(API);
 
 function audioFixture(){
-  const rate=8000,frames=rate*4,b=Buffer.alloc(44+frames*2);b.write('RIFF');b.writeUInt32LE(b.length-8,4);b.write('WAVEfmt ',8);b.writeUInt32LE(16,16);b.writeUInt16LE(1,20);b.writeUInt16LE(1,22);b.writeUInt32LE(rate,24);b.writeUInt32LE(rate*2,28);b.writeUInt16LE(2,32);b.writeUInt16LE(16,34);b.write('data',36);b.writeUInt32LE(frames*2,40);for(let i=0;i<frames;i++)b.writeInt16LE(Math.sin(i*2*Math.PI*440/rate)*1000,44+i*2);return b;
+  const rate=8000,frames=rate*20,b=Buffer.alloc(44+frames*2);b.write('RIFF');b.writeUInt32LE(b.length-8,4);b.write('WAVEfmt ',8);b.writeUInt32LE(16,16);b.writeUInt16LE(1,20);b.writeUInt16LE(1,22);b.writeUInt32LE(rate,24);b.writeUInt32LE(rate*2,28);b.writeUInt16LE(2,32);b.writeUInt16LE(16,34);b.write('data',36);b.writeUInt32LE(frames*2,40);for(let i=0;i<frames;i++)b.writeInt16LE(Math.sin(i*2*Math.PI*440/rate)*1000,44+i*2);return b;
 }
 async function clickAction(page,action){
   console.log('Click visible action',action);
@@ -23,7 +23,9 @@ async function clickAction(page,action){
 async function verifyPhysicalMute(page,mobile){
   // Real media decoding/playback with a deterministic local tone; chosen production
   // asset availability/audibility is a separate live-device acceptance check.
+  await page.bringToFront();
   const button=page.locator('#musicBtn');
+  await page.evaluate(()=>{window.__qaMediaEvents=[];[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].forEach((a,channel)=>{for(const type of ['playing','pause','ended','waiting','error'])a.addEventListener(type,()=>{window.__qaMediaEvents.push({channel,type,time:a.currentTime,at:Math.round(performance.now())});if(window.__qaMediaEvents.length>30)window.__qaMediaEvents.shift()})})});
   const box=await button.boundingBox();assert(box.width>=44&&box.height>=44,'mute must have a 44px hit target');
   const hit=await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert(hit,'mute must receive physical pointer hit-testing');
   const tap=()=>mobile?page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2):page.mouse.click(box.x+box.width/2,box.y+box.height/2);
@@ -34,10 +36,9 @@ async function verifyPhysicalMute(page,mobile){
   await button.evaluate(el=>el.addEventListener('click',()=>{window.__RALUVAAA_ACTION_AUDIO__.playNamed('help');window.__RALUVAAA_REVIVE_AUDIO_V42__.play({type:'wake'})},{once:true}));
   await tap();
   try{
-    await page.waitForFunction(()=>{const a=window.__RALUVAAA_AUDIO__.audio;return !a.paused&&!a.muted&&a.currentTime>0.02},null,{timeout:8000});
-    await page.waitForFunction(()=>[window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].every(a=>!a.paused&&a.currentTime>0.02),null,{timeout:8000});
+    await page.waitForFunction(()=>[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].every(a=>!a.paused&&!a.muted&&a.currentTime>0.02),null,{polling:50,timeout:8000});
   }catch(error){
-    console.error('Actual media start state',await page.evaluate(()=>[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].map(a=>({paused:a.paused,muted:a.muted,time:a.currentTime,readyState:a.readyState,error:a.error?.code||null}))));throw error;
+    console.error('Actual media start state',await page.evaluate(()=>({visibility:document.visibilityState,events:window.__qaMediaEvents,channels:[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].map(a=>({paused:a.paused,muted:a.muted,time:a.currentTime,readyState:a.readyState,error:a.error?.code||null}))})));throw error;
   }
   await tap();
   const stopped=await page.evaluate(()=>[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].map(a=>({paused:a.paused,muted:a.muted,time:a.currentTime})));
