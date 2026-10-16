@@ -11,6 +11,7 @@ const room=window.RALUVAAA_ROOM||String(params.get('room')||'ALPHA').toUpperCase
 const STORE=window.RALUVAAA_STORE_KEY||('raluvaaaSharedAlphaV1:'+room);
 const maps={wish:new Map(),lineage:new Map(),proposal:new Map()};
 let client=null,lastWorld=null,lastMe=null,lastInbox=null,lastFingerprint='',mutating=0,refreshTimer=null,queue=Promise.resolve(),knownConnectIds=null;
+let refreshLoop=null,refreshFlight=null,refreshForced=false,mutationVersion=0;
 let authMe=null,authResolver=null,savedSyncing=false,lastSavedServer=[],savedQueue=Promise.resolve();
 let preferredLang=(()=>{try{return JSON.parse(localStorage.getItem(STORE)||'null')?.lang||window.RALUVAAA_DEFAULT_LANG||((navigator.language||'en').toLowerCase().startsWith('fr')?'fr':'en')}catch{return window.RALUVAAA_DEFAULT_LANG||'en'}})();
 
@@ -82,17 +83,31 @@ function buildState(world,me,inbox,actorId){
 }
 function fp(state){return JSON.stringify({events:state.events.map(e=>[e.type,e.semanticId||'',e.parentSemanticId||'',e.proposalId||'',e.decision||'',e.serverStatus||'',e.aSemanticId||'',e.bSemanticId||'',e.text||'',e.loc||'',e.state||'',e.helpTitle||'',e.open===false?'closed':'',e.note||'',(e.suggestions||[]).join('|'),(e.children||[]).map(c=>[c.semanticId,c.text||'',c.loc||'']).join('|')]),notifications:(state.notifications||[]).map(n=>[n.id,n.kind,n.objectId,n.isRead,n.title||'',n.body||''])})}
 
-async function fetchState(){
-  const [world,me]=await Promise.all([client.world(),client.me()]);
+async function fetchState(automatic=false){
+  const session=savedSession(),version=mutationVersion;
+  const assertCurrent=()=>{assertSavedSession(session);if(version!==mutationVersion||mutating)throw Object.assign(new Error('refresh_obsolete'),{code:'refresh_obsolete'});if(automatic&&document.hidden)throw Object.assign(new Error('refresh_paused'),{code:'refresh_paused'})};
+  assertCurrent();
+  // Wait for both requests even when one fails, so the next cycle cannot
+  // overlap a still-running sibling request.
+  const results=await Promise.allSettled([client.world(),client.me()]);
+  const failed=results.find(result=>result.status==='rejected');
+  if(failed)throw failed.reason;
+  const [world,me]=results.map(result=>result.value);
+  assertCurrent();
   const inbox=me.claimed?await client.inbox():{notifications:[],pending:[],sent:[],receivedHistory:[]};
+  assertCurrent();
   lastWorld=world;lastMe=me;lastInbox=inbox;authMe=me;
   updateAccountButton();
-  const next=buildState(world,me,inbox,client.actorId);
+  const next=buildState(world,me,inbox,session.actorId);
   return next;
 }
-async function refresh(force=false){
-  if(mutating)return;
-  const next=await fetchState(),fingerprint=fp(next);
+async function applyRefresh(force=false,automatic=false){
+  if(mutating)return {skipped:true};
+  const session=savedSession(),version=mutationVersion;
+  const next=await fetchState(automatic),fingerprint=fp(next);
+  assertSavedSession(session);
+  if(version!==mutationVersion||mutating)throw Object.assign(new Error('refresh_obsolete'),{code:'refresh_obsolete'});
+  if(automatic&&document.hidden)throw Object.assign(new Error('refresh_paused'),{code:'refresh_paused'});
   const connectIds=new Set(next.events.filter(e=>e.type==='connect').map(e=>e.proposalId||[e.aSemanticId,e.bSemanticId].sort().join('|')));
   if(knownConnectIds){
     const added=[...connectIds].filter(id=>!knownConnectIds.has(id));
@@ -106,7 +121,30 @@ async function refresh(force=false){
   if(window.__RV26_SHARED__)window.__RV26_SHARED__.replace(next);
   else localStorage.setItem(STORE,JSON.stringify(next));
 }
-function scheduleRefresh(ms=250){clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>refresh(true).catch(showError),ms)}
+function refresh(force=false,automatic=false){
+  const scheduled=automatic;
+  if(force)refreshForced=true;
+  if(refreshFlight)return refreshFlight;
+  refreshFlight=(async()=>{
+    let result;
+    do{
+      const forced=refreshForced;refreshForced=false;
+      try{result=await applyRefresh(forced,automatic)}catch(error){
+        // A deliberate identity switch/finished action can require a fresh pass
+        // after the obsolete in-flight snapshot. Never apply its old response.
+        if(refreshForced&&['account_changed','refresh_obsolete'].includes(error?.code)){automatic=false;continue}
+        if(error?.code==='refresh_obsolete')return {skipped:true};
+        throw error;
+      }
+    }while(refreshForced);
+    return result;
+  })().then(value=>{if(!scheduled&&!value?.skipped)refreshLoop?.settled();return value},error=>{if(!scheduled&&!['refresh_paused','refresh_obsolete'].includes(error?.code))refreshLoop?.settled(error);throw error}).finally(()=>{refreshFlight=null});
+  return refreshFlight;
+}
+function scheduleRefresh(ms=250){
+  if(refreshLoop){refreshLoop.request(ms);return}
+  clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>refresh(true).catch(showError),ms)
+}
 function friendlyError(err){
   const lang=window.__RV26_SHARED__?.state?.().lang||((navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr');
   const fr={
@@ -226,7 +264,7 @@ async function safeEncourage(localId){
   }
 }
 async function syncEvent(ev){
-  mutating++;
+  mutationVersion++;mutating++;
   try{
     let out;
     if(ev.type==='create'){
@@ -272,7 +310,8 @@ function enqueue(ev){queue=queue.then(()=>syncEvent(ev)).catch(err=>{showError(e
 
 async function removeShared(localId){
   await queue;
-  await client.wishEvent(idOf(localId),{type:'remove_mistake'});
+  mutationVersion++;mutating++;
+  try{await client.wishEvent(idOf(localId),{type:'remove_mistake'})}finally{mutating--}
   await refresh(true);
 }
 
@@ -440,7 +479,7 @@ async function boot(){
   window.__RALUVAAA_SHARED_COMMIT__=enqueue;
   window.__RALUVAAA_SHARED_REMOVE__=removeShared;
   window.__RALUVAAA_SHARED_SHARE__=async localId=>{await queue;return idOf(localId)};
-  window.__RALUVAAA_SHARED_MARK_READ__=id=>client.markRead(id);
+  window.__RALUVAAA_SHARED_MARK_READ__=async id=>{mutationVersion++;const result=await client.markRead(id);scheduleRefresh();return result};
   window.__RALUVAAA_SAVE_WISH__=(localId,wanted)=>{
     const session=savedSession();
     const task=async()=>{
@@ -485,7 +524,8 @@ async function boot(){
   window.__RALUVAAA_PRIVATE_AUTH__={requireClaim,showAccount,me:()=>authMe,refreshSaved:refreshSavedFromServer};
   window.__RALUVAAA_SHARED_DEBUG__={client,room,refresh:()=>refresh(true),world:()=>lastWorld,me:()=>lastMe,inbox:()=>lastInbox,maps};
   await refreshSavedFromServer();updateAccountButton();hideStatus();
-  setInterval(()=>{if(!document.hidden)refresh(false).catch(showError)},2500)
+  const {createRefreshLoop}=await import('./refresh-loop.mjs?build=private-alpha-polling-20261016');
+  refreshLoop=createRefreshLoop({refresh,onError:showError,document,window});clearTimeout(refreshTimer);refreshLoop.start()
 }
 boot().catch(showError);
 })();
