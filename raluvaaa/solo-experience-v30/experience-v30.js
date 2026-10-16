@@ -136,7 +136,7 @@ function hideLegacyMenu(){
 }
 
 function decorate(){
-  document.title='RALUVAAA · Experience V30';
+  if(document.body?.dataset.alpha!=='private-alpha'){document.title='RALUVAAA · Experience V30';}
   decorateRail();
   if(document.querySelector('#drawer:not(.hidden) #drawerBody .wish')){
     decorateLineage();

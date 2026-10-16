@@ -28,6 +28,9 @@ async function verifyPhysicalMute(page,mobile){
   const hit=await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert(hit,'mute must receive physical pointer hit-testing');
   const tap=()=>mobile?page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2):page.mouse.click(box.x+box.width/2,box.y+box.height/2);
   if(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled))await tap();
+  // Start the short deterministic fixture from its beginning. Page startup can
+  // otherwise leave it near its end before the three-channel playback check.
+  await page.evaluate(()=>{const a=window.__RALUVAAA_AUDIO__.audio;if(!a.paused)throw new Error('Ambient fixture must be paused before reset');a.currentTime=0});
   // Safari requires each media channel's initial play to belong to a real
   // user gesture. Start the actual channels in the physical unmute click,
   // rather than using evaluate() to simulate permission to autoplay.
@@ -190,10 +193,38 @@ async function verifyShareExports(page,id){
   await page.click('.v46-share-x');await page.waitForSelector('#v46ShareOverlay.open',{state:'hidden'});
   console.log('Downloaded PNG and decoded personalized video',info);
 }
+async function verifyStableIdentity(page,stage){
+  const identity=await page.evaluate(()=>({title:document.title,sub:document.querySelector('#brand .sub')?.textContent,...window.__qaIdentity}));
+  assert.equal(identity.title,'RALUVAAA — Private Alpha',stage+' title');
+  assert.equal(identity.sub,'PRIVATE ALPHA',stage+' subtitle');
+  assert.deepEqual(identity.titles,['RALUVAAA — Private Alpha'],stage+' must never expose a legacy tab title');
+  assert.deepEqual(identity.subtitles,['PRIVATE ALPHA'],stage+' must never expose a legacy subtitle');
+  assert.equal(identity.titleMutations,0,stage+' must not rewrite its title after parsing');
+  assert.equal(identity.brandMutations,0,stage+' must not rewrite its brand after parsing');
+}
 async function pageFor(browser,mobile=false){
   const context=await browser.newContext({
     viewport:mobile?{width:390,height:844}:{width:1280,height:800},
     isMobile:mobile,hasTouch:mobile,locale:mobile?'fr-FR':'en-US'
+  });
+  await context.addInitScript(()=>{
+    if(window.top!==window)return;
+    const identity=window.__qaIdentity={titles:[],subtitles:[],titleMutations:0,brandMutations:0};
+    const record=(list,value)=>{if(value&&list.at(-1)!==value)list.push(value)};
+    let titleNode,brandNode;
+    const discovery=new MutationObserver(attach);
+    function attach(){
+      if(!titleNode&&(titleNode=document.querySelector('title'))){
+        record(identity.titles,document.title);
+        new MutationObserver(records=>{identity.titleMutations+=records.length;record(identity.titles,document.title)}).observe(titleNode,{childList:true,characterData:true,subtree:true});
+      }
+      if(!brandNode&&(brandNode=document.querySelector('#brand .sub'))){
+        record(identity.subtitles,brandNode.textContent);
+        new MutationObserver(records=>{identity.brandMutations+=records.length;record(identity.subtitles,brandNode.textContent)}).observe(brandNode,{childList:true,characterData:true,subtree:true});
+      }
+      if(titleNode&&brandNode)discovery.disconnect();
+    }
+    discovery.observe(document,{childList:true,subtree:true});attach();
   });
   const page=await context.newPage();
   page.on('crash',()=>console.error('Browser page crashed',mobile?'mobile':'desktop'));
@@ -227,6 +258,8 @@ async function pageFor(browser,mobile=false){
     // the final translation assertions: cached results must not depend on test order.
     if(window.__RALUVAAA_TRANSLATION__)window.__RALUVAAA_TRANSLATION__.translate=async (text,target)=>({translation:target==='fr'?'TRADUIT: '+text:text,sourceLang:'en'})
   });
+  await page.waitForTimeout(500);
+  await verifyStableIdentity(page,'initial load and decoration timers');
   return{context,page}
 }
 async function claimViaUi(page,email){
@@ -277,7 +310,8 @@ async function openWish(page,id){
   // replace() rebuilds the engine asynchronously; wait for the actual hydrated node.
   await page.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(w=>w.semanticId===id),id,{polling:100,timeout:8000});
   await page.evaluate(id=>window.__RV26_SHARED__.open(id),id);
-  await page.waitForFunction(id=>window.__RALUVAAA_UI__?.current?.()?.semanticId===id,id,{polling:100,timeout:5000})
+  await page.waitForFunction(id=>window.__RALUVAAA_UI__?.current?.()?.semanticId===id,id,{polling:100,timeout:5000});
+  await verifyStableIdentity(page,'wish navigation and sync')
 }
 async function acceptFirst(page,type){
   await refresh(page);
@@ -603,6 +637,9 @@ async function acceptFirst(page,type){
     assert(await B.page.locator('#inboxBtn').evaluate(el=>el.classList.contains('active')),'consumed deep link must not close Notifications after synchronization');
     assert.equal(await B.page.locator('#drawerBody .wish').count(),0,'deep link must not reopen the wish over Notifications');
     console.log('One-shot deep link preserves subsequent Notifications navigation');
+    await verifyStableIdentity(A.page,'mobile after FR/EN and complete workflow');
+    await verifyStableIdentity(B.page,'desktop after reload, deep link and Notifications');
+    console.log('Stable private-alpha title and brand: no legacy values or repeated mutations');
     assert.deepEqual(A.page.__qaErrors,[],'mobile must have no uncaught page errors');
     assert.deepEqual(B.page.__qaErrors,[],'desktop must have no uncaught page errors');
     console.log('RALUVAAA Private Alpha A/B identity gate passed: mobile '+mobileEngine+' + desktop '+desktopEngine+' (local test-mode OTP)');

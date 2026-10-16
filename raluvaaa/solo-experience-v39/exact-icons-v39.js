@@ -77,9 +77,11 @@ function applyFlag(){
 }
 
 function decorate(){
-  document.title='RALUVAAA · Experience V39';
-  const sub=document.querySelector('#brand .sub');
-  if(sub)sub.textContent='EXPERIENCE V39';
+  if(document.body?.dataset.alpha!=='private-alpha'){
+    document.title='RALUVAAA · Experience V39';
+    const sub=document.querySelector('#brand .sub');
+    if(sub)sub.textContent='EXPERIENCE V39';
+  }
   applyRail();
   applyDeck();
   applyRoot();

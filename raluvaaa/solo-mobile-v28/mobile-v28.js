@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-document.title='RALUVAAA · Solo Mobile V28';
+if(document.body?.dataset.alpha!=='private-alpha'){document.title='RALUVAAA · Solo Mobile V28';}
 
 const STORE=window.RALUVAAA_STORE_KEY||'raluvaaaSoloAlphaV1';
 const CLOSE_AFTER=new Set([
@@ -147,7 +147,7 @@ function simplifyFragments(){
 }
 function decorate(){
   try{window.__RALUVAAA_V27__?.decorate?.()}catch{}
-  if(window.RALUVAAA_SOLO)document.title='RALUVAAA · Solo Mobile V28';
+  if(document.body?.dataset.alpha!=='private-alpha'){if(window.RALUVAAA_SOLO)document.title='RALUVAAA · Solo Mobile V28';}
   if(document.querySelector('#drawer:not(.hidden) #drawerBody .wish')){
     buildLineageBar();
     simplifyActions();

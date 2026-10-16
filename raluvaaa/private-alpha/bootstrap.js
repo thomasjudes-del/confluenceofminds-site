@@ -25,7 +25,6 @@ function status(text,error=false){
 }
 function hideStatus(){const b=document.getElementById('sharedStatus');if(b)b.remove()}
 function installRoomBadge(){
-  const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='SHARED ALPHA · REAL · '+room;
   if(document.getElementById('sharedRoomBadge'))return;
   const style=document.createElement('style');style.textContent='#sharedRoomBadge{position:fixed;z-index:49;left:50%;bottom:10px;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:5px 7px 5px 10px;border:1px solid rgba(184,214,255,.14);border-radius:999px;background:rgba(3,9,18,.82);backdrop-filter:blur(12px);font:7px/1 Inter,system-ui,sans-serif;letter-spacing:.08em;color:rgba(226,238,251,.58)}#sharedRoomBadge b{color:rgba(242,248,255,.88);font-size:8px;letter-spacing:.14em}#sharedRoomBadge button{height:24px;border:1px solid rgba(184,214,255,.12);border-radius:999px;background:rgba(255,255,255,.04);padding:0 8px;color:rgba(237,246,255,.74);font-size:7px;letter-spacing:.05em;text-transform:uppercase}#sharedRoomBadge button:hover{background:rgba(89,206,255,.07)}@media(max-width:820px){#sharedRoomBadge{bottom:7px;max-width:calc(100vw - 20px)}}';document.head.appendChild(style);
   const el=document.createElement('div');el.id='sharedRoomBadge';el.innerHTML='<span>TEST</span><b>'+room+'</b><button type="button">Copier le lien</button>';document.body.appendChild(el);
@@ -469,17 +468,17 @@ async function boot(){
   await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-usability-20261016');
   await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-usability-20261016');
   await loadScript('../solo-organic-v27/ambient-playlist-v27.js?build=private-alpha-1');
-  await loadScript('../solo-organic-v27/organic-v27.js?build=private-alpha-1');
-  await loadScript('../solo-mobile-v28/mobile-v28.js?build=private-alpha-ship-2');
-  await loadScript('../solo-experience-v30/experience-v30.js?build=private-alpha-1');
-  await loadScript('../solo-experience-v33/experience-v33.js?build=private-alpha-1');
-  await loadScript('../solo-experience-v37/experience-v37.js?build=private-alpha-ship-2');
-  await loadScript('../solo-experience-v38/patch-v38.js?build=private-alpha-1');
-  await loadScript('../solo-experience-v39/exact-icons-v39.js?build=private-alpha-1');
+  await loadScript('../solo-organic-v27/organic-v27.js?build=private-alpha-stable-title-20261016');
+  await loadScript('../solo-mobile-v28/mobile-v28.js?build=private-alpha-stable-title-20261016');
+  await loadScript('../solo-experience-v30/experience-v30.js?build=private-alpha-stable-title-20261016');
+  await loadScript('../solo-experience-v33/experience-v33.js?build=private-alpha-stable-title-20261016');
+  await loadScript('../solo-experience-v37/experience-v37.js?build=private-alpha-stable-title-20261016');
+  await loadScript('../solo-experience-v38/patch-v38.js?build=private-alpha-stable-title-20261016');
+  await loadScript('../solo-experience-v39/exact-icons-v39.js?build=private-alpha-stable-title-20261016');
   document.body.classList.add('v39-icons-ready');
   await loadScript('../solo-experience-v42/revive-sound-v42.js?build=private-alpha-usability-20261016');
-  await loadScript('../solo-experience-v42/ui-v42.js?build=private-alpha-1');
-  await loadScript('features.js?build=private-alpha-export-credit-20261016');
+  await loadScript('../solo-experience-v42/ui-v42.js?build=private-alpha-stable-title-20261016');
+  await loadScript('features.js?build=private-alpha-stable-title-20261016');
 
   window.__RALUVAAA_SHARED_READY__=true;
   window.__RALUVAAA_SHARED_ERROR__=friendlyError;

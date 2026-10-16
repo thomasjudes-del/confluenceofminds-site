@@ -1188,8 +1188,7 @@ function interceptShare(e){
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openShare(m)
 }
 function decorate(){
-  document.title='RALUVAAA · Private Alpha';
-  const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='PRIVATE ALPHA';
+  // The private-alpha HTML owns its title and brand; decorators never rewrite them.
   ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();ensureMusicPlacement();localizeUtilities();installGraftSavedBridge();decorateGraftMode();decorateWishTranslation();decorateWishPreviews();decorateWishFacts()
 }
 function decorateWishFacts(){

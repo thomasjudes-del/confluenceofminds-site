@@ -243,9 +243,11 @@ function normalizeWorkflowDeck(){
 }
 
 function decorate(){
-  document.title='RALUVAAA · Experience V42';
-  const sub=document.querySelector('#brand .sub');
-  if(sub)sub.textContent='EXPERIENCE V42';
+  if(document.body?.dataset.alpha!=='private-alpha'){
+    document.title='RALUVAAA · Experience V42';
+    const sub=document.querySelector('#brand .sub');
+    if(sub)sub.textContent='EXPERIENCE V42';
+  }
   relabelSuggest();
   patchSuggestModal();
   applyReviveIcon();
