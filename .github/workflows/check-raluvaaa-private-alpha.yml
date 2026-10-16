@@ -74,3 +74,11 @@ jobs:
             cat /tmp/private-alpha-http.log || true
             exit 1
           fi
+      - name: Keep synthetic export evidence on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: private-alpha-export-diagnostic
+          path: qa-artifacts/export-clip.*
+          if-no-files-found: ignore
+          retention-days: 7

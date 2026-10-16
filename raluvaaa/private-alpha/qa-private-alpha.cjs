@@ -80,6 +80,8 @@ async function verifyResponsiveAccount(page){
   console.log('EN/FR account email, code and error states fit narrow, landscape and reduced-height viewports');
 }
 async function verifyShareExports(page,id){
+  await page.bringToFront();
+  assert.equal(await page.evaluate(()=>document.visibilityState),'visible','export must be exercised in the active user tab');
   await openWish(page,id);await clickAction(page,'share');
   await page.waitForSelector('#v46ShareOverlay.open');
   const shareBox=await page.locator('.v46-share-sheet').boundingBox(),viewport=page.viewportSize();
@@ -97,8 +99,20 @@ async function verifyShareExports(page,id){
   assert.equal(await page.evaluate(()=>window.__RALUVAAA_V46__.mediaError()),false,'animation must finish preparing');
   const clipDownload=page.waitForEvent('download');await page.click('[data-share-download]');
   const clip=await clipDownload,bytes=require('node:fs').readFileSync(await clip.path());assert(bytes.length>1000,'exported video cannot be empty');
-  const info=await page.evaluate(async ({data,mime})=>{const video=document.createElement('video');video.muted=true;video.src='data:'+mime+';base64,'+data;await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=()=>reject(new Error('Exported clip does not decode'))});return{width:video.videoWidth,height:video.videoHeight,duration:video.duration}},{data:bytes.toString('base64'),mime:clip.suggestedFilename().endsWith('.mp4')?'video/mp4':'video/webm'});
-  assert.equal(info.width,720);assert.equal(info.height,900);assert(info.duration>=2.5&&info.duration<5,'clip must decode as a roughly three-second animation');
+  const fs=require('node:fs');fs.mkdirSync('qa-artifacts',{recursive:true});fs.writeFileSync('qa-artifacts/export-clip.'+(clip.suggestedFilename().endsWith('.mp4')?'mp4':'webm'),bytes);
+  const info=await page.evaluate(async ({data,mime})=>{const video=document.createElement('video');video.muted=true;video.src='data:'+mime+';base64,'+data;await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Exported clip metadata timed out')),5000);video.onloadedmetadata=()=>{clearTimeout(timer);resolve()};video.onerror=()=>{clearTimeout(timer);reject(new Error('Exported clip does not decode'))}});const info={width:video.videoWidth,height:video.videoHeight,duration:video.duration,durationText:String(video.duration),frameHashes:[]};
+    console.log('Export metadata before frame seeks',JSON.stringify(info));
+    if(Number.isFinite(info.duration)&&info.duration>2.4){
+      const canvas=document.createElement('canvas');canvas.width=180;canvas.height=225;const ctx=canvas.getContext('2d');
+      for(const time of [0.25,2.1]){
+        await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Export frame seek timed out')),5000);video.onseeked=()=>{clearTimeout(timer);resolve()};video.currentTime=time});
+        ctx.drawImage(video,0,0,canvas.width,canvas.height);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;let hash=0;for(let i=0;i<pixels.length;i+=13)hash=(Math.imul(hash,31)+pixels[i])>>>0;info.frameHashes.push(hash);
+      }
+    }
+    return info},{data:bytes.toString('base64'),mime:clip.suggestedFilename().endsWith('.mp4')?'video/mp4':'video/webm'});
+  console.log('Decoded export metadata',JSON.stringify({...info,filename:clip.suggestedFilename(),bytes:bytes.length,visibility:await page.evaluate(()=>document.visibilityState),previewFrames:await page.evaluate(()=>window.__RALUVAAA_V46__.previewFrames())}));
+  assert.equal(info.width,720);assert.equal(info.height,900);assert(info.duration>=2.5&&info.duration<5,'clip must decode as a roughly three-second animation: '+JSON.stringify(info));
+  assert.equal(info.frameHashes.length,2,'two video frames must be seekable');assert.notEqual(info.frameHashes[0],info.frameHashes[1],'the exported clip must contain motion rather than a frozen frame');
   await page.click('.v46-share-x');await page.waitForSelector('#v46ShareOverlay.open',{state:'hidden'});
   console.log('Downloaded PNG and decoded personalized video',info);
 }
@@ -112,6 +126,7 @@ async function pageFor(browser,mobile=false){
   page.on('close',()=>console.log('Browser page closed',mobile?'mobile':'desktop'));
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));page.__qaErrors=pageErrors;
   for(const pattern of ['https://incompetech.com/music/royalty-free/mp3-royaltyfree/**','https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/raluvaaa/*/audio/**'])await page.route(pattern,r=>r.fulfill({status:200,contentType:'audio/wav',body:audioFixture()}));
+  await page.route(url=>url.origin===new globalThis.URL(BASE).origin&&url.pathname==='/raluvaaa/solo-experience-v46/share-assets/immersed-share.m4a',r=>r.fulfill({status:200,contentType:'audio/wav',body:audioFixture()}));
   page.on('console',msg=>console.log('[browser console]',msg.type(),msg.text()));
   page.on('pageerror',err=>console.log('[browser pageerror]',err?.stack||err?.message||String(err)));
   await page.route('https://ipwho.is/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,city:'Nantes',country:'France'})}));
