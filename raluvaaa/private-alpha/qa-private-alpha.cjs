@@ -53,7 +53,11 @@ async function verifyResponsiveAccount(page){
   const original=page.viewportSize(),sizes=[{width:320,height:568},{width:667,height:375},{width:320,height:360},original];
   async function check(stage){
     for(const viewport of sizes){
-      await page.setViewportSize(viewport);await page.bringToFront();
+      console.log('Account geometry',stage,viewport,await page.evaluate(()=>({brandMutations:window.__qaBrandMutations||0,at:Math.round(performance.now())})));
+      await page.bringToFront();await page.setViewportSize(viewport);
+      // Measure a settled rendered viewport, not an in-flight resize.
+      let frameTimeout;
+      try{await Promise.race([page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))),new Promise((_,reject)=>{frameTimeout=setTimeout(()=>reject(new Error('Viewport did not render two frames within 3 seconds')),3000)})])}finally{clearTimeout(frameTimeout)}
       const geometry=await page.locator('.pa-auth-card').evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{x:r.x,y:r.y,width:r.width,height:r.height,overflowY:s.overflowY,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight}});
       assert(geometry.x>=-1&&geometry.y>=-1&&geometry.x+geometry.width<=viewport.width+1&&geometry.y+geometry.height<=viewport.height+1,'account dialog must fit '+stage+': '+JSON.stringify({viewport,geometry}));
       if(geometry.scrollHeight>geometry.clientHeight+1)assert(['auto','scroll'].includes(geometry.overflowY),'long account content must be scrollable');
@@ -106,6 +110,8 @@ async function pageFor(browser,mobile=false){
     isMobile:mobile,hasTouch:mobile,locale:mobile?'fr-FR':'en-US'
   });
   const page=await context.newPage();
+  page.on('crash',()=>console.error('Browser page crashed',mobile?'mobile':'desktop'));
+  page.on('close',()=>console.log('Browser page closed',mobile?'mobile':'desktop'));
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));page.__qaErrors=pageErrors;
   for(const pattern of ['https://incompetech.com/music/royalty-free/mp3-royaltyfree/**','https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/raluvaaa/*/audio/**'])await page.route(pattern,r=>r.fulfill({status:200,contentType:'audio/wav',body:audioFixture()}));
   page.on('console',msg=>console.log('[browser console]',msg.type(),msg.text()));
@@ -129,6 +135,7 @@ async function pageFor(browser,mobile=false){
     throw err
   }
   await page.evaluate(()=>{
+    window.__qaBrandMutations=0;const brand=document.querySelector('#brand .sub');if(brand)new MutationObserver(records=>window.__qaBrandMutations+=records.length).observe(brand,{subtree:true,childList:true,characterData:true});
     if(window.__RALUVAAA_TRANSLATION__)window.__RALUVAAA_TRANSLATION__.translate=async text=>({translation:text,sourceLang:'und'})
   });
   return{context,page}
@@ -202,6 +209,8 @@ async function acceptFirst(page,type){
   const mobileEngine=process.env.RALUVAAA_QA_MOBILE_ENGINE||'webkit';
   assert(['chromium','webkit'].includes(mobileEngine),'unsupported mobile browser');
   const safari=await ({chromium,webkit}[mobileEngine]).launch({headless:true});
+  chrome.on('disconnected',()=>console.log('Desktop browser disconnected'));
+  safari.on('disconnected',()=>console.log('Mobile browser disconnected'));
   const stamp=Date.now().toString(36);
   const emailA='a+'+stamp+'@raluvaaa.test',emailB='b+'+stamp+'@raluvaaa.test';
   const A=await pageFor(safari,true),B=await pageFor(chrome,false);

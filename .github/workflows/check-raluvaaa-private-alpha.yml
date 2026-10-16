@@ -52,6 +52,8 @@ jobs:
           npm install --no-save playwright@1.55.0 wrangler@4 >/dev/null 2>&1
           npx playwright install --with-deps chromium webkit >/dev/null 2>&1
       - name: Run real two-browser identity QA
+        env:
+          DEBUG: pw:browser
         run: |
           cd raluvaaa/alpha-api
           npx wrangler d1 execute raluvaaa-alpha --local --file=schema.sql --config=wrangler.ci.toml >/tmp/private-alpha-d1.log 2>&1
@@ -63,6 +65,9 @@ jobs:
           trap 'kill $WORKER_PID $HTTP_PID || true' EXIT
           sleep 2
           if ! node raluvaaa/private-alpha/qa-private-alpha.cjs; then
+            echo '--- Runner memory and process footprint ---'
+            free -m
+            ps -eo pid,comm,rss --sort=-rss | head -15
             echo '--- Worker log ---'
             cat /tmp/private-alpha-worker.log || true
             echo '--- Static log ---'
