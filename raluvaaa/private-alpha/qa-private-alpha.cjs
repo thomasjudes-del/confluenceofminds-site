@@ -13,12 +13,10 @@ async function clickAction(page,action){
   if(action==='toggle_help'){await page.locator('[data-pa-toggle-help]').click();return}
   const icon={split:'branch',branch:'branch',connect:'graft',toggle_help:null}[action]??action;
   const deck=page.locator('.v33-action-unit[data-v39-icon="'+icon+'"] .v33-action-circle:visible').first();
-  if(await deck.count()){await deck.click();return}
-  const button=page.locator('[data-act="'+action+'"]:visible').first();
-  if(await button.count()){await button.click();return}
-  const more=page.locator('details.more');
-  if(await more.count()&&!await more.evaluate(el=>el.open))await more.locator('summary').click();
-  await page.locator('[data-act="'+action+'"]:visible').first().click();
+  // Private alpha exposes the action deck after asynchronous decorators finish.
+  // Never fall back to the hidden legacy More menu while that deck is pending.
+  await deck.waitFor({state:'visible',timeout:8000});
+  await deck.click();
 }
 async function verifyPhysicalMute(page,mobile){
   // Real media decoding/playback with a deterministic local tone; chosen production
