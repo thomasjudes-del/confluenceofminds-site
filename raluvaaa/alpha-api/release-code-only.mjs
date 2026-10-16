@@ -8,12 +8,12 @@ import { pathToFileURL } from 'node:url';
 // https://developers.cloudflare.com/api/resources/workers/subresources/scripts/subresources/deployments/methods/create/
 // Wrangler 4.151.0 versions upload explicitly omits non-versioned logpush/observability;
 // this helper never writes settings, triggers, secrets, D1 schema or D1 contents.
-// Intentionally unpinned: the five-root source and a fresh GET-only runtime
-// inventory must be reviewed before these four values and the plan are enabled.
-export const APPROVED_SOURCE_SHA=null;
-export const APPROVED_CODE_SHA256=null;
-export const BASELINE_VERSION=null;
-export const BASELINE_DEPLOYMENT=null;
+// Exact five-root source reviewed with runtime inventory observed 2026-10-16 09:53 UTC.
+// The separate plan remains disabled until exact-source CI and live frontend acceptance pass.
+export const APPROVED_SOURCE_SHA='dc7f6449e4c08ae13271024e95e0db2813795eff';
+export const APPROVED_CODE_SHA256='6cfcbf92414d5d9de9b9cf129a5e1a5038f0713e695945485b457514d918e6e8';
+export const BASELINE_VERSION='0d844cf5-9220-4fc9-930a-98611c15f5b6';
+export const BASELINE_DEPLOYMENT='6f644ee5-bc46-4a02-a860-d3621132c52a';
 export const RELEASE_REF='refs/heads/dot/raluvaaa-code-only-release-20261016';
 const REPOSITORY='thomasjudes-del/confluenceofminds-site';
 const WORKER='raluvaaa-alpha-api';

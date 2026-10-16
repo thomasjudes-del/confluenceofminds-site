@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import * as unconfigured from './release-code-only.mjs';
+import * as configured from './release-code-only.mjs';
 
 // Pin a copy only inside this in-memory fake-fetch suite. Never invent production
 // source/baseline pins just to run tests while the release plan is disabled.
@@ -220,15 +220,27 @@ test('unavailable or incomplete active-run inventory fails before upload',async(
 
 
 test('unconfigured cleanup plan and helper pins cannot contact any service',async()=>{
-  const plan=JSON.parse(readFileSync(new URL('./release-plan.json',import.meta.url),'utf8'));
-  assert.equal(plan.enabled,false);
-  for(const name of Object.keys(testPins))assert.equal(unconfigured[name],null,'production pins remain unset until reviewed');
-  for(const key of ['sourceSha','codeSha256','baselineVersionId','baselineDeploymentId'])assert.equal(plan[key],null);
+  let source=helperSource;
+  for(const name of Object.keys(testPins))source=source.replace(new RegExp("export const "+name+"=(?:null|'[^']*');"),'export const '+name+'=null;');
+  const unconfigured=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+  const plan={enabled:false,sourceSha:null,codeSha256:null,baselineVersionId:null,baselineDeploymentId:null};
+  for(const name of Object.keys(testPins))assert.equal(unconfigured[name],null);
   let calls=0;
   for(const enabled of [false,true]){
     await assert.rejects(()=>unconfigured.releaseCodeOnly({plan:{...plan,enabled},ref:unconfigured.RELEASE_REF,repository:REPOSITORY,fetchImpl:async()=>{calls++;throw new Error('must not run')}}),/disabled|pins are incomplete/);
   }
   assert.equal(calls,0);
+});
+
+test('reviewed production plan matches exact source, code and runtime baseline',()=>{
+  const plan=JSON.parse(readFileSync(new URL('./release-plan.json',import.meta.url),'utf8'));
+  assert.equal(plan.sourceSha,configured.APPROVED_SOURCE_SHA);
+  assert.equal(plan.codeSha256,createHash('sha256').update(CODE).digest('hex'));
+  assert.equal(plan.codeSha256,configured.APPROVED_CODE_SHA256);
+  assert.equal(plan.baselineVersionId,configured.BASELINE_VERSION);
+  assert.equal(plan.baselineDeploymentId,configured.BASELINE_DEPLOYMENT);
+  assert.throws(()=>configured.validatePlan({...plan,enabled:false},{ref:configured.RELEASE_REF,repository:REPOSITORY}),/disabled/);
+  configured.validatePlan({...plan,enabled:true},{ref:configured.RELEASE_REF,repository:REPOSITORY});
 });
 
 
