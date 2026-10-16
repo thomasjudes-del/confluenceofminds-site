@@ -1,14 +1,18 @@
 const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store'};
 const MAX_WISH=280,MAX_LOCATION=80,MAX_HELP=400,MAX_HELP_TITLE=60,MAX_TRANSLATION=560;
 
-// Code-only, reversible QA cleanup. Enable only after the final acceptance review.
+// Code-only, reversible QA cleanup of the exact fixtures accepted in the final recipe.
 // No rows, states, permissions, settings or secrets are changed by this filter.
-const QA_FIXTURE_HIDING_ENABLED=false;
-const QA_FIXTURE_ROOT_IDS=Object.freeze([
-  'wish_57b208a2-c381-4bbd-bca5-4b0c1d76a19d', // QA A
-  'wish_93c9de27-c022-483f-975a-5452bdd9f06e', // QA B
-  'wish_841df73a-7c30-4f8d-b7bd-df945e4c563a'  // QA C
+const QA_FIXTURE_HIDING_ENABLED=true;
+const QA_FIXTURE_ROOTS=Object.freeze([
+  {id:'wish_57b208a2-c381-4bbd-bca5-4b0c1d76a19d',ownerGroup:'original-a'}, // QA A
+  {id:'wish_93c9de27-c022-483f-975a-5452bdd9f06e',ownerGroup:'original-b'}, // QA B
+  {id:'wish_841df73a-7c30-4f8d-b7bd-df945e4c563a',ownerGroup:'original-a'}, // QA C
+  {id:'wish_558a976c-173a-4034-9503-f92a51c5c0b7',ownerGroup:'current-one'},
+  {id:'wish_cc52e794-db66-413d-bb25-9f97d5c80c5a',ownerGroup:'current-two'}
 ]);
+const QA_FIXTURE_ROOT_IDS=Object.freeze(QA_FIXTURE_ROOTS.map(root=>root.id));
+const QA_FIXTURE_PLACEHOLDERS=QA_FIXTURE_ROOT_IDS.map(()=>'?').join(',');
 const QA_VISIBILITY=Symbol('request-local QA visibility');
 const NO_HIDDEN_WISHES=new Set();
 
@@ -16,21 +20,25 @@ async function hiddenQaWishes(env){
   if(!QA_FIXTURE_HIDING_ENABLED)return NO_HIDDEN_WISHES;
   // Cache only within this request. Never retain database identities across requests.
   if(!env[QA_VISIBILITY])env[QA_VISIBILITY]=(async()=>{
-    const result=await env.DB.prepare("SELECT w.*,e.actor_id AS creation_actor_id,e.lineage_id AS creation_lineage_id,e.parent_wish_id AS creation_parent_wish_id,e.created_at AS creation_created_at FROM wishes w LEFT JOIN wish_events e ON e.id=(SELECT id FROM wish_events WHERE wish_id=w.id AND event_type='create' ORDER BY created_at ASC,id ASC LIMIT 1) WHERE w.id IN (?,?,?)").bind(...QA_FIXTURE_ROOT_IDS).all();
+    const result=await env.DB.prepare("SELECT w.*,e.actor_id AS creation_actor_id,e.lineage_id AS creation_lineage_id,e.parent_wish_id AS creation_parent_wish_id,e.created_at AS creation_created_at FROM wishes w LEFT JOIN wish_events e ON e.id=(SELECT id FROM wish_events WHERE wish_id=w.id AND event_type='create' ORDER BY created_at ASC,id ASC LIMIT 1) WHERE w.id IN ("+QA_FIXTURE_PLACEHOLDERS+")").bind(...QA_FIXTURE_ROOT_IDS).all();
     const byId=new Map((result.results||[]).map(root=>[root.id,root])),roots=QA_FIXTURE_ROOT_IDS.map(rootId=>byId.get(rootId));
     for(const [index,root] of roots.entries()){
       const rootId=QA_FIXTURE_ROOT_IDS[index];
       if(!root||root.room_key!=='WORLD'||root.kind!=='create'||root.parent_wish_id!==null||root.root_wish_id!==rootId||root.lineage_id!==rootId)return NO_HIDDEN_WISHES;
       if(root.creation_actor_id!==root.owner_actor_id||root.creation_lineage_id!==rootId||root.creation_parent_wish_id!==null||Number(root.creation_created_at)!==Number(root.created_at))return NO_HIDDEN_WISHES;
     }
-    // Recorded QA provenance: A and C share their creator; B belongs to the other.
-    // Fail open if this invariant changes; names, emails and title patterns are unused.
-    if(roots[0].owner_actor_id!==roots[2].owner_actor_id||roots[0].owner_actor_id===roots[1].owner_actor_id)return NO_HIDDEN_WISHES;
+    // Recorded QA provenance: original A/C share an owner; original B and
+    // current one/two are three other distinct owners. Check both equality and
+    // inequality without collecting emails or hard-coding real actor identities.
+    for(let i=0;i<roots.length;i++)for(let j=0;j<i;j++){
+      const sameGroup=QA_FIXTURE_ROOTS[i].ownerGroup===QA_FIXTURE_ROOTS[j].ownerGroup;
+      if((roots[i].owner_actor_id===roots[j].owner_actor_id)!==sameGroup)return NO_HIDDEN_WISHES;
+    }
     // Follow every incoming structural reference, including inconsistent rows.
     // Filtering only matching owner/root/lineage rows would miss a visible row
     // whose wake/reparent could still act on a hidden root. GRAFTs are separate
     // proposal/event relations and deliberately do not join this ownership graph.
-    const rows=await env.DB.prepare("WITH RECURSIVE family(id) AS (SELECT id FROM wishes WHERE id IN (?,?,?) UNION SELECT w.id FROM wishes w JOIN family f ON w.parent_wish_id=f.id OR w.root_wish_id=f.id OR w.lineage_id=f.id) SELECT w.id,w.owner_actor_id,w.room_key,w.root_wish_id,w.lineage_id,w.parent_wish_id,w.kind FROM wishes w JOIN family f ON f.id=w.id").bind(...QA_FIXTURE_ROOT_IDS).all();
+    const rows=await env.DB.prepare("WITH RECURSIVE family(id) AS (SELECT id FROM wishes WHERE id IN ("+QA_FIXTURE_PLACEHOLDERS+") UNION SELECT w.id FROM wishes w JOIN family f ON w.parent_wish_id=f.id OR w.root_wish_id=f.id OR w.lineage_id=f.id) SELECT w.id,w.owner_actor_id,w.room_key,w.root_wish_id,w.lineage_id,w.parent_wish_id,w.kind FROM wishes w JOIN family f ON f.id=w.id").bind(...QA_FIXTURE_ROOT_IDS).all();
     const family=new Map((rows.results||[]).map(row=>[row.id,row]));
     for(const row of family.values()){
       const root=byId.get(row.root_wish_id);

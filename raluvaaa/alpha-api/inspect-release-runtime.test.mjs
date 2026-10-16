@@ -41,6 +41,8 @@ test('only GET calls reach the fixed Cloudflare host; output omits raw values',a
   const output=JSON.stringify(summary);
   for(const value of [VALUE,TOKEN,ACCOUNT,'"author_email":','"hostname":','"pattern":','"text":','"value":'])assert(!output.includes(value),value+' must not be printed');
   assert.equal(summary.latestVersionId,VERSION);assert.equal(summary.releaseReady,false);
+  assert.equal(summary.inspectionPurpose,'five-root-cleanup-preflight-20261016');
+  assert.match(summary.observedAt,/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   assert.deepEqual(summary.blockers,[]);
   assert.deepEqual(summary.versions[0].bindings.find(b=>b.name==='DB'),{name:'DB',type:'d1'});
   assert.equal(summary.triggers.routeCount,1);

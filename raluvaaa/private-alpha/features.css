@@ -1035,7 +1035,7 @@ body[data-alpha="private-alpha"] .pa-state-abandoned{color:var(--pa-abandoned);b
 }
 
 body[data-alpha="private-alpha"] .v46-share-modes button{min-height:44px!important;font-size:13px!important}
-body[data-alpha="private-alpha"] .v46-style-dots button{width:28px!important;height:28px!important;border:9px solid transparent!important;background-clip:content-box!important}
+body[data-alpha="private-alpha"] .v46-style-dots button{box-sizing:border-box;width:44px!important;height:44px!important;border:17px solid transparent!important;background-clip:content-box!important}
 body[data-alpha="private-alpha"] .v46-style-nav{min-width:44px!important;min-height:44px!important}
 .pa-entrusted-kind{display:block;margin-top:6px;font-size:11px;letter-spacing:.03em;color:#c1d1dc}
 .pa-history-note{margin-top:7px;white-space:pre-wrap;font-size:13px;line-height:1.45;color:#e0e9ed}
@@ -1046,3 +1046,14 @@ body[data-alpha="private-alpha"] .v43-saved-row .drawer-item{padding-right:54px}
 .pa-wish-origin{margin:8px 0;padding:9px 11px;border-left:2px solid rgba(131,226,186,.5);font-size:13px;line-height:1.45;color:#d6e5eb}
 
 body[data-alpha="private-alpha"] .pa-auth-card{max-height:calc(100dvh - 16px);overflow-y:auto;overscroll-behavior:contain}
+
+/* Keep Share readable and every style reachable, including short landscape screens. */
+body[data-alpha="private-alpha"] .v46-swipe-hint,
+body[data-alpha="private-alpha"] .v46-eyebrow{font-size:12px!important;line-height:1.4;color:rgba(236,243,242,.8)}
+body[data-alpha="private-alpha"] .v46-share-meta{display:flex!important;font-size:12px!important;line-height:1.4;white-space:normal!important;overflow:visible!important}
+body[data-alpha="private-alpha"] .v46-audio-note.visible{color:rgba(220,232,230,.8)}
+body[data-alpha="private-alpha"] .v46-style-dots{gap:2px;padding:0 5px}
+@media(max-width:820px){
+ body[data-alpha="private-alpha"] .v46-share-sheet{grid-template-rows:repeat(5,max-content);align-content:start;overflow-y:auto;overflow-x:hidden}
+ body[data-alpha="private-alpha"] .v46-share-preview{width:min(100%,360px);height:auto;aspect-ratio:4/5;max-width:100%;max-height:none;min-height:0;align-self:start;flex-shrink:0}
+}

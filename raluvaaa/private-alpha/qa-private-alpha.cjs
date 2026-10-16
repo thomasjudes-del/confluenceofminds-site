@@ -79,6 +79,80 @@ async function verifyResponsiveAccount(page){
   const music=await page.locator('#musicBtn').boundingBox();assert(music.x>=0&&music.y>=0&&music.x+music.width<=original.width&&music.y+music.height<=original.height,'mute must remain in viewport');
   console.log('EN/FR account email, code and error states fit narrow, landscape and reduced-height viewports');
 }
+async function verifyShareResponsive(page,id){
+  const original=page.viewportSize();
+  const originalLanguage=await page.locator('.lang button.active').getAttribute('data-lang');
+  let states=0,controls=0;
+  try{
+    for(const language of ['en','fr'])for(const viewport of [{width:320,height:568},{width:390,height:844},{width:667,height:375}]){
+      await page.bringToFront();await page.setViewportSize(viewport);
+      await page.click('[data-lang="'+language+'"]');await openWish(page,id);await clickAction(page,'share');
+      await page.waitForSelector('#v46ShareOverlay.open');
+      for(const mode of ['image','animation']){
+        await page.click('[data-mode="'+mode+'"]');
+        assert.equal(await page.locator('.v46-share-modes button.active').getAttribute('data-mode'),mode,'Share must actually select the requested mode');
+        await page.locator('.v46-media.'+(mode==='animation'?'v46-pretty-animation':'v46-pretty-still')).waitFor({state:'visible',timeout:3000});
+        let frameTimeout;
+        try{await Promise.race([page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))),new Promise((_,reject)=>{frameTimeout=setTimeout(()=>reject(new Error('Share viewport did not render two frames within 3 seconds')),3000)})])}finally{clearTimeout(frameTimeout)}
+        let measureTimeout,result;
+        try{result=await Promise.race([page.evaluate(async ({viewport,mode})=>{
+          const sheet=document.querySelector('.v46-share-sheet'),preview=document.querySelector('.v46-share-preview');
+          const failures=[];
+          const check=(ok,message)=>{if(!ok)failures.push(message)};
+          const visible=el=>{
+            for(let p=el;p;p=p.parentElement){const s=getComputedStyle(p);if(s.display==='none'||s.visibility==='hidden')return false}
+            const r=el.getBoundingClientRect();return r.width>0&&r.height>0
+          };
+          const r=sheet.getBoundingClientRect(),css=getComputedStyle(sheet);
+          check(r.x>=-1&&r.y>=-1&&r.right<=viewport.width+1&&r.bottom<=viewport.height+1,'sheet must fit viewport');
+          check(sheet.scrollWidth<=sheet.clientWidth+1,'sheet must not overflow horizontally');
+          check(document.documentElement.scrollWidth<=viewport.width+1&&document.body.scrollWidth<=viewport.width+1,'page must not overflow horizontally');
+          check(sheet.scrollHeight<=sheet.clientHeight+1||['auto','scroll'].includes(css.overflowY),'long Share content must scroll vertically');
+          check(preview.scrollWidth<=preview.clientWidth+1,'preview must not crop its style controls horizontally');
+          const pr=preview.getBoundingClientRect();
+          check(Math.abs(pr.height-pr.width*1.25)<=1,'preview must preserve its readable 4:5 portrait ratio');
+          if(viewport.height<400)check(sheet.scrollHeight>sheet.clientHeight,'short landscape must scroll rather than shrink the wish preview');
+          const buttons=[...sheet.querySelectorAll('button')].filter(visible);
+          check(buttons.length===13,'all thirteen Share controls must exist and be visible');
+          check([...sheet.querySelectorAll('.v46-style-dots button')].filter(visible).length===5,'all five style selectors must be visible');
+          if(mode==='animation'){const note=sheet.querySelector('.v46-audio-note.visible');check(!!note&&visible(note)&&parseFloat(getComputedStyle(note).fontSize)>=12,'animation credit must be visible and readable')}
+          for(const button of buttons){
+            // Scroll only the sheet vertically. scrollIntoView can silently scroll
+            // an overflow:hidden preview and conceal unreachable style controls.
+            const before=button.getBoundingClientRect(),sr=sheet.getBoundingClientRect(),oldScrollTop=sheet.scrollTop;
+            if(before.top<sr.top+4)sheet.scrollTop+=before.top-sr.top-4;
+            else if(before.bottom>sr.bottom-4)sheet.scrollTop+=before.bottom-sr.bottom+4;
+            if(sheet.scrollTop!==oldScrollTop)await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+            const br=button.getBoundingClientRect(),name=button.getAttribute('aria-label')||button.textContent.trim()||button.className;
+            const hit=document.elementFromPoint(br.x+br.width/2,br.y+br.height/2);
+            check(br.width>=43.9&&br.height>=43.9,name+' must have a 44px target');
+            check(br.x>=-1&&br.y>=-1&&br.right<=viewport.width+1&&br.bottom<=viewport.height+1,name+' must be reachable after vertical scroll');
+            check(button.disabled||hit===button||button.contains(hit),name+' must pass actual pointer hit-testing');
+            if(button.textContent.trim()&&!['×','‹','›'].includes(button.textContent.trim()))check(parseFloat(getComputedStyle(button).fontSize)>=12,name+' must use readable text');
+            if(button.matches('.v46-share-x'))check(!!button.getAttribute('aria-label'),'Close must have an accessible label');
+          }
+          for(const text of sheet.querySelectorAll('h3,.v46-eyebrow,.pa-share-free,.v46-swipe-hint,.v46-audio-note,.v46-share-status')){
+            if(visible(text)&&text.textContent.trim())check(parseFloat(getComputedStyle(text).fontSize)>=12,text.className+' must be at least 12px');
+          }
+          check(preview.scrollLeft===0&&sheet.scrollLeft===0,'reachability checks must not scroll content horizontally');
+          sheet.scrollTop=0;
+          return{failures,controls:buttons.length,scrollHeight:sheet.scrollHeight,clientHeight:sheet.clientHeight}
+        },{viewport,mode}),new Promise((_,reject)=>{measureTimeout=setTimeout(()=>reject(new Error('Share scroll and hit-testing did not render within 3 seconds')),3000)})])}finally{clearTimeout(measureTimeout)}
+        assert.deepEqual(result.failures,[],language+' '+viewport.width+'x'+viewport.height+' '+mode+': '+result.failures.join('; '));
+        states++;controls+=result.controls;
+      }
+      await page.click('.v46-share-x');await page.waitForSelector('#v46ShareOverlay.open',{state:'hidden'});
+    }
+  }finally{
+    if(await page.locator('#v46ShareOverlay.open').count()){
+      await page.locator('.v46-share-sheet').evaluate(el=>el.scrollTop=0);
+      await page.click('.v46-share-x');
+    }
+    await page.setViewportSize(original);
+    if(originalLanguage)await page.click('[data-lang="'+originalLanguage+'"]');
+  }
+  console.log('Share responsive geometry, fonts, touch targets and pointer reachability',JSON.stringify({states,controls}));
+}
 async function verifyShareExports(page,id){
   await page.bringToFront();
   assert.equal(await page.evaluate(()=>document.visibilityState),'visible','export must be exercised in the active user tab');
@@ -320,17 +394,39 @@ async function acceptFirst(page,type){
     await B.page.fill('#helpTitleInput','First sailing checklist');
     await B.page.fill('#helpInput','I can share a practical first sailing checklist.');
     await B.page.click('#confirm');
-    await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help')},null,{polling:100,timeout:10000});
+    await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help'&&p.targetWishId===id&&p.privatePayload?.title==='First sailing checklist')},wishA,{polling:100,timeout:10000});
+    const helpProposal=await A.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.inbox().pending.find(p=>p.type==='help'&&p.targetWishId===id&&p.privatePayload?.title==='First sailing checklist').id,wishA);
+    await openWish(A.page,wishA);
+    await A.page.waitForFunction(()=>document.querySelector('.pa-wish-facts')?.textContent.split(' · ').includes('0 accepted offers of help'),null,{timeout:3000});
+    await A.page.locator('.pa-wish-facts').waitFor({state:'visible',timeout:3000});
+    assert(await A.page.locator('.pa-wish-facts').isVisible(),'pending help must leave a visible, truthful zero');
     await A.page.click('#inboxBtn');
-    await A.page.waitForSelector('.pa-request-card',{timeout:3000});
-    const requestText=await A.page.locator('.pa-request-card').first().innerText();
+    const helpCard=A.page.locator('.pa-request-card').filter({has:A.page.locator('[data-accept="'+helpProposal+'"]')});
+    await helpCard.waitFor({state:'visible',timeout:3000});
+    const requestText=await helpCard.innerText();
     assert.match(requestText,/First sailing checklist/);
     assert.match(requestText,/practical first sailing checklist/i);
     assert(!/ACTOR_/i.test(requestText),'raw actor IDs must never appear in human inbox UI');
     assert.equal(await A.page.getByText('Someone offered help',{exact:true}).count(),0,'server proposal notification must not duplicate the help card');
-    const helpProposal=await A.page.locator('[data-accept]').first().getAttribute('data-accept');
     await A.page.click('[data-accept="'+helpProposal+'"]');
-    await B.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.payload?.proposalId===id)},helpProposal,{polling:100,timeout:10000});
+    await B.page.waitForFunction(async ({id,wishId})=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===wishId&&e.payload?.proposalId===id)},{id:helpProposal,wishId:wishA},{polling:100,timeout:10000});
+    for(const page of [A.page,B.page]){
+      await openWish(page,wishA);
+      const events=await page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.world().events.filter(e=>e.type==='help'&&e.wishId===id),wishA);
+      assert.equal(events.length,1,'exactly the accepted offer should materialize for this wish');
+      assert.deepEqual(events[0].payload,{proposalId:helpProposal},'public help must not disclose its private content or helper');
+      for(const language of ['fr','en']){
+        await page.click('[data-lang="'+language+'"]');
+        await openWish(page,wishA); // Mobile language navigation can dismiss the drawer.
+        const label=language==='en'?'1 accepted offer of help':'1 aide acceptée';
+        await page.waitForFunction(label=>document.querySelector('.pa-wish-facts')?.textContent.split(' · ').includes(label),label,{timeout:3000});
+        const facts=page.locator('.pa-wish-facts');await facts.waitFor({state:'visible',timeout:3000});assert(await facts.isVisible(),'accepted help count must be visible outside hidden legacy chips');
+        assert((await facts.innerText()).includes('Nantes, France'),'accepted help count must preserve the wish location');
+        const text=await page.locator('#drawerBody').innerText();
+        for(const privateValue of ['First sailing checklist','I can share a practical first sailing checklist.',actorA,actorB])assert(!text.includes(privateValue),'wish facts must not disclose help content or participant identities');
+      }
+    }
+    console.log('Exact accepted help shows 0 → 1 in visible EN/FR owner and helper facts without private details',helpProposal);
 
     // Owner can close a wish to new help offers; helper can no longer send one.
     await openWish(A.page,wishA);
@@ -437,6 +533,7 @@ async function acceptFirst(page,type){
       assert(await A2.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.saved().then(x=>x.saved.some(w=>w.id===id)),wishB),'Saved wish must return on second browser');
     }finally{await A2.context.close()}
 
+    await verifyShareResponsive(A.page,wishA);
     await verifyShareExports(B.page,wishA);
 
     // V46 product surfaces remain present.
