@@ -1,9 +1,5 @@
 # Confluence of Minds - Straydogs Collective
 
-Compact English landing: https://confluenceofminds.com/straydogs/.
+Static English landing at https://confluenceofminds.com/straydogs/.
 
-Standalone static page with a progressive-enhancement visual example. No tracking, forms, accounts, remote service or automatic submission. The single join link opens the visitor’s email app addressed to the owner-approved public address.
-
-The cartoon characters and work are original illustrative artwork, not real members or projects. The reduced-motion preference starts with a static example. Keyboard and touch buttons select Discover each other’s work, Share what you love and Create things together, stopping the automatic animation at that step.
-
-Original mismatched dog characters and self-hosted Nunito Sans/Outfit fonts form the visual identity. Font licenses are included under assets. Publication uses the existing GitHub Pages flow only.
+Three original illustrated scenes explain discovery, voluntary recommendation and collaboration. Motion plays once on entering a scene and settles within 4.8 seconds. Reduced-motion and no-JavaScript visitors receive the complete static composition. Self-hosted fonts and original SVG artwork; no tracking, backend, forms, accounts or automatic submission. The owner-approved email CTA opens the visitor’s mail app. Publication uses the existing GitHub Pages flow only.
