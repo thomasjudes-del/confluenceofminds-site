@@ -1,7 +1,7 @@
 {
-  "enabled": false,
-  "sourceSha": null,
-  "codeSha256": null,
-  "baselineVersionId": null,
-  "baselineDeploymentId": null
+  "enabled": true,
+  "sourceSha": "3d451859ae464e58e9df3e8eb9b6a82c527fca5b",
+  "codeSha256": "8b6db69320d8b15a2f70ce8711dd74c579aeead36a51adca5e134f55e6d1954d",
+  "baselineVersionId": "346a9b83-4f35-47fc-951c-71eca9c75d50",
+  "baselineDeploymentId": "f845abf7-375b-49dd-8e49-0247905a02a0"
 }

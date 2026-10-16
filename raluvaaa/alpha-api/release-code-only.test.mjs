@@ -2,15 +2,17 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import * as unconfigured from './release-code-only.mjs';
+import * as production from './release-code-only.mjs';
 
-// Pin a copy only inside this in-memory fake-fetch suite. Never invent production
-// source/baseline pins just to run tests while the release plan is disabled.
+// All release simulations use synthetic pins and fake fetch in an in-memory copy.
+// The production module is checked separately without making a network request.
 const CODE=readFileSync(new URL('./worker.mjs',import.meta.url));
 const helperSource=readFileSync(new URL('./release-code-only.mjs',import.meta.url),'utf8');
 const testPins={APPROVED_SOURCE_SHA:'0123456789abcdef0123456789abcdef01234567',APPROVED_CODE_SHA256:createHash('sha256').update(CODE).digest('hex'),BASELINE_VERSION:'55555555-5555-4555-8555-555555555555',BASELINE_DEPLOYMENT:'66666666-6666-4666-8666-666666666666'};
-let testSource=helperSource;
+let testSource=helperSource,nullSource=helperSource;
 for(const [name,value] of Object.entries(testPins))testSource=testSource.replace(new RegExp("export const "+name+"=(?:null|'[^']*');"),'export const '+name+'='+JSON.stringify(value)+';');
+for(const name of Object.keys(testPins))nullSource=nullSource.replace(new RegExp("export const "+name+"=(?:null|'[^']*');"),'export const '+name+'=null;');
+const unconfigured=await import('data:text/javascript;base64,'+Buffer.from(nullSource).toString('base64'));
 const {APPROVED_SOURCE_SHA,APPROVED_CODE_SHA256,BASELINE_VERSION,BASELINE_DEPLOYMENT,RELEASE_REF,releaseCodeOnly,safeReleaseError,validatePlan}=await import('data:text/javascript;base64,'+Buffer.from(testSource).toString('base64'));
 
 
@@ -221,15 +223,30 @@ test('unavailable or incomplete active-run inventory fails before upload',async(
 });
 
 
-test('unconfigured query-only plan and helper pins cannot contact any service',async()=>{
-  const plan=JSON.parse(readFileSync(new URL('./release-plan.json',import.meta.url),'utf8'));
-  assert.equal(plan.enabled,false);
-  for(const name of Object.keys(testPins))assert.equal(unconfigured[name],null,'production pins remain unset until reviewed');
-  for(const key of ['sourceSha','codeSha256','baselineVersionId','baselineDeploymentId'])assert.equal(plan[key],null);
+test('unconfigured in-memory query-only pins cannot contact any service even with an enabled plan',async()=>{
+  const plan={enabled:false,sourceSha:null,codeSha256:null,baselineVersionId:null,baselineDeploymentId:null};
+  for(const name of Object.keys(testPins))assert.equal(unconfigured[name],null,'null-pin rejection is tested independently of production pins');
   let calls=0;
   for(const enabled of [false,true]){
     await assert.rejects(()=>unconfigured.releaseCodeOnly({plan:{...plan,enabled},ref:unconfigured.RELEASE_REF,repository:REPOSITORY,fetchImpl:async()=>{calls++;throw new Error('must not run')}}),/disabled|pins are incomplete/);
   }
+  assert.equal(calls,0);
+});
+
+test('reviewed production pins and the enabled production plan are exact without network access',async()=>{
+  const expectedPins={
+    APPROVED_SOURCE_SHA:'3d451859ae464e58e9df3e8eb9b6a82c527fca5b',
+    APPROVED_CODE_SHA256:'8b6db69320d8b15a2f70ce8711dd74c579aeead36a51adca5e134f55e6d1954d',
+    BASELINE_VERSION:'346a9b83-4f35-47fc-951c-71eca9c75d50',
+    BASELINE_DEPLOYMENT:'f845abf7-375b-49dd-8e49-0247905a02a0'
+  };
+  for(const [name,value] of Object.entries(expectedPins))assert.equal(production[name],value);
+  assert.equal(createHash('sha256').update(CODE).digest('hex'),expectedPins.APPROVED_CODE_SHA256);
+  const plan=JSON.parse(readFileSync(new URL('./release-plan.json',import.meta.url),'utf8'));
+  assert.deepEqual(plan,{enabled:true,sourceSha:expectedPins.APPROVED_SOURCE_SHA,codeSha256:expectedPins.APPROVED_CODE_SHA256,baselineVersionId:expectedPins.BASELINE_VERSION,baselineDeploymentId:expectedPins.BASELINE_DEPLOYMENT});
+  let calls=0;
+  production.validatePlan(plan,{ref:production.RELEASE_REF,repository:REPOSITORY});
+  await assert.rejects(()=>production.releaseCodeOnly({plan:{...plan,enabled:false},ref:production.RELEASE_REF,repository:REPOSITORY,fetchImpl:async()=>{calls++;throw new Error('must not run')}}),/Release plan is disabled/);
   assert.equal(calls,0);
 });
 
