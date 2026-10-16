@@ -11,7 +11,7 @@ const room=window.RALUVAAA_ROOM||String(params.get('room')||'ALPHA').toUpperCase
 const STORE=window.RALUVAAA_STORE_KEY||('raluvaaaSharedAlphaV1:'+room);
 const maps={wish:new Map(),lineage:new Map(),proposal:new Map()};
 let client=null,lastWorld=null,lastMe=null,lastInbox=null,lastFingerprint='',mutating=0,refreshTimer=null,queue=Promise.resolve(),knownConnectIds=null;
-let authMe=null,authResolver=null,savedSyncing=false,lastSavedServer=[];
+let authMe=null,authResolver=null,savedSyncing=false,lastSavedServer=[],savedQueue=Promise.resolve();
 let preferredLang=(()=>{try{return JSON.parse(localStorage.getItem(STORE)||'null')?.lang||window.RALUVAAA_DEFAULT_LANG||((navigator.language||'en').toLowerCase().startsWith('fr')?'fr':'en')}catch{return window.RALUVAAA_DEFAULT_LANG||'en'}})();
 
 function status(text,error=false){
@@ -136,7 +136,7 @@ function friendlyError(err){
     proposal_not_pending:'Cette proposition a déjà été traitée.',
     consent_not_required:'Votre accord n’est pas requis pour cette proposition.',
     already_decided:'Vous avez déjà répondu à cette proposition.',
-    claim_required:'Vérifie ton email pour continuer.',invalid_email:'Entre une adresse email valide.',invalid_code:'Ce code n’est pas correct.',code_expired:'Ce code a expiré.',code_too_soon:'Attends une minute avant de demander un autre code.',code_rate_limited:'Trop de codes demandés. Réessaie plus tard.',email_delivery_failed:'Impossible d’envoyer le code pour le moment.'
+    account_changed:'Ton compte a changé. Réessaie cette action.',claim_required:'Vérifie ton email pour continuer.',invalid_email:'Entre une adresse email valide.',invalid_code:'Ce code n’est pas correct.',code_expired:'Ce code a expiré.',code_too_soon:'Attends une minute avant de demander un autre code.',code_rate_limited:'Trop de codes demandés. Réessaie plus tard.',email_delivery_failed:'Impossible d’envoyer le code pour le moment.'
   };
   const en={
     invalid_wish:'A wish must contain between 3 and 280 characters.',
@@ -165,7 +165,7 @@ function friendlyError(err){
     proposal_not_pending:'This proposal has already been handled.',
     consent_not_required:'Your consent is not required for this proposal.',
     already_decided:'You already responded to this proposal.',
-    claim_required:'Verify your email to continue.',invalid_email:'Enter a valid email address.',invalid_code:'That code is not correct.',code_expired:'This code has expired.',code_too_soon:'Wait a minute before requesting another code.',code_rate_limited:'Too many codes requested. Try again later.',email_delivery_failed:'Could not send the code right now.'
+    account_changed:'Your account changed. Please try this action again.',claim_required:'Verify your email to continue.',invalid_email:'Enter a valid email address.',invalid_code:'That code is not correct.',code_expired:'This code has expired.',code_too_soon:'Wait a minute before requesting another code.',code_rate_limited:'Too many codes requested. Try again later.',email_delivery_failed:'Could not send the code right now.'
   };
   return (lang==='en'?en:fr)[err?.code]||String(err?.message||err||'Unexpected error');
 }
@@ -279,12 +279,12 @@ async function removeShared(localId){
 function authText(){
   const en=(window.__RV26_SHARED__?.state?.().lang||preferredLang)==='en';
   return en?{
-    account:'Your space',title:'Keep this yours',body:'Use your email to publish and manage wishes, save them across devices, help people and receive replies. No password. No public profile.',
-    email:'Email',send:'Send my code',codeTitle:'Enter your code',codeBody:'We sent a 6-digit code to your email. It expires in 10 minutes.',code:'6-digit code',verify:'Continue',
+    account:'Your space',title:'Keep this yours',body:'RALUVAAA is free. Use your email to publish and manage wishes, save them across devices, help people and receive replies. No password. No public profile.',
+    email:'Email',send:'Send my code',codeTitle:'Enter your code',codeBody:'We sent a 6-digit code to your email. It expires in 10 minutes. Check your spam folder if you cannot find it.',code:'6-digit code',verify:'Continue',
     cancel:'Not now',logout:'Sign out',signed:'Private identity',error:'Something went wrong.',reasons:{publish:'Publish this wish',save:'Save across devices',help:'Offer help',suggest:'Suggest a branch',connect:'Propose a graft'}
   }:{
-    account:'Ton espace',title:'Garder ceci à toi',body:'Utilise ton email pour publier et gérer tes wishes, les retrouver sur tes appareils, aider et recevoir des réponses. Pas de mot de passe. Pas de profil public.',
-    email:'Email',send:'Envoyer mon code',codeTitle:'Entre ton code',codeBody:'Un code à 6 chiffres vient de partir par email. Il expire dans 10 minutes.',code:'Code à 6 chiffres',verify:'Continuer',
+    account:'Ton espace',title:'Garde la main sur tes wishes',body:'RALUVAAA est gratuit. Utilise ton email pour publier et gérer tes wishes, les retrouver sur tes appareils, aider et recevoir des réponses. Pas de mot de passe. Pas de profil public.',
+    email:'Email',send:'Envoyer mon code',codeTitle:'Entre ton code',codeBody:'Un code à 6 chiffres vient de partir par email. Il expire dans 10 minutes. Pense à vérifier les courriers indésirables si tu ne le trouves pas.',code:'Code à 6 chiffres',verify:'Continuer',
     cancel:'Pas maintenant',logout:'Se déconnecter',signed:'Identité privée',error:'Une erreur est survenue.',reasons:{publish:'Publier ce wish',save:'Sauvegarder sur tes appareils',help:'Proposer une aide',suggest:'Suggérer une branche',connect:'Proposer une greffe'}
   }
 }
@@ -387,18 +387,25 @@ function writeSavedLocal(rows){
   window.dispatchEvent(new CustomEvent('raluvaaa-saved-changed',{detail:{count:compact.length}}));
   setTimeout(()=>{savedSyncing=false},0)
 }
-async function refreshSavedFromServer(){
+function savedSession(){return {actorId:client.actorId,token:client.token}}
+function assertSavedSession(session){
+  if(!session.actorId||!session.token||client.actorId!==session.actorId||client.token!==session.token)throw Object.assign(new Error('account_changed'),{code:'account_changed'});
+}
+async function refreshSavedFromServer(session=savedSession()){
+  assertSavedSession(session);
   if(!authMe?.claimed){lastSavedServer=[];writeSavedLocal([]);return}
-  const data=await client.saved();lastSavedServer=data.saved||[];writeSavedLocal(lastSavedServer)
+  const data=await client.saved();assertSavedSession(session);
+  lastSavedServer=data.saved||[];writeSavedLocal(lastSavedServer)
 }
 async function syncSavedFromLocal(){
   if(savedSyncing||!authMe?.claimed)return;
+  const session=savedSession();assertSavedSession(session);
   let desired=[];try{desired=JSON.parse(localStorage.getItem(localSavedKey())||'[]')}catch{}
   const desiredIds=new Set(desired.map(r=>r.semanticId).filter(id=>!localSemantic(id)?.simulated).map(id=>idOf(id)).filter(Boolean));
   const serverIds=new Set(lastSavedServer.map(w=>w.id));
-  for(const id of desiredIds)if(!serverIds.has(id))await client.saveWish(id);
-  for(const id of serverIds)if(!desiredIds.has(id))await client.unsaveWish(id);
-  await refreshSavedFromServer()
+  for(const id of desiredIds)if(!serverIds.has(id)){assertSavedSession(session);await client.saveWish(id)}
+  for(const id of serverIds)if(!desiredIds.has(id)){assertSavedSession(session);await client.unsaveWish(id)}
+  assertSavedSession(session);await refreshSavedFromServer(session)
 }
 function installPrivateGuards(){
   window.__RALUVAAA_SHARED_REQUIRE_CLAIM__=requireClaim;
@@ -433,6 +440,19 @@ async function boot(){
   window.__RALUVAAA_SHARED_REMOVE__=removeShared;
   window.__RALUVAAA_SHARED_SHARE__=async localId=>{await queue;return idOf(localId)};
   window.__RALUVAAA_SHARED_MARK_READ__=id=>client.markRead(id);
+  window.__RALUVAAA_SAVE_WISH__=(localId,wanted)=>{
+    const session=savedSession();
+    const task=async()=>{
+      assertSavedSession(session);
+      if(!authMe?.claimed)throw Object.assign(new Error('claim_required'),{code:'claim_required'});
+      await queue;assertSavedSession(session);const id=idOf(localId);
+      if(wanted)await client.saveWish(id);else await client.unsaveWish(id);
+      assertSavedSession(session);await refreshSavedFromServer(session);
+      assertSavedSession(session);return wanted;
+    };
+    const result=savedQueue.then(task);savedQueue=result.catch(()=>{});return result;
+  };
+
   window.__RALUVAAA_SHARED_STATS__=()=>{
     const wishes=lastWorld?.wishes||[],events=lastWorld?.events||[];
     return{roots:wishes.filter(w=>w.kind==='create').length,states:wishes.length,blooms:wishes.filter(w=>w.state==='bloomed').length,abandoned:wishes.filter(w=>w.state==='abandoned').length,helps:events.filter(e=>e.type==='help').length,warps:events.filter(e=>e.type==='connect').length,localRoots:(lastMe?.wishes||[]).filter(w=>w.kind==='create').length}
@@ -442,10 +462,10 @@ async function boot(){
 
   const initial=await fetchState();lastFingerprint=fp(initial);knownConnectIds=new Set(initial.events.filter(e=>e.type==='connect').map(e=>e.proposalId||[e.aSemanticId,e.bSemanticId].sort().join('|')));localStorage.setItem(STORE,JSON.stringify(initial));
 
-  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-readiness-20261015');
+  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-usability-20261016');
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=private-alpha-1');
-  await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-1');
-  await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-graft-i18n-1');
+  await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-usability-20261016');
+  await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-usability-20261016');
   await loadScript('../solo-organic-v27/ambient-playlist-v27.js?build=private-alpha-1');
   await loadScript('../solo-organic-v27/organic-v27.js?build=private-alpha-1');
   await loadScript('../solo-mobile-v28/mobile-v28.js?build=private-alpha-ship-2');
@@ -455,9 +475,9 @@ async function boot(){
   await loadScript('../solo-experience-v38/patch-v38.js?build=private-alpha-1');
   await loadScript('../solo-experience-v39/exact-icons-v39.js?build=private-alpha-1');
   document.body.classList.add('v39-icons-ready');
-  await loadScript('../solo-experience-v42/revive-sound-v42.js?build=private-alpha-1');
+  await loadScript('../solo-experience-v42/revive-sound-v42.js?build=private-alpha-usability-20261016');
   await loadScript('../solo-experience-v42/ui-v42.js?build=private-alpha-1');
-  await loadScript('features.js?build=private-alpha-graft-i18n-2');
+  await loadScript('features.js?build=private-alpha-usability-20261016');
 
   window.__RALUVAAA_SHARED_READY__=true;
   window.__RALUVAAA_SHARED_ERROR__=friendlyError;

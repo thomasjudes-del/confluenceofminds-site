@@ -9,6 +9,10 @@ const history=[];
 function enabled(){
   return window.__RALUVAAA_AUDIO__?.enabled!==false && localStorage.getItem('raluvaaaSoundFxV1')!=='off';
 }
+function silenceWhenDisabled(){if(!enabled()){audio.muted=true;audio.pause()}}
+window.addEventListener('raluvaaa-audio-state',silenceWhenDisabled);
+audio.addEventListener('playing',silenceWhenDisabled);
+
 function duckAmbient(){
   const ambient=window.__RALUVAAA_AUDIO__?.audio;
   if(!ambient||ambient.paused)return;
@@ -19,6 +23,7 @@ function duckAmbient(){
 function play(event){
   if(!enabled()||event?.quiet)return false;
   try{
+    audio.muted=false;
     audio.pause();audio.src=URL;
     try{audio.currentTime=0}catch{}
     history.push({type:event?.type||'wake',semanticId:event?.semanticId||null,at:Date.now(),url:URL});

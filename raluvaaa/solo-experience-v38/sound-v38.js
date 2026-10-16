@@ -27,6 +27,10 @@ function enabled(){
   return window.__RALUVAAA_AUDIO__?.enabled!==false && localStorage.getItem('raluvaaaSoundFxV1')!=='off';
 }
 
+function silenceWhenDisabled(){if(!enabled()){semanticChannel.muted=true;semanticChannel.pause()}}
+window.addEventListener('raluvaaa-audio-state',silenceWhenDisabled);
+semanticChannel.addEventListener('playing',silenceWhenDisabled);
+
 function duckAmbient(){
   const ambient=window.__RALUVAAA_AUDIO__?.audio;
   if(!ambient||ambient.paused)return;
@@ -63,6 +67,7 @@ function playNamed(name){
   const url=samples[name];
   if(!enabled()||!url)return false;
   try{
+    semanticChannel.muted=false;
     semanticChannel.pause();
     semanticChannel.src=url;
     semanticChannel.volume=.76;

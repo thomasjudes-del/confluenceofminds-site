@@ -15,6 +15,7 @@ let starting=false;
 let autoplayPrimed=false;
 let blockedByAutoplay=false;
 let disarmAudioGesture=null;
+let playbackEpoch=0;
 
 function installStyle(){
   const style=document.createElement('style');
@@ -46,23 +47,36 @@ function installUi(){
   credit.innerHTML='Music: <a href="https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600010" target="_blank" rel="noopener">Immersed · Kevin MacLeod</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>';
   document.body.appendChild(credit);
 
-  btn.onclick=()=>{
-    enabled=!enabled;
-    localStorage.setItem(STORE,enabled?'on':'off');
-    if(enabled){arm();start().then(ok=>{if(!ok)primeMutedAutoplay()})}else{audio.pause();audio.muted=false;started=false;starting=false;autoplayPrimed=false;blockedByAutoplay=false}
-    refresh();
-  };
+  btn.onclick=()=>setEnabled(!enabled);
   refresh();
 }
 
 function refresh(){
   const btn=document.getElementById('musicBtn');
   if(!btn)return;
+  const en=(window.__RV26_SHARED__?.state?.().lang||document.querySelector('.lang button.active')?.dataset.lang||'fr')==='en';
+  const label=en?(enabled?'Mute all sound':'Enable sound'):(enabled?'Couper le son':'Activer le son');
   btn.classList.toggle('muted',!enabled);
   const strike=btn.querySelector('.sound-strike');
   if(strike)strike.style.opacity=enabled?'0':'1';
   btn.setAttribute('aria-pressed',enabled?'true':'false');
-  btn.title=enabled?'Couper la musique · Immersed · Kevin MacLeod · CC BY 4.0':'Activer la musique · Immersed · Kevin MacLeod · CC BY 4.0';
+  btn.setAttribute('aria-label',label);
+  btn.title=label+' · Immersed · Kevin MacLeod · CC BY 4.0';
+}
+function silence(){
+  // Mute before pause, including while a play() promise is still pending.
+  audio.muted=true;audio.pause();
+  started=false;starting=false;autoplayPrimed=false;blockedByAutoplay=false;
+}
+function setEnabled(next){
+  enabled=!!next;playbackEpoch++;
+  localStorage.setItem(STORE,enabled?'on':'off');
+  localStorage.setItem('raluvaaaSoundFxV1',enabled?'on':'off');
+  if(!enabled){silence();if(disarmAudioGesture)disarmAudioGesture()}
+  window.dispatchEvent(new CustomEvent('raluvaaa-audio-state',{detail:{enabled}}));
+  refresh();
+  if(enabled){arm();start().then(ok=>{if(!ok&&enabled)primeMutedAutoplay()})}
+  return enabled;
 }
 
 async function start(){
@@ -76,9 +90,12 @@ async function start(){
   }
   if(starting)return false;
   starting=true;
+  const epoch=playbackEpoch;
   try{
     audio.muted=false;
     await audio.play();
+    if(!enabled){silence();return false}
+    if(epoch!==playbackEpoch)return false;
     started=true;
     autoplayPrimed=false;
     blockedByAutoplay=false;
@@ -86,27 +103,31 @@ async function start(){
     if(disarmAudioGesture)disarmAudioGesture();
     return true;
   }catch{
+    if(!enabled||epoch!==playbackEpoch)return false;
     started=false;
     blockedByAutoplay=true;
     refresh();
     return false;
   }finally{
-    starting=false;
+    if(epoch===playbackEpoch)starting=false;
   }
 }
 
 async function primeMutedAutoplay(){
   if(!enabled||qa||autoplayPrimed||(!audio.paused&&!audio.ended))return false;
-  const previousMuted=audio.muted;
+  const previousMuted=audio.muted,epoch=playbackEpoch;
   try{
     audio.muted=true;
     await audio.play();
+    if(!enabled){silence();return false}
+    if(epoch!==playbackEpoch)return false;
     autoplayPrimed=true;
     blockedByAutoplay=true;
     started=false;
     refresh();
     return true;
   }catch{
+    if(!enabled||epoch!==playbackEpoch)return false;
     audio.muted=previousMuted;
     autoplayPrimed=false;
     return false;
@@ -114,10 +135,11 @@ async function primeMutedAutoplay(){
 }
 
 function fadeIn(){
-  const target=.16;
+  const target=.16,epoch=playbackEpoch;
   audio.volume=.015;
   const began=performance.now(),duration=620;
   const step=now=>{
+    if(!enabled||epoch!==playbackEpoch)return;
     const p=Math.min(1,(now-began)/duration);
     audio.volume=.015+(target-.015)*(1-Math.pow(1-p,3));
     if(p<1)requestAnimationFrame(step);
@@ -127,9 +149,12 @@ function fadeIn(){
 
 async function awakenFromGesture(){
   if(!enabled||qa)return false;
+  const epoch=playbackEpoch;
   try{
     audio.muted=false;
     if(audio.paused||audio.ended)await audio.play();
+    if(!enabled){silence();return false}
+    if(epoch!==playbackEpoch)return false;
     fadeIn();
     started=true;
     autoplayPrimed=false;
@@ -159,9 +184,11 @@ installStyle();
 installUi();
 arm();
 
-audio.addEventListener('playing',()=>{if(audio.muted){autoplayPrimed=true;started=false}else{started=true;blockedByAutoplay=false;if(disarmAudioGesture)disarmAudioGesture()}refresh()});
+audio.addEventListener('playing',()=>{if(!enabled){silence();refresh();return}if(audio.muted){autoplayPrimed=true;started=false}else{started=true;blockedByAutoplay=false;if(disarmAudioGesture)disarmAudioGesture()}refresh()});
 audio.addEventListener('pause',()=>{if(!audio.ended)started=false});
-window.__RALUVAAA_AUDIO__={audio,start,awakenFromGesture,primeMutedAutoplay,get enabled(){return enabled},get started(){return started},get blockedByAutoplay(){return blockedByAutoplay},get autoplayPrimed(){return autoplayPrimed},url:AUDIO_URL};
+window.__RALUVAAA_AUDIO__={audio,start,setEnabled,refresh,awakenFromGesture,primeMutedAutoplay,get enabled(){return enabled},get started(){return started},get blockedByAutoplay(){return blockedByAutoplay},get autoplayPrimed(){return autoplayPrimed},url:AUDIO_URL};
+document.addEventListener('click',event=>{if(event.target.closest?.('.lang button'))setTimeout(refresh,0)});
+if(!enabled)silence();
 if(enabled&&!qa){
   start().then(ok=>{if(!ok)primeMutedAutoplay()});
 }

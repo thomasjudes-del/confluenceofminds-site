@@ -5,12 +5,101 @@ const BASE=process.env.RALUVAAA_QA_BASE||'http://127.0.0.1:4173';
 const API=process.env.RALUVAAA_ALPHA_BASE||'http://127.0.0.1:8787';
 const URL=BASE+'/raluvaaa/private-alpha/?api='+encodeURIComponent(API);
 
+function audioFixture(){
+  const rate=8000,frames=rate*4,b=Buffer.alloc(44+frames*2);b.write('RIFF');b.writeUInt32LE(b.length-8,4);b.write('WAVEfmt ',8);b.writeUInt32LE(16,16);b.writeUInt16LE(1,20);b.writeUInt16LE(1,22);b.writeUInt32LE(rate,24);b.writeUInt32LE(rate*2,28);b.writeUInt16LE(2,32);b.writeUInt16LE(16,34);b.write('data',36);b.writeUInt32LE(frames*2,40);for(let i=0;i<frames;i++)b.writeInt16LE(Math.sin(i*2*Math.PI*440/rate)*1000,44+i*2);return b;
+}
+async function clickAction(page,action){
+  console.log('Click visible action',action);
+  if(action==='toggle_help'){await page.locator('[data-pa-toggle-help]').click();return}
+  const icon={split:'branch',branch:'branch',connect:'graft',toggle_help:null}[action]??action;
+  const deck=page.locator('.v33-action-unit[data-v39-icon="'+icon+'"] .v33-action-circle:visible').first();
+  if(await deck.count()){await deck.click();return}
+  const button=page.locator('[data-act="'+action+'"]:visible').first();
+  if(await button.count()){await button.click();return}
+  const more=page.locator('details.more');
+  if(await more.count()&&!await more.evaluate(el=>el.open))await more.locator('summary').click();
+  await page.locator('[data-act="'+action+'"]:visible').first().click();
+}
+async function verifyPhysicalMute(page,mobile){
+  // Real media decoding/playback with a deterministic local tone; chosen production
+  // asset availability/audibility is a separate live-device acceptance check.
+  const button=page.locator('#musicBtn');
+  const box=await button.boundingBox();assert(box.width>=44&&box.height>=44,'mute must have a 44px hit target');
+  const hit=await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert(hit,'mute must receive physical pointer hit-testing');
+  const tap=()=>mobile?page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2):page.mouse.click(box.x+box.width/2,box.y+box.height/2);
+  if(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled))await tap();
+  await tap();
+  await page.waitForFunction(()=>{const a=window.__RALUVAAA_AUDIO__.audio;return !a.paused&&!a.muted&&a.currentTime>0.02},null,{timeout:8000});
+  await page.evaluate(()=>{window.__RALUVAAA_ACTION_AUDIO__.playNamed('help');window.__RALUVAAA_REVIVE_AUDIO_V42__.play({type:'wake'})});
+  await page.waitForFunction(()=>[window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].every(a=>!a.paused&&a.currentTime>0.02),null,{timeout:8000});
+  await tap();
+  const stopped=await page.evaluate(()=>[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].map(a=>({paused:a.paused,muted:a.muted,time:a.currentTime})));
+  assert(stopped.every(a=>a.paused&&a.muted),'physical mute must silence ambient, action and revive immediately');
+  await page.waitForTimeout(250);
+  const later=await page.evaluate(()=>[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].map(a=>a.currentTime));
+  later.forEach((t,i)=>assert(Math.abs(t-stopped[i].time)<0.02,'muted playback must stay stopped'));
+  assert.equal(await page.evaluate(()=>localStorage.getItem('raluvaaaAmbientAudioV1')),'off');
+  console.log('Physical '+(mobile?'touch':'mouse')+' mute: all three decoded media channels stopped');
+}
+async function verifyResponsiveAccount(page){
+  const original=page.viewportSize(),sizes=[{width:320,height:568},{width:667,height:375},{width:320,height:360},original];
+  async function check(stage){
+    for(const viewport of sizes){
+      await page.setViewportSize(viewport);await page.bringToFront();
+      const geometry=await page.locator('.pa-auth-card').evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{x:r.x,y:r.y,width:r.width,height:r.height,overflowY:s.overflowY,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight}});
+      assert(geometry.x>=-1&&geometry.y>=-1&&geometry.x+geometry.width<=viewport.width+1&&geometry.y+geometry.height<=viewport.height+1,'account dialog must fit '+stage+': '+JSON.stringify({viewport,geometry}));
+      if(geometry.scrollHeight>geometry.clientHeight+1)assert(['auto','scroll'].includes(geometry.overflowY),'long account content must be scrollable');
+      assert(Number(await page.locator('.pa-auth-card p').evaluate(el=>parseFloat(getComputedStyle(el).fontSize)))>=14,'account explanation must be readable');
+      assert(Number(await page.locator('.pa-auth-field label').evaluate(el=>parseFloat(getComputedStyle(el).fontSize)))>=12,'account labels must be readable');
+      for(const selector of ['.pa-auth-x','[data-pa-send],[data-pa-verify]']){const r=await page.locator(selector).boundingBox();assert(r.width>=44&&r.height>=44,'account controls need 44px targets');}
+    }
+  }
+  for(const language of ['en','fr']){
+    await page.click('[data-lang="'+language+'"]');await page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.showAccount());await page.waitForSelector('.pa-auth-card',{state:'visible'});
+    await check(language+' email');
+    if(language==='fr'){
+      await page.fill('[data-pa-email]','invalid');await page.click('[data-pa-send]');await page.waitForFunction(()=>!!document.querySelector('[data-pa-error]')?.textContent);await check('FR email error');
+      await page.fill('[data-pa-email]','layout+'+Date.now().toString(36)+'@raluvaaa.test');await page.click('[data-pa-send]');await page.waitForSelector('[data-pa-code]');await check('FR code');
+      assert.match(await page.locator('.pa-auth-card p').innerText(),/indésirables/);
+      await page.fill('[data-pa-code]','no');await page.click('[data-pa-verify]');await page.waitForFunction(()=>!!document.querySelector('[data-pa-error]')?.textContent);await check('FR code error');
+    }
+    await page.click('.pa-auth-x');
+  }
+  await page.setViewportSize(original);await page.click('[data-lang="en"]');
+  const music=await page.locator('#musicBtn').boundingBox();assert(music.x>=0&&music.y>=0&&music.x+music.width<=original.width&&music.y+music.height<=original.height,'mute must remain in viewport');
+  console.log('EN/FR account email, code and error states fit narrow, landscape and reduced-height viewports');
+}
+async function verifyShareExports(page,id){
+  await openWish(page,id);await clickAction(page,'share');
+  await page.waitForSelector('#v46ShareOverlay.open');
+  const shareBox=await page.locator('.v46-share-sheet').boundingBox(),viewport=page.viewportSize();
+  assert(shareBox.x>=0&&shareBox.y>=0&&shareBox.x+shareBox.width<=viewport.width+1&&shareBox.y+shareBox.height<=viewport.height+1,'Share dialog must fit viewport');
+  assert.match(await page.locator('.pa-share-free').innerText(),/free|gratuit/i);
+  for(const selector of ['.v46-share-x','[data-mode="image"]','[data-share-download]']){
+    const box=await page.locator(selector).boundingBox();assert(box.height>=44,'share controls require readable 44px height: '+selector);
+  }
+  await page.click('[data-mode="image"]');
+  const imageDownload=page.waitForEvent('download');await page.click('[data-share-download]');
+  const image=await imageDownload,png=require('node:fs').readFileSync(await image.path());
+  assert.equal(png.subarray(1,4).toString(),'PNG');assert.equal(png.readUInt32BE(16),720);assert.equal(png.readUInt32BE(20),900);
+  await page.click('[data-mode="animation"]');
+  await page.waitForFunction(()=>window.__RALUVAAA_V46__.mediaReady()||window.__RALUVAAA_V46__.mediaError(),null,{timeout:15000});
+  assert.equal(await page.evaluate(()=>window.__RALUVAAA_V46__.mediaError()),false,'animation must finish preparing');
+  const clipDownload=page.waitForEvent('download');await page.click('[data-share-download]');
+  const clip=await clipDownload,bytes=require('node:fs').readFileSync(await clip.path());assert(bytes.length>1000,'exported video cannot be empty');
+  const info=await page.evaluate(async ({data,mime})=>{const video=document.createElement('video');video.muted=true;video.src='data:'+mime+';base64,'+data;await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=()=>reject(new Error('Exported clip does not decode'))});return{width:video.videoWidth,height:video.videoHeight,duration:video.duration}},{data:bytes.toString('base64'),mime:clip.suggestedFilename().endsWith('.mp4')?'video/mp4':'video/webm'});
+  assert.equal(info.width,720);assert.equal(info.height,900);assert(info.duration>=2.5&&info.duration<5,'clip must decode as a roughly three-second animation');
+  await page.click('.v46-share-x');await page.waitForSelector('#v46ShareOverlay.open',{state:'hidden'});
+  console.log('Downloaded PNG and decoded personalized video',info);
+}
 async function pageFor(browser,mobile=false){
   const context=await browser.newContext({
     viewport:mobile?{width:390,height:844}:{width:1280,height:800},
     isMobile:mobile,hasTouch:mobile,locale:mobile?'fr-FR':'en-US'
   });
   const page=await context.newPage();
+  const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));page.__qaErrors=pageErrors;
+  for(const pattern of ['https://incompetech.com/music/royalty-free/mp3-royaltyfree/**','https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/raluvaaa/*/audio/**'])await page.route(pattern,r=>r.fulfill({status:200,contentType:'audio/wav',body:audioFixture()}));
   page.on('console',msg=>console.log('[browser console]',msg.type(),msg.text()));
   page.on('pageerror',err=>console.log('[browser pageerror]',err?.stack||err?.message||String(err)));
   await page.route('https://ipwho.is/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({success:true,city:'Nantes',country:'France'})}));
@@ -81,14 +170,18 @@ async function cameraState(page){
 }
 async function openWish(page,id){
   await refresh(page);
+  // replace() rebuilds the engine asynchronously; wait for the actual hydrated node.
+  await page.waitForFunction(id=>window.__RV26_SHARED__.semantic().some(w=>w.semanticId===id),id,{polling:100,timeout:8000});
   await page.evaluate(id=>window.__RV26_SHARED__.open(id),id);
   await page.waitForFunction(id=>window.__RALUVAAA_UI__?.current?.()?.semanticId===id,id,{polling:100,timeout:5000})
 }
 async function acceptFirst(page,type){
   await refresh(page);
-  await page.click('#inboxBtn');
   await page.waitForFunction(type=>window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type===type),type,{polling:100,timeout:8000});
   const p=await page.evaluate(type=>window.__RALUVAAA_SHARED_DEBUG__.inbox().pending.find(p=>p.type===type),type);
+  if(await page.locator('#drawer').isVisible())await page.click('#drawerClose');
+  await page.waitForSelector('#drawer',{state:'hidden'});
+  await page.click('#inboxBtn');
   const btn=page.locator('[data-accept="'+p.id+'"]');
   await btn.click();
   return p
@@ -98,7 +191,9 @@ async function acceptFirst(page,type){
   const desktopEngine=process.env.RALUVAAA_QA_DESKTOP_ENGINE||'chromium';
   assert(['chromium','webkit'].includes(desktopEngine),'unsupported desktop browser');
   const chrome=await ({chromium,webkit}[desktopEngine]).launch({headless:true});
-  const safari=await webkit.launch({headless:true});
+  const mobileEngine=process.env.RALUVAAA_QA_MOBILE_ENGINE||'webkit';
+  assert(['chromium','webkit'].includes(mobileEngine),'unsupported mobile browser');
+  const safari=await ({chromium,webkit}[mobileEngine]).launch({headless:true});
   const stamp=Date.now().toString(36);
   const emailA='a+'+stamp+'@raluvaaa.test',emailB='b+'+stamp+'@raluvaaa.test';
   const A=await pageFor(safari,true),B=await pageFor(chrome,false);
@@ -110,13 +205,22 @@ async function acceptFirst(page,type){
     assert.equal(await A.page.locator('#rail #privateAccountBtn').count(),0,'Account must not have a separate main rail button');
     assert(await A.page.locator('[data-lang="en"]').evaluate(el=>el.classList.contains('active')),'Private Alpha should default to English on a fresh session');
     assert.equal(await A.page.locator('#rail .rail-btn').count(),4,'Private Alpha main rail must contain exactly four actions');
+    await verifyPhysicalMute(A.page,true);
+    await verifyPhysicalMute(B.page,false);
+    await verifyResponsiveAccount(A.page);
     // App language overrides the browser language, including account dialogs.
+    await A.page.bringToFront();
     await A.page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.showAccount());
+    await A.page.waitForSelector('[data-pa-send]',{state:'visible'});
     assert.equal(await A.page.locator('[data-pa-send]').innerText(),'Send my code');
+    assert.match(await A.page.locator('.pa-auth-card p').innerText(),/RALUVAAA is free/);
     await A.page.click('[data-pa-cancel]');
     await A.page.click('[data-lang="fr"]');
+    await A.page.bringToFront();
     await A.page.evaluate(()=>window.__RALUVAAA_PRIVATE_AUTH__.showAccount());
+    await A.page.waitForSelector('[data-pa-send]',{state:'visible'});
     assert.equal(await A.page.locator('[data-pa-send]').innerText(),'Envoyer mon code');
+    assert.match(await A.page.locator('.pa-auth-card p').innerText(),/RALUVAAA est gratuit/);
     await A.page.click('[data-pa-cancel]');
     await A.page.click('[data-lang="en"]');
 
@@ -143,20 +247,21 @@ async function acceptFirst(page,type){
 
     // Fast branch -> bloom must resolve the server wish id and show a visible state.
     await openWish(A.page,wishA);
-    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('split'));
+    await clickAction(A.page,'split');
     await A.page.fill('#branchInput','First bloom test branch\nSecond live test branch');
     await A.page.click('#confirm');
     await A.page.waitForFunction(()=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.some(w=>w.text==='First bloom test branch'),null,{polling:100,timeout:10000});
     const bloomChild=await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.world().wishes.find(w=>w.text==='First bloom test branch').id);
     await openWish(A.page,bloomChild);
     A.page.once('dialog',d=>d.accept());
-    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('bloom'));
+    await clickAction(A.page,'bloom');
     await A.page.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.world()?.wishes?.find(w=>w.id===id)?.state==='bloomed',bloomChild,{polling:100,timeout:10000});
     await openWish(A.page,bloomChild);
     assert.match(await A.page.locator('.pa-wish-status').innerText(),/Bloomed|Fleuri/i,'node card must show its state');
 
     // B is still anonymous: exploration/encouragement works, but relationship actions do not.
-    await B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.encourage(id),wishA);
+    await openWish(B.page,wishA);await clickAction(B.page,'encourage');
+    await B.page.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.client.me().then(m=>m.encouragedWishIds.includes(id)),wishA,{timeout:8000});
     await refresh(A.page);
     await openWish(A.page,wishA);
     assert.match(await A.page.locator('.pa-encouragement-count').innerText(),/1/,'owner must see a private encouragement count');
@@ -180,7 +285,7 @@ async function acceptFirst(page,type){
 
     // B offers help to A; A receives a real notification and accepts.
     await openWish(B.page,wishA);
-    await B.page.evaluate(()=>window.__RALUVAAA_UI__.action('help'));
+    await clickAction(B.page,'help');
     await B.page.waitForSelector('#helpTitleInput');
     await B.page.fill('#helpTitleInput','First sailing checklist');
     await B.page.fill('#helpInput','I can share a practical first sailing checklist.');
@@ -193,23 +298,24 @@ async function acceptFirst(page,type){
     assert.match(requestText,/practical first sailing checklist/i);
     assert(!/ACTOR_/i.test(requestText),'raw actor IDs must never appear in human inbox UI');
     assert.equal(await A.page.getByText('Someone offered help',{exact:true}).count(),0,'server proposal notification must not duplicate the help card');
-    await A.page.click('[data-accept]');
-    await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help')},null,{polling:100,timeout:10000});
+    const helpProposal=await A.page.locator('[data-accept]').first().getAttribute('data-accept');
+    await A.page.click('[data-accept="'+helpProposal+'"]');
+    await B.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.payload?.proposalId===id)},helpProposal,{polling:100,timeout:10000});
 
     // Owner can close a wish to new help offers; helper can no longer send one.
     await openWish(A.page,wishA);
-    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
+    await clickAction(A.page,'toggle_help');
     await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world().events.some(e=>e.type==='help_setting'&&e.wishId===id&&e.payload?.open===false)},wishA,{polling:100,timeout:8000});
     await assert.rejects(
       ()=>B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.proposeHelp(id,'Blocked title','Blocked help'),wishA),
       /help_closed|not accepting/i
     );
-    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
+    await clickAction(A.page,'toggle_help');
     await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();const ev=window.__RALUVAAA_SHARED_DEBUG__.world().events.filter(e=>e.type==='help_setting'&&e.wishId===id).pop();return ev?.payload?.open===true},wishA,{polling:100,timeout:8000});
 
     // A proposes a graft from its own wish to B's saved wish via the exact Saved UX.
     await openWish(A.page,wishA);
-    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('connect'));
+    await clickAction(A.page,'connect');
     await A.page.waitForSelector('#v46SavedGraftBtn',{polling:100,timeout:3000});
     await A.page.click('#v46SavedGraftBtn');
     await A.page.waitForSelector('[data-v46-graft-target="'+wishB+'"]',{polling:100,timeout:3000});
@@ -217,8 +323,8 @@ async function acceptFirst(page,type){
     await A.page.waitForSelector('#overlay #confirm',{polling:100,timeout:3000});
     await A.page.click('#overlay #confirm');
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='connect')},null,{polling:100,timeout:10000});
-    await acceptFirst(B.page,'connect');
-    await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='connect')},null,{polling:100,timeout:10000});
+    const graftProposal=await acceptFirst(B.page,'connect');
+    await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='connect'&&e.payload?.proposalId===id)},graftProposal.id,{polling:100,timeout:10000});
     await A.page.waitForFunction(()=>document.getElementById('engine')?.contentWindow?.__RV42_RUNTIME__?.warpCount?.()>0,null,{polling:100,timeout:5000});
     const graftVisual=await A.page.locator('#engine').evaluate(f=>({count:f.contentWindow.__RV42_RUNTIME__.warpCount(),dash:f.contentWindow.__RV42_RUNTIME__.warpDash}));
     assert(graftVisual.count>0,'accepted graft must materialise as a warp');
@@ -234,7 +340,7 @@ async function acceptFirst(page,type){
 
     // Reverse roles: A helps B.
     await openWish(A.page,wishB);
-    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('help'));
+    await clickAction(A.page,'help');
     await A.page.fill('#helpTitleInput','First planting day');
     await A.page.fill('#helpInput','I can help organise a first neighbourhood planting day.');
     await A.page.click('#confirm');
@@ -260,6 +366,30 @@ async function acceptFirst(page,type){
     await acceptFirst(B.page,'help');
     await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===id)},wishB,{polling:100,timeout:10000});
 
+    // Suggestion: actual visible send/accept controls, then one server and one visual branch.
+    await openWish(B.page,wishA);await clickAction(B.page,'suggest');
+    await B.page.fill('#suggestInput','A practical first lesson '+stamp);await B.page.click('#confirm');
+    await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox().pending.some(p=>p.type==='suggest_branch')},null,{timeout:10000});
+    if(await A.page.locator('#drawer').isVisible())await A.page.click('#drawerClose');
+    const suggestion=await acceptFirst(A.page,'suggest_branch');
+    await A.page.waitForFunction(async text=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world().wishes.filter(w=>w.text===text).length===1},'A practical first lesson '+stamp,{timeout:10000});
+    await refresh(A.page);await refresh(B.page);
+    for(const page of [A.page,B.page])await page.waitForFunction(text=>window.__RV26_SHARED__.semantic().filter(w=>w.text===text).length===1,'A practical first lesson '+stamp,{timeout:5000});
+    assert.equal(await A.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.world().wishes.filter(w=>w.parentWishId===id&&w.text.startsWith('A practical first lesson')).length,wishA),1);
+    // Decline a separate proposal; no branch is materialized.
+    await openWish(B.page,wishA);await clickAction(B.page,'suggest');
+    await B.page.fill('#suggestInput','Declined alternative '+stamp);await B.page.click('#confirm');
+    await A.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox().pending.some(p=>p.type==='suggest_branch')},null,{timeout:10000});
+    if(await A.page.locator('#drawer').isVisible())await A.page.click('#drawerClose');await A.page.click('#inboxBtn');
+    const declinedId=await A.page.locator('[data-decline]').first().getAttribute('data-decline');await A.page.click('[data-decline="'+declinedId+'"]');
+    await B.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox().sent.some(p=>p.id===id&&p.status==='declined')},declinedId,{timeout:10000});
+    for(const page of [A.page,B.page]){
+      await refresh(page);
+      assert.equal(await page.evaluate(text=>window.__RALUVAAA_SHARED_DEBUG__.world().wishes.filter(w=>w.text===text).length,'Declined alternative '+stamp),0,'declined suggestion must create no server branch');
+      assert.equal(await page.evaluate(text=>window.__RV26_SHARED__.semantic().filter(w=>w.text===text).length,'Declined alternative '+stamp),0,'declined suggestion must create no visual branch');
+    }
+    console.log('Exact accepted suggestion materializes once; declined suggestion creates nothing',suggestion.id,declinedId);
+
     // A logs in from a fresh desktop browser profile: same actor, wishes and Saved come back.
     const A2=await pageFor(chrome,false);
     try{
@@ -271,16 +401,18 @@ async function acceptFirst(page,type){
       assert(await A2.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.saved().then(x=>x.saved.some(w=>w.id===id)),wishB),'Saved wish must return on second browser');
     }finally{await A2.context.close()}
 
+    await verifyShareExports(B.page,wishA);
+
     // V46 product surfaces remain present.
     assert.equal(await A.page.locator('#v46AboutBtn').count(),1,'About guide from V46 must remain');
     await openWish(A.page,wishA);
     const cameraBefore=await cameraState(A.page);
-    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
+    await clickAction(A.page,'toggle_help');
     await A.page.waitForTimeout(180);
     const cameraAfterLocalAction=await cameraState(A.page);
     assert(Math.abs(cameraAfterLocalAction.zoom-cameraBefore.zoom)<0.0001,'local action must not change camera zoom');
     assert(Math.abs(cameraAfterLocalAction.x-cameraBefore.x)<0.01&&Math.abs(cameraAfterLocalAction.y-cameraBefore.y)<0.01,'local action must not move camera');
-    await A.page.evaluate(()=>window.__RALUVAAA_UI__.action('toggle_help'));
+    await clickAction(A.page,'toggle_help');
     await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.refresh());
     await A.page.waitForTimeout(250);
     const cameraAfter=await cameraState(A.page);
@@ -339,7 +471,9 @@ async function acceptFirst(page,type){
     assert(await B.page.locator('#inboxBtn').evaluate(el=>el.classList.contains('active')),'consumed deep link must not close Notifications after synchronization');
     assert.equal(await B.page.locator('#drawerBody .wish').count(),0,'deep link must not reopen the wish over Notifications');
     console.log('One-shot deep link preserves subsequent Notifications navigation');
-    console.log('RALUVAAA Private Alpha A/B identity gate passed: mobile WebKit + desktop '+desktopEngine+' (local test-mode OTP)');
+    assert.deepEqual(A.page.__qaErrors,[],'mobile must have no uncaught page errors');
+    assert.deepEqual(B.page.__qaErrors,[],'desktop must have no uncaught page errors');
+    console.log('RALUVAAA Private Alpha A/B identity gate passed: mobile '+mobileEngine+' + desktop '+desktopEngine+' (local test-mode OTP)');
   }finally{
     await Promise.all([A.context.close(),B.context.close()]);
     await Promise.all([safari.close(),chrome.close()]);

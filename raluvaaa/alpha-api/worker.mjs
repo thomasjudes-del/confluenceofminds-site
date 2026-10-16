@@ -1,8 +1,71 @@
 const JSON_HEADERS={'content-type':'application/json; charset=utf-8','cache-control':'no-store'};
 const MAX_WISH=280,MAX_LOCATION=80,MAX_HELP=400,MAX_HELP_TITLE=60,MAX_TRANSLATION=560;
 
+// Code-only, reversible QA cleanup. Enable only after the final acceptance review.
+// No rows, states, permissions, settings or secrets are changed by this filter.
+const QA_FIXTURE_HIDING_ENABLED=false;
+const QA_FIXTURE_ROOT_IDS=Object.freeze([
+  'wish_57b208a2-c381-4bbd-bca5-4b0c1d76a19d', // QA A
+  'wish_93c9de27-c022-483f-975a-5452bdd9f06e', // QA B
+  'wish_841df73a-7c30-4f8d-b7bd-df945e4c563a'  // QA C
+]);
+const QA_VISIBILITY=Symbol('request-local QA visibility');
+const NO_HIDDEN_WISHES=new Set();
+
+async function hiddenQaWishes(env){
+  if(!QA_FIXTURE_HIDING_ENABLED)return NO_HIDDEN_WISHES;
+  // Cache only within this request. Never retain database identities across requests.
+  if(!env[QA_VISIBILITY])env[QA_VISIBILITY]=(async()=>{
+    const result=await env.DB.prepare("SELECT w.*,e.actor_id AS creation_actor_id,e.lineage_id AS creation_lineage_id,e.parent_wish_id AS creation_parent_wish_id,e.created_at AS creation_created_at FROM wishes w LEFT JOIN wish_events e ON e.id=(SELECT id FROM wish_events WHERE wish_id=w.id AND event_type='create' ORDER BY created_at ASC,id ASC LIMIT 1) WHERE w.id IN (?,?,?)").bind(...QA_FIXTURE_ROOT_IDS).all();
+    const byId=new Map((result.results||[]).map(root=>[root.id,root])),roots=QA_FIXTURE_ROOT_IDS.map(rootId=>byId.get(rootId));
+    for(const [index,root] of roots.entries()){
+      const rootId=QA_FIXTURE_ROOT_IDS[index];
+      if(!root||root.room_key!=='WORLD'||root.kind!=='create'||root.parent_wish_id!==null||root.root_wish_id!==rootId||root.lineage_id!==rootId)return NO_HIDDEN_WISHES;
+      if(root.creation_actor_id!==root.owner_actor_id||root.creation_lineage_id!==rootId||root.creation_parent_wish_id!==null||Number(root.creation_created_at)!==Number(root.created_at))return NO_HIDDEN_WISHES;
+    }
+    // Recorded QA provenance: A and C share their creator; B belongs to the other.
+    // Fail open if this invariant changes; names, emails and title patterns are unused.
+    if(roots[0].owner_actor_id!==roots[2].owner_actor_id||roots[0].owner_actor_id===roots[1].owner_actor_id)return NO_HIDDEN_WISHES;
+    // Follow every incoming structural reference, including inconsistent rows.
+    // Filtering only matching owner/root/lineage rows would miss a visible row
+    // whose wake/reparent could still act on a hidden root. GRAFTs are separate
+    // proposal/event relations and deliberately do not join this ownership graph.
+    const rows=await env.DB.prepare("WITH RECURSIVE family(id) AS (SELECT id FROM wishes WHERE id IN (?,?,?) UNION SELECT w.id FROM wishes w JOIN family f ON w.parent_wish_id=f.id OR w.root_wish_id=f.id OR w.lineage_id=f.id) SELECT w.id,w.owner_actor_id,w.room_key,w.root_wish_id,w.lineage_id,w.parent_wish_id,w.kind FROM wishes w JOIN family f ON f.id=w.id").bind(...QA_FIXTURE_ROOT_IDS).all();
+    const family=new Map((rows.results||[]).map(row=>[row.id,row]));
+    for(const row of family.values()){
+      const root=byId.get(row.root_wish_id);
+      if(!root||row.lineage_id!==root.id||row.owner_actor_id!==root.owner_actor_id||row.room_key!==root.room_key)return NO_HIDDEN_WISHES;
+      if(row.id!==root.id&&(!row.parent_wish_id||!['split','evolve'].includes(row.kind)))return NO_HIDDEN_WISHES;
+    }
+    // Every candidate must have one unbroken, acyclic path to its own verified
+    // root. An unrelated/missing parent or mixed lineage leaves all QA visible.
+    const verified=new Set(QA_FIXTURE_ROOT_IDS);
+    for(const row of family.values()){
+      const path=new Set();let current=row;
+      while(!verified.has(current.id)){
+        if(path.has(current.id))return NO_HIDDEN_WISHES;
+        path.add(current.id);
+        const parent=family.get(current.parent_wish_id);
+        if(!parent||parent.root_wish_id!==current.root_wish_id)return NO_HIDDEN_WISHES;
+        current=parent;
+      }
+      for(const wishId of path)verified.add(wishId);
+    }
+    return new Set(family.keys());
+  })();
+  return env[QA_VISIBILITY];
+}
+function qaExclusion(hidden,...references){
+  // All expressions are internal constants. One bound JSON array avoids a variable
+  // per descendant, and filtering before LIMIT keeps unrelated results available.
+  return hidden.size?{sql:' AND NOT EXISTS (SELECT 1 FROM json_each(?) qa WHERE qa.value IN ('+references.join(',')+'))',args:[JSON.stringify([...hidden])]}:{sql:'',args:[]};
+}
+function eventWishReference(key){return "CASE WHEN json_valid(we.public_payload_json) THEN json_extract(we.public_payload_json,'$."+key+"') END"}
+
+
 export default {
   async fetch(request,env){
+    if(QA_FIXTURE_HIDING_ENABLED)env={...env};
     const origin=request.headers.get('origin')||'';
     const cors=corsHeaders(origin,env);
     if(request.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
@@ -156,7 +219,7 @@ function validatePublicText(text){
   const blocked=/(suicid|self[- ]?harm|kill myself|automutil|medical|diagnos|cancer|maladie|m[eé]dic|porn|explicit sex|sexe explicite|weapon|gun|firearm|bomb|arme|bombe|doxx|harass|harcel|hate crime|haine|crowdfund|donation|send money|argent|crypto)/i;
   if(blocked.test(text))fail(422,'outside_alpha_scope','This wish is outside the current alpha publication scope');
 }
-async function wishById(env,wishId){return env.DB.prepare('SELECT * FROM wishes WHERE id=?').bind(wishId).first()}
+async function wishById(env,wishId){if((await hiddenQaWishes(env)).has(wishId))return null;return env.DB.prepare('SELECT * FROM wishes WHERE id=?').bind(wishId).first()}
 function assertOwner(row,actorId){if(!row||row.owner_actor_id!==actorId)fail(403,'owner_required','Only the wisher can do this')}
 function assertAlive(row){if(!row||row.state!=='alive')fail(409,'wish_not_alive','This wish is no longer active')}
 async function eventInsert(env,{wishId,lineageId,actorId,eventType,parentWishId=null,payload={},publicPayload={}}){
@@ -233,17 +296,20 @@ async function createSession(request,env,cors){
   return json({actorId,token,claimed:false},201,cors);
 }
 async function getMe(request,env,cors){
-  const actorId=await actor(request,env,true),room=roomKey(request);
-  const wishes=await env.DB.prepare("SELECT w.*,COUNT(e.actor_id) AS encouragement_count FROM wishes w LEFT JOIN encouragements e ON e.wish_id=w.id WHERE w.owner_actor_id=? AND w.room_key=? AND w.state!='removed' GROUP BY w.id ORDER BY w.updated_at DESC LIMIT 200").bind(actorId,room).all();
-  const unread=await env.DB.prepare('SELECT COUNT(*) AS n FROM notifications n JOIN proposals p ON p.id=n.object_id JOIN wishes w ON w.id=p.target_wish_id WHERE n.actor_id=? AND n.is_read=0 AND w.room_key=?').bind(actorId,room).first();
-  const encouraged=await env.DB.prepare('SELECT e.wish_id FROM encouragements e JOIN wishes w ON w.id=e.wish_id WHERE e.actor_id=? AND w.room_key=? ORDER BY e.created_at DESC LIMIT 500').bind(actorId,room).all();
+  const actorId=await actor(request,env,true),room=roomKey(request),hidden=await hiddenQaWishes(env);
+  const wishFilter=qaExclusion(hidden,'w.id'),proposalFilter=qaExclusion(hidden,'p.target_wish_id','p.other_wish_id');
+  const wishes=await env.DB.prepare("SELECT w.*,COUNT(e.actor_id) AS encouragement_count FROM wishes w LEFT JOIN encouragements e ON e.wish_id=w.id WHERE w.owner_actor_id=? AND w.room_key=? AND w.state!='removed'"+wishFilter.sql+" GROUP BY w.id ORDER BY w.updated_at DESC LIMIT 200").bind(actorId,room,...wishFilter.args).all();
+  const unread=await env.DB.prepare('SELECT COUNT(*) AS n FROM notifications n JOIN proposals p ON p.id=n.object_id JOIN wishes w ON w.id=p.target_wish_id WHERE n.actor_id=? AND n.is_read=0 AND w.room_key=?'+proposalFilter.sql).bind(actorId,room,...proposalFilter.args).first();
+  const encouraged=await env.DB.prepare('SELECT e.wish_id FROM encouragements e JOIN wishes w ON w.id=e.wish_id WHERE e.actor_id=? AND w.room_key=?'+wishFilter.sql+' ORDER BY e.created_at DESC LIMIT 500').bind(actorId,room,...wishFilter.args).all();
   const who=await actorRow(env,actorId);
   return json({actorId,room,claimed:!!who?.claimed_email,email:who?.claimed_email?maskEmail(who.claimed_email):null,wishes:(wishes.results||[]).map(r=>publicWish(r,true)),unread:Number(unread?.n||0),encouragedWishIds:(encouraged.results||[]).map(r=>r.wish_id)},200,cors);
 }
 async function getWorld(request,env,cors){
-  const actorId=await actor(request,env,false),room=roomKey(request);
-  const rows=await env.DB.prepare("SELECT w.*,COUNT(e.actor_id) AS encouragement_count FROM wishes w LEFT JOIN encouragements e ON e.wish_id=w.id WHERE w.room_key=? AND w.is_public=1 AND w.state!='removed' GROUP BY w.id ORDER BY w.created_at DESC LIMIT 600").bind(room).all();
-  const events=await env.DB.prepare("SELECT we.id,we.wish_id,we.lineage_id,we.event_type,we.parent_wish_id,we.public_payload_json,we.created_at FROM wish_events we JOIN wishes w ON w.id=we.wish_id WHERE w.room_key=? AND we.event_type IN ('create','evolve','split','bloom','abandon','resume','wake','help','connect','reparent','help_setting') ORDER BY we.created_at ASC LIMIT 3000").bind(room).all();
+  const actorId=await actor(request,env,false),room=roomKey(request),hidden=await hiddenQaWishes(env);
+  const wishFilter=qaExclusion(hidden,'w.id');
+  const eventFilter=qaExclusion(hidden,'we.wish_id','we.lineage_id','we.parent_wish_id',...['fromWishId','otherWishId','oldParentWishId','newParentWishId'].map(eventWishReference));
+  const rows=await env.DB.prepare("SELECT w.*,COUNT(e.actor_id) AS encouragement_count FROM wishes w LEFT JOIN encouragements e ON e.wish_id=w.id WHERE w.room_key=? AND w.is_public=1 AND w.state!='removed'"+wishFilter.sql+" GROUP BY w.id ORDER BY w.created_at DESC LIMIT 600").bind(room,...wishFilter.args).all();
+  const events=await env.DB.prepare("SELECT we.id,we.wish_id,we.lineage_id,we.event_type,we.parent_wish_id,we.public_payload_json,we.created_at FROM wish_events we JOIN wishes w ON w.id=we.wish_id WHERE w.room_key=? AND we.event_type IN ('create','evolve','split','bloom','abandon','resume','wake','help','connect','reparent','help_setting')"+eventFilter.sql+" ORDER BY we.created_at ASC LIMIT 3000").bind(room,...eventFilter.args).all();
   return json({room,wishes:(rows.results||[]).map(r=>publicWish(r,actorId&&r.owner_actor_id===actorId)),events:(events.results||[]).map(e=>({id:e.id,wishId:e.wish_id,lineageId:e.lineage_id,type:e.event_type,parentWishId:e.parent_wish_id,payload:parseJson(e.public_payload_json),createdAt:e.created_at}))},200,cors);
 }
 async function createWish(request,env,cors){
@@ -376,7 +442,10 @@ async function createProposal(request,env,cors){
   await env.DB.batch(stmts);await maybeMaterialize(env,pid);return json({proposalId:pid,status:'pending'},201,cors);
 }
 function proposalTitle(type){return type==='help'?'Someone offered help':type==='suggest_branch'?'Someone suggested a branch':'Someone proposed a connection'}
-async function proposalRow(env,pid){return env.DB.prepare('SELECT * FROM proposals WHERE id=?').bind(pid).first()}
+async function proposalRow(env,pid){
+  const row=await env.DB.prepare('SELECT * FROM proposals WHERE id=?').bind(pid).first(),hidden=await hiddenQaWishes(env);
+  return row&&(hidden.has(row.target_wish_id)||hidden.has(row.other_wish_id))?null:row;
+}
 async function requiredConsents(env,pid){const r=await env.DB.prepare('SELECT actor_id,decision FROM proposal_consents WHERE proposal_id=?').bind(pid).all();return r.results||[]}
 async function respondProposal(request,env,cors,pid){
   const actorId=await actor(request,env,true),room=roomKey(request),p=await body(request),decision=String(p.decision||'');
@@ -455,17 +524,18 @@ function proposalView(p){
 }
 async function getInbox(request,env,cors){
   const who=await claimedActor(request,env),actorId=who.id,room=roomKey(request);
-  const notes=await env.DB.prepare('SELECT n.* FROM notifications n JOIN proposals p ON p.id=n.object_id JOIN wishes w ON w.id=p.target_wish_id WHERE n.actor_id=? AND w.room_key=? ORDER BY n.created_at DESC LIMIT 100').bind(actorId,room).all();
+  const filter=qaExclusion(await hiddenQaWishes(env),'p.target_wish_id','p.other_wish_id');
+  const notes=await env.DB.prepare('SELECT n.* FROM notifications n JOIN proposals p ON p.id=n.object_id JOIN wishes w ON w.id=p.target_wish_id WHERE n.actor_id=? AND w.room_key=?'+filter.sql+' ORDER BY n.created_at DESC LIMIT 100').bind(actorId,room,...filter.args).all();
   const base=" FROM proposals p JOIN wishes tw ON tw.id=p.target_wish_id LEFT JOIN wishes ow ON ow.id=p.other_wish_id ";
-  const pending=await env.DB.prepare("SELECT p.*,c.decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"JOIN proposal_consents c ON c.proposal_id=p.id WHERE c.actor_id=? AND tw.room_key=? AND p.status='pending' AND c.decision IS NULL ORDER BY p.created_at DESC LIMIT 100").bind(actorId,room).all();
-  const sent=await env.DB.prepare("SELECT p.*,NULL AS decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"WHERE p.proposer_actor_id=? AND tw.room_key=? ORDER BY p.created_at DESC LIMIT 100").bind(actorId,room).all();
-  const received=await env.DB.prepare("SELECT p.*,c.decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"JOIN proposal_consents c ON c.proposal_id=p.id WHERE c.actor_id=? AND tw.room_key=? AND (p.status!='pending' OR c.decision IS NOT NULL) ORDER BY p.updated_at DESC LIMIT 100").bind(actorId,room).all();
+  const pending=await env.DB.prepare("SELECT p.*,c.decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"JOIN proposal_consents c ON c.proposal_id=p.id WHERE c.actor_id=? AND tw.room_key=? AND p.status='pending' AND c.decision IS NULL"+filter.sql+" ORDER BY p.created_at DESC LIMIT 100").bind(actorId,room,...filter.args).all();
+  const sent=await env.DB.prepare("SELECT p.*,NULL AS decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"WHERE p.proposer_actor_id=? AND tw.room_key=?"+filter.sql+" ORDER BY p.created_at DESC LIMIT 100").bind(actorId,room,...filter.args).all();
+  const received=await env.DB.prepare("SELECT p.*,c.decision,tw.owner_actor_id AS target_owner_actor_id,ow.owner_actor_id AS other_owner_actor_id"+base+"JOIN proposal_consents c ON c.proposal_id=p.id WHERE c.actor_id=? AND tw.room_key=? AND (p.status!='pending' OR c.decision IS NOT NULL)"+filter.sql+" ORDER BY p.updated_at DESC LIMIT 100").bind(actorId,room,...filter.args).all();
   return json({room,notifications:(notes.results||[]).map(n=>({id:n.id,kind:n.kind,objectId:n.object_id,title:n.title,body:n.body,isRead:!!n.is_read,createdAt:n.created_at})),pending:(pending.results||[]).map(proposalView),sent:(sent.results||[]).map(proposalView),receivedHistory:(received.results||[]).map(proposalView)},200,cors);
 }
 
 async function getSaved(request,env,cors){
-  const who=await claimedActor(request,env),room=roomKey(request);
-  const rows=await env.DB.prepare("SELECT w.*,s.created_at AS saved_at,0 AS encouragement_count FROM saved_wishes s JOIN wishes w ON w.id=s.wish_id WHERE s.actor_id=? AND w.room_key=? AND w.state!='removed' ORDER BY s.created_at DESC LIMIT 250").bind(who.id,room).all();
+  const who=await claimedActor(request,env),room=roomKey(request),filter=qaExclusion(await hiddenQaWishes(env),'w.id');
+  const rows=await env.DB.prepare("SELECT w.*,s.created_at AS saved_at,0 AS encouragement_count FROM saved_wishes s JOIN wishes w ON w.id=s.wish_id WHERE s.actor_id=? AND w.room_key=? AND w.state!='removed'"+filter.sql+" ORDER BY s.created_at DESC LIMIT 250").bind(who.id,room,...filter.args).all();
   return json({saved:(rows.results||[]).map(r=>({...publicWish(r,r.owner_actor_id===who.id),savedAt:r.saved_at}))},200,cors)
 }
 async function saveWish(request,env,cors,wishId){
@@ -476,11 +546,16 @@ async function saveWish(request,env,cors,wishId){
 }
 async function unsaveWish(request,env,cors,wishId){
   const who=await claimedActor(request,env);
+  if((await hiddenQaWishes(env)).has(wishId))fail(404,'wish_not_found','Wish not found');
   await env.DB.prepare('DELETE FROM saved_wishes WHERE actor_id=? AND wish_id=?').bind(who.id,wishId).run();
   return json({wishId,saved:false},200,cors)
 }
 
-async function readNotification(request,env,cors,nid){const actorId=await actor(request,env,true),room=roomKey(request);const r=await env.DB.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND actor_id=? AND EXISTS (SELECT 1 FROM proposals p JOIN wishes w ON w.id=p.target_wish_id WHERE p.id=notifications.object_id AND w.room_key=?)').bind(nid,actorId,room).run();if(!r.meta?.changes)fail(404,'notification_not_found','Notification not found');return json({id:nid,isRead:true},200,cors)}
+async function readNotification(request,env,cors,nid){
+  const actorId=await actor(request,env,true),room=roomKey(request),filter=qaExclusion(await hiddenQaWishes(env),'p.target_wish_id','p.other_wish_id');
+  const r=await env.DB.prepare('UPDATE notifications SET is_read=1 WHERE id=? AND actor_id=? AND EXISTS (SELECT 1 FROM proposals p JOIN wishes w ON w.id=p.target_wish_id WHERE p.id=notifications.object_id AND w.room_key=?'+filter.sql+')').bind(nid,actorId,room,...filter.args).run();
+  if(!r.meta?.changes)fail(404,'notification_not_found','Notification not found');return json({id:nid,isRead:true},200,cors)
+}
 async function createReport(request,env,cors){const actorId=await actor(request,env,false),room=roomKey(request),p=await body(request),wishId=String(p.wishId||''),reason=cleanText(p.reason,80),details=cleanText(p.details,500);if(!reason)fail(400,'reason_required','Report reason required');const w=await wishById(env,wishId);if(!w||w.room_key!==room)fail(404,'wish_not_found','Wish not found');const rid=id('report');await env.DB.prepare("INSERT INTO reports (id,reporter_actor_id,wish_id,reason,details,status,created_at) VALUES (?,?,?,?,?,'open',?)").bind(rid,actorId,wishId,reason,details||null,now()).run();return json({reportId:rid},201,cors)}
 
 
