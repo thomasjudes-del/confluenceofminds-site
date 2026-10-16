@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'dot/raluvaaa-code-only-release-20261016'
+      - 'dot/raluvaaa-query-only-release-20261016'
     paths:
       - 'raluvaaa/alpha-api/release-plan.json'
 
@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   release:
-    if: github.ref == 'refs/heads/dot/raluvaaa-code-only-release-20261016' && github.repository == 'thomasjudes-del/confluenceofminds-site'
+    if: github.ref == 'refs/heads/dot/raluvaaa-query-only-release-20261016' && github.repository == 'thomasjudes-del/confluenceofminds-site'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

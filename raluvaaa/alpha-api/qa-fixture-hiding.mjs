@@ -378,3 +378,81 @@ test('actual accepted suggestions and evolved descendants on both new roots hide
   for(const {wishId,owner} of created)assert.equal((await h.request('/v1/wishes/'+wishId+'/events',{method:'POST',actor:owner,type:'wake'})).status,404);
   assert.deepEqual(h.snapshot(),before,'hide, denied mutation and reversal preserve every domain row');
 });
+
+// Compare the executed Worker SQL with both its original OR-based closure and
+// an independent graph walk. These use synthetic SQLite only and run in the
+// existing isolated CI step, including when no local Worker server is running.
+const legacyFamilySql="WITH RECURSIVE family(id) AS (SELECT id FROM wishes WHERE id IN ("+ROOTS.map(()=>'?').join(',')+") UNION SELECT w.id FROM wishes w JOIN family f ON w.parent_wish_id=f.id OR w.root_wish_id=f.id OR w.lineage_id=f.id) SELECT w.id,w.owner_actor_id,w.room_key,w.root_wish_id,w.lineage_id,w.parent_wish_id,w.kind FROM wishes w JOIN family f ON f.id=w.id";
+async function executedFamilySql(){
+  const h=harness(),prepare=h.env.DB.prepare.bind(h.env.DB);let familySql;
+  h.env.DB.prepare=sql=>{if(sql.startsWith('WITH RECURSIVE family(id) AS'))familySql=sql;return prepare(sql)};
+  try{
+    assert.equal((await h.request('/v1/world')).status,200);
+    assert(familySql,'capture the actual Worker family query, not a separate optimized copy');
+    return familySql;
+  }finally{h.sqlite.close()}
+}
+function assertEquivalentFamily(sql,rows,label){
+  const sqlite=new DatabaseSync(':memory:');
+  try{
+    sqlite.exec(readFileSync(new URL('./schema.sql',import.meta.url),'utf8'));
+    // Deliberately allow dangling and cyclic references for fail-open coverage.
+    sqlite.exec('PRAGMA foreign_keys=OFF');
+    const insert=sqlite.prepare("INSERT INTO wishes (id,owner_actor_id,room_key,root_wish_id,lineage_id,parent_wish_id,kind,text,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'Synthetic graph row',1,1)");
+    for(const row of rows)insert.run(row.id,row.owner_actor_id,row.room_key,row.root_wish_id,row.lineage_id,row.parent_wish_id,row.kind);
+    const sort=values=>values.sort((a,b)=>a.id.localeCompare(b.id));
+    const actual=sort(sqlite.prepare(sql).all(...ROOTS));
+    assert.deepEqual(actual,sort(sqlite.prepare(legacyFamilySql).all(...ROOTS)),label+': original SQL closure');
+    const reached=new Set(rows.filter(row=>ROOTS.includes(row.id)).map(row=>row.id));
+    let changed=true;
+    while(changed){
+      changed=false;
+      for(const row of rows)if(!reached.has(row.id)&&[row.parent_wish_id,row.root_wish_id,row.lineage_id].some(ref=>reached.has(ref))){reached.add(row.id);changed=true}
+    }
+    assert.deepEqual(actual.map(row=>({...row})),sort(rows.filter(row=>reached.has(row.id))),label+': independent incoming-edge graph closure');
+    assert.equal(actual.length,new Set(actual.map(row=>row.id)).size,label+': UNION must deduplicate cycles and overlapping edges');
+    return actual;
+  }finally{sqlite.close()}
+}
+function graphRow(id,{root=id,lineage=root,parent=null,owner='synthetic-owner',room='WORLD',kind=parent?'split':'create'}={}){
+  return{id,owner_actor_id:owner,room_key:room,root_wish_id:root,lineage_id:lineage,parent_wish_id:parent,kind};
+}
+
+test('family SQL preserves the representative 12-wish, 7-member fixture closure',async()=>{
+  const rows=[...ROOTS.map(id=>graphRow(id)),
+    graphRow('child',{root:ROOTS[0],parent:ROOTS[0]}),
+    graphRow('grandchild',{root:ROOTS[0],parent:'child',kind:'evolve'}),
+    ...Array.from({length:5},(_,i)=>graphRow('unrelated-'+i))];
+  assert.equal(rows.length,12);
+  assert.equal(assertEquivalentFamily(await executedFamilySql(),rows,'representative small database').length,7);
+});
+
+test('family SQL follows every mixed structural edge and terminates on cycles',async()=>{
+  const rows=[...ROOTS.map(id=>graphRow(id)),
+    graphRow('parent-only',{parent:ROOTS[0],owner:'different-owner',room:'OTHER'}),
+    graphRow('root-only',{root:'parent-only',lineage:'unrelated',parent:'missing-parent'}),
+    graphRow('lineage-only',{lineage:'root-only'}),
+    graphRow('cycle-a',{lineage:'lineage-only',parent:'cycle-b'}),
+    graphRow('cycle-b',{parent:'cycle-a'}),
+    graphRow('overlapping',{root:ROOTS[1],lineage:ROOTS[2],parent:'cycle-b'}),
+    graphRow('unrelated'),graphRow('unreachable-cycle-a',{parent:'unreachable-cycle-b'}),
+    graphRow('unreachable-cycle-b',{parent:'unreachable-cycle-a'})];
+  assert.equal(assertEquivalentFamily(await executedFamilySql(),rows,'mixed graph').length,11);
+});
+
+test('family SQL equals the original and independent closure for 250 seeded adversarial graphs',async()=>{
+  const sql=await executedFamilySql();let seed=1977;
+  const random=n=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed%n};
+  for(let trial=0;trial<250;trial++){
+    // Some graphs omit roots entirely; references can still name missing roots.
+    const ids=[...ROOTS.filter(()=>random(4)!==0),...Array.from({length:1+random(60)},(_,i)=>'random-'+i)];
+    const references=[...ids,...ROOTS,'missing-reference'];
+    const rows=ids.map(id=>graphRow(id,{
+      root:references[random(references.length)],lineage:references[random(references.length)],
+      parent:random(5)===0?null:references[random(references.length)],
+      owner:'synthetic-owner-'+random(3),room:random(3)===0?'OTHER':'WORLD',
+      kind:['create','split','evolve'][random(3)]
+    }));
+    assertEquivalentFamily(sql,rows,'seed 1977 graph '+trial);
+  }
+});

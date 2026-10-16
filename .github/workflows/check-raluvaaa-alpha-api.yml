@@ -31,7 +31,7 @@ jobs:
           grep -q "already_encouraged" raluvaaa/alpha-api/worker.mjs
           grep -q "RaluvaaaAlphaClient" raluvaaa/alpha-api/client.mjs
       - name: Run isolated security and concurrency regressions
-        run: node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/alpha-api/qa-fixture-hiding.mjs
+        run: node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/alpha-api/qa-fixture-hiding.mjs raluvaaa/alpha-api/release-code-only.test.mjs raluvaaa/alpha-api/inspect-release-runtime.test.mjs
       - name: Validate D1 schema with SQLite
         run: |
           python3 - <<'PY'

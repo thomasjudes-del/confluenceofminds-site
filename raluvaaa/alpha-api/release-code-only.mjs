@@ -8,13 +8,13 @@ import { pathToFileURL } from 'node:url';
 // https://developers.cloudflare.com/api/resources/workers/subresources/scripts/subresources/deployments/methods/create/
 // Wrangler 4.151.0 versions upload explicitly omits non-versioned logpush/observability;
 // this helper never writes settings, triggers, secrets, D1 schema or D1 contents.
-// Intentionally unpinned: the five-root source and a fresh GET-only runtime
+// Intentionally unpinned: the SQL-only source and a fresh GET-only runtime
 // inventory must be reviewed before these four values and the plan are enabled.
 export const APPROVED_SOURCE_SHA=null;
 export const APPROVED_CODE_SHA256=null;
 export const BASELINE_VERSION=null;
 export const BASELINE_DEPLOYMENT=null;
-export const RELEASE_REF='refs/heads/dot/raluvaaa-code-only-release-20261016';
+export const RELEASE_REF='refs/heads/dot/raluvaaa-query-only-release-20261016';
 const REPOSITORY='thomasjudes-del/confluenceofminds-site';
 const WORKER='raluvaaa-alpha-api';
 const PUBLIC_WORLD_URL='https://raluvaaa-alpha-api.thomas-judes.workers.dev/v1/world';
@@ -127,49 +127,37 @@ function checkedPublicWorld(data){
   }
   return rows;
 }
-function snapshotPublicVisibility(rows){
-  const roots=new Set(QA_FIXTURE_ROOT_IDS),family=new Map();
-  for(const rootId of roots){
-    const root=rows.get(rootId);
-    if(!root||root.kind!=='create'||root.rootWishId!==rootId||root.lineageId!==rootId||root.parentWishId!==null)fail('Public WORLD fixture baseline is missing or invalid; release stopped before upload');
-    family.set(rootId,{rootWishId:root.rootWishId,lineageId:root.lineageId,parentWishId:root.parentWishId});
+function assertPublicFixtureAbsence(rows){
+  const roots=new Set(QA_FIXTURE_ROOT_IDS);
+  for(const row of rows.values()){
+    // The five roots are already hidden. A root or any structural reference to
+    // one in this bounded public view blocks both before and after deployment.
+    if([row.id,row.rootWishId,row.lineageId,row.parentWishId].some(reference=>roots.has(reference)))fail('Public WORLD fixture absence verification failed; inspect checkpoints, do not retry or roll back automatically');
   }
-  // Follow visible structural references so an inconsistent neighbor cannot be
-  // silently classified as disposable. Missing parents may be outside this view;
-  // the Worker's separate D1 guard validates the complete family before hiding.
-  let changed=true;
-  while(changed){
-    changed=false;
-    for(const row of rows.values()){
-      if(family.has(row.id)||![row.rootWishId,row.lineageId,row.parentWishId].some(reference=>family.has(reference)))continue;
-      if(!roots.has(row.rootWishId)||row.lineageId!==row.rootWishId||row.parentWishId===null||!['split','evolve'].includes(row.kind))fail('Public WORLD fixture baseline is missing or invalid; release stopped before upload');
-      const parent=rows.get(row.parentWishId);
-      if(parent&&(parent.rootWishId!==row.rootWishId||parent.lineageId!==row.lineageId))fail('Public WORLD fixture baseline is missing or invalid; release stopped before upload');
-      family.set(row.id,{rootWishId:row.rootWishId,lineageId:row.lineageId,parentWishId:row.parentWishId});changed=true;
-    }
-  }
-  // Reject cycles we can actually observe without requiring a parent omitted by
-  // the public cap to be present. This remains a visibility check, not a D1 audit.
-  for(const rowId of family.keys()){
+  // Reject every observable parent cycle, including unrelated public wishes.
+  // A parent outside the 600-row view is allowed; its ancestry is not proven.
+  for(const rowId of rows.keys()){
     const path=new Set();let current=rowId;
-    while(family.has(current)&&!roots.has(current)){
-      if(path.has(current))fail('Public WORLD fixture baseline is missing or invalid; release stopped before upload');
-      path.add(current);current=family.get(current).parentWishId;
+    while(rows.has(current)){
+      if(path.has(current))fail('Public WORLD visibility response contains an observable parent cycle');
+      path.add(current);current=rows.get(current).parentWishId;
     }
   }
-  const others=new Map([...rows].filter(([rowId])=>!family.has(rowId)).map(([rowId,row])=>[rowId,hash(canonical(row))]));
-  return{family,others,publicWishCount:rows.size};
+}
+function snapshotPublicVisibility(rows){
+  assertPublicFixtureAbsence(rows);
+  const fingerprints=new Map([...rows].map(([rowId,row])=>[rowId,hash(canonical(row))]));
+  return{fingerprints,publicWishCount:rows.size};
 }
 function verifyPublicVisibility(before,after){
-  for(const row of after.values()){
-    if([row.id,row.rootWishId,row.lineageId,row.parentWishId].some(reference=>before.family.has(reference)))fail('Public WORLD fixture visibility verification failed; inspect checkpoints, do not retry or roll back automatically');
-  }
-  for(const [rowId,fingerprint] of before.others){
+  assertPublicFixtureAbsence(after);
+  for(const [rowId,fingerprint] of before.fingerprints){
     if(!after.has(rowId)||hash(canonical(after.get(rowId)))!==fingerprint)fail('Public WORLD neighbor verification is inconclusive; concurrent changes are possible; inspect checkpoints, do not retry or roll back automatically');
   }
-  // Additional rows are allowed: removing fixtures before LIMIT can reveal older
-  // wishes. Legitimate concurrent edits/deletions still make this check fail.
-  return{beforePublicWishCount:before.publicWishCount,afterPublicWishCount:after.size,fixtureRootCount:QA_FIXTURE_ROOT_IDS.length,hiddenVisibleFixtureWishCount:before.family.size,unchangedOtherWishCount:before.others.size,newlyVisibleOtherWishCount:after.size-before.others.size};
+  // Additional unrelated rows are allowed. No observed pre-release row may be
+  // changed or lost, even through concurrent edits/deletions or cap displacement.
+  // Neither a successful comparison nor an absent root proves unseen D1 rows.
+  return{beforePublicWishCount:before.publicWishCount,afterPublicWishCount:after.size,absentFixtureRootCount:QA_FIXTURE_ROOT_IDS.length,unchangedPublicWishCount:before.fingerprints.size,newlyVisiblePublicWishCount:after.size-before.fingerprints.size};
 }
 
 export async function releaseCodeOnly({fetchImpl=fetch,accountId,token,plan,ref,repository,code,runId,onCheckpoint=()=>{}}={}){
