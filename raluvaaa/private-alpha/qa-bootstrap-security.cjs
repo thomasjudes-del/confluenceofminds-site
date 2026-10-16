@@ -88,3 +88,17 @@ for(const bootstrap of ['bootstrap.js','../shared-alpha/shared-bootstrap.js']){
   });
  }
 }
+
+test('a graft initiator retains their recorded owner consent when sent/history copies overlap',()=>{
+  const source=readFileSync(resolve(__dirname,'bootstrap.js'),'utf8'),start=source.indexOf('function buildState('),end=source.indexOf('function fp(',start);
+  const c={preferredLang:'en',seed:()=>1,ownerFor:w=>w.ownerActorId};vm.createContext(c);vm.runInContext(source.slice(start,end),c);
+  const p={id:'proposal-fixture',type:'connect',proposerActorId:'actor-a',targetWishId:'wish-a',otherWishId:'wish-b',targetOwnerActorId:'actor-a',otherOwnerActorId:'actor-b',status:'pending',createdAt:100};
+  const result=c.buildState({wishes:[],events:[]},{encouragedWishIds:[]},{pending:[],sent:[{...p,decision:null}],receivedHistory:[{...p,decision:'accept'}]},'actor-a');
+  assert.equal(result.events.filter(e=>e.type==='connect_proposed').length,1,'one proposal remains');
+  const response=result.events.find(e=>e.type==='proposal_response');assert(response,'private consent must survive deduplication');assert.equal(response.actorId,'actor-a');assert.equal(response.proposalId,p.id);assert.equal(response.decision,'accept');
+  for(const status of ['pending','accepted']){
+    const concurrent=c.buildState({wishes:[],events:[]},{encouragedWishIds:[]},{pending:[{...p,decision:null}],sent:[{...p,decision:null}],receivedHistory:[{...p,status,decision:'accept'}]},'actor-a');
+    const proposals=concurrent.events.filter(e=>e.type==='connect_proposed'),responses=concurrent.events.filter(e=>e.type==='proposal_response');
+    assert.equal(proposals.length,1);assert.equal(proposals[0].serverStatus,status);assert.equal(responses.length,1);assert.equal(responses[0].decision,'accept');
+  }
+});

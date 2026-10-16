@@ -28,10 +28,17 @@ async function verifyPhysicalMute(page,mobile){
   const hit=await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert(hit,'mute must receive physical pointer hit-testing');
   const tap=()=>mobile?page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2):page.mouse.click(box.x+box.width/2,box.y+box.height/2);
   if(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled))await tap();
+  // Safari requires each media channel's initial play to belong to a real
+  // user gesture. Start the actual channels in the physical unmute click,
+  // rather than using evaluate() to simulate permission to autoplay.
+  await button.evaluate(el=>el.addEventListener('click',()=>{window.__RALUVAAA_ACTION_AUDIO__.playNamed('help');window.__RALUVAAA_REVIVE_AUDIO_V42__.play({type:'wake'})},{once:true}));
   await tap();
-  await page.waitForFunction(()=>{const a=window.__RALUVAAA_AUDIO__.audio;return !a.paused&&!a.muted&&a.currentTime>0.02},null,{timeout:8000});
-  await page.evaluate(()=>{window.__RALUVAAA_ACTION_AUDIO__.playNamed('help');window.__RALUVAAA_REVIVE_AUDIO_V42__.play({type:'wake'})});
-  await page.waitForFunction(()=>[window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].every(a=>!a.paused&&a.currentTime>0.02),null,{timeout:8000});
+  try{
+    await page.waitForFunction(()=>{const a=window.__RALUVAAA_AUDIO__.audio;return !a.paused&&!a.muted&&a.currentTime>0.02},null,{timeout:8000});
+    await page.waitForFunction(()=>[window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].every(a=>!a.paused&&a.currentTime>0.02),null,{timeout:8000});
+  }catch(error){
+    console.error('Actual media start state',await page.evaluate(()=>[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].map(a=>({paused:a.paused,muted:a.muted,time:a.currentTime,readyState:a.readyState,error:a.error?.code||null}))));throw error;
+  }
   await tap();
   const stopped=await page.evaluate(()=>[window.__RALUVAAA_AUDIO__.audio,window.__RALUVAAA_ACTION_AUDIO__.semanticChannel,window.__RALUVAAA_REVIVE_AUDIO_V42__.audio].map(a=>({paused:a.paused,muted:a.muted,time:a.currentTime})));
   assert(stopped.every(a=>a.paused&&a.muted),'physical mute must silence ambient, action and revive immediately');
@@ -323,6 +330,12 @@ async function acceptFirst(page,type){
     await A.page.waitForSelector('#overlay #confirm',{polling:100,timeout:3000});
     await A.page.click('#overlay #confirm');
     await B.page.waitForFunction(async()=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='connect')},null,{polling:100,timeout:10000});
+    await refresh(A.page);
+    const sentGraft=await A.page.evaluate(()=>window.__RALUVAAA_SHARED_DEBUG__.inbox().sent.find(p=>p.type==='connect'&&p.status==='pending'));
+    assert(sentGraft,'initiator sees the pending graft while awaiting the other owner');
+    if(await A.page.locator('#drawer').isVisible())await A.page.click('#drawerClose');await A.page.click('#inboxBtn');
+    assert.equal(await A.page.locator('[data-accept="'+sentGraft.id+'"]').count(),0,'initiator must not be asked to repeat their recorded consent');
+    await A.page.click('#drawerClose');
     const graftProposal=await acceptFirst(B.page,'connect');
     await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='connect'&&e.payload?.proposalId===id)},graftProposal.id,{polling:100,timeout:10000});
     await A.page.waitForFunction(()=>document.getElementById('engine')?.contentWindow?.__RV42_RUNTIME__?.warpCount?.()>0,null,{polling:100,timeout:5000});

@@ -73,9 +73,11 @@ function buildState(world,me,inbox,actorId){
     if(p.type==='connect')events.push({...common,type:'connect_proposed',aSemanticId:p.targetWishId,bSemanticId:p.otherWishId});
     if(role==='received'&&p.decision)events.push({type:'proposal_response',actorId,proposalId:p.id,decision:p.decision,semanticId:p.targetWishId,aSemanticId:p.targetWishId,bSemanticId:p.otherWishId,at:(p.updatedAt||p.createdAt)+1});
   };
+  // The later history query can contain a consent newer than a pending copy.
+  // An initiator can also be an owner; sent deliberately has no private decision.
+  for(const p of inbox.receivedHistory||[])addProposal(p,'received');
   for(const p of inbox.pending||[])addProposal(p,'received');
   for(const p of inbox.sent||[])addProposal(p,'sent');
-  for(const p of inbox.receivedHistory||[])addProposal(p,'received');
   events.sort((a,b)=>(a.at||0)-(b.at||0));
   return{version:26,lang:preferredLang,entrusted:null,notifications:(inbox.notifications||[]).map(x=>({...x})),events};
 }
