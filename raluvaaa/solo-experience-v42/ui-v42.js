@@ -126,7 +126,7 @@ function ensureVitalityNote(){
   if(!note){
     note=document.createElement('div');
     note.className='v42-vitality-note';
-    const meta=body.querySelector('.meta');
+    const meta=body.querySelector('.pa-context-facts')||body.querySelector('.meta');
     if(meta)meta.insertAdjacentElement('afterend',note);
     else body.prepend(note);
   }

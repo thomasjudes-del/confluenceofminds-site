@@ -404,7 +404,7 @@ async function acceptFirst(page,type){
     await B.page.waitForFunction(id=>window.__RALUVAAA_SHARED_DEBUG__.client.me().then(m=>m.encouragedWishIds.includes(id)),wishA,{timeout:8000});
     await refresh(A.page);
     await openWish(A.page,wishA);
-    assert.match(await A.page.locator('.pa-encouragement-count').innerText(),/1/,'owner must see a private encouragement count');
+    assert.match(await A.page.locator('.pa-owner-engagement').innerText(),/1 support received/,'owner must see the exact selected-wish encouragement count');
     await assert.rejects(
       ()=>B.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.client.proposeHelp(id,'Anonymous help must be gated.'),wishA),
       /claim_required|Verify your email|HTTP 403/
@@ -433,9 +433,9 @@ async function acceptFirst(page,type){
     await A.page.waitForFunction(async id=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.inbox()?.pending?.some(p=>p.type==='help'&&p.targetWishId===id&&p.privatePayload?.title==='First sailing checklist')},wishA,{polling:100,timeout:10000});
     const helpProposal=await A.page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.inbox().pending.find(p=>p.type==='help'&&p.targetWishId===id&&p.privatePayload?.title==='First sailing checklist').id,wishA);
     await openWish(A.page,wishA);
-    await A.page.waitForFunction(()=>document.querySelector('.pa-wish-facts')?.textContent.split(' · ').includes('0 accepted offers of help'),null,{timeout:3000});
-    await A.page.locator('.pa-wish-facts').waitFor({state:'visible',timeout:3000});
-    assert(await A.page.locator('.pa-wish-facts').isVisible(),'pending help must leave a visible, truthful zero');
+    await A.page.waitForFunction(()=>document.querySelector('.pa-owner-engagement')?.textContent.split(' · ').includes('0 accepted offers of help'),null,{timeout:3000});
+    await A.page.locator('.pa-owner-engagement').waitFor({state:'visible',timeout:3000});
+    assert(await A.page.locator('.pa-owner-engagement').isVisible(),'pending help must leave a visible, truthful zero');
     await A.page.click('#inboxBtn');
     const helpCard=A.page.locator('.pa-request-card').filter({has:A.page.locator('[data-accept="'+helpProposal+'"]')});
     await helpCard.waitFor({state:'visible',timeout:3000});
@@ -447,6 +447,11 @@ async function acceptFirst(page,type){
     await A.page.click('[data-accept="'+helpProposal+'"]');
     await B.page.waitForFunction(async ({id,wishId})=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===wishId&&e.payload?.proposalId===id)},{id:helpProposal,wishId:wishA},{polling:100,timeout:10000});
     for(const page of [A.page,B.page]){
+      await page.bringToFront();
+      await page.waitForFunction(()=>document.visibilityState==='visible',null,{timeout:3000});
+      // A server commit observed by B can precede A's acceptance response.
+      // Refresh intentionally skips while A is mutating; await each account's exact event.
+      await page.waitForFunction(async ({id,wishId})=>{await window.__RALUVAAA_SHARED_DEBUG__.refresh();return window.__RALUVAAA_SHARED_DEBUG__.world()?.events?.some(e=>e.type==='help'&&e.wishId===wishId&&e.payload?.proposalId===id)},{id:helpProposal,wishId:wishA},{polling:100,timeout:10000});
       await openWish(page,wishA);
       const events=await page.evaluate(id=>window.__RALUVAAA_SHARED_DEBUG__.world().events.filter(e=>e.type==='help'&&e.wishId===id),wishA);
       assert.equal(events.length,1,'exactly the accepted offer should materialize for this wish');
@@ -455,9 +460,10 @@ async function acceptFirst(page,type){
         await page.click('[data-lang="'+language+'"]');
         await openWish(page,wishA); // Mobile language navigation can dismiss the drawer.
         const label=language==='en'?'1 accepted offer of help':'1 aide acceptée';
-        await page.waitForFunction(label=>document.querySelector('.pa-wish-facts')?.textContent.split(' · ').includes(label),label,{timeout:3000});
-        const facts=page.locator('.pa-wish-facts');await facts.waitFor({state:'visible',timeout:3000});assert(await facts.isVisible(),'accepted help count must be visible outside hidden legacy chips');
-        assert((await facts.innerText()).includes('Nantes, France'),'accepted help count must preserve the wish location');
+        await page.waitForFunction(label=>document.querySelector('.pa-owner-engagement')?.textContent.split(' · ').includes(label)||document.querySelector('#pa-count-help')?.getAttribute('aria-label')===label,label,{timeout:3000});
+        const facts=page.locator('.pa-owner-engagement:visible,#pa-count-help:visible');await facts.waitFor({state:'visible',timeout:3000});assert(await facts.isVisible(),'accepted help count must be visible in owner summary or helper action badge');
+        if(await page.locator('#pa-count-help').count())assert.equal(await page.locator('#pa-count-help').innerText(),'1','helper badge must show exactly one accepted offer');
+        assert((await page.locator('.pa-context-facts').innerText()).includes('Nantes, France'),'compact wish facts preserve the current location');
         const text=await page.locator('#drawerBody').innerText();
         for(const privateValue of ['First sailing checklist','I can share a practical first sailing checklist.',actorA,actorB])assert(!text.includes(privateValue),'wish facts must not disclose help content or participant identities');
       }
@@ -612,7 +618,16 @@ async function acceptFirst(page,type){
     assert.equal((await A.page.locator('#drawerBody .wish').innerText()).trim(),'A wants to learn coastal sailing '+stamp,'reader must be able to reveal the canonical original wish');
     await A.page.click('#entrustedBtn');
     await A.page.waitForSelector('#drawerBody [data-open] .t',{timeout:3000});
-    await A.page.waitForFunction(()=>[...document.querySelectorAll('#drawerBody [data-open] .t')].some(el=>/^TRADUIT: /.test(el.textContent||'')),null,{polling:100,timeout:5000});
+    await A.page.waitForFunction(()=>{
+      const cards=[...document.querySelectorAll('#drawerBody [data-entrusted-band][data-open]')];
+      const examples=new Map(window.RALUVAAA_CURATED_EXAMPLES.nodes.map(x=>[x.semanticId,x.text.fr]));
+      const semantic=new Map(window.__RV26_SHARED__.semantic().map(x=>[x.semanticId,x]));
+      return cards.length===3&&cards.every(card=>{
+        const id=card.dataset.open,original=semantic.get(id)?.text;
+        const expected=examples.get(id)||(original?'TRADUIT: '+original:null);
+        return expected&&card.querySelector('.t')?.textContent.trim()===expected;
+      });
+    },null,{polling:100,timeout:5000});
     await A.page.waitForSelector('#drawerBody .v43-saved-open .t',{timeout:3000});
     await A.page.waitForFunction(()=>[...document.querySelectorAll('#drawerBody .v43-saved-open .t')].some(el=>/^TRADUIT: /.test(el.textContent||'')),null,{polling:100,timeout:5000});
 
