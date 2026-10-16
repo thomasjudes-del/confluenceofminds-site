@@ -696,6 +696,18 @@ function prettyOverlay(ctx,m,p,mode){
 
   ctx.font='750 12px system-ui,sans-serif';ctx.letterSpacing='1.7px';ctx.fillStyle=p.b;
   ctx.fillText(t.shareText.toUpperCase(),pad,850);
+
+  if(mode==='animation'){
+    // Keep the soundtrack credit in every recorded frame, clear of wish metadata.
+    // The silent PNG keeps its existing layout and has no music attribution.
+    ctx.save();ctx.letterSpacing='0px';
+    ctx.fillStyle='rgba(2,6,12,.86)';roundRect(ctx,pad-8,506,W-pad*2+16,76,12);ctx.fill();
+    ctx.font='16px system-ui,sans-serif';ctx.fillStyle=p.ink;
+    ctx.fillText('Immersed · Kevin MacLeod · incompetech.com',pad,526);
+    ctx.fillText('CC BY 4.0 · https://creativecommons.org/licenses/by/4.0/',pad,547);
+    ctx.fillText(lang()==='en'?'Edited excerpt':'Extrait adapté',pad,568);
+    ctx.restore();
+  }
 }
 function renderPrettyFrame(canvas,m,style,timeMs,mode='animation'){
   const ctx=canvas.getContext('2d'),p=palettes[style%palettes.length],t=((timeMs%DURATION)/DURATION),seed=m.semanticId||m.text||'wish';

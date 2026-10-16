@@ -56,6 +56,25 @@ test('export identity and date are truthful for real versus simulated wishes',()
  texts.length=0;c.prettyOverlay(ctx,{simulated:true,created:999,text:'Exact title'},{ink:'white',muted:'grey',b:'yellow'},'image');
  assert(texts.includes('SIMULATED'));assert(!texts.some(t=>/1970|2026/.test(t)),'simulation clock is never a real date');
 });
+for(const language of ['en','fr'])test(language+' animated canvas embeds readable music credit without changing wish metadata or PNG',()=>{
+ const draws=[],panels=[],stack=[],ctx={createLinearGradient:()=>({addColorStop(){}}),fillRect(){},fill(){},stroke(){},measureText:s=>({width:s.length}),
+  fillText(text,x,y){draws.push({text,x,y,font:this.font,letterSpacing:this.letterSpacing,fillStyle:this.fillStyle})},
+  save(){stack.push({font:this.font,letterSpacing:this.letterSpacing,fillStyle:this.fillStyle})},restore(){Object.assign(this,stack.pop())}};
+ const c={copy:()=>({simulated:'SIMULATED',local:'LOCAL',human:'HUMAN',shareText:'SHARE'}),lang:()=>language,window:{RALUVAAA_SHARED:true},W:720,H:900,
+  roundRect:(ctx,...args)=>panels.push(args),wrapText:()=>['A long wish','continues here','and here','and ends here'],stateLabel:()=> 'Alive',Intl,Date};
+ vm.createContext(c);vm.runInContext(part('function prettyOverlay(','function renderPrettyFrame('),c);
+ const wish={owner:true,createdAt:Date.UTC(2026,9,16),text:'A long wish',loc:'Nantes, France'},palette={ink:'#f5f4ef',muted:'#b5c8ca',b:'#f2c979'};
+ c.prettyOverlay(ctx,wish,palette,'image');const png=draws.splice(0),pngPanels=panels.splice(0);
+ assert(!png.some(d=>/Immersed|creativecommons|extrait|excerpt/i.test(d.text)),'silent PNG has no soundtrack credit');
+ c.prettyOverlay(ctx,wish,palette,'animation');
+ assert.deepEqual(draws.slice(0,png.length),png,'all existing wish text, metadata and footer keep their exact draw calls');
+ assert.deepEqual(panels.slice(0,pngPanels.length),pngPanels,'existing card and location panels are unchanged');
+ const credit=draws.slice(png.length);
+ assert.deepEqual(credit.map(d=>d.text),['Immersed · Kevin MacLeod · incompetech.com','CC BY 4.0 · https://creativecommons.org/licenses/by/4.0/',language==='en'?'Edited excerpt':'Extrait adapté']);
+ for(const d of credit){assert.equal(d.font,'16px system-ui,sans-serif');assert.equal(d.letterSpacing,'0px');assert.equal(d.x,48);assert(d.y>=526&&d.y<=568,'credit remains above the first wish baseline at 621');assert.equal(d.fillStyle,palette.ink)}
+ assert.deepEqual(panels.at(-1),[40,506,640,76,12],'dedicated contrast panel fits between art and wish');
+ assert.equal(stack.length,0);assert.equal(ctx.font,'750 12px system-ui,sans-serif','credit restores the canvas text state');
+});
 test('failed clipboard fallback cannot claim link copied',async()=>{
  const statuses=[],c={shareWish:{text:'TEST'},copy:()=>({fallback:'Copied'}),shareUrl:()=> 'https://example.invalid/#wish=a',preparedMedia:null,preparedKey:'',mediaKey:()=>'',mediaPrepareError:new Error('media unavailable'),navigator:{},copyUrl:async()=>{statuses.push('Copy failed');return false},setStatus:t=>statuses.push(t),console};
  vm.createContext(c);vm.runInContext(part('function nativeShareNow(){','async function downloadCurrent(){'),c);c.nativeShareNow();await Promise.resolve();await Promise.resolve();assert.deepEqual(statuses,['Copy failed']);
