@@ -1,6 +1,45 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 const source=fs.readFileSync(path.resolve(__dirname,'features.js'),'utf8');
 function part(start,end){const a=source.indexOf(start),b=source.indexOf(end,a+1);assert(a>=0&&b>a);return source.slice(a,b)}
+function wishFactsHarness(language,events,options={}){
+ const nodes=new Map(),writes=[];
+ const m={semanticId:'wish-a',lineageId:'wish-a',kind:'create',helpCount:999,...options};
+ const record={id:'wish-a',isMine:true,createdAt:Date.UTC(2026,9,16),locationText:'Nantes, France',encouragementCount:0};
+ const world={wishes:options.noRecord?[]:[record],events};
+ function element(){let text='';return{className:'',get textContent(){return text},set textContent(value){text=value;writes.push(value)},insertAdjacentElement(position,node){nodes.set('.'+node.className,node)},remove(){nodes.delete('.'+this.className)}}}
+ nodes.set('.wish',element());nodes.set('.meta',element());
+ const c={current:()=>m,semantic:()=>[m],lang:()=>language,window:{__RALUVAAA_SHARED_DEBUG__:{world:()=>world,
+  inbox:()=>({pending:[{type:'help',status:'pending',targetWishId:m.semanticId,privatePayload:{note:'PRIVATE PENDING'}}],receivedHistory:[{type:'help',status:'declined',targetWishId:m.semanticId,privatePayload:{note:'PRIVATE DECLINED'}},{type:'help',status:'accepted',targetWishId:m.semanticId,privatePayload:{note:'PRIVATE ACCEPTED'}}]})}},
+  document:{getElementById:()=>({querySelector:selector=>nodes.get(selector)||null}),createElement:element},Intl,Date};
+ vm.createContext(c);vm.runInContext(part('function decorateWishFacts(){','let queued=false;'),c);
+ return{world,writes,render(){c.decorateWishFacts();return nodes.get('.pa-wish-facts')?.textContent||''},nodes};
+}
+for(const language of ['en','fr'])test(language+' wish facts count only accepted public help for this real wish',()=>{
+ for(const count of [0,1,3]){
+  const events=[{type:'help',wishId:'another-wish'},{type:'encourage',wishId:'wish-a'},{type:'help_setting',wishId:'wish-a'},
+   ...Array.from({length:count},(_,i)=>({id:'help-'+i,type:'help',wishId:'wish-a',payload:{proposalId:'proposal-'+i}}))];
+  const h=wishFactsHarness(language,events),text=h.render();
+  const expected=language==='en'?count+' accepted offer'+(count===1?'':'s')+' of help':count+' aide'+(count===1?'':'s')+' acceptée'+(count===1?'':'s');
+  assert(text.includes(expected),text);assert(text.includes('Nantes, France'));assert(text.includes('2026'));
+  assert(text.includes(language==='en'?'0 support received':'0 soutiens reçus'),'existing support facts remain intact');
+  assert(!/999|PRIVATE|proposal-|another-wish/.test(text),'never use simulated counts, proposals, notes or participant identifiers');
+  const writes=h.writes.length;assert.equal(h.render(),text);assert.equal(h.writes.length,writes,'unchanged decoration must not churn the mutation observer');
+ }
+});
+for(const language of ['en','fr'])test(language+' capped world history gives only a defensible accepted-help lower bound',()=>{
+ const events=Array.from({length:3000},(_,i)=>({id:'event-'+i,type:i<2?'help':'create',wishId:'wish-a'}));
+ const h=wishFactsHarness(language,events),text=h.render();
+ assert(text.includes(language==='en'?'At least 2 accepted offers of help':'Au moins 2 aides acceptées'),text);
+ events[0].wishId=events[1].wishId='another-wish';assert(!/accepted|acceptée/.test(h.render()),'a capped snapshot cannot establish zero accepted help');
+});
+test('wish facts refresh on actual help events and omit unknown or simulated counts',()=>{
+ const h=wishFactsHarness('en',[]);h.render();const writes=h.writes.length;
+ h.world.events.push({type:'help',wishId:'wish-a',payload:{proposalId:'accepted'}});
+ assert(h.render().includes('1 accepted offer of help'));assert.equal(h.writes.length,writes+1);assert.equal(h.nodes.size,3,'refresh reuses the existing facts element');
+ assert(!/accepted/.test(wishFactsHarness('en',undefined).render()),'missing event data is not zero');
+ assert(!/accepted|999/.test(wishFactsHarness('en',[],{simulated:true,noRecord:true}).render()),'simulation history is not real help');
+ assert.equal(wishFactsHarness('en',[],{noRecord:true}).render(),'','a real wish requires its authoritative record');
+});
 test('FR and EN account and share copy explicitly say free',()=>{
  const bootstrap=fs.readFileSync(path.resolve(__dirname,'bootstrap.js'),'utf8');const a=bootstrap.indexOf('function authText()'),b=bootstrap.indexOf('function authHost()',a);
  for(const language of ['fr','en']){

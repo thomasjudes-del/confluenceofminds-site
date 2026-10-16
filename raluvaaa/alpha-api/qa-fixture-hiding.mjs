@@ -15,14 +15,20 @@ const [{default:worker},{default:hiddenWorker}]=await Promise.all([isolatedWorke
 const ROOTS=[
   'wish_57b208a2-c381-4bbd-bca5-4b0c1d76a19d',
   'wish_93c9de27-c022-483f-975a-5452bdd9f06e',
-  'wish_841df73a-7c30-4f8d-b7bd-df945e4c563a'
+  'wish_841df73a-7c30-4f8d-b7bd-df945e4c563a',
+  'wish_558a976c-173a-4034-9503-f92a51c5c0b7',
+  'wish_cc52e794-db66-413d-bb25-9f97d5c80c5a'
 ];
+const ROOT_OWNERS=['a','b','a','one','two'];
+const ACTORS=['a','b','one','two','neighbor'];
 const TITLES=[
   'TEST Cloud alpha A — Verify Help and GRAFT between two test accounts.',
   'TEST Cloud alpha B — Connect this test wish to TEST Cloud alpha A.',
-  'TEST QA 2026-10-15 — Verify date validation after release.'
+  'TEST QA 2026-10-15 — Verify date validation after release.',
+  'TEST Confluence one — Synthetic QA root',
+  'TEST Confluence two — Synthetic QA root'
 ];
-const HIDDEN=[...ROOTS,'qa-child-a','qa-grandchild-a'];
+const HIDDEN=[...ROOTS,'qa-child-a','qa-grandchild-a','qa-suggested-one','qa-suggested-one-continuation'];
 const REAL=['real-test-alpha','real-shfg','real-lgi','real-identical-title'];
 const DOMAIN_TABLES=['wishes','wish_events','encouragements','saved_wishes','proposals','proposal_consents','notifications','reports','translation_cache','actors'];
 
@@ -40,7 +46,7 @@ function harness(){
     async batch(statements){sqlite.exec('BEGIN');try{const results=statements.map(s=>s.execute());sqlite.exec('COMMIT');return results}catch(e){sqlite.exec('ROLLBACK');throw e}}
   };
   const env={DB,AUTH_TEST_MODE:'1'};
-  for(const owner of ['a','b','neighbor']){
+  for(const owner of ACTORS){
     sqlite.prepare('INSERT INTO actors (id,created_at,claimed_email,claimed_at) VALUES (?,?,?,?)').run(owner,1,owner+'@isolated.test',1);
     sqlite.prepare('INSERT INTO sessions (token_hash,actor_id,created_at,last_seen_at) VALUES (?,?,?,?)').run(createHash('sha256').update(owner+'-token').digest('hex'),owner,1,1);
   }
@@ -59,9 +65,11 @@ function harness(){
     event(id,parent?kind:'create',parent?{fromWishId:parent}:{});
     return id;
   }
-  ROOTS.forEach((id,i)=>wish(id,i===1?'b':'a',TITLES[i]));
+  ROOTS.forEach((id,i)=>wish(id,ROOT_OWNERS[i],TITLES[i]));
   wish('qa-child-a','a','A child of the known QA fixture',{root:ROOTS[0],parent:ROOTS[0]});
   wish('qa-grandchild-a','a','A continuation of the child',{root:ROOTS[0],parent:'qa-child-a',kind:'evolve'});
+  wish('qa-suggested-one','one','An accepted QA suggestion',{root:ROOTS[3],parent:ROOTS[3]});
+  wish('qa-suggested-one-continuation','one','Continuation of the accepted suggestion',{root:ROOTS[3],parent:'qa-suggested-one',kind:'evolve'});
   REAL.forEach((id,i)=>wish(id,i===2?'b':i===1?'neighbor':'a',['Test Alpha A','Shfg','LGI prior wish',TITLES[0]][i]));
   wish('other-room-wish','a','TEST Cloud alpha in another room',{room:'OTHER'});
   function proposal(id,target,other=null,{type=other?'connect':'help',status='pending',proposer='b'}={}){
@@ -84,12 +92,16 @@ function harness(){
   proposal('neighbor-to-qa',REAL[1],ROOTS[1],{status:'accepted',proposer:'a'});
   proposal('neighbor-to-qa-pending',REAL[1],ROOTS[1],{proposer:'a'});
   proposal('qa-to-neighbor',ROOTS[2],REAL[1],{proposer:'b'});
+  proposal('qa-current-help-accepted',ROOTS[3],null,{status:'accepted',proposer:'two'});
+  proposal('qa-current-graft-accepted',ROOTS[3],ROOTS[4],{status:'accepted',proposer:'two'});
+  proposal('qa-current-help-pending',ROOTS[3],null,{proposer:'two'});
+  proposal('qa-current-branch-pending',ROOTS[4],null,{type:'suggest_branch',proposer:'one'});
   proposal('real-help-accepted',REAL[0],null,{status:'accepted'});
   proposal('real-help-pending',REAL[0]);
-  for(const owner of ['a','b','neighbor'])for(const id of [...HIDDEN,...REAL,'other-room-wish']){
+  for(const owner of ACTORS)for(const id of [...HIDDEN,...REAL,'other-room-wish']){
     sqlite.prepare('INSERT INTO saved_wishes (actor_id,wish_id,created_at) VALUES (?,?,?)').run(owner,id,++timestamp);
   }
-  for(const id of [ROOTS[0],ROOTS[2],'qa-child-a',REAL[0]])sqlite.prepare('INSERT INTO encouragements (wish_id,actor_id,created_at) VALUES (?,?,?)').run(id,'b',++timestamp);
+  for(const id of [ROOTS[0],ROOTS[2],ROOTS[3],ROOTS[4],'qa-child-a','qa-suggested-one',REAL[0]])sqlite.prepare('INSERT INTO encouragements (wish_id,actor_id,created_at) VALUES (?,?,?)').run(id,'b',++timestamp);
   sqlite.prepare("INSERT INTO reports (id,reporter_actor_id,wish_id,reason,details,status,created_at) VALUES ('qa-report','b',?,'Synthetic reason','Synthetic context','open',?)").run(ROOTS[0],++timestamp);
   sqlite.prepare("INSERT INTO translation_cache (cache_key,source_text,source_lang,target_lang,translated_text,created_at,updated_at) VALUES ('qa-translation',?,'en','fr','Traduction de test',?,?)").run(TITLES[0],timestamp,timestamp);
   async function request(path,{actor='a',method='GET',enabled=true,room='WORLD',...body}={}){
@@ -116,16 +128,18 @@ async function surfaces(h,enabled=true,actor='a'){
 
 test('disabled baseline includes exact fixtures; switch reversal restores identical views and domain rows',async()=>{
   const h=harness(),before=h.snapshot();
-  const baseline=await surfaces(h,false),hidden=await surfaces(h,true),restored=await surfaces(h,false);
-  for(const id of HIDDEN)assert(baseline['/v1/world'].wishes.some(w=>w.id===id));
-  assertNoHiddenReferences(hidden);
-  assert.deepEqual(restored,baseline,'switch reversal restores wishes, private context, Saved and unread counts');
+  for(const actor of ACTORS){
+    const baseline=await surfaces(h,false,actor),hidden=await surfaces(h,true,actor),restored=await surfaces(h,false,actor);
+    for(const id of HIDDEN)assert(baseline['/v1/world'].wishes.some(w=>w.id===id));
+    assertNoHiddenReferences(hidden);
+    assert.deepEqual(restored,baseline,'switch reversal restores wishes, private context, Saved and unread counts for '+actor);
+  }
   assert.deepEqual(h.snapshot(),before,'all fixture/domain rows and relationships remain byte-for-byte unchanged');
 });
 
-test('all four response surfaces, counts and both accounts consistently hide fixture relations',async()=>{
+test('all four response surfaces, counts and all four fixture owners consistently hide fixture relations',async()=>{
   const h=harness();
-  for(const actor of ['a','b','neighbor']){
+  for(const actor of ACTORS){
     const value=await surfaces(h,true,actor);assertNoHiddenReferences(value);
     assert.deepEqual(value['/v1/world'].wishes.map(w=>w.id).sort(),REAL.slice().sort());
     assert.deepEqual(value['/v1/saved'].saved.map(w=>w.id).sort(),REAL.slice().sort());
@@ -160,7 +174,7 @@ test('all wish mutations and direct URLs reject hidden roots and descendants wit
   const h=harness(),before=h.snapshot();
   for(const wishId of HIDDEN){
     for(const type of ['evolve','split','add_branch','bloom','abandon','resume','wake','close_lineage','resume_lineage','correct','reparent','set_help','remove_mistake']){
-      const result=await h.request('/v1/wishes/'+wishId+'/events',{method:'POST',actor:wishId===ROOTS[1]?'b':'a',type,text:'A valid correction',locationText:'Synthetic location',children:['First child','Second child'],newParentWishId:REAL[0]});
+      const result=await h.request('/v1/wishes/'+wishId+'/events',{method:'POST',actor:h.sqlite.prepare('SELECT owner_actor_id FROM wishes WHERE id=?').get(wishId).owner_actor_id,type,text:'A valid correction',locationText:'Synthetic location',children:['First child','Second child'],newParentWishId:REAL[0]});
       assert.equal(result.status,404,type+' '+wishId);
     }
     for(const [path,options] of [
@@ -176,12 +190,12 @@ test('all wish mutations and direct URLs reject hidden roots and descendants wit
 
 test('proposal creation and direct proposal/notification actions check both GRAFT endpoints',async()=>{
   const h=harness(),before=h.snapshot();
-  for(const [targetWishId,otherWishId] of [[ROOTS[0],ROOTS[1]],[ROOTS[0],REAL[1]],[REAL[1],ROOTS[0]]]){
+  for(const [targetWishId,otherWishId] of ROOTS.flatMap(root=>[[root,REAL[1]],[REAL[1],root]])){
     const result=await h.request('/v1/proposals',{method:'POST',actor:'neighbor',type:'connect',targetWishId,otherWishId});assert.equal(result.status,404);
   }
   for(const type of ['help','suggest_branch'])assert.equal((await h.request('/v1/proposals',{method:'POST',actor:'b',type,targetWishId:ROOTS[0],title:'A small lesson',note:'I can teach this',steps:['Try a first step']})).status,404);
-  for(const id of ['qa-help-pending','qa-branch-pending','neighbor-to-qa-pending','qa-to-neighbor','qa-graft-accepted']){
-    for(const actor of ['a','b','neighbor']){
+  for(const id of ['qa-help-pending','qa-branch-pending','neighbor-to-qa-pending','qa-to-neighbor','qa-graft-accepted','qa-current-help-pending','qa-current-branch-pending','qa-current-graft-accepted']){
+    for(const actor of ACTORS){
       for(const action of ['respond','cancel'])assert.equal((await h.request('/v1/proposals/'+id+'/'+action,{method:'POST',actor,decision:'accept'})).status,404,id+' '+action);
     }
   }
@@ -266,8 +280,8 @@ test('deployment environment bindings cannot activate the code-only filter',asyn
   for(const id of HIDDEN)assert(data.wishes.some(w=>w.id===id));
 });
 
-test('shipping fixture filter stays disabled pending final acceptance',()=>{
-  assert(source.includes('const QA_FIXTURE_HIDING_ENABLED=false;'));
+test('reviewed five-root fixture filter is enabled while reversal remains covered',()=>{
+  assert(source.includes('const QA_FIXTURE_HIDING_ENABLED=true;'));
 });
 
 for(const [name,alter] of [
@@ -287,8 +301,80 @@ for(const [name,alter] of [
   ['lineage points to a fixture descendant',h=>h.wish('foreign-descendant-lineage','a','An unrelated lineage reference',{root:'foreign-descendant-lineage',lineage:'qa-grandchild-a'})]
 ])test('ambiguous fixture ancestry fails open: '+name,async()=>{
   const h=harness();alter(h);const before=h.snapshot();
-  for(const actor of ['a','b','neighbor']){
+  for(const actor of ACTORS){
     assert.deepEqual(await surfaces(h,true,actor),await surfaces(h,false,actor),'an ambiguous family must leave every response identical to the unfiltered baseline');
   }
   assert.deepEqual(h.snapshot(),before,'provenance checks never modify ambiguous or unrelated rows');
+});
+
+
+for(const [index,changedOwner] of [[3,'a'],[3,'b'],[3,'two'],[4,'a'],[4,'b'],[4,'one']])test('new fixture owner group remains distinct: root '+index+' vs '+changedOwner,async()=>{
+  const h=harness(),rootId=ROOTS[index];
+  // Keep creation and lineage internally consistent so only the owner-group
+  // invariant rejects the ambiguous match.
+  h.sqlite.prepare('UPDATE wishes SET owner_actor_id=? WHERE root_wish_id=?').run(changedOwner,rootId);
+  h.sqlite.prepare('UPDATE wish_events SET actor_id=? WHERE lineage_id=?').run(changedOwner,rootId);
+  const before=h.snapshot();
+  for(const actor of ACTORS)assert.deepEqual(await surfaces(h,true,actor),await surfaces(h,false,actor));
+  assert.deepEqual(h.snapshot(),before);
+});
+
+for(const index of [3,4])test('new fixture original-create proof is required: root '+index,async()=>{
+  const h=harness();
+  h.sqlite.prepare("UPDATE wish_events SET actor_id='neighbor' WHERE wish_id=? AND event_type='create'").run(ROOTS[index]);
+  assert.deepEqual(await surfaces(h,true),await surfaces(h,false));
+});
+
+test('new suggested descendants retain strict ancestry validation',async()=>{
+  const h=harness();
+  h.sqlite.prepare('UPDATE wishes SET parent_wish_id=? WHERE id=?').run(REAL[0],'qa-suggested-one');
+  const before=h.snapshot();
+  for(const actor of ACTORS)assert.deepEqual(await surfaces(h,true,actor),await surfaces(h,false,actor));
+  assert.deepEqual(h.snapshot(),before);
+});
+
+test('additional unlisted wishes by each new QA owner remain visible',async()=>{
+  const h=harness();
+  h.wish('unlisted-one','one',TITLES[3]);h.wish('unlisted-two','two',TITLES[4]);
+  for(const [actor,id] of [['one','unlisted-one'],['two','unlisted-two']]){
+    const value=await surfaces(h,true,actor);
+    assert(value['/v1/world'].wishes.some(w=>w.id===id));
+    assert(value['/v1/me'].wishes.some(w=>w.id===id));
+    assertNoHiddenReferences(value);
+  }
+});
+
+test('actual accepted suggestions and evolved descendants on both new roots hide and restore without changing data',async()=>{
+  const h=harness(),created=[];
+  // Clear the seeded pending suggestion through its normal proposer action.
+  assert.equal((await h.request('/v1/proposals/qa-current-branch-pending/cancel',{enabled:false,method:'POST',actor:'one'})).status,200);
+  for(const [index,proposer] of [[3,'two'],[4,'one']]){
+    const owner=ROOT_OWNERS[index],root=ROOTS[index],step='A suggested first step for '+owner;
+    const proposal=await h.request('/v1/proposals',{enabled:false,method:'POST',actor:proposer,type:'suggest_branch',targetWishId:root,steps:[step]});
+    assert.equal(proposal.status,201);
+    const accepted=await h.request('/v1/proposals/'+proposal.data.proposalId+'/respond',{enabled:false,method:'POST',actor:owner,decision:'accept'});
+    assert.equal(accepted.status,200);assert.equal(accepted.data.status,'accepted');
+    const children=h.sqlite.prepare('SELECT id FROM wishes WHERE parent_wish_id=? AND text=?').all(root,step);
+    assert.equal(children.length,1,'an accepted suggestion materializes exactly one child');
+    const child=children[0].id;
+    const evolved=await h.request('/v1/wishes/'+child+'/events',{enabled:false,method:'POST',actor:owner,type:'evolve',text:'A smaller follow-up step for '+owner});
+    assert.equal(evolved.status,201);
+    for(const wishId of [child,evolved.data.wishId]){
+      assert.equal((await h.request('/v1/saved/'+wishId,{enabled:false,method:'POST',actor:proposer})).status,201);
+      assert.equal((await h.request('/v1/wishes/'+wishId+'/encourage',{enabled:false,method:'POST',actor:proposer})).status,201);
+      created.push({wishId,owner});
+    }
+  }
+  const before=h.snapshot();
+  for(const actor of ACTORS){
+    const baseline=await surfaces(h,false,actor),hidden=await surfaces(h,true,actor),restored=await surfaces(h,false,actor);
+    assertNoHiddenReferences(hidden);
+    for(const {wishId} of created){
+      assert(baseline['/v1/world'].wishes.some(w=>w.id===wishId));
+      assert(!JSON.stringify(hidden).includes(wishId),'materialized descendant must disappear from every response');
+    }
+    assert.deepEqual(restored,baseline,'code-only reversal restores actual API-created branches and related activity');
+  }
+  for(const {wishId,owner} of created)assert.equal((await h.request('/v1/wishes/'+wishId+'/events',{method:'POST',actor:owner,type:'wake'})).status,404);
+  assert.deepEqual(h.snapshot(),before,'hide, denied mutation and reversal preserve every domain row');
 });

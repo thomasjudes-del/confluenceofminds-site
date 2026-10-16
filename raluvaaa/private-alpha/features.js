@@ -1183,7 +1183,7 @@ function decorate(){
 function decorateWishFacts(){
   const m=current(),body=document.getElementById('drawerBody');
   if(!m||!body?.querySelector('.wish'))return;
-  const record=window.__RALUVAAA_SHARED_DEBUG__?.world()?.wishes?.find(w=>w.id===m.semanticId);
+  const world=window.__RALUVAAA_SHARED_DEBUG__?.world(),record=world?.wishes?.find(w=>w.id===m.semanticId);
   if(!record&&!m.simulated)return;
   const date=Number(record?.createdAt),locale=lang()==='en'?'en-GB':'fr-FR',parts=[];
   if(Number.isFinite(date)&&date>0){
@@ -1195,6 +1195,13 @@ function decorateWishFacts(){
   if(record?.isMine){
     const count=Number(record.encouragementCount);
     if(Number.isInteger(count)&&count>=0&&!body.querySelector('.pa-encouragement-count'))parts.push(count+' '+(lang()==='en'?'support received':'soutien'+(count===1?'':'s')+' reçu'+(count===1?'':'s')));
+  }
+  if(record&&!m.simulated&&Array.isArray(world.events)){
+    // Only public, accepted help events count; proposals and private details do not.
+    const count=world.events.filter(e=>e.type==='help'&&e.wishId===m.semanticId).length;
+    // The world endpoint returns at most 3,000 events, so a full page is a lower bound.
+    const limited=world.events.length>=3000;
+    if(!limited||count>0)parts.push((limited?(lang()==='en'?'At least ':'Au moins '):'')+count+' '+(lang()==='en'?'accepted offer'+(count===1?'':'s')+' of help':'aide'+(count===1?'':'s')+' acceptée'+(count===1?'':'s')));
   }
   let box=body.querySelector('.pa-wish-facts');
   if(!box){box=document.createElement('div');box.className='pa-wish-facts';body.querySelector('.meta')?.insertAdjacentElement('afterend',box)}
