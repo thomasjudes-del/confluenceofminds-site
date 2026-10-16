@@ -223,7 +223,9 @@ async function pageFor(browser,mobile=false){
   }
   await page.evaluate(()=>{
     window.__qaBrandMutations=0;const brand=document.querySelector('#brand .sub');if(brand)new MutationObserver(records=>window.__qaBrandMutations+=records.length).observe(brand,{subtree:true,childList:true,characterData:true});
-    if(window.__RALUVAAA_TRANSLATION__)window.__RALUVAAA_TRANSLATION__.translate=async text=>({translation:text,sourceLang:'und'})
+    // Keep one deterministic translator throughout FR layout/count checks and
+    // the final translation assertions: cached results must not depend on test order.
+    if(window.__RALUVAAA_TRANSLATION__)window.__RALUVAAA_TRANSLATION__.translate=async (text,target)=>({translation:target==='fr'?'TRADUIT: '+text:text,sourceLang:'en'})
   });
   return{context,page}
 }
@@ -568,10 +570,7 @@ async function acceptFirst(page,type){
     assert.notEqual(await firstEntrusted.evaluate(el=>getComputedStyle(el).borderColor),'rgba(0, 0, 0, 0)','entrusted wish must retain its color cue');
 
     // Wish content, not only chrome, follows the reader language while the original stays accessible.
-    await A.page.evaluate(()=>{
-      window.__RALUVAAA_TRANSLATION__.translate=async text=>({translation:'TRADUIT: '+text,sourceLang:'en'});
-      document.querySelector('[data-lang="fr"]')?.click()
-    });
+    await A.page.click('[data-lang="fr"]');
     await openWish(A.page,wishA);
     await A.page.waitForSelector('.v47-translation-note',{polling:100,timeout:5000});
     assert.match((await A.page.locator('#drawerBody .wish').innerText()).trim(),/^TRADUIT: /,'wish body must be translated for the reader');
