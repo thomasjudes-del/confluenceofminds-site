@@ -28,6 +28,9 @@ async function verifyPhysicalMute(page,mobile){
   const hit=await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert(hit,'mute must receive physical pointer hit-testing');
   const tap=()=>mobile?page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2):page.mouse.click(box.x+box.width/2,box.y+box.height/2);
   if(await page.evaluate(()=>window.__RALUVAAA_AUDIO__.enabled))await tap();
+  // Start the short deterministic fixture from its beginning. Page startup can
+  // otherwise leave it near its end before the three-channel playback check.
+  await page.evaluate(()=>{const a=window.__RALUVAAA_AUDIO__.audio;if(!a.paused)throw new Error('Ambient fixture must be paused before reset');a.currentTime=0});
   // Safari requires each media channel's initial play to belong to a real
   // user gesture. Start the actual channels in the physical unmute click,
   // rather than using evaluate() to simulate permission to autoplay.
