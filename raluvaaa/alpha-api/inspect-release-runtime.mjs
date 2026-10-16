@@ -107,7 +107,7 @@ export async function inspectRuntime({fetchImpl=fetch,accountId,token,workerName
   // D1 UUIDs, variable values, secret values, annotations, actor emails, route
   // patterns and domain names never enter the returned/logged summary.
   return{
-    inspection:'read-only-runtime-inventory',worker:workerName,
+    inspection:'read-only-runtime-inventory',inspectionPurpose:'five-root-cleanup-preflight-20261016',observedAt:new Date().toISOString(),worker:workerName,
     deploymentId:identifier(current.id,'deployment'),activeVersions:active,
     latestVersionId:latestId,latestMatchesActive:active.length===1&&active[0].versionId===latestId,
     versions:summaries,authModes:modes,
