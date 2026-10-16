@@ -58,9 +58,27 @@ test('full history yields exact zero, capped positive is a minimum and capped ze
  events[0]={id:'h',type:'help',wishId:'current'};events[1]={id:'s',type:'split',parentWishId:'current',payload:{proposalId:'p'}};
  const positive=context.counts(current,world(events));assert.equal(positive.help.value,1);assert.equal(positive.suggest.value,1);assert(positive.help.limited);assert.match(context.countLabel(positive.help,'help','en'),/^At least 1/);assert.match(context.countLabel(positive.suggest,'suggest','fr'),/^Au moins 1/);
 });
-test('current short date and place are authoritative, no arbitrary simulated timestamp',()=>{
- const html=render();assert.match(html,/Montréal, Canada/);assert.match(html,/>16 oct\.</);assert.match(html,/datetime="2026-10-16/);
- const simulated=render({...current,simulated:true,created:100},[root,parent,current],world([]));assert(!simulated.includes('<time'));assert.match(simulated,/Date indisponible/);assert(!simulated.includes('Wish simulé'));
+test('current short date and place are authoritative and keep one compact status-place-date line',()=>{
+ const html=context.facts({...current,loc:'Stale place'},world([]),'fr','Vivant');
+ assert.equal((html.match(/pa-context-facts/g)||[]).length,1);assert.match(html,/Montréal, Canada/);assert(!html.includes('Stale place'));assert.match(html,/>16 oct\.</);assert.match(html,/datetime="2026-10-16T00:00:00.000Z"/);assert.match(html,/title="16 octobre 2026"/);
+ assert.equal((html.match(/pa-fact-sep/g)||[]).length,2);assert(html.indexOf('Vivant')<html.indexOf('Montréal'));assert(html.indexOf('Montréal')<html.indexOf('<time'));assert(!html.includes('indisponible'));
+ const english=context.facts(current,world([]),'en','Alive');assert.match(english,/>16 Oct</);assert.match(english,/title="16 October 2026"/);
+});
+test('absent, invalid and simulated dates omit the date and its separator without inventing a timestamp',()=>{
+ for(const lang of ['fr','en'])for(const date of [undefined,null,'',0,-1,NaN,Infinity,9e20,'invalid',true,'1792108800000']){
+  const data=world([]);data.wishes.find(w=>w.id==='current').createdAt=date;
+  const html=context.facts({...current,created:100},data,lang,'Alive');assert(!html.includes('<time'));assert(!/unavailable|indisponible/.test(html));assert.match(html,/Montréal, Canada/);assert.equal((html.match(/pa-fact-sep/g)||[]).length,1);
+ }
+ const html=context.facts({...current,simulated:true,created:100},world([]),'fr','Vivant');assert(!html.includes('<time'));assert(!/indisponible|simulé/.test(html));assert.equal((html.match(/pa-fact-sep/g)||[]).length,1);
+});
+test('absent location omits its separator and never falls back to stale semantic text over a public record',()=>{
+ for(const location of [undefined,null,'','   ']){
+  const data=world([]);data.wishes.find(w=>w.id==='current').locationText=location;
+  const html=context.facts({...current,loc:'Stale place'},data,'fr','Vivant');assert(!html.includes('pa-context-location'));assert(!html.includes('Stale place'));assert.match(html,/>16 oct\.</);assert.equal((html.match(/pa-fact-sep/g)||[]).length,1);
+  data.wishes.find(w=>w.id==='current').createdAt=null;const bare=context.facts({...current,loc:'Stale place'},data,'fr','Vivant');assert(!bare.includes('pa-fact-sep'));assert(!bare.includes('<time'));assert(!bare.includes('pa-context-location'));assert.match(bare,/>Vivant</);
+ }
+ const example=context.facts({...current,simulated:true,loc:''},null,'fr','Vivant');assert(!example.includes('pa-fact-sep'));assert(!/indisponible|unavailable/.test(example));
+ const local=context.facts({...current,loc:'Lyon, France'},null,'fr','Vivant');assert.match(local,/Lyon, France/);assert.equal((local.match(/pa-fact-sep/g)||[]).length,1);assert(!local.includes('<time'));
 });
 test('all title/metadata strings are escaped and unknown kind is not mislabeled as branch',()=>{
  const m={...current,text:'<img src=x onerror=alert(1)>',kind:'unknown'};const html=render(m,[m],null);assert(!html.includes('<img'));assert.match(html,/&lt;img/);assert.match(html,/\(vœu\)/);

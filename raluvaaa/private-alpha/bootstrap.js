@@ -518,7 +518,7 @@ async function boot(){
 
   const initial=restoreEntrustedAssignments(await fetchState(),client.actorId);lastFingerprint=fp(initial);knownConnectIds=new Set(initial.events.filter(e=>e.type==='connect').map(e=>e.proposalId||[e.aSemanticId,e.bSemanticId].sort().join('|')));localStorage.setItem(STORE,JSON.stringify(initial));
 
-  await loadScript('wish-context.js?build=private-alpha-context-v2-20261016');
+  await loadScript('wish-context.js?build=private-alpha-context-v2-20261016-compact-facts');
   await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-context-v2-20261016');
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=private-alpha-1');
   await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-usability-20261016');

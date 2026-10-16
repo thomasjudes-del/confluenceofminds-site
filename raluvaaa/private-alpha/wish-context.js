@@ -10,12 +10,12 @@ function copy(lang){return lang==='en'?{
   create:'initial wish',split:'branch',evolve:'evolution',unknown:'wish',current:'Currently viewed wish',path:'Wish path',children:'Direct continuations',
   missingRoot:'Initial wish unavailable',missingParent:'Part of the parent path is unavailable',invalidPath:'Incomplete wish path',
   support:'support received',help:'accepted offers of help',suggest:'accepted branch suggestions',atLeast:'At least ',unavailable:'Count unavailable',simulated:'Simulated wish',
-  limit:'Public history is incomplete; this is a minimum.',simulation:'Real engagement is unavailable for this simulated wish.',dateUnavailable:'Date unavailable'
+  limit:'Public history is incomplete; this is a minimum.',simulation:'Real engagement is unavailable for this simulated wish.'
 }:{
   create:'vœu initial',split:'branche',evolve:'évolution',unknown:'vœu',current:'Vœu actuellement ouvert',path:'Chemin du vœu',children:'Suites directes',
   missingRoot:'Vœu initial indisponible',missingParent:'Une partie du chemin parent est indisponible',invalidPath:'Chemin du vœu incomplet',
   support:'soutiens reçus',help:'aides acceptées',suggest:'suggestions de branche acceptées',atLeast:'Au moins ',unavailable:'Compteur indisponible',simulated:'Wish simulé',
-  limit:'L’historique public est incomplet ; ce chiffre est un minimum.',simulation:'L’activité réelle est indisponible pour ce wish simulé.',dateUnavailable:'Date indisponible'
+  limit:'L’historique public est incomplet ; ce chiffre est un minimum.',simulation:'L’activité réelle est indisponible pour ce wish simulé.'
 }}
 function context(current,semantic,world){
   const navigable=new Set((semantic||[]).map(m=>m.semanticId));
@@ -64,11 +64,13 @@ function countLabel(metric,key,lang,simulated){
   return (metric.limited?t.atLeast:'')+metric.value+' '+(metric.value===1?singular[key]:t[key])+(metric.limited?'. '+t.limit:'');
 }
 function facts(current,world,lang,status){
-  const t=copy(lang),record=world?.wishes?.find(w=>w.id===current.semanticId),date=Number(record?.createdAt);
-  const location=record?.locationText||current.loc||'';
+  const record=world?.wishes?.find(w=>w.id===current.semanticId),date=record?.createdAt;
+  const location=String(record?record.locationText||'':current.loc||'').trim();
   const validDate=!current.simulated&&Number.isFinite(date)&&date>0&&!Number.isNaN(new Date(date).getTime());
-  const dateHtml=validDate?'<time datetime="'+esc(new Date(date).toISOString())+'" title="'+esc(new Intl.DateTimeFormat(lang==='en'?'en-GB':'fr-FR',{dateStyle:'long'}).format(date))+'">'+esc(new Intl.DateTimeFormat(lang==='en'?'en-GB':'fr-FR',{day:'numeric',month:'short'}).format(date))+'</time>':'<span class="pa-date-unavailable">'+esc(t.dateUnavailable)+'</span>';
-  return '<div class="pa-context-facts"><span class="pa-wish-status pa-state-'+esc(current.state||'alive')+'">'+esc(status)+'</span>'+(location?'<span class="pa-fact-sep" aria-hidden="true">·</span><span class="pa-context-location" title="'+esc(location)+'">'+esc(location)+'</span>':'')+'<span class="pa-fact-sep" aria-hidden="true">·</span>'+dateHtml+'</div>';
+  const parts=['<span class="pa-wish-status pa-state-'+esc(current.state||'alive')+'">'+esc(status)+'</span>'];
+  if(location)parts.push('<span class="pa-context-location" title="'+esc(location)+'">'+esc(location)+'</span>');
+  if(validDate)parts.push('<time datetime="'+esc(new Date(date).toISOString())+'" title="'+esc(new Intl.DateTimeFormat(lang==='en'?'en-GB':'fr-FR',{dateStyle:'long'}).format(date))+'">'+esc(new Intl.DateTimeFormat(lang==='en'?'en-GB':'fr-FR',{day:'numeric',month:'short'}).format(date))+'</time>');
+  return '<div class="pa-context-facts">'+parts.join('<span class="pa-fact-sep" aria-hidden="true">·</span>')+'</div>';
 }
 function render({current,semantic,world,lang,status}){
   const t=copy(lang),c=context(current,semantic,world),id=current.semanticId;
