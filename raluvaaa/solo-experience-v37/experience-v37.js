@@ -96,9 +96,11 @@ function decorateDeck(){
 }
 
 function decorate(){
-  document.title='RALUVAAA · Experience V37';
-  const sub=document.querySelector('#brand .sub');
-  if(sub)sub.textContent='EXPERIENCE V37';
+  if(document.body?.dataset.alpha!=='private-alpha'){
+    document.title='RALUVAAA · Experience V37';
+    const sub=document.querySelector('#brand .sub');
+    if(sub)sub.textContent='EXPERIENCE V37';
+  }
   decorateRail();
   decorateRoot();
   decorateDeck();

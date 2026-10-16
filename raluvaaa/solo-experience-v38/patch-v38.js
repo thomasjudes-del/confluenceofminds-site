@@ -56,9 +56,11 @@ function ensureReportButton(){
 }
 
 function decorate(){
-  document.title='RALUVAAA · Experience V38';
-  const sub=document.querySelector('#brand .sub');
-  if(sub)sub.textContent='EXPERIENCE V38';
+  if(document.body?.dataset.alpha!=='private-alpha'){
+    document.title='RALUVAAA · Experience V38';
+    const sub=document.querySelector('#brand .sub');
+    if(sub)sub.textContent='EXPERIENCE V38';
+  }
   decorateExistingReport();
   ensureReportButton();
 }

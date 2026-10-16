@@ -7,8 +7,10 @@ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const structuralTypes=new Set(['create','evolve','split','branch_add','bloom','abandon','close_lineage','resume','resume_lineage','reparent']);
 
 function injectChrome(){
-  document.title=window.RALUVAAA_SOLO?'RALUVAAA · Solo RC':'RALUVAAA · Alpha V0';
-  const sub=document.querySelector('#brand .sub');if(sub)sub.textContent=window.RALUVAAA_SOLO?'SOLO RC · SIMULÉ':(params.has('qa')?'ALPHA V0 · QA · SIMULÉ':'ALPHA V0 · SIMULÉ');
+  if(document.body?.dataset.alpha!=='private-alpha'){
+    document.title=window.RALUVAAA_SOLO?'RALUVAAA · Solo RC':'RALUVAAA · Alpha V0';
+    const sub=document.querySelector('#brand .sub');if(sub)sub.textContent=window.RALUVAAA_SOLO?'SOLO RC · SIMULÉ':(params.has('qa')?'ALPHA V0 · QA · SIMULÉ':'ALPHA V0 · SIMULÉ');
+  }
   if(!params.has('qa')){const q=document.getElementById('qaStrip');if(q)q.classList.add('hidden')}
   const style=document.createElement('style');style.textContent=`
   #ritualLayer{position:fixed;inset:0;z-index:62;pointer-events:none;overflow:hidden}

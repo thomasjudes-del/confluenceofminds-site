@@ -46,7 +46,7 @@ jobs:
           grep -q "requestCode" raluvaaa/alpha-api/client.mjs
           grep -q "saved_wishes" raluvaaa/alpha-api/schema.sql
       - name: Check security and concurrent request regressions
-        run: node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/alpha-api/qa-fixture-hiding.mjs raluvaaa/private-alpha/qa-bootstrap-security.cjs raluvaaa/private-alpha/qa-audio.cjs raluvaaa/private-alpha/qa-entrusted-workflows.cjs raluvaaa/private-alpha/qa-usability.cjs
+        run: node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/alpha-api/qa-fixture-hiding.mjs raluvaaa/private-alpha/qa-bootstrap-security.cjs raluvaaa/private-alpha/qa-audio.cjs raluvaaa/private-alpha/qa-entrusted-workflows.cjs raluvaaa/private-alpha/qa-usability.cjs raluvaaa/private-alpha/qa-branding.cjs
       - name: Install browsers and Worker
         run: |
           npm install --no-save playwright@1.55.0 wrangler@4 >/dev/null 2>&1

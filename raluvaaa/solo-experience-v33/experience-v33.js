@@ -153,7 +153,7 @@ function buildDeck(){
 }
 
 function decorate(){
-  document.title='RALUVAAA · Experience V33';
+  if(document.body?.dataset.alpha!=='private-alpha'){document.title='RALUVAAA · Experience V33';}
   decorateRail();
   decorateRoot();
   buildDeck();
