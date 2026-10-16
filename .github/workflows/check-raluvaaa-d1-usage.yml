@@ -1,0 +1,39 @@
+name: Inspect RALUVAAA account D1 usage (read only)
+
+# Only the explicitly approved diagnostic branch can start this read-only job.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'inspect/d1-usage-local-20261016'
+    paths:
+      - '.github/workflows/check-raluvaaa-d1-usage.yml'
+      - 'raluvaaa/alpha-api/inspect-d1-usage.mjs'
+      - 'raluvaaa/alpha-api/inspect-d1-usage.test.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: raluvaaa-d1-usage-inspection
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    if: github.ref == 'refs/heads/inspect/d1-usage-local-20261016'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify fixed aggregate query and sanitized output offline
+        run: node --test raluvaaa/alpha-api/inspect-d1-usage.test.mjs
+      - name: Read two UTC days of aggregate D1 analytics once
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node raluvaaa/alpha-api/inspect-d1-usage.mjs
