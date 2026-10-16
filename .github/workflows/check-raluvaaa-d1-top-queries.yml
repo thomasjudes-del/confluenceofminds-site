@@ -1,0 +1,39 @@
+name: Inspect RALUVAAA D1 query usage (read only)
+
+# Separate reviewed diagnostic branch; never deploys Worker code or executes SQL.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'inspect/d1-query-usage-20261016'
+    paths:
+      - '.github/workflows/check-raluvaaa-d1-top-queries.yml'
+      - 'raluvaaa/alpha-api/inspect-d1-top-queries.mjs'
+      - 'raluvaaa/alpha-api/inspect-d1-top-queries.test.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: raluvaaa-d1-top-query-inspection
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    if: github.ref == 'refs/heads/inspect/d1-query-usage-20261016' && github.repository == 'thomasjudes-del/confluenceofminds-site'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify fixed DB binding gate and SQL-free output offline
+        run: node --test raluvaaa/alpha-api/inspect-d1-top-queries.test.mjs
+      - name: Verify fixed Worker DB binding then read top-ten aggregates
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node raluvaaa/alpha-api/inspect-d1-top-queries.mjs
