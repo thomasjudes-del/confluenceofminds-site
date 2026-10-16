@@ -7,6 +7,8 @@ on:
       - 'raluvaaa/private-alpha/qa-*'
       - 'raluvaaa/shared-alpha/qa-*'
       - '.github/workflows/check-raluvaaa-alpha-api.yml'
+      - '.github/workflows/check-raluvaaa-private-alpha.yml'
+      - '.github/workflows/check-raluvaaa-shared-ui.yml'
   workflow_dispatch:
 
 jobs:
@@ -29,7 +31,7 @@ jobs:
           grep -q "already_encouraged" raluvaaa/alpha-api/worker.mjs
           grep -q "RaluvaaaAlphaClient" raluvaaa/alpha-api/client.mjs
       - name: Run isolated security and concurrency regressions
-        run: node --test raluvaaa/alpha-api/qa-security.mjs
+        run: node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/alpha-api/qa-fixture-hiding.mjs
       - name: Validate D1 schema with SQLite
         run: |
           python3 - <<'PY'

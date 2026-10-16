@@ -7,8 +7,14 @@ on:
       - 'raluvaaa/shared-alpha/**'
       - 'raluvaaa/alpha-api/**'
       - 'raluvaaa/solo-experience-v42/app-v42.js'
+      - 'raluvaaa/solo-experience-v42/revive-sound-v42.js'
+      - 'raluvaaa/solo-experience-v38/sound-v38.js'
+      - 'raluvaaa/mvp-v26/ambient-audio.js'
+      - 'raluvaaa/mvp-v26/alpha-hardening.js'
       - 'raluvaaa/solo-experience-v46/**'
       - '.github/workflows/check-raluvaaa-private-alpha.yml'
+      - '.github/workflows/check-raluvaaa-alpha-api.yml'
+      - '.github/workflows/check-raluvaaa-shared-ui.yml'
   workflow_dispatch:
 
 concurrency:
@@ -40,12 +46,14 @@ jobs:
           grep -q "requestCode" raluvaaa/alpha-api/client.mjs
           grep -q "saved_wishes" raluvaaa/alpha-api/schema.sql
       - name: Check security and concurrent request regressions
-        run: node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/private-alpha/qa-bootstrap-security.cjs
+        run: node --test raluvaaa/alpha-api/qa-security.mjs raluvaaa/alpha-api/qa-fixture-hiding.mjs raluvaaa/private-alpha/qa-bootstrap-security.cjs raluvaaa/private-alpha/qa-audio.cjs raluvaaa/private-alpha/qa-entrusted-workflows.cjs raluvaaa/private-alpha/qa-usability.cjs
       - name: Install browsers and Worker
         run: |
           npm install --no-save playwright@1.55.0 wrangler@4 >/dev/null 2>&1
           npx playwright install --with-deps chromium webkit >/dev/null 2>&1
       - name: Run real two-browser identity QA
+        env:
+          DEBUG: pw:browser
         run: |
           cd raluvaaa/alpha-api
           npx wrangler d1 execute raluvaaa-alpha --local --file=schema.sql --config=wrangler.ci.toml >/tmp/private-alpha-d1.log 2>&1
@@ -57,9 +65,20 @@ jobs:
           trap 'kill $WORKER_PID $HTTP_PID || true' EXIT
           sleep 2
           if ! node raluvaaa/private-alpha/qa-private-alpha.cjs; then
+            echo '--- Runner memory and process footprint ---'
+            free -m
+            ps -eo pid,comm,rss --sort=-rss | head -15
             echo '--- Worker log ---'
             cat /tmp/private-alpha-worker.log || true
             echo '--- Static log ---'
             cat /tmp/private-alpha-http.log || true
             exit 1
           fi
+      - name: Keep synthetic export evidence on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: private-alpha-export-diagnostic
+          path: qa-artifacts/export-clip.*
+          if-no-files-found: ignore
+          retention-days: 7

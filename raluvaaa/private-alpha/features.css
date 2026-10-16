@@ -934,7 +934,9 @@ body[data-alpha="private-alpha"] #rail{pointer-events:auto!important}
 /* Music is a utility, not a fifth primary navigation action. */
 #brand .pa-brand-music{
   flex:0 0 auto;
-  width:25px!important;height:25px!important;min-width:25px!important;
+  width:44px!important;height:44px!important;min-width:44px!important;
+  pointer-events:auto!important;touch-action:manipulation;
+  position:relative;
   display:grid!important;place-items:center!important;
   border:1px solid rgba(184,214,255,.12)!important;
   border-radius:999px!important;
@@ -942,10 +944,10 @@ body[data-alpha="private-alpha"] #rail{pointer-events:auto!important}
   padding:0!important;margin:0!important;
   color:rgba(238,244,248,.68)!important;
 }
-#brand .pa-brand-music .v37-rail-icon{width:15px!important;height:15px!important;display:grid!important;place-items:center!important}
-#brand .pa-brand-music img{width:15px!important;height:15px!important;display:block!important;object-fit:contain!important}
+#brand .pa-brand-music .v37-rail-icon{width:24px!important;height:24px!important;display:grid!important;place-items:center!important}
+#brand .pa-brand-music img{width:24px!important;height:24px!important;display:block!important;object-fit:contain!important}
 #brand .pa-brand-music.muted{opacity:.58!important}
-@media(max-width:820px){#brand .pa-brand-music{width:24px!important;height:24px!important;min-width:24px!important}}
+
 
 /* Ship pass: entrusted wishes own their timer/color styling natively. */
 .pa-entrusted{transition:border-color .18s ease,box-shadow .18s ease}
@@ -979,3 +981,68 @@ body[data-alpha="private-alpha"] #rail{pointer-events:auto!important}
   cursor:pointer
 }
 .v47-translation-note button:hover{color:rgba(232,247,255,.88);border-bottom-color:rgba(151,215,236,.46)}
+
+/* Private alpha usability: one readable scale and real touch/click targets. */
+body[data-alpha="private-alpha"]{--pa-active:#83e2ba;--pa-bloom:#f3cf78;--pa-abandoned:#f399a4}
+body[data-alpha="private-alpha"] #brand{width:auto!important;max-width:calc(100vw - 24px)!important}
+body[data-alpha="private-alpha"] #brand .brand-row{gap:6px!important;flex-wrap:wrap}
+body[data-alpha="private-alpha"] #brand .v46-about-btn{width:44px;height:44px;min-width:44px;font-size:19px!important}
+body[data-alpha="private-alpha"] .lang button{min-width:36px!important;height:40px!important;font-size:11px!important}
+body[data-alpha="private-alpha"] #brand .pa-brand-music .sound-strike{left:7px;right:7px;top:21px}
+body[data-alpha="private-alpha"] button:focus-visible{outline:2px solid #b0e9ef!important;outline-offset:3px}
+body[data-alpha="private-alpha"] .drawer-close,
+body[data-alpha="private-alpha"] .pa-auth-x,
+body[data-alpha="private-alpha"] .v46-share-x,
+body[data-alpha="private-alpha"] .v46-about-close,
+body[data-alpha="private-alpha"] .v43-saved-remove{min-width:44px!important;min-height:44px!important}
+body[data-alpha="private-alpha"] .sheet{max-height:calc(100dvh - 24px);overflow:auto}
+body[data-alpha="private-alpha"] .sheet p,
+body[data-alpha="private-alpha"] .pa-auth-card p,
+body[data-alpha="private-alpha"] .pa-auth-account span{font-size:14px!important;line-height:1.5!important}
+body[data-alpha="private-alpha"] .field label,
+body[data-alpha="private-alpha"] .pa-auth-field label{font-size:12px!important;letter-spacing:.04em!important}
+body[data-alpha="private-alpha"] .field-note,
+body[data-alpha="private-alpha"] .pa-auth-kicker,
+body[data-alpha="private-alpha"] .pa-request-wish,
+body[data-alpha="private-alpha"] .v47-translation-note,
+body[data-alpha="private-alpha"] .v47-translation-note button{font-size:11px!important;line-height:1.4!important}
+body[data-alpha="private-alpha"] .sheet input,
+body[data-alpha="private-alpha"] .sheet textarea,
+body[data-alpha="private-alpha"] .pa-auth-field input{font-size:16px!important}
+body[data-alpha="private-alpha"] .sheet-actions button,
+body[data-alpha="private-alpha"] .pa-auth-actions button,
+body[data-alpha="private-alpha"] .request-actions button,
+body[data-alpha="private-alpha"] .pa-myworld-account-action,
+body[data-alpha="private-alpha"] .v46-share-sheet footer button{min-height:44px!important;font-size:13px!important}
+body[data-alpha="private-alpha"] .drawer-item .t{font-size:14px!important;line-height:1.4!important}
+body[data-alpha="private-alpha"] .drawer-item .m,
+body[data-alpha="private-alpha"] .meta{font-size:12px!important;line-height:1.5!important}
+body[data-alpha="private-alpha"] .pa-wish-status{min-height:32px;padding:5px 11px;font-size:12px;font-weight:650;letter-spacing:.02em}
+body[data-alpha="private-alpha"] .pa-wish-status::before{content:'●';margin-right:7px}
+body[data-alpha="private-alpha"] .pa-state-alive{color:var(--pa-active);border-color:#83e2ba66;background:#83e2ba12}
+body[data-alpha="private-alpha"] .pa-state-bloom,
+body[data-alpha="private-alpha"] .pa-state-bloomed{color:var(--pa-bloom);border-color:#f3cf7866;background:#f3cf7812}
+body[data-alpha="private-alpha"] .pa-state-abandoned{color:var(--pa-abandoned);border-color:#f399a466;background:#f399a412}
+.pa-wish-facts{display:flex;flex-wrap:wrap;gap:6px 12px;margin:10px 0;font-size:12px;line-height:1.45;color:rgba(230,239,241,.8)}
+.pa-entrusted-origin{margin-top:6px;font-size:12px;line-height:1.4;color:rgba(230,239,241,.75)}
+.pa-share-free{font-size:12px;color:rgba(230,239,241,.8);margin-top:6px}
+@media(max-width:820px){
+ body[data-alpha="private-alpha"] #brand{max-width:calc(100vw - 16px)!important;padding:6px!important}
+ body[data-alpha="private-alpha"] #brand .logo{font-size:12px!important;letter-spacing:.18em!important}
+ body[data-alpha="private-alpha"] #brand .brand-row{gap:4px!important}
+ body[data-alpha="private-alpha"] .lang button{min-width:32px!important;padding:0 5px!important}
+ body[data-alpha="private-alpha"] .v46-share-sheet{overflow:auto}
+}
+
+body[data-alpha="private-alpha"] .v46-share-modes button{min-height:44px!important;font-size:13px!important}
+body[data-alpha="private-alpha"] .v46-style-dots button{width:28px!important;height:28px!important;border:9px solid transparent!important;background-clip:content-box!important}
+body[data-alpha="private-alpha"] .v46-style-nav{min-width:44px!important;min-height:44px!important}
+.pa-entrusted-kind{display:block;margin-top:6px;font-size:11px;letter-spacing:.03em;color:#c1d1dc}
+.pa-history-note{margin-top:7px;white-space:pre-wrap;font-size:13px;line-height:1.45;color:#e0e9ed}
+body[data-alpha="private-alpha"] .v43-saved-row .drawer-item{padding-right:54px}
+
+.pa-help-toggle{min-height:44px;padding:8px 12px;border:1px solid rgba(184,214,255,.22);border-radius:12px;background:rgba(255,255,255,.04);font-size:13px}
+
+.pa-wish-origin{margin:8px 0;padding:9px 11px;border-left:2px solid rgba(131,226,186,.5);font-size:13px;line-height:1.45;color:#d6e5eb}
+
+body[data-alpha="private-alpha"] .pa-auth-card{max-height:calc(100dvh - 16px);overflow-y:auto;overscroll-behavior:contain}

@@ -28,16 +28,16 @@ function copy(){
     shareTitle:'Share this wish',image:'Still image',animation:'Animated clip',style:'Style',preview:'Preview',
     shareNow:'Share',download:'Download',copyLink:'Copy link',copiedButton:'✓ Link copied',shareLinkOnly:'Share link',clipReady:'Clip ready',close:'Close',
     copied:'Link copied',downloaded:'Downloaded',shared:'Share opened',preparingClip:'Preparing clip…',copyFailed:'Copy failed. Select the link below.',fallback:'Sharing is unavailable here. The link has been copied.',
-    shareText:'Discover this wish on RALUVAAA',simulated:'SIMULATED WISH',local:'LOCAL POC WISH',human:'HUMAN WISH',
-    saveFailed:'Could not save this wish.'
+    shareText:'Discover this wish on RALUVAAA',free:'Free to explore, create and share',simulated:'SIMULATED WISH',local:'LOCAL POC WISH',human:'HUMAN WISH',
+    saveFailed:'Could not save this wish.',saving:'Saving…'
   }:{
     save:'Sauvegarder',saved:'Sauvegardé',saveWish:'Sauvegarder ce wish',savedWish:'Sauvegardé',savedTitle:'Wishes sauvegardés',savedEmpty:'Sauvegarde les wishes que tu veux retrouver, aider ou connecter plus tard.',
     entrusted:'Confiés pour un temps',remove:'Retirer',unavailable:'Indisponible dans cette session locale',
     shareTitle:'Partager ce wish',image:'Image fixe',animation:'Clip animé',style:'Style',preview:'Aperçu',
     shareNow:'Partager',download:'Télécharger',copyLink:'Copier le lien',copiedButton:'✓ Lien copié',shareLinkOnly:'Partager le lien',clipReady:'Clip prêt',close:'Fermer',
     copied:'Lien copié',downloaded:'Téléchargé',shared:'Partage ouvert',preparingClip:'Préparation du clip…',copyFailed:'Copie impossible. Sélectionne le lien ci-dessous.',fallback:'Le partage natif est indisponible ici. Le lien a été copié.',
-    shareText:'Découvrir ce wish sur RALUVAAA',simulated:'WISH SIMULÉ',local:'WISH LOCAL POC',human:'WISH HUMAIN',
-    saveFailed:"Impossible de sauvegarder ce wish."
+    shareText:'Découvrir ce wish sur RALUVAAA',free:'Explorer, créer et partager : c’est gratuit',simulated:'WISH SIMULÉ',local:'WISH LOCAL POC',human:'WISH HUMAIN',
+    saveFailed:"Impossible de sauvegarder ce wish.",saving:"Enregistrement…"
   };
 }
 function toast(msg){
@@ -75,8 +75,17 @@ function savedRecordFor(m){
   if(!m)return null;
   return loadSaved().find(row=>row.semanticId===m.semanticId||resolveSaved(row)?.semanticId===m.semanticId)||null;
 }
-function toggleSaved(m){
-  if(!m)return;
+const pendingSaved=new Set();
+async function toggleSaved(m){
+  if(!m||pendingSaved.has(m.semanticId))return;
+  if(typeof window.__RALUVAAA_SAVE_WISH__==='function'){
+    const existing=savedRecordFor(m),id=existing?.semanticId||m.semanticId;
+    pendingSaved.add(m.semanticId);decorate();
+    try{await window.__RALUVAAA_SAVE_WISH__(id,!existing);toast(existing?copy().remove:copy().saved)}
+    catch(error){toast(window.__RALUVAAA_SHARED_ERROR__?.(error)||copy().saveFailed)}
+    finally{pendingSaved.delete(m.semanticId);decorateEntrustedFresh();decorate()}
+    return;
+  }
   let rows=loadSaved();
   const existing=savedRecordFor(m);
   if(existing)rows=rows.filter(x=>!(x.semanticId===existing.semanticId&&x.lineageId===existing.lineageId));
@@ -85,8 +94,8 @@ function toggleSaved(m){
 }
 function stateLabel(m){
   if(!m)return'';
-  if(m.state==='bloom')return lang()==='en'?'Bloomed':'Fleuri';
-  if(m.state==='abandoned')return lang()==='en'?'Let go':'Laissé';
+  if(m.state==='bloom'||m.state==='bloomed')return lang()==='en'?'Bloomed':'Fleuri';
+  if(m.state==='abandoned')return lang()==='en'?'Let go':'Laissé de côté';
   if(window.__RALUVAAA_VITALITY_V42__?.isDormant?.(m.semanticId))return lang()==='en'?'Dormant':'Dormant';
   return lang()==='en'?'Alive':'Vivant';
 }
@@ -108,7 +117,9 @@ function ensureBookmark(){
   }
   const is=!!savedRecordFor(m),t=copy();
   btn.classList.toggle('active',is);
-  btn.querySelector('span').textContent=is?t.saved:t.save;
+  btn.disabled=pendingSaved.has(m.semanticId);
+  btn.setAttribute('aria-busy',btn.disabled?'true':'false');
+  btn.querySelector('span').textContent=btn.disabled?t.saving:(is?t.saved:t.save);
   btn.title=is?t.saved:t.save;
   btn.setAttribute('aria-pressed',is?'true':'false');
 }
@@ -136,7 +147,9 @@ function ensureMobileBookmark(){
   }
   const is=!!savedRecordFor(m),t=copy();
   btn.classList.toggle('active',is);
-  btn.querySelector('span').textContent=is?t.savedWish:t.saveWish;
+  btn.disabled=pendingSaved.has(m.semanticId);
+  btn.setAttribute('aria-busy',btn.disabled?'true':'false');
+  btn.querySelector('span').textContent=btn.disabled?t.saving:(is?t.savedWish:t.saveWish);
   btn.title=is?t.savedWish:t.saveWish;
   btn.setAttribute('aria-pressed',is?'true':'false');
 }
@@ -179,7 +192,7 @@ function decorateEntrusted(){
       }
       const remove=document.createElement('button');
       remove.className='v43-saved-remove';remove.type='button';remove.textContent='×';remove.title=t.remove;
-      remove.onclick=()=>{saveSaved(loadSaved().filter(x=>!(x.semanticId===row.semanticId&&x.lineageId===row.lineageId)));decorateEntrustedFresh()};
+      remove.onclick=()=>{if(window.__RALUVAAA_SAVE_WISH__)return toggleSaved(m||row);saveSaved(loadSaved().filter(x=>!(x.semanticId===row.semanticId&&x.lineageId===row.lineageId)));decorateEntrustedFresh()};
       item.appendChild(remove);
       list.appendChild(item);
     }
@@ -268,12 +281,22 @@ function ensureAboutButton(){
   }
   const t=aboutCopy();btn.title=t.button;btn.setAttribute('aria-label',t.button)
 }
+function localizeUtilities(){
+  const en=lang()==='en';
+  for(const [id,label] of [['entrustedBtn',en?'Entrusted wishes':'Wishes confiés'],['drawerClose',en?'Close':'Fermer'],['modeClose',en?'Close':'Fermer']]){
+    const button=document.getElementById(id);if(!button)continue;
+    if(button.getAttribute('aria-label')!==label)button.setAttribute('aria-label',label);
+    if(button.title!==label)button.title=label;
+  }
+  const close=document.getElementById('modeClose');if(close&&close.textContent!==(en?'Close':'Fermer'))close.textContent=en?'Close':'Fermer';
+}
 function ensureMusicPlacement(){
-  const brand=document.querySelector('#brand .brand-row'),lang=document.querySelector('#brand .lang'),btn=document.getElementById('musicBtn');
-  if(!brand||!lang||!btn)return;
-  if(btn.parentElement!==brand)lang.insertAdjacentElement('beforebegin',btn);
-  btn.classList.remove('rail-btn');
-  btn.classList.add('pa-brand-music');
+  const brand=document.querySelector('#brand .brand-row'),langControl=document.querySelector('#brand .lang'),btn=document.getElementById('musicBtn');
+  if(!brand||!langControl||!btn)return;
+  if(btn.parentElement!==brand)langControl.insertAdjacentElement('beforebegin',btn);
+  if(btn.classList.contains('rail-btn'))btn.classList.remove('rail-btn');
+  if(!btn.classList.contains('pa-brand-music'))btn.classList.add('pa-brand-music');
+  if(btn.dataset.paAudioLang!==lang()){btn.dataset.paAudioLang=lang();window.__RALUVAAA_AUDIO__?.refresh?.()}
 }
 
 let graftSourceId=null;
@@ -651,8 +674,14 @@ function prettyOverlay(ctx,m,p,mode){
   ctx.strokeStyle='rgba(230,245,245,.11)';ctx.lineWidth=1.2;roundRect(ctx,30,30,W-60,H-60,34);ctx.stroke();
 
   ctx.fillStyle=p.ink;ctx.font='700 17px system-ui,sans-serif';ctx.letterSpacing='4px';ctx.fillText('RALUVAAA',pad,72);
-  const badge=m.simulated?t.simulated:(m.owner?t.local:t.human);
+  const badge=m.simulated?t.simulated:((m.owner&&!window.RALUVAAA_SHARED)?t.local:t.human);
   ctx.font='700 10px system-ui,sans-serif';ctx.letterSpacing='2px';ctx.fillStyle=p.b;ctx.fillText(badge,pad,99);
+
+  ctx.font='600 12px system-ui,sans-serif';ctx.letterSpacing='.4px';ctx.fillStyle=p.muted;
+  const date=Number(m.createdAt);
+  const detail=[stateLabel(m)];
+  if(Number.isFinite(date)&&date>0)detail.push(new Intl.DateTimeFormat(lang()==='en'?'en-GB':'fr-FR',{dateStyle:'medium'}).format(new Date(date)));
+  ctx.fillText(detail.join(' · '),pad,122);
 
   ctx.font='39px Georgia,serif';ctx.fillStyle=p.ink;
   const lines=wrapText(ctx,m.text||'',W-pad*2,4);let y=621;
@@ -713,7 +742,7 @@ function shareUrl(m){
   return u.href
 }
 function shareCaption(m,includeUrl=true){
-  const t=copy(),parts=[m.text||'Wish',m.loc||'',t.shareText];
+  const t=copy(),parts=[m.text||'Wish',m.loc||'',t.shareText,t.free];
   if(includeUrl)parts.push(shareUrl(m));
   return parts.filter(Boolean).join('\n');
 }
@@ -971,14 +1000,14 @@ function setShareActionBusy(on){
     if(btn){btn.disabled=true;btn.classList.add('busy');btn.textContent=copy().preparingClip}
   }else syncShareActionState()
 }
-function settleNativeShare(p,t){
+function settleNativeShare(p,t,url){
   Promise.resolve(p).then(()=>{
     setStatus(t.shared);
     window.dispatchEvent(new CustomEvent('raluvaaa-share'))
   }).catch(e=>{
     if(e?.name==='AbortError')return;
     console.warn('V46 native share failed',e);
-    copyUrl(shareUrl(shareWish)).then(()=>setStatus(t.fallback))
+    copyUrl(url).then(ok=>{if(ok)setStatus(t.fallback)})
   })
 }
 function nativeShareNow(){
@@ -996,11 +1025,11 @@ function nativeShareNow(){
           text:shareCaption(shareWish,false),
           url
         });
-        settleNativeShare(p,t);
+        settleNativeShare(p,t,url);
         return
       }
     }catch(e){console.warn('V46 link share failed',e)}
-    copyUrl(url).then(()=>setStatus(t.fallback));
+    copyUrl(url).then(ok=>{if(ok)setStatus(t.fallback)});
     return
   }
 
@@ -1014,7 +1043,7 @@ function nativeShareNow(){
         text:shareCaption(shareWish,true),
         files:[file]
       });
-      settleNativeShare(p,t);
+      settleNativeShare(p,t,url);
       return
     }
     if(navigator.share){
@@ -1023,25 +1052,28 @@ function nativeShareNow(){
         text:shareCaption(shareWish,false),
         url
       });
-      settleNativeShare(p,t);
+      settleNativeShare(p,t,url);
       return
     }
   }catch(e){console.warn('V46 native share failed',e)}
 
   // Desktop browsers without Web Share: never open the video in a new tab.
   // Copy the wish deep link instead.
-  copyUrl(url).then(()=>setStatus(t.fallback))
+  copyUrl(url).then(ok=>{if(ok)setStatus(t.fallback)})
 }
 async function downloadCurrent(){
   if(!shareWish||recorderBusy)return;
   recorderBusy=true;
+  const requestedKey=mediaKey();
   const btn=document.querySelector('#v46ShareOverlay [data-share-download]');
   const old=btn?.textContent;
   if(btn){btn.disabled=true;btn.textContent=shareMode==='animation'?copy().preparingClip:copy().download}
   try{
     let media=(preparedMedia&&preparedKey===mediaKey())?preparedMedia:null;
     if(!media)media=await prepareCurrentMedia();
-    if(media?.file)downloadFile(media.file);
+    if(requestedKey!==mediaKey()||!shareWish)return;
+    if(!media?.file)throw new Error('media-not-ready');
+    downloadFile(media.file);
     setStatus(copy().downloaded);window.dispatchEvent(new CustomEvent('raluvaaa-share'))
   }catch(e){
     console.warn('V46 download failed',e);
@@ -1058,7 +1090,7 @@ function mediaHtml(){
 function modalHtml(){
   const t=copy();
   return '<div class="v46-share-scrim"></div><section class="v46-share-sheet" role="dialog" aria-modal="true">'+
-    '<header><div><span class="v46-eyebrow">RALUVAAA SHARE</span><h3>'+escapeHtml(t.shareTitle)+'</h3></div><button type="button" class="v46-share-x">×</button></header>'+
+    '<header><div><span class="v46-eyebrow">RALUVAAA</span><h3>'+escapeHtml(t.shareTitle)+'</h3><div class="pa-share-free">'+escapeHtml(t.free)+'</div></div><button type="button" class="v46-share-x" aria-label="'+escapeHtml(t.close)+'">×</button></header>'+
     '<div class="v46-share-modes"><button type="button" data-mode="image">'+escapeHtml(t.image)+'</button><button type="button" data-mode="animation">'+escapeHtml(t.animation)+'</button></div>'+
     '<div class="v46-share-preview">'+mediaHtml()+
       '<button type="button" class="v46-style-nav prev" data-style-prev>‹</button><button type="button" class="v46-style-nav next" data-style-next>›</button>'+
@@ -1117,7 +1149,8 @@ function bindShareSwipe(host){
   area.addEventListener('pointerdown',start);area.addEventListener('pointerup',end)
 }
 function openShare(m){
-  shareWish={...m};shareStyle=hash(m.semanticId+'|'+Date.now())%5;shareMode='animation';shareStatus='';
+  const record=window.__RALUVAAA_SHARED_DEBUG__?.world()?.wishes?.find(w=>w.id===m.semanticId);
+  shareWish={...m,createdAt:record?.createdAt||null};shareStyle=hash(m.semanticId+'|'+Date.now())%5;shareMode='animation';shareStatus='';
   let host=document.getElementById('v46ShareOverlay');
   if(!host){host=document.createElement('div');host.id='v46ShareOverlay';document.body.appendChild(host)}
   host.innerHTML=modalHtml();host.classList.add('open');
@@ -1145,8 +1178,45 @@ function interceptShare(e){
 function decorate(){
   document.title='RALUVAAA · Private Alpha';
   const sub=document.querySelector('#brand .sub');if(sub)sub.textContent='PRIVATE ALPHA';
-  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();ensureMusicPlacement();installGraftSavedBridge();decorateGraftMode();decorateWishTranslation();decorateWishPreviews()
+  ensureBookmark();ensureMobileBookmark();decorateEntrusted();ensureAboutButton();ensureMusicPlacement();localizeUtilities();installGraftSavedBridge();decorateGraftMode();decorateWishTranslation();decorateWishPreviews();decorateWishFacts()
 }
+function decorateWishFacts(){
+  const m=current(),body=document.getElementById('drawerBody');
+  if(!m||!body?.querySelector('.wish'))return;
+  const record=window.__RALUVAAA_SHARED_DEBUG__?.world()?.wishes?.find(w=>w.id===m.semanticId);
+  if(!record&&!m.simulated)return;
+  const date=Number(record?.createdAt),locale=lang()==='en'?'en-GB':'fr-FR',parts=[];
+  if(Number.isFinite(date)&&date>0){
+    const label=lang()==='en'?'Created':'Créé le';
+    parts.push(label+' '+new Intl.DateTimeFormat(locale,{dateStyle:'medium'}).format(new Date(date)));
+  }
+  if(m.simulated)parts.push(lang()==='en'?'Simulated wish':'Wish simulé');
+  if(record?.locationText)parts.push(record.locationText);
+  if(record?.isMine){
+    const count=Number(record.encouragementCount);
+    if(Number.isInteger(count)&&count>=0&&!body.querySelector('.pa-encouragement-count'))parts.push(count+' '+(lang()==='en'?'support received':'soutien'+(count===1?'':'s')+' reçu'+(count===1?'':'s')));
+  }
+  let box=body.querySelector('.pa-wish-facts');
+  if(!box){box=document.createElement('div');box.className='pa-wish-facts';body.querySelector('.meta')?.insertAdjacentElement('afterend',box)}
+  const text=parts.join(' · ');if(box.textContent!==text)box.textContent=text;
+  const root=semantic().find(w=>w.lineageId===m.lineageId&&w.kind==='create');
+  let origin=body.querySelector('.pa-wish-origin');
+  if(root&&root.semanticId!==m.semanticId){
+    if(!origin){origin=document.createElement('div');origin.className='pa-wish-origin';box.insertAdjacentElement('afterend',origin)}
+    const text=(lang()==='en'?'Original wish: ':'Wish d’origine : ')+root.text;
+    if(origin.textContent!==text)origin.textContent=text;
+  }else origin?.remove();
+
+  const helpSource=body.querySelector('details.more [data-act="toggle_help"]');
+  let helpButton=body.querySelector('[data-pa-toggle-help]');
+  if(helpSource){
+    if(!helpButton){helpButton=document.createElement('button');helpButton.type='button';helpButton.dataset.paToggleHelp='1';helpButton.className='pa-help-toggle';box.insertAdjacentElement('afterend',helpButton)}
+    if(helpButton.textContent!==helpSource.textContent)helpButton.textContent=helpSource.textContent;
+    helpButton.onclick=()=>helpSource.click();
+  }else helpButton?.remove();
+
+}
+
 let queued=false;
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;decorate()})}
 new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-panel','data-open','data-v39-icon']});
