@@ -119,11 +119,15 @@ function ensureBookmark(){
   btn.classList.toggle('active',is);
   btn.disabled=pendingSaved.has(m.semanticId);
   btn.setAttribute('aria-busy',btn.disabled?'true':'false');
-  btn.querySelector('span').textContent=btn.disabled?t.saving:(is?t.saved:t.save);
-  btn.title=is?t.saved:t.save;
+  const label=btn.disabled?t.saving:(is?t.saved:t.save);
+  if(btn.querySelector('span').textContent!==label)btn.querySelector('span').textContent=label;
+  btn.title=btn.disabled?t.saving:(is?t.savedWish:t.saveWish);
+  btn.setAttribute('aria-label',btn.title);
   btn.setAttribute('aria-pressed',is?'true':'false');
 }
 function ensureMobileBookmark(){
+  // A single 44px icon beside Close works at every width.
+  if(document.body?.dataset.alpha==='private-alpha'){document.getElementById('v43MobileBookmarkBtn')?.remove();return}
   const body=document.getElementById('drawerBody'),m=current();
   let btn=document.getElementById('v43MobileBookmarkBtn');
   if(!body||!m){
@@ -221,6 +225,7 @@ function aboutCopy(){
       ['Three wishes are entrusted to you','They are temporary and selected without personalisation. They are not here because an algorithm thinks they will keep you scrolling. You can simply notice them, encourage them or help if something genuinely connects.'],
       ['Nothing grows alone','Other people can encourage, offer help or suggest a branch, pivot or graft. They cannot impose a transformation or declare someone else\'s wish fulfilled.']
     ],
+    examples:'This alpha contains a few example wishes.',
     foot:'Take your time. There is nothing to catch up on.',
     close:'Lose yourself in the world'
   }:{
@@ -235,6 +240,7 @@ function aboutCopy(){
       ['Trois wishes te sont confiés','Ils sont temporaires et choisis sans personnalisation. Ils ne sont pas là parce qu\'un algorithme pense qu\'ils te feront rester. Tu peux simplement les regarder, les encourager ou aider si quelque chose résonne vraiment.'],
       ['Nothing grows alone','Les autres peuvent encourager, proposer une aide, une branche, un pivot ou une greffe. Ils ne peuvent ni imposer une transformation, ni déclarer le wish de quelqu\'un d\'autre accompli.']
     ],
+    examples:'Cette alpha contient quelques vœux d’exemple.',
     foot:'Prends ton temps. Il n\'y a rien à rattraper.',
     close:'Se perdre dans le monde'
   }
@@ -247,6 +253,7 @@ function aboutHtml(){
     '<h2>'+escapeHtml(t.title)+'</h2>'+
     '<p class="v46-about-intro">'+escapeHtml(t.intro)+'</p>'+
     '<div class="v46-about-grid">'+t.cards.map((c,i)=>'<article><span>0'+(i+1)+'</span><h3>'+escapeHtml(c[0])+'</h3><p>'+escapeHtml(c[1])+'</p></article>').join('')+'</div>'+
+    '<p class="pa-example-disclosure">'+escapeHtml(t.examples)+'</p>'+
     '<div class="v46-about-foot"><p>'+escapeHtml(t.foot)+'</p><button type="button" class="v46-about-close">'+escapeHtml(t.close)+'</button></div>'+
   '</section>'
 }
@@ -375,7 +382,7 @@ function decorateGraftMode(){
   const source=semantic().find(x=>x.semanticId===graftSourceId);
   if(!source){graftSourceId=null;btn?.remove();return}
   const t=graftCopy();
-  if(text)text.textContent=t.mode;
+  if(text){const next='“'+source.text+'” · '+t.mode;if(text.textContent!==next)text.textContent=next;text.title=next}
   if(!btn){
     btn=document.createElement('button');btn.id='v46SavedGraftBtn';btn.type='button';btn.className='v46-saved-graft-btn';
     const close=document.getElementById('modeClose');bar.insertBefore(btn,close||null);
@@ -413,7 +420,7 @@ function translationCopy(){
 }
 function translationKey(m,target){return target+'|'+m.semanticId+'|'+String(m.text||'')}
 function requestWishTranslation(m,target){
-  if(!m?.text||!['fr','en'].includes(target))return Promise.resolve(null);
+  if(!m?.text||m.exampleVersion===1||!['fr','en'].includes(target))return Promise.resolve(null);
   const key=translationKey(m,target);
   if(wishTranslationCache.has(key))return Promise.resolve(wishTranslationCache.get(key));
   if(wishTranslationInflight.has(key))return wishTranslationInflight.get(key);
@@ -421,11 +428,13 @@ function requestWishTranslation(m,target){
   if(!api?.translate)return Promise.resolve(null);
   const job=Promise.resolve(api.translate(m.text,target)).then(r=>{
     const translated=String(r?.translation||'').trim();
-    if(!translated)return null;
+    // Cache empty/error results for this page session too: snapshots must not
+    // retry a failing title. Original text stays visible; reload retries.
+    if(!translated){wishTranslationCache.set(key,null);return null}
     const value={translation:translated,sourceLang:String(r?.sourceLang||'und')};
     wishTranslationCache.set(key,value);
     return value
-  }).catch(err=>{console.warn('Wish translation unavailable',err);return null}).finally(()=>wishTranslationInflight.delete(key));
+  }).catch(err=>{wishTranslationCache.set(key,null);console.warn('Wish translation unavailable',err);return null}).finally(()=>wishTranslationInflight.delete(key));
   wishTranslationInflight.set(key,job);
   return job
 }
@@ -447,7 +456,7 @@ function decorateWishPreviews(){
   const body=document.getElementById('drawerBody');
   if(body){
     [...body.querySelectorAll('[data-open]')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('.t'),by.get(btn.dataset.open),target));
-    [...body.querySelectorAll('[data-nav-wish]')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('b'),by.get(btn.dataset.navWish),target));
+    [...body.querySelectorAll('[data-nav-wish]:not([aria-current]):not([data-context-wish])')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('b'),by.get(btn.dataset.navWish),target));
     [...body.querySelectorAll('.v43-saved-open[data-v47-wish]')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('.t'),by.get(btn.dataset.v47Wish),target))
   }
   const graft=document.getElementById('v46SavedGraftOverlay');
@@ -455,9 +464,35 @@ function decorateWishPreviews(){
     [...graft.querySelectorAll('[data-v46-graft-target]')].slice(0,24).forEach(btn=>decorateWishTextNode(btn.querySelector('b'),by.get(btn.dataset.v46GraftTarget),target))
   }
 }
+function decorateContextTranslations(body,viewed){
+  const target=lang(),by=new Map(semantic().map(m=>[m.semanticId,m]));
+  for(const w of window.__RALUVAAA_SHARED_DEBUG__?.world()?.wishes||[])if(!by.has(w.id))by.set(w.id,{semanticId:w.id,text:w.text});
+  // Keep the full active ancestry, but preserve the existing 24-preview request budget.
+  const heading=body.querySelectorAll('.pa-context-heading [data-context-wish]');
+  const children=[...body.querySelectorAll('.pa-context-children [data-context-wish]')].slice(0,24);
+  for(const row of [...heading,...children]){
+    const m=by.get(row.dataset.contextWish),text=row.querySelector('.pa-context-text');
+    if(!m||!text)continue;
+    const signature=translationKey(m,target);
+    if(text.dataset.v47TranslationSignature===signature)continue;
+    text.dataset.v47TranslationSignature=signature;text.textContent=m.text||'';
+    const old=row.nextElementSibling;if(old?.classList.contains('v47-translation-note'))old.remove();
+    requestWishTranslation(m,target).then(result=>{
+      if(!result||!row.isConnected||current()?.semanticId!==viewed.semanticId||lang()!==target||text.dataset.v47TranslationSignature!==signature)return;
+      const translated=String(result.translation||'').trim(),original=String(m.text||'').trim();
+      if(!translated||translated===original)return;
+      text.textContent=translated;text.dataset.v47Translation=translated;text.dataset.v47Original=original;text.dataset.v47Mode='translated';
+      const t=translationCopy(),note=document.createElement('div');note.className='v47-translation-note';
+      note.innerHTML='<span>'+escapeHtml(t.auto)+'</span><button type="button">'+escapeHtml(t.original)+'</button>';
+      note.querySelector('button').onclick=()=>{const translatedMode=text.dataset.v47Mode==='translated';text.dataset.v47Mode=translatedMode?'original':'translated';text.textContent=translatedMode?original:translated;note.querySelector('button').textContent=translatedMode?t.translated:t.original};
+      row.insertAdjacentElement('afterend',note);
+    })
+  }
+}
 function decorateWishTranslation(){
   const body=document.getElementById('drawerBody'),m=current();
   if(!body||!m||document.getElementById('drawer')?.classList.contains('hidden'))return;
+  if(body.querySelector('.pa-context-heading')){decorateContextTranslations(body,m);return}
   const wish=body.querySelector('.wish');
   if(!wish)return;
   const target=lang(),signature=m.semanticId+'|'+String(m.text||'')+'|'+target;
@@ -1194,6 +1229,7 @@ function decorate(){
 function decorateWishFacts(){
   const m=current(),body=document.getElementById('drawerBody');
   if(!m||!body?.querySelector('.wish'))return;
+  if(body.querySelector('.pa-context-heading')){decorateCompactWishFacts(m,body);return}
   const world=window.__RALUVAAA_SHARED_DEBUG__?.world(),record=world?.wishes?.find(w=>w.id===m.semanticId);
   if(!record&&!m.simulated)return;
   const date=Number(record?.createdAt),locale=lang()==='en'?'en-GB':'fr-FR',parts=[];
@@ -1233,6 +1269,37 @@ function decorateWishFacts(){
     helpButton.onclick=()=>helpSource.click();
   }else helpButton?.remove();
 
+}
+
+function decorateCompactWishFacts(m,body){
+  const context=window.__RALUVAAA_WISH_CONTEXT__,world=window.__RALUVAAA_SHARED_DEBUG__?.world();
+  if(!context)return;
+  const metrics=context.counts(m,world);
+  let summary=body.querySelector('.pa-owner-engagement');
+  if(m.owner){
+    if(!summary){summary=document.createElement('div');summary.className='pa-owner-engagement';body.querySelector('.pa-context-facts').insertAdjacentElement('afterend',summary)}
+    const text=['support','help','suggest'].map(key=>context.countLabel(metrics[key],key,lang(),m.simulated)).join(' · ');
+    if(summary.textContent!==text)summary.textContent=text;
+  }else summary?.remove();
+  for(const [icon,key] of [['encourage','support'],['help','help'],['suggest','suggest']]){
+    const unit=body.querySelector('.v33-action-unit[data-v39-icon="'+icon+'"]'),button=unit?.querySelector('button');
+    if(!button)continue;
+    let badge=unit.querySelector('.pa-engagement-badge');
+    if(!badge){badge=document.createElement('span');badge.className='pa-engagement-badge';badge.id='pa-count-'+key;badge.onclick=()=>button.click();unit.appendChild(badge)}
+    const metric=metrics[key],text=metric.value===null?'—':String(metric.value)+(metric.limited?'+':'');
+    const explanation=context.countLabel(metric,key,lang(),m.simulated);
+    if(badge.textContent!==text)badge.textContent=text;
+    if(badge.title!==explanation)badge.title=explanation;
+    if(badge.getAttribute('aria-label')!==explanation)badge.setAttribute('aria-label',explanation);
+    if(button.getAttribute('aria-describedby')!==badge.id)button.setAttribute('aria-describedby',badge.id);
+  }
+  const helpSource=body.querySelector('details.more [data-act="toggle_help"]');
+  let helpButton=body.querySelector('[data-pa-toggle-help]');
+  if(helpSource){
+    if(!helpButton){helpButton=document.createElement('button');helpButton.type='button';helpButton.dataset.paToggleHelp='1';helpButton.className='pa-help-toggle';body.querySelector('.pa-context-facts').insertAdjacentElement('afterend',helpButton)}
+    if(helpButton.textContent!==helpSource.textContent)helpButton.textContent=helpSource.textContent;
+    helpButton.onclick=()=>helpSource.click();
+  }else helpButton?.remove();
 }
 
 let queued=false;

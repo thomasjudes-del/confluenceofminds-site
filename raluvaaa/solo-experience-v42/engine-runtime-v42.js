@@ -6,7 +6,7 @@ const zonePositions=[[-420,-20],[-900,420],[80,-540],[800,-220],[640,520],[-120,
 function H(s){return hash('raluvaaa-v25|'+String(s))}
 function Rfor(s){return rng(H(s))}
 function nodeBySemantic(id){const m=metaBySemantic.get(id);return m?world.nodes.find(n=>n.id===m.nodeId)||null:null}
-function cloneMeta(m){return{nodeId:m.nodeId,semanticId:m.semanticId,text:m.text,loc:m.loc,kind:m.kind,lineageId:m.lineageId,parentSemanticId:m.parentSemanticId,state:m.state,helpCount:m.helpCount||0,suggestionCount:m.suggestionCount||0,encouragements:m.encouragements||0,localEncouragements:m.localEncouragements||0,warpCount:m.warpCount||0,owner:!!m.owner,simulated:!!m.simulated,created:m.created||0}}
+function cloneMeta(m){return{nodeId:m.nodeId,semanticId:m.semanticId,text:m.text,loc:m.loc,kind:m.kind,lineageId:m.lineageId,parentSemanticId:m.parentSemanticId,state:m.state,helpCount:m.helpCount||0,suggestionCount:m.suggestionCount||0,encouragements:m.encouragements||0,localEncouragements:m.localEncouragements||0,warpCount:m.warpCount||0,owner:!!m.owner,simulated:!!m.simulated,created:m.created||0,...(m.exampleVersion?{exampleVersion:m.exampleVersion}:{})}}
 function registerMeta(node,m){m.nodeId=node.id;metaByNode.set(node.id,m);metaBySemantic.set(m.semanticId,m);semantic.push(m);return m}
 function makeZone(i){const p=zonePositions[i],z={id:'zone'+i,index:i,label:'',x:p[0],y:p[1],hue:hues[i%hues.length],nodeId:null};world.roots.push(z);zones.push(z);return z}
 function clearWorld(){world.roots=[];world.nodes=[];world.edges=[];world.tips=[];world.clock=0;world.next=1;world.humans=0;world.history=[];world.selected=null;anim=null;metaByNode.clear();metaBySemantic.clear();semantic.length=0;warps.length=0;zones.length=0;selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();focusLineageId=null;dragState=null;dragTargetId=null;for(let i=0;i<6;i++)makeZone(i)}
@@ -122,6 +122,9 @@ function buildSimulated(){
     if(a&&b&&aMeta.lineageId!==bMeta.lineageId)addWarp(a,b,'simwarp|'+i)
   }
 
+  installSimulationQC()
+}
+function installSimulationQC(){
   window.__RV42_SIMULATION_QC__={
     version:42,
     summary(){
@@ -163,6 +166,49 @@ function buildSimulated(){
     }
   }
 }
+// Curated private-alpha input is explicit and bounded. Invalid input fails closed
+// to an empty example world; it must never silently restore the legacy 100 roots.
+function curatedExampleNodes(input){
+  if(input?.version!==1||!Array.isArray(input.nodes)||input.nodes.length!==10)return [];
+  const seen=new Map(),evolved=new Set(),rows=[];
+  for(const row of input.nodes){
+    if(!row||!/^alpha-example-v1-[a-z0-9-]+$/.test(row.semanticId)||seen.has(row.semanticId)||
+      !/^alpha-example-v1-lineage-[a-z0-9-]+$/.test(row.lineageId)||
+      !['create','split','evolve'].includes(row.kind)||
+      !['en','fr'].every(lang=>typeof row.text?.[lang]==='string'&&row.text[lang].trim()&&row.text[lang].length<=280))return [];
+    const parent=row.parentSemanticId?seen.get(row.parentSemanticId):null;
+    if(row.kind==='create'){
+      if(row.parentSemanticId||rows.some(x=>x.lineageId===row.lineageId))return []
+    }else{
+      if(!parent||parent.lineageId!==row.lineageId||evolved.has(parent.semanticId))return [];
+      if(row.kind==='evolve')evolved.add(parent.semanticId)
+    }
+    const clean={semanticId:row.semanticId,lineageId:row.lineageId,kind:row.kind,
+      parentSemanticId:row.parentSemanticId||null,text:{en:row.text.en,fr:row.text.fr}};
+    seen.set(clean.semanticId,clean);rows.push(clean)
+  }
+  return rows.filter(x=>x.kind==='create').length>=3?rows:[]
+}
+function buildCuratedExamples(){
+  for(const row of payload.curatedExamples){
+    const opts={...row,text:row.text[payload.exampleLanguage],loc:'',owner:false,simulated:true,seed:row.semanticId};
+    const node=row.kind==='create'?addSemanticRoot(opts):growSemantic(nodeBySemantic(row.parentSemanticId),row.kind==='evolve'?'bend':'split',opts);
+    const meta=node&&metaByNode.get(node.id);
+    // `created` is the engine's logical age, never a fabricated calendar date.
+    if(meta){meta.exampleVersion=1;meta.created=0}
+  }
+  // Growing illustration geometry must not invent human participation.
+  world.humans=0;
+  installSimulationQC()
+}
+function setExampleLanguage(language){
+  if(!payload.privateAlphaExamples)return;
+  const next=language==='fr'?'fr':'en';
+  if(next===payload.exampleLanguage)return;
+  payload.exampleLanguage=next;
+  for(const row of payload.curatedExamples){const meta=metaBySemantic.get(row.semanticId);if(meta?.exampleVersion===1)meta.text=row.text[next]}
+  snapshot()
+}
 function addLocalCreate(ev){const n=addSemanticRoot({semanticId:ev.semanticId,lineageId:ev.lineageId,text:ev.text,loc:ev.loc??'',owner:true,simulated:false,seed:ev.seed||ev.semanticId});n.mine=true;return n}
 function addChildrenEvent(ev){const p=nodeBySemantic(ev.parentSemanticId),pm=metaBySemantic.get(ev.parentSemanticId);if(!p||!pm)return null;let last=null;for(const c of ev.children||[]){if(!String(c.text||'').trim())continue;last=growSemantic(p,'split',{semanticId:c.semanticId,lineageId:ev.lineageId,parentSemanticId:ev.parentSemanticId,text:c.text,loc:c.loc||pm.loc,kind:'split',owner:true,simulated:false,seed:c.seed||c.semanticId});if(last)last.mine=true}return last}
 function applyEvent(ev){if(!ev||!ev.type)return null;if(ev.type==='create')return addLocalCreate(ev);if(ev.type==='evolve'){const p=nodeBySemantic(ev.parentSemanticId),pm=metaBySemantic.get(ev.parentSemanticId);if(!p||!pm||String(ev.text||'').trim()===String(pm.text||'').trim()||semantic.some(x=>x.parentSemanticId===ev.parentSemanticId&&x.kind==='evolve'))return null;const n=growSemantic(p,'bend',{semanticId:ev.semanticId,lineageId:ev.lineageId,parentSemanticId:ev.parentSemanticId,text:ev.text,loc:ev.loc||pm.loc,kind:'evolve',owner:true,simulated:false,seed:ev.seed||ev.semanticId});n.mine=true;return n}if(ev.type==='split'||ev.type==='branch_add')return addChildrenEvent(ev);if(ev.type==='bloom'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner&&m.state==='alive'){addBloom(n,m);return n}return null}if(ev.type==='abandon'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner&&m.state==='alive'){abandon(n,m);return n}return null}if(ev.type==='close_branch'){let last=null;const ids=Array.isArray(ev.semanticIds)&&ev.semanticIds.length?new Set(ev.semanticIds):null;for(const m of semantic.filter(x=>x.lineageId===ev.lineageId&&x.owner&&x.state==='alive'&&(!ids||ids.has(x.semanticId)))){const n=nodeBySemantic(m.semanticId);abandon(n,m);last=n||last}return last}if(ev.type==='close_lineage'){let last=null;const ids=Array.isArray(ev.semanticIds)&&ev.semanticIds.length?new Set(ev.semanticIds):null;for(const m of semantic.filter(x=>x.lineageId===ev.lineageId&&x.owner&&x.state==='alive'&&(!ids||ids.has(x.semanticId)))){const n=nodeBySemantic(m.semanticId);abandon(n,m);last=n||last}return last}if(ev.type==='resume_branch'){let last=null;const ids=Array.isArray(ev.semanticIds)&&ev.semanticIds.length?new Set(ev.semanticIds):null;for(const m of semantic.filter(x=>x.lineageId===ev.lineageId&&x.owner&&x.state==='abandoned'&&(!ids||ids.has(x.semanticId)))){const n=nodeBySemantic(m.semanticId);resume(n,m);last=n||last}return last}if(ev.type==='resume_lineage'){let last=null;const ids=Array.isArray(ev.semanticIds)&&ev.semanticIds.length?new Set(ev.semanticIds):null;for(const m of semantic.filter(x=>x.lineageId===ev.lineageId&&x.owner&&x.state==='abandoned'&&(!ids||ids.has(x.semanticId)))){const n=nodeBySemantic(m.semanticId);resume(n,m);last=n||last}return last}if(ev.type==='resume'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner&&m.state==='abandoned'){resume(n,m);return n}return null}if(ev.type==='wake'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner&&m.state==='alive'){if(n)n.lastActive=world.clock;return n}return null}if(ev.type==='correct'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m?.owner){if(String(ev.text||'').trim())m.text=String(ev.text).trim();if(Object.prototype.hasOwnProperty.call(ev,'loc'))m.loc=ev.loc||'';if(n)n.lastActive=world.clock;return n}return null}if(ev.type==='encourage'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m){m.encouragements=(m.encouragements||0)+1;m.localEncouragements=(m.localEncouragements||0)+1;if(n)n.lastActive=world.clock;return n}return null}if(ev.type==='help'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m&&m.state==='alive'){addHelp(n,m,1,ev.seed||ev.semanticId);return n}return null}if(ev.type==='suggest_split'){const m=metaBySemantic.get(ev.semanticId),n=nodeBySemantic(ev.semanticId);if(m&&m.state==='alive'){m.suggestionCount=(m.suggestionCount||0)+Math.max(1,(ev.suggestions||[]).length);return n}return null}if(ev.type==='connect'){const a=nodeBySemantic(ev.aSemanticId),b=nodeBySemantic(ev.bSemanticId);return addWarp(a,b,ev.seed||ev.aSemanticId+'|'+ev.bSemanticId)}if(ev.type==='reparent')return reparent(ev.semanticId,ev.newParentSemanticId,ev.seed||ev.semanticId+'|'+ev.newParentSemanticId);return null}
@@ -172,8 +218,8 @@ function reparent(semanticId,newParentSemanticId,seed){const m=metaBySemantic.ge
 function computeAncestors(id){const set=new Set();let m=metaBySemantic.get(id),guard=0;while(m&&guard++<100){set.add(m.semanticId);m=m.parentSemanticId?metaBySemantic.get(m.parentSemanticId):null}return set}
 function selectSemantic(id,focus=false){const m=metaBySemantic.get(id),n=nodeBySemantic(id);if(!m||!n)return;selectedSemanticId=id;selectedLineage=m.lineageId;ancestorIds=computeAncestors(id);world.selected=n;if(focus)camera.focus(n,false);parent.postMessage({type:'rv25-select',meta:cloneMeta(m),lineage:semantic.filter(x=>x.lineageId===m.lineageId).map(cloneMeta)},location.origin)}
 function snapshot(){const blooms=semantic.filter(m=>m.state==='bloom').length,abandoned=semantic.filter(m=>m.state==='abandoned').length,helps=semantic.reduce((s,m)=>s+(m.helpCount||0),0),roots=semantic.filter(m=>m.kind==='create').length,localRoots=semantic.filter(m=>m.kind==='create'&&m.owner).length;parent.postMessage({type:'rv25-snapshot',semantic:semantic.map(cloneMeta),stats:{roots,states:semantic.length,blooms,abandoned,helps,warps:warps.length,localRoots}},location.origin)}
-function buildAll(events){clearWorld();buildSimulated();for(const ev of events||[])applyEvent(ev);drawLabels=function(){};updateStats();snapshot()}
-function init(data){payload={texts:Array.isArray(data.texts)?data.texts:[],locs:Array.isArray(data.locs)?data.locs:[]};buildAll(data.events||[]);camera.fit();camera.zoom=Math.max(.16,camera.zoom*.91);updateStats();parent.postMessage({type:'rv25-ready'},location.origin)}
+function buildAll(events){clearWorld();if(payload.privateAlphaExamples)buildCuratedExamples();else buildSimulated();for(const ev of events||[])applyEvent(ev);drawLabels=function(){};updateStats();snapshot()}
+function init(data){payload={texts:Array.isArray(data.texts)?data.texts:[],locs:Array.isArray(data.locs)?data.locs:[],privateAlphaExamples:data.privateAlphaExamples===true,curatedExamples:curatedExampleNodes(data.curatedExamples),exampleLanguage:data.exampleLanguage==='fr'?'fr':'en'};buildAll(data.events||[]);camera.fit();camera.zoom=Math.max(.16,camera.zoom*.91);updateStats();parent.postMessage({type:'rv25-ready'},location.origin)}
 function rebuild(events,preserveCamera=false){
   const oldFocus=focusLineageId,cam={x:camera.x,y:camera.y,zoom:camera.zoom};
   buildAll(events||[]);
@@ -251,6 +297,6 @@ canvas.addEventListener('pointermove',e=>{if(!dragState||dragState.pointerId!==e
 function endSemanticDrag(e){if(!dragState||dragState.pointerId!==e.pointerId)return;const sourceId=dragState.sourceId,wasActive=dragState.active,targetId=dragTargetId;dragState=null;dragTargetId=null;suppressClickUntil=Date.now()+250;try{canvas.releasePointerCapture(e.pointerId)}catch{}canvas.style.cursor='default';e.preventDefault();e.stopImmediatePropagation();if(wasActive&&targetId)parent.postMessage({type:'rv25-reparent-request',sourceSemanticId:sourceId,targetSemanticId:targetId},location.origin);else selectSemantic(sourceId,false)}
 canvas.addEventListener('pointerup',endSemanticDrag,true);canvas.addEventListener('pointercancel',endSemanticDrag,true);
 canvas.addEventListener('click',ev=>{if(Date.now()<suppressClickUntil)return;let best=null,bd=18;for(const m of semantic){if(focusLineageId&&m.lineageId!==focusLineageId&&!connectedEndpoint(m))continue;const n=nodeBySemantic(m.semanticId);if(!n)continue;const s=camera.worldToScreen(n.x,n.y),d=Math.hypot(s.x-ev.clientX,s.y-ev.clientY);if(d<bd){best=m;bd=d}}if(best)selectSemantic(best.semanticId,false);else{selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();world.selected=null;parent.postMessage({type:'rv25-blank'},location.origin)}},true);
-window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='rv25-init')init(e.data);if(e.data?.type==='rv25-event'){const cam=e.data.preserveCamera?{x:camera.x,y:camera.y,zoom:camera.zoom}:null;const n=applyEvent(e.data.event);updateStats();snapshot();const id=e.data.focusSemanticId||(n&&metaByNode.get(n.id)?.semanticId);if(id)selectSemantic(id,!e.data.preserveCamera);if(cam){camera.x=cam.x;camera.y=cam.y;camera.zoom=cam.zoom;updateStats()}}if(e.data?.type==='rv25-rebuild')rebuild(e.data.events||[],!!e.data.preserveCamera);if(e.data?.type==='rv25-focus'&&e.data.semanticId)selectSemantic(e.data.semanticId,true);if(e.data?.type==='rv25-clear'){selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();world.selected=null}if(e.data?.type==='rv25-lineage-focus'){focusLineageId=e.data.lineageId||null;if(focusLineageId)fitLineage(focusLineageId);else camera.fit();selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();world.selected=null}});
+window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='rv25-init')init(e.data);if(e.data?.type==='rv25-example-language')setExampleLanguage(e.data.language);if(e.data?.type==='rv25-event'){const cam=e.data.preserveCamera?{x:camera.x,y:camera.y,zoom:camera.zoom}:null;const n=applyEvent(e.data.event);updateStats();snapshot();const id=e.data.focusSemanticId||(n&&metaByNode.get(n.id)?.semanticId);if(id)selectSemantic(id,!e.data.preserveCamera);if(cam){camera.x=cam.x;camera.y=cam.y;camera.zoom=cam.zoom;updateStats()}}if(e.data?.type==='rv25-rebuild')rebuild(e.data.events||[],!!e.data.preserveCamera);if(e.data?.type==='rv25-focus'&&e.data.semanticId)selectSemantic(e.data.semanticId,true);if(e.data?.type==='rv25-clear'){selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();world.selected=null}if(e.data?.type==='rv25-lineage-focus'){focusLineageId=e.data.lineageId||null;if(focusLineageId)fitLineage(focusLineageId);else camera.fit();selectedSemanticId=null;selectedLineage=null;ancestorIds=new Set();world.selected=null}});
 window.__RV42_RUNTIME__={version:42,warpDash:[4.5,7],warpCount:()=>warps.length};parent.postMessage({type:'rv25-runtime-ready'},location.origin);
 })();

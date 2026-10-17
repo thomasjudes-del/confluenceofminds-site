@@ -81,6 +81,22 @@ function buildState(world,me,inbox,actorId){
   events.sort((a,b)=>(a.at||0)-(b.at||0));
   return{version:26,lang:preferredLang,entrusted:null,notifications:(inbox.notifications||[]).map(x=>({...x})),events};
 }
+function restoreEntrustedAssignments(next,actorId){
+  if(window.RALUVAAA_PRIVATE_ALPHA_EXAMPLES!==true)return next;
+  // Restore only local UI assignments belonging to this verified session actor.
+  // Unscoped legacy storage and other accounts are never adopted. API wishes,
+  // ownership and events remain authoritative and are not read from storage.
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORE)||'null');
+    if(actorId&&saved?.version===26&&saved.entrustedActorId===actorId&&Array.isArray(saved.entrusted)){
+      next.entrustedActorId=actorId;
+      next.entrusted=saved.entrusted.slice(0,3)
+        .filter(x=>x&&typeof x.semanticId==='string'&&Number.isFinite(x.expires))
+        .map(x=>({semanticId:x.semanticId,expires:x.expires,nonce:x.nonce||0,slot:x.slot,band:x.band}))
+    }
+  }catch{}
+  return next
+}
 function fp(state){return JSON.stringify({events:state.events.map(e=>[e.type,e.semanticId||'',e.parentSemanticId||'',e.proposalId||'',e.decision||'',e.serverStatus||'',e.aSemanticId||'',e.bSemanticId||'',e.text||'',e.loc||'',e.state||'',e.helpTitle||'',e.open===false?'closed':'',e.note||'',(e.suggestions||[]).join('|'),(e.children||[]).map(c=>[c.semanticId,c.text||'',c.loc||'']).join('|')]),notifications:(state.notifications||[]).map(n=>[n.id,n.kind,n.objectId,n.isRead,n.title||'',n.body||''])})}
 
 async function fetchState(automatic=false){
@@ -500,9 +516,10 @@ async function boot(){
   window.__RALUVAAA_SHARED_REPORT__=async(localId,reason,details)=>{await queue;return client.report({wishId:idOf(localId),reason,details})};
   window.__RALUVAAA_TRANSLATION__={translate:(text,targetLang)=>client.translate(text,targetLang)};
 
-  const initial=await fetchState();lastFingerprint=fp(initial);knownConnectIds=new Set(initial.events.filter(e=>e.type==='connect').map(e=>e.proposalId||[e.aSemanticId,e.bSemanticId].sort().join('|')));localStorage.setItem(STORE,JSON.stringify(initial));
+  const initial=restoreEntrustedAssignments(await fetchState(),client.actorId);lastFingerprint=fp(initial);knownConnectIds=new Set(initial.events.filter(e=>e.type==='connect').map(e=>e.proposalId||[e.aSemanticId,e.bSemanticId].sort().join('|')));localStorage.setItem(STORE,JSON.stringify(initial));
 
-  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-usability-20261016');
+  await loadScript('wish-context.js?build=private-alpha-context-v2-20261016-compact-facts');
+  await loadScript('../solo-experience-v42/app-v42.js?build=private-alpha-context-v2-20261016');
   await loadScript('../mvp-v26/alpha-v0-controls.js?build=private-alpha-1');
   await loadScript('../mvp-v26/ambient-audio.js?build=private-alpha-usability-20261016');
   await loadScript('../solo-experience-v38/sound-v38.js?build=private-alpha-usability-20261016');
@@ -516,8 +533,8 @@ async function boot(){
   await loadScript('../solo-experience-v39/exact-icons-v39.js?build=private-alpha-stable-title-20261016');
   document.body.classList.add('v39-icons-ready');
   await loadScript('../solo-experience-v42/revive-sound-v42.js?build=private-alpha-usability-20261016');
-  await loadScript('../solo-experience-v42/ui-v42.js?build=private-alpha-stable-title-20261016');
-  await loadScript('features.js?build=private-alpha-stable-title-20261016');
+  await loadScript('../solo-experience-v42/ui-v42.js?build=private-alpha-stable-title-20261016-context-v2');
+  await loadScript('features.js?build=private-alpha-context-v2-20261016-retry-guard');
 
   window.__RALUVAAA_SHARED_READY__=true;
   window.__RALUVAAA_SHARED_ERROR__=friendlyError;
