@@ -38,7 +38,9 @@ async function hiddenQaWishes(env){
     // Filtering only matching owner/root/lineage rows would miss a visible row
     // whose wake/reparent could still act on a hidden root. GRAFTs are separate
     // proposal/event relations and deliberately do not join this ownership graph.
-    const rows=await env.DB.prepare("WITH RECURSIVE family(id) AS (SELECT id FROM wishes WHERE id IN ("+QA_FIXTURE_PLACEHOLDERS+") UNION SELECT w.id FROM wishes w JOIN family f ON w.parent_wish_id=f.id OR w.root_wish_id=f.id OR w.lineage_id=f.id) SELECT w.id,w.owner_actor_id,w.room_key,w.root_wish_id,w.lineage_id,w.parent_wish_id,w.kind FROM wishes w JOIN family f ON f.id=w.id").bind(...QA_FIXTURE_ROOT_IDS).all();
+    // Separate indexed equality joins preserve the same cycle-safe UNION closure.
+    // Keep family first in the final join so each result uses the wishes primary key.
+    const rows=await env.DB.prepare("WITH RECURSIVE family(id) AS (SELECT id FROM wishes WHERE id IN ("+QA_FIXTURE_PLACEHOLDERS+") UNION SELECT w.id FROM wishes w JOIN family f ON w.parent_wish_id=f.id UNION SELECT w.id FROM wishes w JOIN family f ON w.root_wish_id=f.id UNION SELECT w.id FROM wishes w JOIN family f ON w.lineage_id=f.id) SELECT w.id,w.owner_actor_id,w.room_key,w.root_wish_id,w.lineage_id,w.parent_wish_id,w.kind FROM family f CROSS JOIN wishes w ON w.id=f.id").bind(...QA_FIXTURE_ROOT_IDS).all();
     const family=new Map((rows.results||[]).map(row=>[row.id,row]));
     for(const row of family.values()){
       const root=byId.get(row.root_wish_id);

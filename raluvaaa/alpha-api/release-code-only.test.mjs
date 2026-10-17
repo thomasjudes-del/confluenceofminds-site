@@ -30,9 +30,11 @@ const CHILD='wish_77777777-7777-4777-8777-777777777777',GRANDCHILD='wish_8888888
 const NEIGHBOR='wish_99999999-9999-4999-8999-999999999999',NEIGHBOR_TWO='wish_aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',NEW_NEIGHBOR='wish_bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const PUBLIC_TEXT='PUBLIC-WISH-CONTENT-MUST-NOT-APPEAR',PUBLIC_LOCATION='PUBLIC-WISH-LOCATION-MUST-NOT-APPEAR';
 function publicWish(id,changes={}){return{id,lineageId:id,parentWishId:null,rootWishId:id,kind:'create',text:PUBLIC_TEXT,locationText:PUBLIC_LOCATION,state:'alive',createdAt:1000,updatedAt:1000,encouragementCount:0,isMine:false,...changes}}
-function fixtureWorld(promoted){
-  const family=[...ROOT_IDS.map(id=>publicWish(id)),publicWish(CHILD,{rootWishId:ROOT_IDS[0],lineageId:ROOT_IDS[0],parentWishId:ROOT_IDS[0],kind:'split'}),publicWish(GRANDCHILD,{rootWishId:ROOT_IDS[0],lineageId:ROOT_IDS[0],parentWishId:CHILD,kind:'evolve'})];
-  return{room:'WORLD',wishes:[...(promoted?[]:family),publicWish(NEIGHBOR),publicWish(NEIGHBOR_TWO)],events:[]};
+function publicWorldFixture(){
+  return{room:'WORLD',wishes:[publicWish(NEIGHBOR),publicWish(NEIGHBOR_TWO)],events:[]};
+}
+function hiddenFixtureFamily(){
+  return[...ROOT_IDS.map(id=>publicWish(id)),publicWish(CHILD,{rootWishId:ROOT_IDS[0],lineageId:ROOT_IDS[0],parentWishId:ROOT_IDS[0],kind:'split'}),publicWish(GRANDCHILD,{rootWishId:ROOT_IDS[0],lineageId:ROOT_IDS[0],parentWishId:CHILD,kind:'evolve'})];
 }
 
 function fake(change=()=>{}){
@@ -43,7 +45,7 @@ function fake(change=()=>{}){
     const u=new URL(url),path=u.pathname;calls.push({url,options,snapshot});
     let result,github=false,world=false;
     if(u.origin===new URL(WORLD_URL).origin){
-      assert.equal(url,WORLD_URL);assert.equal(options.method,'GET');world=true;worldRead++;result=fixtureWorld(promoted);
+      assert.equal(url,WORLD_URL);assert.equal(options.method,'GET');world=true;worldRead++;result=publicWorldFixture();
     }else if(u.origin==='https://api.github.com'){
       github=true;const workflow=path.split('/').at(-2);
       if(path.endsWith('/actions/runs'))result={total_count:0,workflow_runs:[]};
@@ -219,7 +221,7 @@ test('unavailable or incomplete active-run inventory fails before upload',async(
 });
 
 
-test('unconfigured cleanup plan and helper pins cannot contact any service',async()=>{
+test('unconfigured query-only plan and helper pins cannot contact any service',async()=>{
   const plan=JSON.parse(readFileSync(new URL('./release-plan.json',import.meta.url),'utf8'));
   assert.equal(plan.enabled,false);
   for(const name of Object.keys(testPins))assert.equal(unconfigured[name],null,'production pins remain unset until reviewed');
@@ -237,6 +239,8 @@ test('only a dedicated release-plan push can trigger the guarded code-only route
   assert(workflow.includes('workflow_dispatch:'));
   assert(workflow.includes("  push:\n    branches:\n      - '"+RELEASE_REF.replace('refs/heads/','')+"'\n    paths:\n      - 'raluvaaa/alpha-api/release-plan.json'"));
   assert(!workflow.includes('dot/private-alpha-test-cleanup-20261016'));
+  assert(!workflow.includes('dot/raluvaaa-code-only-release-20261016'));
+  assert.equal(RELEASE_REF,'refs/heads/dot/raluvaaa-query-only-release-20261016');
   assert(workflow.includes("if: github.ref == '"+RELEASE_REF+"' && github.repository == '"+REPOSITORY+"'"));
   const validation=workflow.indexOf('validatePlan(JSON.parse(readFileSync(');
   const credentials=workflow.indexOf('CLOUDFLARE_API_TOKEN:');
@@ -260,7 +264,7 @@ test('public WORLD reads are fixed-origin, unauthenticated, bounded and bracket 
   assert.equal(new URL(preUploadCalls[0].url).pathname.split('/').at(-1),'deployments');
   assert(preUploadCalls.slice(-5).every(call=>new URL(call.url).pathname.endsWith('/actions/runs')));
   assert.equal(worldCalls[0].snapshot,1);assert.equal(worldCalls[1].snapshot,4);assert.equal(f.calls.at(-1),worldCalls[1]);
-  const counts={beforePublicWishCount:9,afterPublicWishCount:2,fixtureRootCount:5,hiddenVisibleFixtureWishCount:7,unchangedOtherWishCount:2,newlyVisibleOtherWishCount:0};
+  const counts={beforePublicWishCount:2,afterPublicWishCount:2,absentFixtureRootCount:5,unchangedPublicWishCount:2,newlyVisiblePublicWishCount:0};
   assert.deepEqual(result.publicVisibility,counts);assert.deepEqual(f.checkpoints.at(-1).publicVisibility,counts);
   assert(Object.values(counts).every(Number.isSafeInteger));
   // Test adapters contain the exact reviewed five roots independently of the helper.
@@ -268,24 +272,33 @@ test('public WORLD reads are fixed-origin, unauthenticated, bounded and bracket 
   assert.deepEqual(ROOT_IDS,workerRoots);
 });
 
-test('every exact fixture root must be visible and have valid root pointers before any POST',async()=>{
-  for(const rootId of ROOT_IDS){
-    await blocked(fake(c=>{if(c.world&&!c.promoted)c.result.wishes=c.result.wishes.filter(row=>row.id!==rootId)}),/fixture baseline/);
-  }
-  for(const change of [row=>row.rootWishId=NEIGHBOR,row=>row.lineageId=NEIGHBOR,row=>row.parentWishId=NEIGHBOR,row=>row.kind='evolve']){
-    await blocked(fake(c=>{if(c.world&&!c.promoted)change(c.result.wishes[0])}),/fixture baseline/);
-  }
-});
-
-test('visible fixture family pointer mismatches block before upload',async()=>{
-  for(const change of [row=>row.rootWishId=NEIGHBOR,row=>row.lineageId=NEIGHBOR,row=>row.parentWishId=NEIGHBOR,row=>row.parentWishId=null,row=>row.kind='create']){
-    await blocked(fake(c=>{if(c.world&&!c.promoted)change(c.result.wishes.find(row=>row.id===CHILD))}),/fixture baseline/);
+test('already-hidden fixture roots are required before upload and after promotion',async()=>{
+  const f=fake(),result=await run(f);
+  assert.equal(result.status,'release-verified');
+  assert.equal(result.publicVisibility.absentFixtureRootCount,5);
+  assert.equal(result.publicVisibility.unchangedPublicWishCount,2);
+  assert.equal(posts(f).length,2);
+  for(const promoted of [false,true])for(const row of hiddenFixtureFamily()){
+    const f=fake(c=>{if(c.world&&c.promoted===promoted)c.result.wishes.push(row)});
+    await blocked(f,/fixture absence verification failed/,promoted?2:0);
+    assert.equal(f.checkpoints.at(-1).stage,promoted?'promotion-response-received':'baseline-verified');
   }
 });
 
-test('an observable self-reference or cycle in a fixture family blocks before upload',async()=>{
-  for(const parent of [CHILD,GRANDCHILD]){
-    await blocked(fake(c=>{if(c.world&&!c.promoted)c.result.wishes.find(row=>row.id===CHILD).parentWishId=parent}),/fixture baseline/);
+test('every known root and any residual structural family reference block at both snapshots',async()=>{
+  for(const promoted of [false,true])for(const rootId of ROOT_IDS)for(const field of ['id','rootWishId','lineageId','parentWishId']){
+    const f=fake(c=>{if(c.world&&c.promoted===promoted)c.result.wishes.push(publicWish(CHILD,{[field]:rootId}))});
+    await blocked(f,/fixture absence verification failed/,promoted?2:0);
+  }
+});
+
+test('observable self-references and multi-row cycles block at both snapshots',async()=>{
+  for(const promoted of [false,true])for(const parent of [NEIGHBOR,NEIGHBOR_TWO]){
+    const f=fake(c=>{if(c.world&&c.promoted===promoted){
+      c.result.wishes[0].parentWishId=parent;
+      if(parent===NEIGHBOR_TWO)c.result.wishes[1].parentWishId=NEIGHBOR;
+    }});
+    await blocked(f,/observable parent cycle/,promoted?2:0);
   }
 });
 
@@ -315,7 +328,7 @@ test('public redirect, network, HTTP and JSON failures are sanitized and never r
     ()=>{throw new TypeError('redirect '+PUBLIC_LOCATION+' '+ROOT_IDS[0])},
     ()=>({ok:false,status:302,json:async()=>{throw new Error('must not parse')}}),
     ()=>({ok:true,status:200,redirected:true,json:async()=>{throw new Error('must not parse')}}),
-    ()=>({ok:false,status:503,json:async()=>{throw new Error('must not parse')}}),
+    ...[403,429,500,503].map(status=>()=>({ok:false,status,json:async()=>{throw new Error('quota '+TOKEN)}})),
     ()=>({ok:true,status:204,json:async()=>{throw new Error('must not parse')}}),
     ()=>({ok:true,status:200,json:async()=>{throw new Error(TOKEN+' '+PUBLIC_TEXT+' '+NEIGHBOR)}})
   ];
@@ -324,18 +337,6 @@ test('public redirect, network, HTTP and JSON failures are sanitized and never r
     await blocked(f,/Public WORLD visibility (request failed|response is unreadable)/,promoted?2:0);
     assert.equal(f.calls.filter(c=>c.url===WORLD_URL).length,promoted?2:1);
   }
-});
-
-test('a fixture root or any previously visible descendant remaining after promotion fails without retry or rollback',async()=>{
-  const family=fixtureWorld(false).wishes.filter(row=>!([NEIGHBOR,NEIGHBOR_TWO].includes(row.id)));
-  for(const row of family){
-    const f=fake(c=>{if(c.world&&c.promoted)c.result.wishes.push(row)});
-    await blocked(f,/fixture visibility verification failed/,2);assert.equal(f.checkpoints.at(-1).stage,'promotion-response-received');
-  }
-  // A newly observed fixture descendant also must not survive the filter.
-  await blocked(fake(c=>{if(c.world&&c.promoted)c.result.wishes.push(publicWish(NEW_NEIGHBOR,{rootWishId:ROOT_IDS[0],lineageId:ROOT_IDS[0],parentWishId:CHILD,kind:'split'}))}),/fixture visibility verification failed/,2);
-  // Rewriting pointers cannot conceal an ID already observed in the fixture family.
-  await blocked(fake(c=>{if(c.world&&c.promoted)c.result.wishes.push(publicWish(CHILD))}),/fixture visibility verification failed/,2);
 });
 
 test('any changed or deleted preexisting public neighbor makes post-promotion verification inconclusive',async()=>{
@@ -353,24 +354,36 @@ test('any changed or deleted preexisting public neighbor makes post-promotion ve
 test('newly visible older public neighbors and response ordering are allowed',async()=>{
   const f=fake(c=>{if(c.world&&c.promoted){c.result.wishes.push(publicWish(NEW_NEIGHBOR,{createdAt:1,updatedAt:1}));c.result.wishes.reverse();c.result.wishes=c.result.wishes.map(row=>Object.fromEntries(Object.entries(row).reverse()))}});
   const result=await run(f);
-  assert.equal(result.status,'release-verified');assert.equal(result.publicVisibility.newlyVisibleOtherWishCount,1);assert.equal(result.publicVisibility.unchangedOtherWishCount,2);assert.equal(posts(f).length,2);
+  assert.equal(result.status,'release-verified');assert.equal(result.publicVisibility.newlyVisiblePublicWishCount,1);assert.equal(result.publicVisibility.unchangedPublicWishCount,2);assert.equal(posts(f).length,2);
   assert.equal(f.calls.filter(c=>c.url===WORLD_URL).length,2);
 });
 
-test('a full 600-row public view may reveal older neighbors without requiring unseen D1 parents',async()=>{
-  const visible=Array.from({length:591},(_,i)=>publicWish('wish_'+i.toString(16).padStart(8,'0')+'-cccc-4ccc-8ccc-cccccccccccc'));
+test('a bounded public view allows an additional unrelated wish and missing unseen parents',async()=>{
+  const visible=Array.from({length:597},(_,i)=>publicWish('wish_'+i.toString(16).padStart(8,'0')+'-cccc-4ccc-8ccc-cccccccccccc'));
   const missingParent='wish_dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+  visible[0]={...visible[0],parentWishId:missingParent,rootWishId:missingParent,lineageId:missingParent,kind:'split'};
   const f=fake(c=>{if(c.world){
     c.result.wishes.push(...visible);
-    if(!c.promoted)c.result.wishes.find(row=>row.id===GRANDCHILD).parentWishId=missingParent;
-    else c.result.wishes.push(publicWish(NEW_NEIGHBOR,{createdAt:1,updatedAt:1}));
+    if(c.promoted)c.result.wishes.push(publicWish(NEW_NEIGHBOR,{createdAt:1,updatedAt:1}));
   }});
-  const result=await run(f);assert.equal(result.publicVisibility.beforePublicWishCount,600);assert.equal(result.publicVisibility.unchangedOtherWishCount,593);assert.equal(result.publicVisibility.newlyVisibleOtherWishCount,1);
+  const result=await run(f);assert.equal(result.publicVisibility.beforePublicWishCount,599);assert.equal(result.publicVisibility.afterPublicWishCount,600);assert.equal(result.publicVisibility.unchangedPublicWishCount,599);assert.equal(result.publicVisibility.newlyVisiblePublicWishCount,1);
+});
+
+test('a full 600-row public view passes only if all observed rows remain unchanged',async()=>{
+  const visible=Array.from({length:598},(_,i)=>publicWish('wish_'+i.toString(16).padStart(8,'0')+'-cccc-4ccc-8ccc-cccccccccccc'));
+  for(const displace of [false,true]){
+    const f=fake(c=>{if(c.world){
+      c.result.wishes.push(...visible);
+      if(c.promoted&&displace)c.result.wishes[0]=publicWish(NEW_NEIGHBOR);
+    }});
+    if(displace)await blocked(f,/neighbor verification is inconclusive/,2);
+    else{const result=await run(f);assert.equal(result.publicVisibility.beforePublicWishCount,600);assert.equal(result.publicVisibility.unchangedPublicWishCount,600);assert.equal(result.publicVisibility.newlyVisiblePublicWishCount,0)}
+  }
 });
 
 test('public content, identities, row values and fingerprints never enter checkpoints or release results',async()=>{
   const f=fake(),result=await run(f),output=JSON.stringify([f.checkpoints,result]);
-  for(const row of fixtureWorld(false).wishes){
+  for(const row of publicWorldFixture().wishes){
     assert(!output.includes(row.id));assert(!output.includes(row.text));assert(!output.includes(row.locationText));
     const fingerprint=createHash('sha256').update(JSON.stringify(Object.fromEntries(Object.entries(row).sort(([a],[b])=>a.localeCompare(b))))).digest('hex');
     assert(!output.includes(fingerprint));
