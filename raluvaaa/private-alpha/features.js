@@ -248,7 +248,7 @@ function aboutCopy(){
 function aboutHtml(){
   const t=aboutCopy();
   return '<div class="v46-about-scrim"></div><section class="v46-about-panel" role="dialog" aria-modal="true" aria-label="'+escapeHtml(t.button)+'">'+
-    '<button class="v46-about-x" type="button" aria-label="Close">×</button>'+
+    '<button class="v46-about-x" type="button" aria-label="'+escapeHtml(copy().close)+'">×</button>'+
     '<div class="v46-about-eyebrow">'+escapeHtml(t.eyebrow)+'</div>'+
     '<h2>'+escapeHtml(t.title)+'</h2>'+
     '<p class="v46-about-intro">'+escapeHtml(t.intro)+'</p>'+

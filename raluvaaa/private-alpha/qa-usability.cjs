@@ -48,6 +48,15 @@ test('FR and EN account and share copy explicitly say free',()=>{
   if(language==='fr')assert.equal(c.authText().title,'Garde la main sur tes wishes');
  }
 });
+test('About close button follows the active FR or EN interface language',()=>{
+ const c={lang:()=>language,escapeHtml:value=>String(value)};
+ let language='fr';vm.createContext(c);
+ vm.runInContext(part('function copy(){','function toast(')+part('function aboutCopy(){','function closeAbout(){'),c);
+ for(const [lang,label] of [['fr','Fermer'],['en','Close'],['fr','Fermer']]){
+  language=lang;
+  assert.match(c.aboutHtml(),new RegExp('class="v46-about-x"[^>]*aria-label="'+label+'"'));
+ }
+});
 test('export identity and date are truthful for real versus simulated wishes',()=>{
  const texts=[],ctx={createLinearGradient:()=>({addColorStop(){}}),fillRect(){},fill(){},stroke(){},fillText:t=>texts.push(t),measureText:s=>({width:s.length})};
  const c={copy:()=>({simulated:'SIMULATED',local:'LOCAL',human:'HUMAN',shareText:'SHARE'}),lang:()=> 'en',window:{RALUVAAA_SHARED:true},W:720,H:900,roundRect(){},wrapText:()=>['Exact title'],stateLabel:()=> 'Alive',Intl,Date};vm.createContext(c);vm.runInContext(part('function prettyOverlay(','function renderPrettyFrame('),c);
