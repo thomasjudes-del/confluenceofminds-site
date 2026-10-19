@@ -19,7 +19,8 @@ on:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 has browser builds for Ubuntu 24.04, not Ubuntu 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
@@ -38,8 +39,8 @@ jobs:
           grep -q "action-audio.js" raluvaaa/shared-alpha/index.html
       - name: Install browser and Worker QA dependencies
         run: |
-          npm install --no-save playwright@1.55.0 wrangler@4 >/dev/null 2>&1
-          npx playwright install --with-deps chromium firefox >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0 wrangler@4
+          npx playwright install --with-deps chromium firefox
       - name: Run two-browser shared UI QA
         run: |
           cd raluvaaa/alpha-api
