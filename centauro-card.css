@@ -1,0 +1,40 @@
+/* Preserve the complete vertical explanatory video, never crop its captions. */
+.world-card--centauro .world-card__preview,
+.world-card--centauro .world-card__poster {
+  object-fit: contain !important;
+  object-position: right center !important;
+  transform: none !important;
+}
+.world-card--centauro .world-card__body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 64% !important;
+  box-sizing: border-box;
+}
+.world-card--centauro .centauro-status {
+  font: 500 11px/1.3 var(--sans);
+  color: #c1d6d1;
+}
+.world-card--centauro .world-card__play {
+  display: flex; align-items: center; justify-content: center;
+  left: 31%; top: auto; bottom: 20px;
+  width: 154px; height: 42px;
+  transform: translateX(-50%);
+  border-radius: 24px;
+  gap: 9px;
+}
+.world-card--centauro .world-card__play::after {
+  content: "Watch the video";
+  font: 600 11px/1 var(--sans);
+  color: white;
+}
+html[lang="fr"] .world-card--centauro .world-card__play::after { content: "Voir la vidéo"; }
+@media(max-width:760px) {
+  .world-card--centauro .world-card__body { gap: 7px !important; }
+  .world-card--centauro .centauro-status { font-size: 10px; }
+  .world-card--centauro .world-card__play { width: 138px; height: 34px; bottom: 12px; }
+}
+.world-card--centauro p { white-space: normal !important; overflow: visible !important; }
+.world-card--centauro .world-card__play:hover,
+.world-card--centauro .world-card__play:focus-visible { transform: translateX(-50%) scale(1.04); }

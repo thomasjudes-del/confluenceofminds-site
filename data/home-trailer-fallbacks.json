@@ -52,5 +52,12 @@
     "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Shattered_Dragons_Recap_Teaser_16x9.mp4",
     "sha256": "a60368024cd9baa63d6dccec6dc87abb6711e11a80edb05e8e1c8fdaa31bc45e",
     "bytes": 6182311
+  },
+  {
+    "id": "centauro",
+    "url": "https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/centauro-quest/Centauro_Quest_V9_1080x1920.mp4",
+    "sha256": "5793b14d2e45325a35e69aa98fe8693c66de2b91830308c37f7e273cdaf05ba9",
+    "bytes": 23622365,
+    "poster_second": 22
   }
 ]
