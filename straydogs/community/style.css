@@ -2,3 +2,5 @@
 
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.optional{border-top:1px solid var(--line);margin-top:23px;padding-top:18px}.optional summary{font-size:13px;font-weight:700;cursor:pointer;margin-bottom:20px}.optional .upload-box{margin-bottom:0}
 @media(max-width:760px){.form-layout aside.private-summary{display:block}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
+.avatar-initials{display:grid;place-items:center;width:100%;height:100%;background:var(--purple);font-weight:700;font-size:clamp(20px,3vw,40px)}.skip{top:0;transform:translateY(-150%)}.skip:focus{transform:translateY(0)}

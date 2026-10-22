@@ -66,3 +66,8 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 CREATE INDEX IF NOT EXISTS otp_expiration ON otp_challenges(expires_at);
 CREATE INDEX IF NOT EXISTS sessions_expiration ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS rate_limits_expiration ON rate_limits(expires_at);
+
+-- Namespace marker prevents the manual administrator adapter targeting another app's database.
+CREATE TABLE IF NOT EXISTS straydogs_metadata(key TEXT PRIMARY KEY,value TEXT NOT NULL);
+INSERT OR IGNORE INTO straydogs_metadata(key,value) VALUES('application','straydogs-members-v1');
+CREATE INDEX IF NOT EXISTS applications_pending_review ON applications(status,created_at);

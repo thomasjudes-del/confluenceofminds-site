@@ -8,3 +8,5 @@ test('Verified token stays in memory and is sent only in Authorization header',a
 test('Unauthorized response clears the local session',async()=>{const a=new Api('https://api.example.invalid',async()=>({ok:false,status:401,json:async()=>({error:'unauthorized'}),headers:{get:()=>null}}));a.token='a'.repeat(64);await assert.rejects(a.me());assert.equal(a.token,'')});
 test('Logout clears token even when provider fails',async()=>{const a=new Api('https://api.example.invalid',async()=>{throw Error('offline')});a.token='a'.repeat(64);await assert.rejects(a.logout());assert.equal(a.token,'')});
 test('Incomplete verify response never establishes a session',async()=>{const a=new Api('https://api.example.invalid',async()=>({ok:true,json:async()=>({status:'ok'})}));await assert.rejects(a.verifyCode('a@example.invalid','12345678'));assert.equal(a.token,'')});
+
+test('Browser fetch is invoked with its global receiver, not the API instance',async()=>{let receiver;const a=new Api('https://api.example.invalid',async function(){receiver=this;return {ok:true,json:async()=>({members:[]})}});await a.members();assert.notEqual(receiver,a);assert.equal(receiver.StrayDogsApi,Api)});

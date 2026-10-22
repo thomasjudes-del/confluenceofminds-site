@@ -4,6 +4,9 @@
  const runtime=globalThis.STRAYDOGS_RUNTIME||{};
  if(runtime.mode!=='production')return;
  const api=new StrayDogsApi(runtime.apiBase),nativeRender=render;
+ const nativePublicProfile=publicProfile;
+ avatar=function(c){return `<span class="avatar">${c.visual?`<img alt="${esc(t('Visuel de','Visual for'))} ${esc(c.name)}" src="${esc(c.visual)}">`:`<span class="avatar-initials" aria-label="${esc(t('Sans visuel','No visual'))}">${esc((c.name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase())}</span>`}</span>`;};
+ publicProfile=function(c,preview=false){return nativePublicProfile(c,preview).replace(/<div class="work-art">[\s\S]*?<\/div>/,c.visual?`<div class="work-art"><img src="${esc(c.visual)}" alt="${esc(t('Visuel choisi par','Visual selected by'))} ${esc(c.name)}" style="width:100%;height:100%;object-fit:cover"></div>`:'');};
  let loaded=false,loadFailed=false,busy=false,authStep='email',loginEmail='',requestEpoch=0,expiresAt=0;
  const route=()=>location.hash.replace(/^#\/?/,'').split('/')[0]||'home';
  const message=(fr,en)=>notify(t(fr,en));

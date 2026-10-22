@@ -22,7 +22,7 @@ The first alpha can accept profile/project links. Real file uploads require an i
 
 ## Not yet live or complete
 
-No resources or runtime secrets were created. No application was collected, no email sent, and no live landing page changed. The worker must be deployed and the endpoint configured before any real journey works online. The private maintenance module still needs an authorised remote invocation path before real admissions can be operated. Uploads, work-round submissions, collaboration requests, account export/deletion and a full admin interface are not implemented; the live UI does not pretend otherwise.
+No resources or runtime secrets were created. No application was collected, no email sent, and no live landing page changed. The worker must be deployed and the endpoint configured before any real journey works online. A guarded manual D1 administration adapter is prepared, but its remote execution and transaction behaviour still need to be verified on the dedicated environment before real admissions can be operated. Uploads, work-round submissions, collaboration requests, account export/deletion and a full admin interface are not implemented; the live UI does not pretend otherwise.
 
 Historical Workers Free evidence does not guarantee current available capacity. D1 quotas apply to the account, not independently to this new database. The first version does not poll: members load on initial view or a deliberate update; API lists are capped at 100. Do not enable a paid plan or paid overages as a fallback.
 

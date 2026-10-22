@@ -13,7 +13,7 @@ Le fournisseur d’envoi Resend existe déjà : `confluenceofminds.com` est vér
 - Retrait du consentement public immédiatement appliqué à l’ancienne fiche.
 - Notification équipe facultative, asynchrone, limitée à la référence de candidature ; état envoyé/échoué conservé.
 
-**Non couvert :** interface web administrateur et chemin d’invocation distant du module privé de maintenance, uploads, œuvres/rondes/collaborations, récupération ou changement d’email, suppression/export de compte et politique de conservation. Ces fonctions doivent rester désactivées ou clairement distinctes d’une démo tant que leurs vrais endpoints n’existent pas.
+**Non couvert :** interface web administrateur et validation réelle du chemin distant de maintenance, uploads, œuvres/rondes/collaborations, récupération ou changement d’email, suppression/export de compte et politique de conservation. Ces fonctions doivent rester désactivées ou clairement distinctes d’une démo tant que leurs vrais endpoints n’existent pas.
 
 ## Contrat frontend
 
@@ -131,3 +131,15 @@ Node 24+, aucune dépendance à télécharger. Le test utilise le SQLite intégr
 **55 tests passent**, dont concurrence, limites, expiration, usage unique, accès propriétaire, consentement, absence de fuite privée, retrait, injection SQL et configuration absente. Syntaxe vérifiée. Aucun test sur Cloudflare déployé, aucun envoi Resend réel ni audit indépendant : ne pas qualifier ce bloc de production-ready.
 
 Références vérifiées : [transactions D1](https://developers.cloudflare.com/d1/worker-api/d1-database/), [requêtes préparées D1](https://developers.cloudflare.com/d1/worker-api/prepared-statements/), [Web Crypto Workers](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/), [envoi Resend](https://resend.com/docs/send-with-nodejs).
+
+## Opérations administratives manuelles — préparées, non exécutées
+
+`tools/admin.mjs` raccorde le module `maintenance.mjs` à l’[API D1 officielle](https://developers.cloudflare.com/api/resources/d1/subresources/database/methods/query/) via des requêtes paramétrées et un unique batch par transaction logique. Ce chemin est testé avec réponses interceptées, **pas encore vérifié contre le service distant**. Ce n’est pas une interface web d’administration.
+
+Prérequis avant toute utilisation : autorisation explicite de l’opération et de la base dédiée ; environnement opérateur de confiance ; variables serveur `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `STRAYDOGS_D1_DATABASE_ID` et `STRAYDOGS_ADMIN_CONFIRM=authorised-straydogs-only`. Aucune de ces valeurs n’est à placer dans le frontend, un commit ou une conversation. Le script vérifie d’abord la marque `straydogs-members-v1` dans la base ; sans elle, aucun changement métier n’est exécuté. Il ne crée ni ressource ni clé.
+
+Opérations : `pending`, `review-application ID`, `review-profile ID`, `admit ID [--publish]`, `reject-application ID`, `approve-profile ID`, `reject-profile ID`, `withdraw MEMBER_ID`, `suspend MEMBER_ID`, `revoke MEMBER_ID`, `purge`.
+
+Les opérations de lecture exigent `STRAYDOGS_PRIVATE_REVIEW_FILE`, un fichier local nouveau créé en mode 0600. Ne pas le joindre à un artifact CI public. Les logs ne contiennent ni email ni fiche ; seuls statut, nombre et identifiants opaques d’opération peuvent être affichés. L’admission ne publie qu’avec `--publish` **et** le consentement déjà enregistré. Aucun email d’admission automatique : l’opérateur doit informer le membre par le canal autorisé ou prévoir ensuite ce vrai envoi.
+
+Les six tests supplémentaires couvrent la confirmation obligatoire, le refus avant vérification de cible, la mauvaise base, les paramètres séparés, le batch unique et l’absence de données sensibles dans les erreurs. La revue/admission distante reste un prérequis à valider sur l’environnement isolé avant ouverture des candidatures.
