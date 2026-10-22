@@ -1,8 +1,5 @@
 name: Check StrayDogs community
 on:
-  push:
-    branches: ['feat/straydogs-members-20261022']
-    paths: ['straydogs/community/**', 'straydogs/member-api/**', '.github/workflows/check-straydogs-community.yml']
   pull_request:
     paths: ['straydogs/community/**', 'straydogs/member-api/**', '.github/workflows/check-straydogs-community.yml']
 permissions:
@@ -45,18 +42,3 @@ jobs:
           path: straydogs/community/qa-artifacts/
           if-no-files-found: ignore
           retention-days: 7
-  account-concordance:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 1
-    steps:
-      - name: Compare configured account with historical billing evidence
-        env:
-          ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          node - <<'JS'
-          const {createHash}=require('node:crypto');
-          const value=process.env.ACCOUNT_ID||'';
-          const expected='1a294d5b005afdfd18718df6b19786b770261015f8485c9e1c4bd2726bbf52fd';
-          console.log(JSON.stringify({configured:Boolean(value),matchesHistoricalBillingAccount:Boolean(value)&&createHash('sha256').update(value).digest('hex')===expected,providerRequests:0,resourcesCreated:0}));
-          JS

@@ -11,3 +11,5 @@
 - Production : zéro fixture, zéro secret réel, activation désactivée, aucune route ni ressource provisionnée.
 
 Limites : pas de runtime Cloudflare/workerd exécuté, pas de base D1 distante, pas d’envoi Resend réel, pas d’audit indépendant, pas de chemin d’administration distant raccordé. Les tests ne prouvent pas un déploiement fonctionnel. Activation et ressources demeurent en attente d’autorisation.
+
+Complément : six tests du raccordement administratif HTTP intercepté + deux tests du flag notification admin ; total 63. Aucun appel distant exécuté.

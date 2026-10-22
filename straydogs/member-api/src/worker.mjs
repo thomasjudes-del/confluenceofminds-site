@@ -100,7 +100,7 @@ export function resendAdapter(env,fetchImpl=fetch) {
   }
   return {
     sendCode:({to,code,challengeId})=>send({from:env.MAIL_FROM,to:[to],subject:'Votre code StrayDogs / Your StrayDogs code',text:`Votre code de connexion StrayDogs : ${code}\nValable 10 minutes, une seule fois. Ne le partagez pas.\nSi vous n’avez rien demandé, ignorez cet email.\n\nYour StrayDogs sign-in code: ${code}\nValid for 10 minutes, once only. Do not share it.\nIf you did not request this, ignore this email.`},'straydogs-otp-'+challengeId),
-    notifyApplication:({applicationId})=>send({from:env.MAIL_FROM,to:[env.ADMIN_NOTIFICATION_TO],subject:'StrayDogs : candidature à examiner',text:`Une candidature attend une revue privée.\nRéférence : ${applicationId}\nAucune fiche n’a été publiée. La revue doit être effectuée avec l’outil de maintenance privé autorisé. Aucune interface d’administration web n’est encore fournie.`},'straydogs-application-'+applicationId)
+    notifyApplication:({applicationId,summary={}})=>send({from:env.MAIL_FROM,to:[env.ADMIN_NOTIFICATION_TO],subject:'StrayDogs : candidature à examiner',text:`Une candidature attend une revue privée.\nRéférence : ${applicationId}\n\nCréateur : ${summary.name||'—'}\nProjet : ${summary.projectTitle||'—'}\nUnivers : ${summary.universe||'—'}\nAffichage public demandé : ${summary.publicConsent?'oui, sous réserve de validation':'non'}\n\nEmail, audience et autres données privées restent dans la revue autorisée, pas dans ce message.\nAucune fiche n’a été publiée. La revue doit être effectuée avec l’outil de maintenance privé autorisé. Aucune interface d’administration web n’est encore fournie.`},'straydogs-application-'+applicationId)
   };
 }
 
@@ -133,8 +133,8 @@ export function createWorker({now=seconds,mailerFactory=resendAdapter}={}) {
         return result(200,{members:rows.results.map(r=>({id:r.id,...publicOutput(parse(r.public_data))}))},cors);
       }
       if(path==='/v1/applications'&&method==='POST') {
-        const notifyEnabled=!!(env.ADMIN_NOTIFICATION_TO&&env.RESEND_API_KEY&&env.MAIL_FROM);
-        if(notifyEnabled){mailConfigured(env);email(env.ADMIN_NOTIFICATION_TO);if(!ctx?.waitUntil)fail(503,'RUNTIME_NOT_SUPPORTED');}
+        const notifyEnabled=env.ADMIN_NOTIFICATIONS_ENABLED==='true';
+        if(notifyEnabled){mailConfigured(env);if(!env.ADMIN_NOTIFICATION_TO)fail(503,'ADMIN_NOTIFICATION_NOT_CONFIGURED');email(env.ADMIN_NOTIFICATION_TO);if(!ctx?.waitUntil)fail(503,'RUNTIME_NOT_SUPPORTED');}
         const input=await jsonBody(request),address=email(input.email),profile=publicInput(input);
         if(input.privacyConsent!==true||input.charter!==true)fail(422,'APPLICATION_CONSENT_REQUIRED');
         const privateData={email:address,audienceChannel:text(input.audienceChannel,100,1),audience:text(input.audience,60,1)};
@@ -143,7 +143,7 @@ export function createWorker({now=seconds,mailerFactory=resendAdapter}={}) {
         const consent={version:CONSENT_VERSION,at:timestamp,privacy:true,charter:true,publicProfile:input.publicConsent,round:false,socialReuse:false};
         const inserted=await stmt(env.DB,`INSERT OR IGNORE INTO applications(id,email,private_data,public_data,consent_data,status,notification_status,created_at) SELECT ?,?,?,?,?, 'pending',?,? WHERE NOT EXISTS(SELECT 1 FROM members WHERE email=?)`,id,address,JSON.stringify(privateData),JSON.stringify(profile),JSON.stringify(consent),notifyEnabled?'pending':'not_configured',timestamp,address).run();
         if(inserted.meta.changes>0&&notifyEnabled) {
-          const job=mailerFactory(env).notifyApplication({applicationId:id}).then(()=>stmt(env.DB,"UPDATE applications SET notification_status='sent' WHERE id=?",id).run()).catch(()=>stmt(env.DB,"UPDATE applications SET notification_status='failed' WHERE id=?",id).run()).catch(()=>{});
+          const job=mailerFactory(env).notifyApplication({applicationId:id,summary:{name:profile.name,projectTitle:profile.projectTitle,universe:profile.universe,publicConsent:input.publicConsent}}).then(()=>stmt(env.DB,"UPDATE applications SET notification_status='sent' WHERE id=?",id).run()).catch(()=>stmt(env.DB,"UPDATE applications SET notification_status='failed' WHERE id=?",id).run()).catch(()=>{});
           schedule(ctx,job);
         }
         return result(202,{status:'received'},cors);

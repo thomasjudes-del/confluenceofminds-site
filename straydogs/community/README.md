@@ -41,3 +41,5 @@ node --test straydogs/community/qa-api-client.cjs
 The first two tests exercise the reusable prototype model with explicitly fictional fixtures. Those fixtures are never loaded by `index.html`. `qa-live-render` checks the production adapter with an empty directory. `qa-browser.cjs` runs in GitHub Actions using a fake intercepted API and reserved `example.invalid` addresses; it does not send mail or provision services. Screenshot artifacts are labelled QA fixtures, not evidence of a deployed real member account.
 
 `configure-endpoint.mjs` accepts only an HTTPS origin, updates the public API URL and the CSP, and does not deploy or configure credentials. Leave the placeholder untouched until the dedicated backend is approved and smoke-tested.
+
+Infrastructure evidence: read-only preflight run `39846186911`; configured account concordance `39848571644` / job `120068328294` was true. These were one-off checks. Subsequent UI CI is pull-request-only, has no provider credentials and sends no email. Historical plan evidence is not a live capacity guarantee.

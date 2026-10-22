@@ -11,7 +11,7 @@ Le fournisseur d’envoi Resend existe déjà : `confluenceofminds.com` est vér
 - Lecture de sa fiche et soumission de modifications à relecture.
 - Annuaire public limité aux instantanés approuvés, consentis, de membres admis.
 - Retrait du consentement public immédiatement appliqué à l’ancienne fiche.
-- Notification équipe facultative, asynchrone, limitée à la référence de candidature ; état envoyé/échoué conservé.
+- Notification équipe préparée derrière un flag désactivé, asynchrone, avec référence et récapitulatif minimal ; état envoyé/échoué conservé.
 
 **Non couvert :** interface web administrateur et validation réelle du chemin distant de maintenance, uploads, œuvres/rondes/collaborations, récupération ou changement d’email, suppression/export de compte et politique de conservation. Ces fonctions doivent rester désactivées ou clairement distinctes d’une démo tant que leurs vrais endpoints n’existent pas.
 
@@ -128,7 +128,7 @@ npm run check
 
 Node 24+, aucune dépendance à télécharger. Le test utilise le SQLite intégré à Node pour exécuter le vrai schéma et les vraies requêtes, avec une façade D1 et un mailer mémoire. Le Worker de production n’importe ni les fixtures ni le mailer de test.
 
-**55 tests passent**, dont concurrence, limites, expiration, usage unique, accès propriétaire, consentement, absence de fuite privée, retrait, injection SQL et configuration absente. Syntaxe vérifiée. Aucun test sur Cloudflare déployé, aucun envoi Resend réel ni audit indépendant : ne pas qualifier ce bloc de production-ready.
+**63 tests passent**, dont concurrence, limites, expiration, usage unique, accès propriétaire, consentement, absence de fuite privée, retrait, injection SQL et configuration absente. Syntaxe vérifiée. Aucun test sur Cloudflare déployé, aucun envoi Resend réel ni audit indépendant : ne pas qualifier ce bloc de production-ready.
 
 Références vérifiées : [transactions D1](https://developers.cloudflare.com/d1/worker-api/d1-database/), [requêtes préparées D1](https://developers.cloudflare.com/d1/worker-api/prepared-statements/), [Web Crypto Workers](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/), [envoi Resend](https://resend.com/docs/send-with-nodejs).
 
@@ -143,3 +143,5 @@ Opérations : `pending`, `review-application ID`, `review-profile ID`, `admit ID
 Les opérations de lecture exigent `STRAYDOGS_PRIVATE_REVIEW_FILE`, un fichier local nouveau créé en mode 0600. Ne pas le joindre à un artifact CI public. Les logs ne contiennent ni email ni fiche ; seuls statut, nombre et identifiants opaques d’opération peuvent être affichés. L’admission ne publie qu’avec `--publish` **et** le consentement déjà enregistré. Aucun email d’admission automatique : l’opérateur doit informer le membre par le canal autorisé ou prévoir ensuite ce vrai envoi.
 
 Les six tests supplémentaires couvrent la confirmation obligatoire, le refus avant vérification de cible, la mauvaise base, les paramètres séparés, le batch unique et l’absence de données sensibles dans les erreurs. La revue/admission distante reste un prérequis à valider sur l’environnement isolé avant ouverture des candidatures.
+
+La notification de réception attend `ADMIN_NOTIFICATIONS_ENABLED=true` et un destinataire administrateur vérifié. Son récapitulatif contient nom/pseudo, projet, univers bref et choix public ; email et audience restent dans la revue privée. Le flag reste `false` dans les exemples. Aucun email réel n’a été envoyé.

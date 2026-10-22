@@ -71,3 +71,6 @@ CREATE INDEX IF NOT EXISTS rate_limits_expiration ON rate_limits(expires_at);
 CREATE TABLE IF NOT EXISTS straydogs_metadata(key TEXT PRIMARY KEY,value TEXT NOT NULL);
 INSERT OR IGNORE INTO straydogs_metadata(key,value) VALUES('application','straydogs-members-v1');
 CREATE INDEX IF NOT EXISTS applications_pending_review ON applications(status,created_at);
+
+CREATE INDEX IF NOT EXISTS published_profiles_by_approval ON member_profiles(consent_public,approved_at DESC);
+CREATE INDEX IF NOT EXISTS approved_applications_by_email ON applications(email,status,created_at DESC);

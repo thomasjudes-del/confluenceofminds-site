@@ -19,3 +19,5 @@ ADMIN_NOTIFICATION_TO = ""
 # binding = "DB"
 # database_name = "<approved-database-name>"
 # database_id = "<approved-database-id>"
+
+ADMIN_NOTIFICATIONS_ENABLED = "false"

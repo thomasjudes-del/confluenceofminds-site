@@ -4,3 +4,5 @@
 @media(max-width:760px){.form-layout aside.private-summary{display:block}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 
 .avatar-initials{display:grid;place-items:center;width:100%;height:100%;background:var(--purple);font-weight:700;font-size:clamp(20px,3vw,40px)}.skip{top:0;transform:translateY(-150%)}.skip:focus{transform:translateY(0)}
+
+@media(max-width:760px){.nav{flex-wrap:wrap;overflow:visible;justify-content:flex-start;gap:14px 20px}.nav .nav-join{margin-left:auto}}
