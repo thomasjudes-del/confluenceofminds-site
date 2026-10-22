@@ -1,0 +1,21 @@
+# EXAMPLE ONLY. No account, resource or route is provisioned by this file.
+name = "straydogs-api-alpha"
+main = "src/worker.mjs"
+compatibility_date = "2026-10-22"
+workers_dev = false
+
+[vars]
+LIVE_ENABLED = "false"
+ALLOWED_ORIGINS = "https://confluenceofminds.com"
+MAIL_FROM = ""
+ADMIN_NOTIFICATION_TO = ""
+
+# Configure secrets in the approved runtime, never commit actual values:
+# OTP_HMAC_SECRET — independently generated high-entropy value, at least 32 bytes
+# RESEND_API_KEY — restricted existing or explicitly authorized sending credential
+
+# After authorization, bind a dedicated D1 database. Do not reuse another project.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "<approved-database-name>"
+# database_id = "<approved-database-id>"

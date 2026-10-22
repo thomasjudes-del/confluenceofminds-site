@@ -1,0 +1,42 @@
+// Browser UI QA only: every API response is a local synthetic fixture.
+// Run on the repository's GitHub Actions runner, not a user computer.
+const fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert');
+const {chromium}=require('playwright');const root=__dirname,port=4173,origin='http://127.0.0.1:'+port,api='https://api.straydogs.example.invalid';
+const server=http.createServer((req,res)=>{
+ const decoded=decodeURIComponent((req.url||'/').split('?')[0]);const unconfigured=decoded.startsWith('/unconfigured/');let file=decoded.replace(/^\/unconfigured/,'');if(file==='/'||file==='')file='/index.html';
+ if(file.includes('..')){res.writeHead(403).end();return;}const target=path.join(root,file);if(!fs.existsSync(target)){res.writeHead(404).end();return;}let content=fs.readFileSync(target);
+ if(file==='/runtime-config.js')content=Buffer.from(`globalThis.STRAYDOGS_RUNTIME={mode:'production',apiBase:${JSON.stringify(unconfigured?'':api)}};`);
+ if(file==='/index.html')content=Buffer.from(content.toString().replace("connect-src 'none'",unconfigured?"connect-src 'none'":'connect-src '+api));
+ res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html');res.end(content);
+});
+const candidate={name:'Créateur QA fictif',email:'creator-qa@example.invalid',universe:'Un univers synthétique réservé aux tests automatisés.',discipline:'words',projectTitle:'Projet de contrôle fictif',projectUrl:'https://example.invalid/qa',website:'',socialType:'Newsletter',socialUrl:'',visualUrl:'',interests:['imaginary'],audienceChannel:'Canal QA',audience:'starting',publicConsent:false,privacyConsent:true,charter:true};
+(async()=>{await new Promise(r=>server.listen(port,'127.0.0.1',r));const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));let codeRequests=0,applications=[],updates=[];
+ const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'Authorization, Content-Type','Access-Control-Allow-Methods':'GET,POST,PATCH,OPTIONS'};
+ await page.route(api+'/**',async route=>{const request=route.request(),p=new URL(request.url()).pathname;if(request.method()==='OPTIONS')return route.fulfill({status:204,headers});let body={};try{body=request.postDataJSON()||{}}catch{}let data={},status=200;
+ if(p==='/v1/members')data={members:[]};
+ else if(p==='/v1/applications'){applications.push(body);status=202;data={status:'received'};}
+ else if(p==='/v1/auth/request-code'){codeRequests++;await new Promise(r=>setTimeout(r,80));status=202;data={status:'accepted',retryAfterSeconds:60};}
+ else if(p==='/v1/auth/verify-code'){if(body.code==='12345678')data={token:'a'.repeat(64),expiresAt:Math.floor(Date.now()/1000)+7200,member:{id:'qa-only',name:candidate.name,status:'approved'}};else{status=401;data={error:'INVALID_OR_EXPIRED_CODE'};}}
+ else if(p==='/v1/me'){assert.equal(request.headers().authorization,'Bearer '+'a'.repeat(64));data={member:{id:'qa-only',email:candidate.email,name:candidate.name,status:'approved'},profile:null,candidate};}
+ else if(p==='/v1/me/profile'){updates.push(body);status=202;data={status:'pending_review'};}
+ else if(p==='/v1/logout'){status=204;}
+ else{status=404;data={error:'NOT_FOUND'};}
+ await route.fulfill({status,headers,contentType:'application/json',body:status===204?'':JSON.stringify(data)});
+ });
+ const artifacts=path.join(root,'qa-artifacts');fs.mkdirSync(artifacts,{recursive:true});
+ await page.goto(origin+'/unconfigured/#/home');await page.waitForSelector('.hero');assert(!(await page.locator('main').innerText()).includes('Mila Rive'));
+ await page.goto(origin+'/unconfigured/#/login');assert(await page.getByRole('button',{name:'Recevoir mon code'}).isDisabled());
+ await page.goto(origin+'/#/join');await page.waitForSelector('#application-form');assert.equal(await page.locator('input[type=file]').count(),0);assert.equal(await page.locator('[data-action=fill-demo]').count(),0);
+ for(const k of ['name','universe','projectTitle','projectUrl','email','audienceChannel'])await page.locator(`[data-candidate=${k}]`).fill(candidate[k]);
+ await page.locator('[data-candidate=discipline]').selectOption('words');await page.locator('[data-candidate=audience]').selectOption('starting');await page.locator('input[name=interest][value=imaginary]').check();await page.locator('[data-candidate=privacyConsent]').check();await page.locator('[data-candidate=charter]').check();
+ await page.getByRole('button',{name:'Voir ma fiche avant envoi'}).click();await page.waitForURL('**/#/preview');assert(!(await page.locator('main').innerText()).includes(candidate.email));await page.screenshot({path:path.join(artifacts,'01-public-preview-qa-fixture.png'),fullPage:true});
+ await page.getByRole('button',{name:'Envoyer ma candidature'}).click();await page.waitForURL('**/#/submitted');assert.equal(applications.length,1);assert.equal(applications[0].publicConsent,false);assert.equal(applications[0].attachment,undefined);
+ await page.goto(origin+'/#/login');await page.locator('#login-email').fill(candidate.email);await page.locator('#live-login-form button[type=submit],#live-login-form button.button').first().evaluate(el=>{el.click();el.click()});await page.waitForSelector('input[name=code]');assert.equal(codeRequests,1);
+ await page.locator('input[name=code]').fill('00000000');await page.getByRole('button',{name:'Valider le code'}).click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Code incorrect'));
+ await page.locator('input[name=code]').fill('12345678');await page.getByRole('button',{name:'Valider le code'}).click();await page.waitForURL('**/#/studio');assert((await page.locator('main').innerText()).includes(candidate.name));
+ await page.getByRole('button',{name:'Modifier ma fiche'}).click();await page.waitForURL('**/#/join');assert.equal(await page.locator('[data-candidate=audienceChannel]').inputValue(),'Canal QA');await page.locator('[data-candidate=projectTitle]').fill('Projet QA modifié');await page.getByRole('button',{name:'Voir ma fiche avant envoi'}).click();await page.waitForURL('**/#/preview');await page.getByRole('button',{name:'Soumettre la modification'}).click();await page.waitForURL('**/#/submitted');assert.equal(updates.length,1);assert.equal(updates[0].email,undefined);assert.equal(updates[0].audience,undefined);
+ await page.goto(origin+'/#/studio');await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(artifacts,'02-member-mobile-qa-fixture.png'),fullPage:true});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
+ await page.getByRole('button',{name:'Me déconnecter'}).click();await page.waitForURL('**/#/login');await page.reload();assert.equal(await page.evaluate(()=>StrayDogsLive.api.token),'');
+ await page.locator('[data-action=lang][data-lang=en]').click();assert(await page.getByRole('button',{name:'Send me a code'}).isVisible());await page.goto(origin+'/#/moderation');assert.equal(await page.locator('[data-action=moderate]').count(),0);
+ assert.deepEqual(errors,[]);fs.writeFileSync(path.join(artifacts,'RESULT.json'),JSON.stringify({status:'passed',browser:'Chromium',viewportDesktop:'1440x1000',viewportMobile:'390x844',scope:'Real DOM and browser navigation with intercepted synthetic API only. No email, deployment or real backend tested.',checks:['unconfigured fail-closed','no fictional production members','no misleading file uploads','short form','private/public separation','application consent','duplicate-click protection','wrong OTP','successful OTP fixture','protected profile edit','no private field in public update','mobile overflow','logout/reload','English','no client moderation']},null,2));console.log('PASS: browser production frontend flows with synthetic API, no real sends');await browser.close();server.close();
+})().catch(e=>{console.error(e);server.close();process.exit(1)});

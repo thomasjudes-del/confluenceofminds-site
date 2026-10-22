@@ -1,0 +1,62 @@
+name: Check StrayDogs community
+on:
+  push:
+    branches: ['feat/straydogs-members-20261022']
+    paths: ['straydogs/community/**', 'straydogs/member-api/**', '.github/workflows/check-straydogs-community.yml']
+  pull_request:
+    paths: ['straydogs/community/**', 'straydogs/member-api/**', '.github/workflows/check-straydogs-community.yml']
+permissions:
+  contents: read
+concurrency:
+  group: straydogs-community-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check JavaScript and no-send unit tests
+        run: |
+          node --check straydogs/community/app.js
+          node --check straydogs/community/live.js
+          node --check straydogs/community/api-client.js
+          node straydogs/community/qa-model.cjs
+          node straydogs/community/qa-events.cjs
+          node straydogs/community/qa-live-render.cjs
+          node --test straydogs/community/qa-api-client.cjs
+          cd straydogs/member-api
+          npm test
+      - name: Install browser for isolated synthetic UI tests
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Real browser flows, intercepted fake API, no emails
+        run: node straydogs/community/qa-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: straydogs-browser-qa-only
+          path: straydogs/community/qa-artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
+  account-concordance:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Compare configured account with historical billing evidence
+        env:
+          ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node - <<'JS'
+          const {createHash}=require('node:crypto');
+          const value=process.env.ACCOUNT_ID||'';
+          const expected='1a294d5b005afdfd18718df6b19786b770261015f8485c9e1c4bd2726bbf52fd';
+          console.log(JSON.stringify({configured:Boolean(value),matchesHistoricalBillingAccount:Boolean(value)&&createHash('sha256').update(value).digest('hex')===expected,providerRequests:0,resourcesCreated:0}));
+          JS
