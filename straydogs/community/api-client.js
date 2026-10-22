@@ -11,7 +11,7 @@ class StrayDogsApi {
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),15000);
   try{
    const headers={'Accept':'application/json'};if(body!==undefined)headers['Content-Type']='application/json';if(auth)headers.Authorization='Bearer '+this.token;
-   const r=await this.fetcher(this.base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',signal:controller.signal});
+   const r=await this.fetcher.call(globalThis,this.base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',signal:controller.signal});
    let data={};try{data=await r.json()}catch{}
    if(!r.ok){if(r.status===401)this.token='';throw Object.assign(new Error('request_failed'),{status:r.status,code:typeof data.error==='string'?data.error:'request_failed',retryAfter:Number(r.headers?.get('retry-after'))||0});}
    return data;
