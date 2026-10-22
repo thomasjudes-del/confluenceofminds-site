@@ -1,0 +1,30 @@
+name: StrayDogs read-only infrastructure check
+on:
+  push:
+    branches: ['feat/straydogs-members-20261022']
+    paths:
+      - 'straydogs/community/tools/preflight-readonly.mjs'
+      - '.github/workflows/straydogs-readonly-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read account metadata, never change resources
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RALUVAAA_EMAIL_FROM: ${{ secrets.RALUVAAA_EMAIL_FROM }}
+        run: node straydogs/community/tools/preflight-readonly.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: straydogs-readonly-preflight
+          path: straydogs-readonly-preflight.json
+          retention-days: 7
