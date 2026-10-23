@@ -122,7 +122,12 @@
     activeCard = card;
     returnFocus = trigger instanceof HTMLElement ? trigger : card.querySelector('.world-card__play');
     modalTitle.textContent = cardTitle(card);
-    musicCredit.hidden = card.dataset.videoCredit !== 'horizons';
+    const track = { horizons: 'Horizons', catalyst: 'Catalyst' }[card.dataset.videoCredit];
+    musicCredit.hidden = !track;
+    if (track) {
+      const editNote = isFrench() ? 'Extrait monté, volume adapté et fondus appliqués.' : 'Edited excerpt; volume adjusted and fades applied.';
+      musicCredit.innerHTML = `“${track}” — <a href="https://www.scottbuckley.com.au/library/${card.dataset.videoCredit}/" target="_blank" rel="noopener noreferrer">Scott Buckley</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> · ${editNote}`;
+    }
 
     pausedPreviews = [...document.querySelectorAll('video[data-viewport-video]')]
       .filter((video) => !video.paused);
