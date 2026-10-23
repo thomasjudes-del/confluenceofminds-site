@@ -64,3 +64,6 @@
 .zine{container-type:inline-size}.scene .zine strong{font-size:clamp(14px,32cqw,36px)}:lang(fr) .zine strong{font-size:clamp(14px,28cqw,36px)}
 :lang(fr) .discover-work .label{min-width:84px;left:50%;translate:-50% 0}
 @container(max-width:52px){.zine strong{display:none}}
+
+/* Keep the application explanation clear of the join button and its shadow. */
+.join-copy > .join-button + p{margin-top:24px}
