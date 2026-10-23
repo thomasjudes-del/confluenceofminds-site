@@ -54,6 +54,12 @@
   `;
   document.body.append(lightbox);
 
+  const musicCredit = document.createElement('p');
+  musicCredit.className = 'video-lightbox__credit';
+  musicCredit.hidden = true;
+  musicCredit.innerHTML = '“Horizons” — <a href="https://www.scottbuckley.com.au/library/horizons/" target="_blank" rel="noopener noreferrer">Scott Buckley</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> · Edited, excerpted and looped; volume adjusted.';
+  lightbox.querySelector('.video-lightbox__panel').append(musicCredit);
+
   const modalVideo = lightbox.querySelector('.video-lightbox__video');
   const modalTitle = lightbox.querySelector('#video-lightbox-title');
   const closeButton = lightbox.querySelector('.video-lightbox__close');
@@ -69,7 +75,7 @@
   const cardTitle = (card) => card.querySelector('h3')?.textContent?.trim() || 'Confluence of Minds';
   const cardSource = (card) => {
     const preview = card.querySelector('.world-card__preview');
-    return preview?.currentSrc || preview?.querySelector('source')?.getAttribute('src') || '';
+    return card?.dataset.fullVideo || preview?.currentSrc || preview?.querySelector('source')?.getAttribute('src') || '';
   };
 
   const refreshLabels = () => {
@@ -116,6 +122,7 @@
     activeCard = card;
     returnFocus = trigger instanceof HTMLElement ? trigger : card.querySelector('.world-card__play');
     modalTitle.textContent = cardTitle(card);
+    musicCredit.hidden = card.dataset.videoCredit !== 'horizons';
 
     pausedPreviews = [...document.querySelectorAll('video[data-viewport-video]')]
       .filter((video) => !video.paused);
@@ -171,8 +178,8 @@
     if (event.key === 'Escape') closeLightbox();
     if (event.key !== 'Tab') return;
 
-    const focusable = [...lightbox.querySelectorAll('button, video[controls]')]
-      .filter((element) => !element.hasAttribute('disabled'));
+    const focusable = [...lightbox.querySelectorAll('button, video[controls], a[href]')]
+      .filter((element) => !element.hasAttribute('disabled') && !element.closest('[hidden]'));
     if (!focusable.length) return;
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
