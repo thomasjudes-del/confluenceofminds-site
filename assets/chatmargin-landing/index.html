@@ -1,0 +1,115 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ChatMargin original landing animation</title><link rel="stylesheet" href="demo.css"><style>html,body{width:1200px;height:675px;margin:0;overflow:hidden;background:#fff} .hero{display:block!important;width:1200px!important;max-width:none!important;margin:0!important;padding:0!important}.hero-copy,.browser-bar{display:none!important}.product-demo{width:1200px;height:675px}.app-stage{width:1200px;height:675px!important;min-height:0!important;border:0;border-radius:0;box-shadow:none}</style></head><body>    <section class="hero">
+      <section class="hero-copy">
+        <span class="eyebrow">See it in context</span>
+        <h1>A workspace that lives next to ChatGPT.</h1>
+        <p class="lead">ChatMargin keeps the useful layer around your conversations: structured notes, reusable prompts, follow-ups, search and a full writing workspace.</p>
+        <div class="scenario-nav" aria-label="Demo scenarios">
+          <button class="scenario active" data-scenario="notes"><span>✏️</span> Notes</button>
+          <button class="scenario" data-scenario="prompts"><span>💬</span> Prompts</button>
+          <button class="scenario" data-scenario="dashboard"><span>📊</span> Dashboard</button>
+          <button class="scenario" data-scenario="search"><span>⌕</span> Search</button>
+          <button class="scenario" data-scenario="workspace"><span>▣</span> Workspace</button>
+        </div>
+        <div class="scenario-copy" aria-live="polite">
+          <div class="step-label" id="stepLabel">NOTES</div>
+          <h2 id="scenarioTitle">Keep the important parts of a chat beside the chat.</h2>
+          <p id="scenarioText">Watch a useful passage move from ChatGPT into a structured note, get formatted, then split into a sub-page.</p>
+          <div class="progress"><span id="progressBar"></span></div>
+          <button id="replay" class="replay" type="button">↻ Replay this flow</button>
+        </div>
+        <div class="actions">
+          <a class="btn btn-primary" href="https://chromewebstore.google.com/detail/chat-margin-for-chatgpt/fnickbjgphdehoelanbchadempnlmmpc" target="_blank" rel="noopener">Add ChatMargin to Chrome</a>
+        </div>
+        <p class="privacy-line">Local-first. No ChatMargin account required. Independent from OpenAI.</p>
+      </section>
+
+      <section class="product-demo" aria-label="Interactive ChatMargin demo">
+        <div class="browser-bar"><div class="browser-dots"><span></span><span></span><span></span></div><div class="browser-url">chatgpt.com</div><div class="browser-right">⋯</div></div>
+        <div class="app-stage" id="appStage">
+          <aside class="gpt-nav">
+            <div class="gpt-logo">✺</div>
+            <div class="gpt-new">＋ New chat</div>
+            <div class="gpt-section-label">Projects</div>
+            <div class="gpt-project selected">◫ Product launch</div>
+            <div class="gpt-project">◫ Research</div>
+            <div class="gpt-section-label">Chats</div>
+            <div class="gpt-chat-row">Website launch plan</div>
+            <div class="gpt-chat-row">User interviews</div>
+            <div class="gpt-user">TJ</div>
+          </aside>
+          <div class="gpt-main">
+            <div class="gpt-top"><span class="gpt-model">ChatGPT ▾</span><span class="gpt-actions">Share&nbsp;&nbsp; •••</span></div>
+            <div class="conversation" id="conversation">
+              <div class="chat-title" id="chatTitle">Website launch plan</div>
+              <div class="message user"><div class="avatar user-avatar">T</div><div class="bubble">We need a lean launch plan for ChatMargin. What should we prioritize first?</div></div>
+              <div class="message assistant"><div class="avatar ai-avatar">✺</div><div class="bubble"><p>For the first phase, keep the product scope narrow and optimize for learning.</p><p><span id="copySource" class="copy-source">Start with Chrome and Chromium, focus on heavy ChatGPT users, and learn from the first 100 active users before expanding.</span></p><p>Then use those real workflows to decide what deserves deeper automation.</p></div></div>
+              <div class="message user"><div class="avatar user-avatar">T</div><div class="bubble">Good. Turn that into concrete actions and risks.</div></div>
+              <div class="message assistant"><div class="avatar ai-avatar">✺</div><div class="bubble"><p><strong>Actions:</strong> tighten onboarding, instrument feedback, interview users and preserve local-first trust.</p><p><strong>Risk:</strong> adding too many features before the core workflow is obvious.</p></div></div>
+            </div>
+            <div class="composer-wrap"><div class="composer" id="composer"><span class="composer-placeholder">Ask anything</span><span class="composer-text" id="composerText"></span><button class="send-btn" id="sendButton">↑</button></div><div class="composer-meta">ChatGPT can make mistakes. Check important info.</div></div>
+          </div>
+
+          <aside class="cm-panel" id="cmPanel">
+            <div class="cm-header">
+              <div class="cm-brand-row">
+                <div class="cm-brand"><img src="https://chatmargin.app/assets/chatmargin-logo.png" alt=""><span>Chat Margin v0.60</span></div>
+                <div class="cm-header-actions"><button title="Help">?</button><button title="Expand">⧉</button><button title="Collapse">−</button></div>
+              </div>
+              <div class="cm-chat-row"><span class="online-dot"></span><div><strong id="cmChatTitle">Website launch plan</strong><small>Product launch</small></div></div>
+            </div>
+            <div class="cm-tabs" role="tablist">
+              <button class="cm-tab active" data-panel="notes">Notes ✏️</button>
+              <button class="cm-tab" data-panel="prompts">Prompts 💬</button>
+              <button class="cm-tab" data-panel="dashboard">Dashboard 📊</button>
+              <button class="cm-tab" data-panel="search">Search ⌕</button>
+            </div>
+            <div class="cm-body">
+              <section class="cm-view active" data-view="notes">
+                <div class="note-pages"><div class="page-tabs"><button class="page-tab active" data-page="main">Main</button><button class="page-tab hidden" id="feedbackPageTab" data-page="feedback">User feedback</button></div><div class="page-actions"><button id="workspaceBtn" class="workspace-btn" title="Open in Workspace">▣</button><button>⋯</button><button id="addPage">＋</button></div></div>
+                <div class="note-editor" id="noteEditor">
+                  <div class="note-block heading"><span class="grip">⠿</span><div>Launch decisions</div></div>
+                  <div class="note-block"><span class="grip">⠿</span><div>Keep the launch simple and learn from real use.</div></div>
+                  <div class="note-block inserted" id="insertedNote"><span class="grip">⠿</span><div id="insertedNoteText"></div></div>
+                  <div class="format-toolbar" id="formatToolbar"><button id="boldBtn"><strong>B</strong></button><button>U</button><button>H1</button><button>• List</button><button>☑</button></div>
+                </div>
+                <div class="feedback-page" id="feedbackPage"><div class="note-block heading"><span class="grip">⠿</span><div>User feedback</div></div><div class="note-block"><span class="grip">⠿</span><div>What do users reopen most often?</div></div><div class="note-block"><span class="grip">⠿</span><div>Where do they lose context today?</div></div></div>
+              </section>
+
+              <section class="cm-view" data-view="prompts">
+                <div class="prompt-toolbar"><strong>Prompt cards</strong><div><button>Import project</button><button>＋ New prompt</button></div></div>
+                <div class="prompt-list" id="promptList">
+                  <article class="prompt-card" id="promptA"><div class="prompt-head"><button class="drag-handle">⠿</button><strong>Turn this into actions</strong><div class="prompt-actions"><button class="collapse-btn" data-card="promptA">⌃</button><button class="send-prompt" data-text="Turn the discussion above into concrete actions, owners, risks and open questions.">Send to ChatGPT</button></div></div><div class="prompt-body">Turn the discussion above into concrete actions, owners, risks and open questions.</div></article>
+                  <article class="prompt-card" id="promptB"><div class="prompt-head"><button class="drag-handle" id="dragPromptB">⠿</button><strong>Challenge the plan</strong><div class="prompt-actions"><button class="collapse-btn" data-card="promptB">⌃</button><button class="send-prompt" data-text="Challenge this plan. Identify weak assumptions, missing evidence and better alternatives.">Send to ChatGPT</button></div></div><div class="prompt-body">Challenge this plan. Identify weak assumptions, missing evidence and better alternatives.</div></article>
+                  <article class="prompt-card collapsed" id="promptC"><div class="prompt-head"><button class="drag-handle">⠿</button><strong>Restart context</strong><div class="prompt-actions"><button class="collapse-btn" data-card="promptC">⌄</button><button class="send-prompt" data-text="Create a compact checkpoint so I can restart this work later without losing key decisions.">Send to ChatGPT</button></div></div><div class="prompt-body">Create a compact checkpoint so I can restart this work later without losing key decisions.</div></article>
+                </div>
+              </section>
+
+              <section class="cm-view" data-view="dashboard">
+                <div class="dash-controls"><button class="filter-button" id="priorityFilter">All priorities ▾</button><button class="filter-button" id="projectFilter">All projects ▾</button><button class="filter-button">Priority ▾</button></div>
+                <div class="dash-list" id="dashList">
+                  <article class="dash-card urgent" data-project="Product launch"><div class="priority-line urgent-dot"></div><div class="dash-main"><strong>Website launch plan</strong><span>Product launch</span><small>2 min ago · 3 note blocks</small></div><button>↗</button></article>
+                  <article class="dash-card medium" data-project="Product launch"><div class="priority-line medium-dot"></div><div class="dash-main"><strong>User interviews</strong><span>Product launch</span><small>Yesterday · 6 note blocks</small></div><button>↗</button></article>
+                  <article class="dash-card urgent" data-project="Research"><div class="priority-line urgent-dot"></div><div class="dash-main"><strong>Competitor scan</strong><span>Research</span><small>3 days ago · 4 note blocks</small></div><button>↗</button></article>
+                </div>
+              </section>
+
+              <section class="cm-view" data-view="search">
+                <div class="search-wrap"><div class="search-box"><span>⌕</span><input id="searchInput" placeholder="Search conversations, notes and prompts…" /></div><div class="search-filters"><button id="searchProject">All projects ▾</button><button>All types ▾</button></div></div>
+                <div class="search-results" id="searchResults"><div class="search-empty">Start typing to search across Chat Margin.</div></div>
+              </section>
+            </div>
+            <div class="cm-footer"><div><strong>Saved locally</strong><small id="saveStatus">Just now</small></div><div class="priority-picker"><span>Priority</span><button class="clear">×</button><button class="dot low"></button><button class="dot medium"></button><button class="dot urgent active"></button></div></div>
+          </aside>
+
+          <div class="workspace-overlay" id="workspaceOverlay">
+            <div class="workspace-top"><div class="workspace-brand"><img src="https://chatmargin.app/assets/chatmargin-logo.png" alt="">Chat Margin Workspace</div><button id="closeWorkspace">×</button></div>
+            <div class="workspace-shell"><aside class="workspace-pages"><div class="ws-title">Website launch plan</div><button class="active">Main</button><button>User feedback</button><button>Metrics</button><button>Launch ideas</button><button class="new-page">＋ New page</button></aside><article class="workspace-doc"><div class="workspace-breadcrumb">Product launch / Website launch plan</div><h2>Launch decisions</h2><p>Keep the launch simple and learn from real use.</p><p><strong>Start with Chrome and Chromium</strong>, focus on heavy ChatGPT users, and learn from the first 100 active users before expanding.</p><h3>Next steps</h3><ul><li>Instrument feedback from the current workflow</li><li>Interview early users</li><li>Protect the local-first experience</li></ul><div class="ws-callout">Same note. More room. Still attached to the ChatGPT conversation.</div></article></div>
+          </div>
+
+          <div class="toast" id="toast">Copied to clipboard</div>
+          <div class="demo-cursor" id="demoCursor"><div class="cursor-arrow"></div><div class="cursor-ripple"></div></div>
+        </div>
+      </section>
+    </section>
+
+<script src="demo.js"></script></body></html>
