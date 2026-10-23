@@ -43,3 +43,8 @@ The first two tests exercise the reusable prototype model with explicitly fictio
 `configure-endpoint.mjs` accepts only an HTTPS origin, updates the public API URL and the CSP, and does not deploy or configure credentials. Leave the placeholder untouched until the dedicated backend is approved and smoke-tested.
 
 Infrastructure evidence: read-only preflight run `39846186911`; configured account concordance `39848571644` / job `120068328294` was true. These were one-off checks. Subsequent UI CI is pull-request-only, has no provider credentials and sends no email. Historical plan evidence is not a live capacity guarantee.
+
+
+## 23 October integration review
+
+Synced with main after PR35, retaining all homepage, ChatMargin animation and Explorer changes. No landing-page replacement. Sign-in now prefers the member’s latest submitted profile name over the older admission name; browser QA covers this distinction. The completed one-off infrastructure preflight has been removed from active workflows to prevent an accidental repeat of a denied subscription read. No provider configuration is changed by this update.

@@ -175,7 +175,8 @@
             "name": "Guess the Book",
             "description": "A visual guessing game built around books hidden inside images.",
             "url": "https://www.instagram.com/confluenceofminds/"
-          },
+          }
+        },
         {
           "@type": "ListItem",
           "position": 11,
@@ -195,7 +196,6 @@
             "description": "A local-first Chrome extension for notes, prompts, follow-ups, search and workspace around ChatGPT.",
             "url": "https://chatmargin.app/"
           }
-        }
         }
       ]
     }
@@ -221,6 +221,10 @@
   <link rel="stylesheet" href="/engagement-v1.css?v=20260808-v1" />
   <link rel="stylesheet" href="/straydogs/assets/fonts.css" />
   <link rel="stylesheet" href="/straydogs/tile.css" />
+  <link rel="stylesheet" href="/centauro-card.css?v=20261022-v1" />
+  <link rel="stylesheet" href="/explorer-card.css?v=20261023-v4" />
+  <link rel="stylesheet" href="/memoryx-card.css?v=20261023-video-v2" />
+  <link rel="stylesheet" href="/chatmargin-card.css?v=20261023-original-demo" />
 </head>
 <body>
   <div class="paper-grain" aria-hidden="true"></div>
@@ -349,11 +353,13 @@
 
         <article class="world-card world-card--titan world-card--native reveal" data-portal="Incident on Titan" data-media-container>
           <a class="world-card__link" href="/titan/" aria-label="Enter Incident on Titan">
-            <div class="world-cover">
-              <img class="world-card__poster" src="assets/titan-poster-mobile.jpg?v=20260806-native-v2" alt="" aria-hidden="true" />
-              <video class="world-card__preview" data-viewport-video autoplay muted loop playsinline preload="auto" poster="assets/titan-poster-mobile.jpg?v=20260806-native-v2" aria-hidden="true">
-                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/incident-on-titan-preview.mp4" type="video/mp4" />
+            <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/titan.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/titan.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/titan.jpg" aria-hidden="true">
+                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Incident_on_Titan_Teaser_Minimal_Cut_HD_Final.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/titan.mp4" type="video/mp4" />
               </video>
+              
+              
               <span class="world-card__scrim" aria-hidden="true"></span>
               <div class="world-card__body">
                 <h3>Incident on Titan</h3>
@@ -385,6 +391,7 @@
           <a class="world-card__link" href="https://chatmargin.app/" target="_blank" rel="noopener" aria-label="Open ChatMargin">
             <div class="world-cover">
               <img class="world-card__poster world-card__poster--product" src="https://chatmargin.app/assets/chatmargin-hero.png" alt="" aria-hidden="true" loading="lazy" />
+              <iframe class="chatmargin-landing-animation" data-animation-src="/assets/chatmargin-landing/index.html" title="ChatMargin landing demonstration" sandbox="allow-scripts" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
               <span class="world-card__scrim" aria-hidden="true"></span>
               <div class="world-card__body">
                 <div class="world-card__meta"><span>Local-first tool</span><span>Live</span></div>
@@ -398,22 +405,13 @@
 
 
         <article class="world-card world-card--anjin world-card--native reveal" data-portal="Anjin of the Shogun" data-media-container>
-          <div class="world-cover">
-            <svg viewBox="0 0 640 360" aria-hidden="true">
-              <defs><linearGradient id="anjinPaper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#efe6d4"/><stop offset="1" stop-color="#b8a891"/></linearGradient><filter id="inkBlur"><feGaussianBlur stdDeviation="4"/></filter></defs>
-              <rect width="640" height="360" fill="url(#anjinPaper)"/>
-              <circle cx="494" cy="105" r="69" fill="#a6251c" opacity=".9"/>
-              <path d="M0 287c95-54 167-60 260-17 97-68 189-73 380-6v96H0Z" fill="#202826" opacity=".9"/>
-              <path d="M80 267c52-51 103-78 161-84 62-7 105 13 162 54" fill="none" stroke="#0e1615" stroke-width="25" stroke-linecap="round" filter="url(#inkBlur)" opacity=".55"/>
-              <g fill="#101716"><path d="M308 104c-28 0-48 25-48 58v103h96V162c0-33-20-58-48-58Z"/><path d="M278 114l30-42 30 42Z"/><path d="M282 164l-60 103h172l-60-103Z"/></g>
-              <g stroke="#27302e" stroke-width="5" fill="none"><path d="M447 254h130M460 225h106M475 196h75"/><path d="M497 190v73M530 190v73"/></g>
-              <text x="35" y="72" fill="#25302d" font-family="Noto Serif JP, serif" font-size="18" letter-spacing="4">按針 · THE CULTURE BEHIND THE SERIES</text>
-              <text x="34" y="130" fill="#111918" font-family="Noto Serif JP, serif" font-size="54">ANJIN</text>
-              <text x="37" y="170" fill="#111918" font-family="Bodoni Moda, serif" font-size="26" letter-spacing="4">OF THE SHOGUN</text>
-            </svg>
-              <video class="world-card__preview" data-viewport-video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Anjin_of_the_Shogun_Teaser_27s_HD.mp4" type="video/mp4" />
+          <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/anjin.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/anjin.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/anjin.jpg" aria-hidden="true">
+                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Good%20Anjin_of_the_Shogun_Teaser_Cinematic_V4_1080p.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/anjin.mp4" type="video/mp4" />
               </video>
+            
+              
               <span class="world-card__scrim" aria-hidden="true"></span>
           </div>
           <div class="world-card__body">
@@ -425,22 +423,13 @@
         </article>
 
         <article class="world-card world-card--kashgar world-card--native reveal" data-portal="Chronicles of Kashgar" data-media-container>
-          <div class="world-cover">
-            <svg viewBox="0 0 640 360" aria-hidden="true">
-              <defs><linearGradient id="kashSky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1e4054"/><stop offset=".58" stop-color="#c58b51"/><stop offset="1" stop-color="#d3a56e"/></linearGradient></defs>
-              <rect width="640" height="360" fill="url(#kashSky)"/>
-              <path d="M0 214l108-87 79 70 82-112 89 109 69-89 122 114 91-73v214H0Z" fill="#293d41" opacity=".8"/>
-              <path d="M0 244c106-32 194-30 284 8 113-51 227-48 356-8v116H0Z" fill="#b9824b"/>
-              <g fill="#5b3825"><path d="M68 268h255v92H68Z"/><path d="M102 228h63v132h-63Z"/><path d="M116 201h35l14 27h-63Z"/><path d="M203 242h81v118h-81Z"/><path d="M215 207h57l12 35h-81Z"/></g>
-              <path d="M366 302c51-35 101-53 150-54 43 0 84 12 124 37v75H366Z" fill="#8e5a35"/>
-              <circle cx="512" cy="84" r="47" fill="#f4c87c" opacity=".8"/>
-              <text x="34" y="75" fill="#f5e7cc" font-family="Cinzel, serif" font-size="18" letter-spacing="4">THE NOVICES & THE BUTTERFLY’S DREAM</text>
-              <text x="33" y="132" fill="#fff2d7" font-family="Cinzel, serif" font-size="42">CHRONICLES OF</text>
-              <text x="31" y="194" fill="#fff2d7" font-family="Cinzel, serif" font-size="64">KASHGAR</text>
-            </svg>
-              <video class="world-card__preview" data-viewport-video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+          <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/kashgar.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/kashgar.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/kashgar.jpg" aria-hidden="true">
                 <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/0%20Kashgar_Teaser_V3.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/kashgar.mp4" type="video/mp4" />
               </video>
+            
+              
               <span class="world-card__scrim" aria-hidden="true"></span>
           </div>
           <div class="world-card__body">
@@ -452,21 +441,13 @@
         </article>
 
         <article class="world-card world-card--dragons world-card--native reveal" data-portal="Shattered Dragons" data-media-container>
-          <div class="world-cover">
-            <svg viewBox="0 0 640 360" aria-hidden="true">
-              <defs><radialGradient id="dragonMist" cx="70%" cy="45%" r="60%"><stop stop-color="#73946b" stop-opacity=".65"/><stop offset=".55" stop-color="#193428" stop-opacity=".32"/><stop offset="1" stop-color="#06100d" stop-opacity="0"/></radialGradient></defs>
-              <rect width="640" height="360" fill="#06100d"/><rect width="640" height="360" fill="url(#dragonMist)"/>
-              <path d="M0 299c86-63 174-88 266-58 65 21 112 13 173-12 68-29 132-20 201 30v101H0Z" fill="#10261d"/>
-              <path d="M464 77c-52 4-96 33-122 75-31 50-17 95 26 122-10-39 4-68 38-88-4 32 9 57 37 75 5-41 23-66 54-78 27 27 55 39 86 38-24-13-39-31-46-55 24 11 48 10 73-2-27-5-47-19-60-42-17-29-37-48-66-45Z" fill="#101816" stroke="#78a66d" stroke-width="3"/>
-              <path d="M488 112c26 8 46 21 60 41l-46 4-29-24Z" fill="#223f31"/><circle cx="525" cy="132" r="6" fill="#d9f77b"/>
-              <path d="M55 77c46 24 85 55 119 94M93 53c31 34 56 74 75 119M588 275c-37-43-70-71-113-90" stroke="#55765a" stroke-width="3" fill="none" opacity=".55"/>
-              <text x="35" y="84" fill="#d8e5cc" font-family="Cinzel, serif" font-size="22" letter-spacing="4">THEY REMEMBER</text>
-              <text x="34" y="144" fill="#f0f3e8" font-family="Cinzel, serif" font-size="48">SHATTERED</text>
-              <text x="33" y="205" fill="#f0f3e8" font-family="Cinzel, serif" font-size="61">DRAGONS</text>
-            </svg>
-              <video class="world-card__preview" data-viewport-video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+          <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/dragons.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/dragons.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/dragons.jpg" aria-hidden="true">
                 <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Shattered_Dragons_Recap_Teaser_16x9.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/dragons.mp4" type="video/mp4" />
               </video>
+            
+              
               <span class="world-card__scrim" aria-hidden="true"></span>
           </div>
           <div class="world-card__body">
@@ -477,24 +458,28 @@
           </div>
         </article>
 
+<article class="world-card world-card--snowwhite world-card--native reveal" data-portal="Snow White and the Queen of Ashes" data-media-container>
+      <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/snowwhite.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/snowwhite.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/snowwhite.jpg" aria-hidden="true">
+                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Snow_White_Queen_of_Ashes_Cinematic_Teaser_compressed.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/snowwhite.mp4" type="video/mp4" />
+              </video><span class="world-card__scrim" aria-hidden="true"></span>
+        
+      </div>
+      <div class="world-card__body">
+        <div class="world-card__meta"><span>Ecological fairy tale</span><span>Reimagining</span></div>
+        <h3>Snow White and the Queen of Ashes</h3>
+        <p>A contemporary ecological retelling of the Grimm tale, still deeply enchanted.</p>
+      </div>
+    </article>
         <article class="world-card world-card--katephomi world-card--native reveal" data-portal="À la recherche de Katephomi Kitembe" data-media-container>
-          <div class="world-cover">
-            <svg viewBox="0 0 640 360" aria-hidden="true">
-              <defs><linearGradient id="heatSky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f3c254"/><stop offset=".42" stop-color="#df5f31"/><stop offset="1" stop-color="#381a2c"/></linearGradient><linearGradient id="portal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#55d7d0"/><stop offset=".5" stop-color="#7d55ff"/><stop offset="1" stop-color="#ff4e87"/></linearGradient></defs>
-              <rect width="640" height="360" fill="url(#heatSky)"/>
-              <circle cx="531" cy="65" r="63" fill="#fff0a7" opacity=".74"/>
-              <path d="M0 230c89-35 158-31 238 7 92-51 177-51 270-7 45 22 89 24 132 8v122H0Z" fill="#472536"/>
-              <path d="M354 84c-58 0-104 48-104 108s46 108 104 108 104-48 104-108S412 84 354 84Zm0 29c42 0 75 35 75 79s-33 79-75 79-75-35-75-79 33-79 75-79Z" fill="url(#portal)" opacity=".88"/>
-              <path d="M321 271c10-50 24-91 34-120 10 29 24 70 34 120" fill="none" stroke="#f5f6e8" stroke-width="6"/>
-              <path d="M303 271h103" stroke="#f5f6e8" stroke-width="6"/>
-              <path d="M105 277c30-73 70-115 120-125l-19 125Z" fill="#1b2b36"/><circle cx="190" cy="132" r="19" fill="#1b2b36"/>
-              <text x="31" y="69" fill="#2d1624" font-family="IBM Plex Mono, monospace" font-size="14" letter-spacing="3">THE YEAR OF THE HEATWAVE</text>
-              <text x="29" y="121" fill="#fff6d9" font-family="Bodoni Moda, serif" font-size="34">À LA RECHERCHE DE</text>
-              <text x="28" y="178" fill="#fff6d9" font-family="Bodoni Moda, serif" font-size="50">KATEPHOMI KITEMBE</text>
-            </svg>
-              <video class="world-card__preview" data-viewport-video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/A_la_recherche_de_Katephomi_Kitembe_Teaser.mp4" type="video/mp4" />
+          <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/katephomi.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/katephomi.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/katephomi.jpg" aria-hidden="true">
+                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/katephomi.mp4" type="video/mp4" />
               </video>
+            
+              
               <span class="world-card__scrim" aria-hidden="true"></span>
           </div>
           <div class="world-card__body">
@@ -505,21 +490,13 @@
           </div>
         </article>
 
-        <article class="world-card world-card--victims reveal" data-portal="Authentiques Victimes">
-          <div class="world-cover">
-            <svg viewBox="0 0 640 360" aria-hidden="true">
-              <defs><linearGradient id="victimRoom" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#20302d"/><stop offset="1" stop-color="#090d0c"/></linearGradient></defs>
-              <rect width="640" height="360" fill="url(#victimRoom)"/>
-              <rect x="372" y="0" width="10" height="360" fill="#8eaa94" opacity=".23"/><rect x="471" y="0" width="7" height="360" fill="#8eaa94" opacity=".16"/>
-              <path d="M394 98h98v124h-98Z" fill="#cdd7ca" opacity=".08"/><path d="M425 222v74M463 222v74" stroke="#817260" stroke-width="10"/>
-              <path d="M402 214h92v20h-92Z" fill="#51463b"/><path d="M414 134h68v80h-68Z" fill="#615346"/>
-              <g fill="#8aa17f" opacity=".3"><circle cx="87" cy="273" r="41"/><circle cx="125" cy="243" r="35"/><circle cx="158" cy="280" r="47"/><circle cx="214" cy="250" r="32"/></g>
-              <path d="M51 313c67-55 124-74 184-60 51 12 86 44 121 91H51Z" fill="#17241f"/>
-              <text x="34" y="83" fill="#c9d2c7" font-family="Special Elite, serif" font-size="18" letter-spacing="3">WHO WROTE WHOM?</text>
-              <text x="31" y="143" fill="#f0eadf" font-family="Special Elite, serif" font-size="48">AUTHENTIQUES</text>
-              <text x="32" y="204" fill="#f0eadf" font-family="Special Elite, serif" font-size="58">VICTIMES</text>
-              <rect x="30" y="230" width="247" height="8" fill="#7d2720"/>
-            </svg>
+        <article data-media-container class="world-card world-card--native world-card--victims reveal" data-portal="Authentiques Victimes">
+          <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/victims.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/victims.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/victims.jpg" aria-hidden="true">
+                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Authentiques_Victimes_Cinematic_Teaser_V2_Nils_Frahm.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/victims.mp4" type="video/mp4" />
+              </video><span class="world-card__scrim" aria-hidden="true"></span>
+            
           </div>
           <div class="world-card__body">
             <div class="world-card__meta"><span>Psychological SF thriller</span><span>Book</span></div>
@@ -529,20 +506,13 @@
           </div>
         </article>
 
-        <article class="world-card world-card--aitalent reveal" data-portal="AI’s Got Talent">
-          <div class="world-cover">
-            <svg viewBox="0 0 640 360" aria-hidden="true">
-              <defs><linearGradient id="stageBg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#081627"/><stop offset=".5" stop-color="#251039"/><stop offset="1" stop-color="#06070e"/></linearGradient><radialGradient id="stageGlow" cx="50%" cy="100%" r="80%"><stop stop-color="#ff3e9c" stop-opacity=".8"/><stop offset=".5" stop-color="#6b5cff" stop-opacity=".24"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
-              <rect width="640" height="360" fill="url(#stageBg)"/><rect width="640" height="360" fill="url(#stageGlow)"/>
-              <path d="M67 0l157 360M573 0L416 360M224 0l72 360M416 0l-72 360" stroke="#a5dbff" stroke-opacity=".25" stroke-width="35"/>
-              <ellipse cx="321" cy="320" rx="215" ry="50" fill="#ff3e9c" opacity=".24"/>
-              <path d="M321 187c-19 0-32 16-32 39v50h64v-50c0-23-13-39-32-39Zm-5-12h12l5-36h-22Z" fill="#05070d"/>
-              <path d="M289 221l-78-46M353 221l78-46" stroke="#05070d" stroke-width="13" stroke-linecap="round"/>
-              <g fill="#fce6ff" opacity=".5"><circle cx="68" cy="301" r="4"/><circle cx="91" cy="287" r="5"/><circle cx="122" cy="310" r="4"/><circle cx="526" cy="303" r="5"/><circle cx="551" cy="286" r="4"/><circle cx="578" cy="307" r="5"/></g>
-              <text x="40" y="85" fill="#fff" font-family="Oswald, sans-serif" font-size="25" letter-spacing="4">THE INTERNET’S STAGE FOR</text>
-              <text x="38" y="150" fill="#ffd64a" font-family="Oswald, sans-serif" font-weight="700" font-size="61">AI’S GOT TALENT</text>
-              <text x="41" y="183" fill="#62e6ff" font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="2">SUBMIT · GET SELECTED · FACE THE VOTE</text>
-            </svg>
+        <article data-media-container class="world-card world-card--native world-card--aitalent reveal" data-portal="AI’s Got Talent">
+          <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/aitalent.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/aitalent.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/aitalent.jpg" aria-hidden="true">
+                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/AI_Talent_Mini_Teaser_V2_Show.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/aitalent.mp4" type="video/mp4" />
+              </video><span class="world-card__scrim" aria-hidden="true"></span>
+            
           </div>
           <div class="world-card__body">
             <div class="world-card__meta"><span>Online talent show</span><span>Live</span></div>
@@ -573,20 +543,13 @@
           </div>
         </article>
 
-        <article class="world-card world-card--silmea reveal" data-portal="Créations SILMEA">
-          <div class="world-cover">
-            <svg viewBox="0 0 640 360" aria-hidden="true">
-              <defs><linearGradient id="audioBg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07192a"/><stop offset=".55" stop-color="#123a47"/><stop offset="1" stop-color="#0a0e1a"/></linearGradient><linearGradient id="wave" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f2bc55"/><stop offset=".5" stop-color="#ef5a7c"/><stop offset="1" stop-color="#68d7e5"/></linearGradient></defs>
-              <rect width="640" height="360" fill="url(#audioBg)"/>
-              <circle cx="510" cy="79" r="106" fill="#3d8792" opacity=".14"/><circle cx="516" cy="83" r="63" fill="#e56375" opacity=".1"/>
-              <g fill="url(#wave)">
-                <rect x="48" y="177" width="9" height="26" rx="4"/><rect x="67" y="154" width="9" height="72" rx="4"/><rect x="86" y="128" width="9" height="124" rx="4"/><rect x="105" y="166" width="9" height="48" rx="4"/><rect x="124" y="109" width="9" height="162" rx="4"/><rect x="143" y="141" width="9" height="98" rx="4"/><rect x="162" y="86" width="9" height="208" rx="4"/><rect x="181" y="151" width="9" height="79" rx="4"/><rect x="200" y="120" width="9" height="141" rx="4"/><rect x="219" y="170" width="9" height="42" rx="4"/>
-              </g>
-              <path d="M288 184c68-57 118-85 167-83 51 2 89 34 143 96-60 47-112 69-164 63-52-6-95-31-146-76Z" fill="none" stroke="#e9eff1" stroke-opacity=".3" stroke-width="2"/>
-              <text x="287" y="153" fill="#fff" font-family="Bodoni Moda, serif" font-size="31" letter-spacing="5">CRÉATIONS</text>
-              <text x="286" y="222" fill="#fff" font-family="Bodoni Moda, serif" font-size="67" letter-spacing="7">SILMEA</text>
-              <text x="291" y="254" fill="#f2bc55" font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="4">FILMS SONORES</text>
-            </svg>
+        <article data-media-container class="world-card world-card--native world-card--silmea reveal" data-portal="Créations SILMEA">
+          <div class="world-cover"><img class="world-card__poster" src="/assets/trailer-fallbacks/silmea.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+              <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/silmea.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/silmea.jpg" aria-hidden="true">
+                <source src="https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/SILMEA_Films_Sonores_Teaser_V3_Court_Cinematique.mp4" type="video/mp4" />
+                <source src="/assets/trailer-fallbacks/silmea.mp4" type="video/mp4" />
+              </video><span class="world-card__scrim" aria-hidden="true"></span>
+            
           </div>
           <div class="world-card__body">
             <div class="world-card__meta"><span>Audio fiction studio</span><span>Listen</span></div>
@@ -645,6 +608,50 @@
             </div>
           </a>
         </article>
+        <article class="world-card world-card--centauro world-card--native reveal" data-portal="Centauro Quest" data-media-container>
+          <div class="world-cover">
+            <img class="world-card__poster" src="/assets/trailer-fallbacks/centauro.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <video class="world-card__preview" data-viewport-video data-media-fallback="/assets/trailer-fallbacks/centauro.mp4" muted loop playsinline preload="none" poster="/assets/trailer-fallbacks/centauro.jpg" aria-hidden="true">
+              <source src="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/centauro-quest/Centauro_Quest_V9_1080x1920.mp4" type="video/mp4" />
+              <source src="/assets/trailer-fallbacks/centauro.mp4" type="video/mp4" />
+            </video>
+            <div class="world-card__body">
+              <h3>Centauro Quest</h3>
+              <p>You + your AI. One player. A puzzle quest designed for the duo.</p>
+              <span class="centauro-status">In development</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="world-card world-card--explorer world-card--native reveal" id="explorer" data-media-container data-full-video="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/explorer/exploring-the-world-v4-horizontal.mp4" data-video-credit="horizons">
+          <div class="world-cover">
+            <img class="world-card__poster" src="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/explorer/exploring-v4-poster.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <video class="world-card__preview" data-viewport-video muted loop playsinline preload="none" poster="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/explorer/exploring-v4-poster.jpg" aria-hidden="true">
+              <source src="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/explorer/exploring-the-world-v4-web-loop-muted.mp4" type="video/mp4" />
+            </video>
+            <span class="world-card__scrim" aria-hidden="true"></span>
+            <div class="world-card__body">
+              <h3>Exploration as creative practice</h3>
+              <p>Aconcagua and Mont Blanc. The Sinai and Wahiba Sands on foot. Greenland, Iceland, South America, Central Asia. Experiences that feed the worlds I create.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="world-card world-card--memoryx world-card--native reveal" id="memoryx" data-media-container data-full-video="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/memoryx/concept-v2-en-master.mp4" data-video-credit="catalyst">
+          <div class="world-cover">
+            <img class="world-card__poster" src="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/memoryx/concept-v2-en-poster.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <video class="world-card__preview" data-viewport-video muted loop playsinline preload="none" poster="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/memoryx/concept-v2-en-poster.jpg" aria-hidden="true">
+              <source src="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/memoryx/concept-v2-en-loop.mp4" type="video/mp4" />
+            </video>
+            <span class="world-card__scrim" aria-hidden="true"></span>
+            <div class="world-card__body">
+              <h3>MemoryX</h3>
+              <p>Rediscover your past, enrich your memories with loved ones and AI, and train your memory.</p>
+            </div>
+            <a class="memoryx-cta" data-project-link href="https://thomasjudes-del.github.io/memoryx/">Discover MemoryX <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+
       </div>
     </section>
     <section id="about" class="about about--video about--native" aria-labelledby="about-title" data-media-container>
@@ -698,11 +705,12 @@
   </div>
 
   <script src="script.js?v=20261014-hero-readability-v1"></script>
-  <script src="native-media-v4.js?v=20260808-working-rollback-v1"></script>
+  <script src="native-media-v4.js?v=20261022-real-trailers"></script>
   <script src="i18n.js?v=20260808-canonical-lang-v2"></script>
-  <script src="video-lightbox-v1.js?v=20260808-card-ctas-v1"></script>
+  <script src="video-lightbox-v1.js?v=20261023-memoryx-v2"></script>
   <script src="/engagement-v1.js?v=20260808-v1"></script>
   <script src="/raluvaaa/visual-engine-v3.js?v=20260918-bloom-v3"></script>
   <script src="/straydogs/tile.js" defer></script>
+  <script src="/chatmargin-card.js?v=20261023-original-demo"></script>
 </body>
 </html>

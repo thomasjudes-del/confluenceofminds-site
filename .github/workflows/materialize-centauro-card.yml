@@ -1,0 +1,21 @@
+name: Materialize original Centauro Quest V9 media
+on:
+  push:
+    branches: [feat/centauro-quest-card-20261022]
+    paths: ['.github/workflows/materialize-centauro-card.yml']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: python scripts/materialize-home-trailers.py centauro
+      - name: Commit only Centauro media
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/trailer-fallbacks/centauro.mp4 assets/trailer-fallbacks/centauro.jpg
+          git diff --cached --quiet || git commit -m 'Add exact Centauro Quest V9 and authentic poster'
+          git push origin HEAD:feat/centauro-quest-card-20261022

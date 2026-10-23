@@ -1,0 +1,63 @@
+[
+  {
+    "id": "titan",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Incident_on_Titan_Teaser_Minimal_Cut_HD_Final.mp4",
+    "sha256": "a54998b81b507c84a98e3a339466eed0cd5be0f861da0387e68ec6e79dbf6433",
+    "bytes": 9897875
+  },
+  {
+    "id": "anjin",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Good%20Anjin_of_the_Shogun_Teaser_Cinematic_V4_1080p.mp4",
+    "sha256": "c0cd88263668609e61055cfdd9768b57c0a56381df82bdd8afeaf0af0946bc11",
+    "bytes": 15953534
+  },
+  {
+    "id": "katephomi",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/A_la_recherche_de_Katephomi_Kitembe_Teaser_V4_Carried_by_Hope.mp4",
+    "sha256": "c2bb1d7d42063ff464834d45f86129f8a67ba516766751ff51e3c4d0c4590173",
+    "bytes": 16105300
+  },
+  {
+    "id": "victims",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Authentiques_Victimes_Cinematic_Teaser_V2_Nils_Frahm.mp4",
+    "sha256": "beaf03a8a8a99c0abe2a088d78067c37b28764fbc1b75701b82d72147640e954",
+    "bytes": 2773956
+  },
+  {
+    "id": "aitalent",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/AI_Talent_Mini_Teaser_V2_Show.mp4",
+    "sha256": "6c3e51a6c94eccf672c64184a24fde9b34fbad2fb0ea1c388f41b09b1929548d",
+    "bytes": 6714715
+  },
+  {
+    "id": "silmea",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/SILMEA_Films_Sonores_Teaser_V3_Court_Cinematique.mp4",
+    "sha256": "476fcf31ab9c5e47ae26f1e0e684f1647a2884485a69c55129c39cc7f5ac1159",
+    "bytes": 4903216
+  },
+  {
+    "id": "snowwhite",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Snow_White_Queen_of_Ashes_Cinematic_Teaser_compressed.mp4",
+    "sha256": "c412fa862c9828ae358e1d62aa9b31e6d2f601b4dbc6963620184e3b2547f71c",
+    "bytes": 21099920
+  },
+  {
+    "id": "kashgar",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/0%20Kashgar_Teaser_V3.mp4",
+    "sha256": "bfc1b2899866adf59eab3d90165842a3a99d1fb756a7ce4f55cefe81d790d5f8",
+    "bytes": 11565857
+  },
+  {
+    "id": "dragons",
+    "url": "https://pub-4af364e5f0b8401cade14d4e21fb0e19.r2.dev/Shattered_Dragons_Recap_Teaser_16x9.mp4",
+    "sha256": "a60368024cd9baa63d6dccec6dc87abb6711e11a80edb05e8e1c8fdaa31bc45e",
+    "bytes": 6182311
+  },
+  {
+    "id": "centauro",
+    "url": "https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/centauro-quest/Centauro_Quest_V9_1080x1920.mp4",
+    "sha256": "5793b14d2e45325a35e69aa98fe8693c66de2b91830308c37f7e273cdaf05ba9",
+    "bytes": 23622365,
+    "poster_second": 22
+  }
+]
