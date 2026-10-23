@@ -1,0 +1,2 @@
+.chatmargin-landing-animation { position:absolute; top:0; left:0; z-index:1; width:1200px; height:675px; border:0; transform-origin:top left; pointer-events:none; opacity:0; }
+.chatmargin-landing-animation.is-loaded { opacity:1; }
