@@ -17,7 +17,7 @@ Le fournisseur d’envoi Resend existe déjà : `confluenceofminds.com` est vér
 
 ## Contrat frontend
 
-Toutes les dates sont des secondes Unix. Les mutations exigent `Content-Type: application/json`, une origine HTTPS exactement autorisée et un corps de moins de 12 Kio. Aucun cookie n’est utilisé. Les réponses privées sont `Cache-Control: no-store`.
+Toutes les dates sont des secondes Unix. Les mutations exigent `Content-Type: application/json`, une origine HTTPS exactement autorisée et un corps de moins de 12 Kio. Un cookie serveur HttpOnly est utilisé ; aucun jeton n’est accessible au JavaScript. Les requêtes privées exigent aussi une origine exacte et `X-StrayDogs-Client: web`. Les réponses privées sont `Cache-Control: no-store`.
 
 ### `POST /v1/applications`
 
@@ -49,13 +49,23 @@ Le code à **huit chiffres** expire après 10 minutes ; 60 secondes entre émiss
 `{"email":"…","code":"12345678"}` →
 
 ```
-200 { token, expiresAt, member: { id, name, status: "approved" } }
+200 { expiresAt, member: { id, name, status: "approved" } }
 401 { error: "INVALID_OR_EXPIRED_CODE" }
 ```
 
 Le code n’est jamais renvoyé par l’API. Cinq essais maximum par défi ; limites supplémentaires de vérification par IP/email. La consommation et l’émission de session sont une transaction D1 : deux vérifications concurrentes ne produisent qu’une session.
 
-**Frontend : garder `token` en mémoire uniquement**, jamais URL, localStorage, sessionStorage ou cookie JavaScript. Recharger oblige à demander un nouveau code : limite explicite de cette alpha. Envoyer `Authorization: Bearer <token>` aux routes privées. À `401`, vider la mémoire et revenir à la connexion. Durée de session : deux heures, sans refresh token.
+**Cookie uniquement :** le serveur émet `__Host-straydogs` avec `Secure; HttpOnly; SameSite=Strict; Path=/; Max-Age=604800`, sans `Domain`. Aucun token dans JSON, URL, localStorage, sessionStorage ou cookie JavaScript. Stockage serveur HMAC uniquement. Une nouvelle validation OTP crée toujours un identifiant aléatoire neuf.
+
+### `POST /v1/auth/session`
+
+`{}` avec cookie et en-tête client → `{ expiresAt, member }`. Restaure la connexion après rechargement ou réouverture, sans demander/envoyer d’OTP. Le navigateur utilise `credentials: include` pour vérification, restauration, lecture privée, modification et déconnexion ; les appels publics omettent les cookies.
+
+Expiration **absolue de sept jours** depuis la validation OTP, non prolongée par l’activité. Lors d’une restauration après 24 heures, rotation atomique du token. L’ancien hash ne reste valable que 30 secondes pour les requêtes déjà en vol ; une seule requête concurrente émet le nouveau cookie. Identifiant de ligne stable pour qu’une déconnexion concurrente révoque aussi un token venant de tourner. Maximum 60 restaurations/membre/heure, sans polling ni renvoi email automatique. En cas de perte de la réponse gagnante à une rotation, le code email peut être nécessaire après la courte grâce : pas de refresh secret persistant en clair dans D1.
+
+**CSRF :** origine HTTPS exacte, en-tête non simple `X-StrayDogs-Client: web`, corps JSON pour mutations et restauration, refus `Sec-Fetch-Site: cross-site`, SameSite Strict et CORS credentialed sans wildcard. Les lectures privées exigent aussi l’origine et l’en-tête. Un sous-domaine frère non autorisé ne peut ni lire ni muter. Cookies doubles ambigus, Bearer et query tokens refusés.
+
+**Hébergement :** API sous un hostname HTTPS du même site que le frontend `confluenceofminds.com`, par exemple un sous-domaine dédié approuvé. Une URL `workers.dev` tierce ne convient pas à SameSite Strict ; ne pas basculer en SameSite=None ou localStorage pour contourner ce choix. Aucun domaine/route/DNS n’est créé par ce code. Le sélecteur d’endpoint refuse une origine hors `confluenceofminds.com`. L’activation devra approuver et tester le hostname/API et son TLS.
 
 ### `GET /v1/me`
 
@@ -82,7 +92,7 @@ Public : `200 {members:[{id,...publicFields}]}`. `publicFields` : `name, univers
 
 ### `POST /v1/logout`
 
-Bearer requis → `204`, session révoquée. Le frontend doit effacer son token même si le réseau échoue ; l’ancien token expire au plus tard après deux heures. Une suspension ou un incrément de `members.session_version` invalide également les sessions.
+Corps `{}`, cookie/origine/en-tête client → `204`, session révoquée côté serveur et cookie expiré. Sans session valide, efface quand même le cookie (idempotent). En cas de panne réseau, le frontend indique « déconnexion non confirmée » et propose de réessayer ; il ne prétend pas avoir supprimé un cookie HttpOnly inaccessible au JavaScript. Une suspension ou un incrément de `members.session_version` invalide également toutes les sessions. Ne pas laisser une session active sur un appareil partagé.
 
 ### Erreurs communes
 
@@ -95,7 +105,7 @@ Bearer requis → `204`, session révoquée. Le frontend doit effacer son token 
 
 1. Choisir un Worker et une base **dédiés à StrayDogs**, les autoriser et vérifier leurs coûts. Aucune ressource RALUVAAA, Omirel ou Kaos n’est utilisée.
 2. Appliquer `schema.sql` à cette base isolée, après revue. Il n’y a aucun membre préchargé.
-3. Configurer le binding `DB`, l’origine exacte de chaque frontend autorisé, l’expéditeur choisi et une clé Resend serveur autorisée. Ne pas créer une clé ou élargir une clé existante sans accord.
+3. Configurer le binding `DB`, le hostname API HTTPS same-site approuvé et l’origine exacte de chaque frontend autorisé, l’expéditeur choisi et une clé Resend serveur autorisée. Ne pas créer une clé ou élargir une clé existante sans accord.
 4. Fournir `OTP_HMAC_SECRET`, valeur indépendante à forte entropie d’au moins 32 octets, exclusivement dans le runtime sécurisé. La rotation invalide les sessions et défis existants. Le fichier exemple ne génère rien.
 5. Garder `LIVE_ENABLED=false` jusqu’aux tests de l’environnement isolé. `workers_dev=false` évite une URL publique implicite ; aucune route n’est configurée par l’exemple.
 6. Le module privé `src/maintenance.mjs` exécute admission et revue par transactions D1. Le raccordement à un contexte d’administration autorisé reste à réaliser : aucun endpoint admin public n’est fourni. Aucun navigateur ne peut s’octroyer un rôle ou approuver sa propre fiche. Voir le protocole de maintenance ci-dessous.
@@ -145,3 +155,10 @@ Les opérations de lecture exigent `STRAYDOGS_PRIVATE_REVIEW_FILE`, un fichier l
 Les six tests supplémentaires couvrent la confirmation obligatoire, le refus avant vérification de cible, la mauvaise base, les paramètres séparés, le batch unique et l’absence de données sensibles dans les erreurs. La revue/admission distante reste un prérequis à valider sur l’environnement isolé avant ouverture des candidatures.
 
 La notification de réception attend `ADMIN_NOTIFICATIONS_ENABLED=true` et un destinataire administrateur vérifié. Son récapitulatif contient nom/pseudo, projet, univers bref et choix public ; email et audience restent dans la revue privée. Le flag reste `false` dans les exemples. Aucun email réel n’a été envoyé.
+
+
+## Session : références de conception
+- https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+- https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie
+
+Le schéma sessions a été préparé avant toute création de la DB StrayDogs : pas de migration sur une base existante exécutée. Si une base est créée depuis un ancien commit, ne pas supposer que CREATE TABLE IF NOT EXISTS ajoute les nouvelles colonnes ; revoir explicitement la migration avant activation.

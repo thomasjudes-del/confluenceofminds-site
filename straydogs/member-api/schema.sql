@@ -50,6 +50,9 @@ CREATE TABLE IF NOT EXISTS otp_challenges (
   created_at INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS sessions (
+  id TEXT NOT NULL UNIQUE,
+  previous_token_hash TEXT,
+  rotated_at INTEGER NOT NULL,
   token_hash TEXT PRIMARY KEY,
   member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
   session_version INTEGER NOT NULL,
@@ -57,6 +60,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   expires_at INTEGER NOT NULL,
   revoked_at INTEGER
 );
+CREATE UNIQUE INDEX IF NOT EXISTS sessions_previous_token ON sessions(previous_token_hash);
 CREATE INDEX IF NOT EXISTS sessions_owner ON sessions(member_id);
 CREATE TABLE IF NOT EXISTS rate_limits (
   key TEXT PRIMARY KEY,
@@ -74,3 +78,4 @@ CREATE INDEX IF NOT EXISTS applications_pending_review ON applications(status,cr
 
 CREATE INDEX IF NOT EXISTS published_profiles_by_approval ON member_profiles(consent_public,approved_at DESC);
 CREATE INDEX IF NOT EXISTS approved_applications_by_email ON applications(email,status,created_at DESC);
+

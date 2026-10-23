@@ -3,6 +3,8 @@ name = "straydogs-api-alpha"
 main = "src/worker.mjs"
 compatibility_date = "2026-10-22"
 workers_dev = false
+# Cookie auth requires an approved HTTPS same-site hostname under confluenceofminds.com.
+# No route/DNS is created here. Do not enable a cross-site workers.dev fallback.
 
 [vars]
 LIVE_ENABLED = "false"
@@ -21,3 +23,4 @@ ADMIN_NOTIFICATION_TO = ""
 # database_id = "<approved-database-id>"
 
 ADMIN_NOTIFICATIONS_ENABLED = "false"
+

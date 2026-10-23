@@ -2,7 +2,10 @@
 const ENCODER = new TextEncoder();
 const OTP_TTL = 10 * 60;
 const OTP_COOLDOWN = 60;
-const SESSION_TTL = 2 * 60 * 60;
+const SESSION_TTL = 7 * 24 * 60 * 60; // Absolute, never extended by activity.
+const SESSION_ROTATION = 24 * 60 * 60;
+const SESSION_GRACE = 30; // In-flight requests from other tabs, not a refresh lifetime.
+const SESSION_COOKIE = '__Host-straydogs';
 const CONSENT_VERSION = 'straydogs-2026-10-22';
 const PUBLIC_FIELDS = ['name','universe','discipline','projectTitle','projectUrl','website','socialType','socialUrl','interests','visualUrl'];
 const DISCIPLINES = new Set(['image','words','sound','film','interactive','other']);
@@ -75,9 +78,9 @@ function configuration(env) {
 function mailConfigured(env) {
   if(!env.RESEND_API_KEY||!env.MAIL_FROM||/[\r\n]/.test(env.MAIL_FROM))fail(503,'EMAIL_NOT_CONFIGURED');
 }
-function result(status,body,origin=null) {
-  const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin'};
-  if(origin)headers['Access-Control-Allow-Origin']=origin;
+function result(status,body,origin=null,extraHeaders={}) {
+  const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin',...extraHeaders};
+  if(origin){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Credentials']='true';}
   return new Response(status===204?null:JSON.stringify(body),{status,headers});
 }
 function stmt(db,sql,...args) { return db.prepare(sql).bind(...args); }
@@ -104,11 +107,17 @@ export function resendAdapter(env,fetchImpl=fetch) {
   };
 }
 
+function sessionCookie(token,maxAge) {
+  return `${SESSION_COOKIE}=${token}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=${Math.max(0,maxAge)}`;
+}
 async function session(request,env,now) {
-  const match=/^Bearer ([a-f0-9]{64})$/.exec(request.headers.get('Authorization')||'');if(!match)fail(401,'UNAUTHORIZED');
-  const tokenHash=await hmac(env.OTP_HMAC_SECRET,'session:'+match[1]);
-  const member=await stmt(env.DB,`SELECT m.id,m.email,m.display_name,m.status FROM sessions s JOIN members m ON m.id=s.member_id WHERE s.token_hash=? AND s.revoked_at IS NULL AND s.expires_at>? AND s.session_version=m.session_version AND m.status='approved'`,tokenHash,now).first();
-  if(!member)fail(401,'UNAUTHORIZED');return {member,tokenHash};
+  // Never accept bearer/query tokens or ambiguous duplicate cookies.
+  const cookies=(request.headers.get('Cookie')||'').split(';').map(v=>v.trim()).filter(v=>v.startsWith(SESSION_COOKIE+'='));
+  if(cookies.length!==1||request.headers.has('Authorization'))fail(401,'UNAUTHORIZED');
+  const token=cookies[0].slice(SESSION_COOKIE.length+1);if(!/^[a-f0-9]{64}$/.test(token))fail(401,'UNAUTHORIZED');
+  const presentedHash=await hmac(env.OTP_HMAC_SECRET,'session:'+token);
+  const row=await stmt(env.DB,`SELECT m.id,m.email,m.display_name,m.status,s.id AS session_id,s.token_hash,s.rotated_at,s.expires_at FROM sessions s JOIN members m ON m.id=s.member_id WHERE (s.token_hash=? OR (s.previous_token_hash=? AND s.rotated_at>?)) AND s.revoked_at IS NULL AND s.expires_at>? AND s.session_version=m.session_version AND m.status='approved'`,presentedHash,presentedHash,now-SESSION_GRACE,now).first();
+  if(!row)fail(401,'UNAUTHORIZED');return {member:row,presentedHash};
 }
 
 export function createWorker({now=seconds,mailerFactory=resendAdapter}={}) {
@@ -124,9 +133,15 @@ export function createWorker({now=seconds,mailerFactory=resendAdapter}={}) {
       const path=new URL(request.url).pathname,method=request.method.toUpperCase();
       if(method==='OPTIONS') {
         if(!cors)fail(403,'ORIGIN_REQUIRED');
-        return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':cors,'Access-Control-Allow-Methods':'GET, POST, PATCH, OPTIONS','Access-Control-Allow-Headers':'Authorization, Content-Type','Access-Control-Max-Age':'600','Vary':'Origin','Cache-Control':'no-store'}});
+        return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':cors,'Access-Control-Allow-Methods':'GET, POST, PATCH, OPTIONS','Access-Control-Allow-Headers':'Content-Type, X-StrayDogs-Client','Access-Control-Allow-Credentials':'true','Access-Control-Max-Age':'600','Vary':'Origin','Cache-Control':'no-store'}});
       }
-      if(method!=='GET'&&!cors)fail(403,'ORIGIN_REQUIRED');
+      // JSON + non-simple header + exact Origin protect against cross-site and same-site sibling CSRF.
+      // Even private GETs require this proof; public directory remains usable without cookies.
+      if(!(path==='/v1/members'&&method==='GET')) {
+        if(!cors)fail(403,'ORIGIN_REQUIRED');
+        if(request.headers.get('Sec-Fetch-Site')==='cross-site')fail(403,'SAME_SITE_REQUIRED');
+        if(request.headers.get('X-StrayDogs-Client')!=='web')fail(403,'CLIENT_HEADER_REQUIRED');
+      }
       const timestamp=now();
       if(path==='/v1/members'&&method==='GET') {
         const rows=await stmt(env.DB,`SELECT m.id,p.public_data FROM member_profiles p JOIN members m ON m.id=p.member_id WHERE p.consent_public=1 AND p.approved_at IS NOT NULL AND m.status='approved' ORDER BY p.approved_at DESC LIMIT 100`).all();
@@ -165,15 +180,28 @@ export function createWorker({now=seconds,mailerFactory=resendAdapter}={}) {
         if(typeof input.code!=='string'||!/^\d{8}$/.test(input.code))fail(401,'INVALID_OR_EXPIRED_CODE');
         await limits(env.DB,env.OTP_HMAC_SECRET,[['verify-ip',sourceIp(request),900,30],['verify-email',address,900,15]],timestamp);
         const emailKey=await hmac(env.OTP_HMAC_SECRET,'email:'+address),codeHash=await hmac(env.OTP_HMAC_SECRET,'otp:'+emailKey+':'+input.code);
-        const token=randomToken(),tokenHash=await hmac(env.OTP_HMAC_SECRET,'session:'+token),expiresAt=timestamp+SESSION_TTL;
+        const token=randomToken(),tokenHash=await hmac(env.OTP_HMAC_SECRET,'session:'+token),expiresAt=timestamp+SESSION_TTL,sessionId=crypto.randomUUID();
         // D1 batch is transactional. A unique token hash ties consumption and issuance together.
         const consumed=await env.DB.batch([
           stmt(env.DB,`UPDATE otp_challenges SET attempts=attempts+1,consumed_at=CASE WHEN code_hash=? THEN ? ELSE consumed_at END,consumed_by=CASE WHEN code_hash=? THEN ? ELSE consumed_by END WHERE email_key=? AND consumed_at IS NULL AND expires_at>? AND attempts<5 AND member_id IN(SELECT id FROM members WHERE status='approved') RETURNING member_id,consumed_by`,codeHash,timestamp,codeHash,tokenHash,emailKey,timestamp),
-          stmt(env.DB,`INSERT INTO sessions(token_hash,member_id,session_version,created_at,expires_at) SELECT ?,o.member_id,m.session_version,?,? FROM otp_challenges o JOIN members m ON m.id=o.member_id WHERE o.email_key=? AND o.consumed_by=? AND o.consumed_at=? AND m.status='approved'`,tokenHash,timestamp,expiresAt,emailKey,tokenHash,timestamp)
+          stmt(env.DB,`INSERT INTO sessions(id,token_hash,member_id,session_version,created_at,rotated_at,expires_at) SELECT ?,?,o.member_id,m.session_version,?,?,? FROM otp_challenges o JOIN members m ON m.id=o.member_id WHERE o.email_key=? AND o.consumed_by=? AND o.consumed_at=? AND m.status='approved'`,sessionId,tokenHash,timestamp,timestamp,expiresAt,emailKey,tokenHash,timestamp)
         ]);
         if(consumed[0].results?.[0]?.consumed_by!==tokenHash||consumed[1].meta.changes!==1)fail(401,'INVALID_OR_EXPIRED_CODE');
-        const me=await session(new Request(request.url,{headers:{Authorization:'Bearer '+token}}),env,timestamp);
-        return result(200,{token,expiresAt,member:{id:me.member.id,name:me.member.display_name,status:'approved'}},cors);
+        const me=await session(new Request(request.url,{headers:{Cookie:SESSION_COOKIE+'='+token}}),env,timestamp);
+        return result(200,{expiresAt,member:{id:me.member.id,name:me.member.display_name,status:'approved'}},cors,{'Set-Cookie':sessionCookie(token,SESSION_TTL)});
+      }
+      if(path==='/v1/auth/session'&&method==='POST') {
+        await jsonBody(request);
+        const {member,presentedHash}=await session(request,env,timestamp);
+        await limits(env.DB,env.OTP_HMAC_SECRET,[['session-member',member.id,3600,60]],timestamp);
+        const headers={};
+        if(member.token_hash===presentedHash&&member.rotated_at<=timestamp-SESSION_ROTATION) {
+          const token=randomToken(),hash=await hmac(env.OTP_HMAC_SECRET,'session:'+token);
+          // Only one concurrent tab wins; losers send no Set-Cookie (no stale overwrite).
+          const rotated=await stmt(env.DB,'UPDATE sessions SET previous_token_hash=token_hash,token_hash=?,rotated_at=? WHERE id=? AND token_hash=? AND revoked_at IS NULL AND expires_at>?',hash,timestamp,member.session_id,presentedHash,timestamp).run();
+          if(rotated.meta.changes===1)headers['Set-Cookie']=sessionCookie(token,member.expires_at-timestamp);
+        }
+        return result(200,{expiresAt:member.expires_at,member:{id:member.id,name:member.display_name,status:'approved'}},cors,headers);
       }
       if(path==='/v1/me'&&method==='GET') {
         const {member}=await session(request,env,timestamp);
@@ -194,7 +222,13 @@ export function createWorker({now=seconds,mailerFactory=resendAdapter}={}) {
         await env.DB.batch(statements);return result(202,{status:'pending_review',submissionId:id},cors);
       }
       if(path==='/v1/logout'&&method==='POST') {
-        const {tokenHash}=await session(request,env,timestamp);await stmt(env.DB,'UPDATE sessions SET revoked_at=? WHERE token_hash=?',timestamp,tokenHash).run();return result(204,null,cors);
+        await jsonBody(request);
+        try {
+          const {member}=await session(request,env,timestamp);
+          // Stable row id also revokes a session rotated by a concurrent tab.
+          await stmt(env.DB,'UPDATE sessions SET revoked_at=? WHERE id=?',timestamp,member.session_id).run();
+        } catch(error) { if(!(error instanceof HttpError&&error.status===401))throw error; }
+        return result(204,null,cors,{'Set-Cookie':sessionCookie('',0)});
       }
       fail(404,'NOT_FOUND');
     } catch(error) {
@@ -206,4 +240,5 @@ export function createWorker({now=seconds,mailerFactory=resendAdapter}={}) {
 }
 
 export default createWorker();
-export const contract={OTP_TTL,OTP_COOLDOWN,SESSION_TTL,CONSENT_VERSION};
+export const contract={OTP_TTL,OTP_COOLDOWN,SESSION_TTL,SESSION_ROTATION,SESSION_GRACE,SESSION_COOKIE,CONSENT_VERSION};
+
