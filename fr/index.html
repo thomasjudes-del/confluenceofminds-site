@@ -31,7 +31,7 @@
     <link rel="alternate" hreflang="fr" href="https://confluenceofminds.com/fr/" />
     <link rel="alternate" hreflang="x-default" href="https://confluenceofminds.com/" />
     <script type="application/ld+json">
-    {
+{
   "@context": "https://schema.org",
   "@graph": [
     {
@@ -47,7 +47,10 @@
         "https://www.instagram.com/confluenceofminds/",
         "https://tiktok.com/@confluenceofminds",
         "https://www.youtube.com/channel/UC7fNrfsgXC0dEXvuZ7u06fg"
-      ]
+      ],
+      "founder": {
+        "@id": "https://confluenceofminds.com/#thomas-judes"
+      }
     },
     {
       "@type": "WebSite",
@@ -198,10 +201,19 @@
           }
         }
       ]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://confluenceofminds.com/#thomas-judes",
+      "name": "Thomas Judes",
+      "url": "https://confluenceofminds.com/#thomas-judes",
+      "affiliation": {
+        "@id": "https://confluenceofminds.com/#organization"
+      }
     }
   ]
 }
-    </script>
+</script>
     <!-- SEO DISCOVERABILITY END -->
   <!-- End social sharing metadata -->
   <title>Confluence of Minds — Récits, jeux, fiction sonore et expériences créatives</title>
@@ -227,6 +239,7 @@
   <link rel="stylesheet" href="/chatmargin-card.css?v=20261023-original-demo" />
   <link rel="stylesheet" href="/assistant-human-card.css?v=20261023-v5" />
   <link rel="stylesheet" href="/gallery-play-controls.css?v=20261023-unified" />
+  <link rel="stylesheet" href="/studio-identity.css?v=20261023-v1" />
 </head>
 <body>
   <div class="paper-grain" aria-hidden="true"></div>
@@ -260,6 +273,7 @@
         <div class="hero-copy">
           <p class="hero-kicker">Récits · jeux · expériences · mondes impossibles</p>
           <h1 id="hero-title">Des mondes différents.<br />Une même confluence.</h1>
+          <p class="hero-identity" id="thomas-judes">Le studio créatif personnel de Thomas Judes.</p>
           <p class="hero-lede">Au fil des années, j’ai écrit, entrepris, créé et expérimenté.<br /><strong>• Écrivain :</strong> 3 romans, <em>Chroniques de Kashgar</em>, <em>Authentiques Victimes</em>, <em>À la recherche de Katephomi Kitembe</em><br /><strong>• Fiction sonore :</strong> SILMEA (Amazon / Audible, Festival de Cannes...)<br /><strong>• Entrepreneur et créateur :</strong> projets artistiques, sociaux, technologiques, engagements<br /><strong>• Et bien d’autres mondes</strong> passés, présents et à venir...</p>
           <a class="primary-button" href="#worlds">Explorez mes mondes <span aria-hidden="true">↓</span></a>
           <nav class="social-links social-links--hero" aria-label="Suivre Confluence of Minds sur les réseaux sociaux">
@@ -438,7 +452,7 @@
             <div class="world-card__meta"><span>Roman de fantasy</span><span>Livre</span></div>
             <h3>Chronicles of Kashgar</h3>
             <p>Une initiation de fantasy au cœur de Kashgar.</p>
-            <button type="button" data-project-link>Enter CDK <span>↗</span></button>
+            <a class="world-card__cta" data-project-link href="https://www.amazon.com/Chroniques-Kashgar-Novices-Papillon-French/dp/1790850193" target="_blank" rel="noopener noreferrer" aria-label="Chronicles of Kashgar">Enter CDK <span>↗</span></a>
           </div>
         </article>
 
@@ -488,7 +502,7 @@
             <div class="world-card__meta"><span>Aventure d’anticipation climatique</span><span>Livre</span></div>
             <h3>À la recherche de Katephomi Kitembe</h3>
             <p>Une aventure climatique dans un monde-jeu instable.</p>
-            <button type="button" data-project-link>Enter KK <span>↗</span></button>
+            <a class="world-card__cta" data-project-link href="https://books.apple.com/fr/book/a-la-recherche-de-katephomi-kitembe/id6442944248?l=fr" target="_blank" rel="noopener noreferrer" aria-label="À la recherche de Katephomi Kitembe">Enter KK <span>↗</span></a>
           </div>
         </article>
 
@@ -504,7 +518,7 @@
             <div class="world-card__meta"><span>Thriller psychologique SF</span><span>Livre</span></div>
             <h3>Authentiques Victimes</h3>
             <p>Un thriller psychologique sur l’auteur et les algorithmes.</p>
-            <button type="button" data-project-link>Enter AV <span>↗</span></button>
+            <a class="world-card__cta" data-project-link href="https://confluenceofminds.com/authentiques-victimes/" target="_blank" rel="noopener noreferrer" aria-label="Authentiques Victimes">Enter AV <span>↗</span></a>
           </div>
         </article>
 
@@ -520,7 +534,7 @@
             <div class="world-card__meta"><span>Concours en ligne</span><span>Live</span></div>
             <h3>AI’s Got Talent</h3>
             <p>Le concours en ligne des créations par intelligence artificielle.</p>
-            <button type="button" data-project-link>Enter Talent <span>↗</span></button>
+            <a class="world-card__cta" data-project-link href="https://aitalent.show/" target="_blank" rel="noopener noreferrer" aria-label="AI’s Got Talent">Enter Talent <span>↗</span></a>
           </div>
         </article>
 
@@ -557,7 +571,7 @@
             <div class="world-card__meta"><span>Studio de fiction sonore</span><span>Écouter</span></div>
             <h3>Créations SILMEA</h3>
             <p>Des films immersifs entièrement conçus par le son.</p>
-            <button type="button" data-project-link>Enter Silmea <span>↗</span></button>
+            <a class="world-card__cta" data-project-link href="https://smartlink.ausha.co/creations-silmea" target="_blank" rel="noopener noreferrer" aria-label="Créations SILMEA">Enter Silmea <span>↗</span></a>
           </div>
         </article>
 
