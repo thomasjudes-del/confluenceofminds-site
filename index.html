@@ -222,7 +222,7 @@
   <link rel="stylesheet" href="/straydogs/assets/fonts.css" />
   <link rel="stylesheet" href="/straydogs/tile.css" />
   <link rel="stylesheet" href="/centauro-card.css?v=20261022-v1" />
-  <link rel="stylesheet" href="/explorer-card.css?v=20261022-v1" />
+  <link rel="stylesheet" href="/explorer-card.css?v=20261023-v4" />
   <link rel="stylesheet" href="/memoryx-card.css?v=20261022-v1" />
 </head>
 <body>
@@ -621,9 +621,13 @@
           </div>
         </article>
 
-        <article class="world-card world-card--explorer reveal" id="explorer">
+        <article class="world-card world-card--explorer world-card--native reveal" id="explorer" data-media-container data-full-video="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/explorer/exploring-the-world-v4-horizontal.mp4" data-video-credit="horizons">
           <div class="world-cover">
-            <img class="explorer-photo" src="/assets/explorer/wahiba-sands-thomas-judes.jpg" alt="Wahiba Sands dunes beneath a cloudy sky, from Thomas Judes’s expedition archives." width="2048" height="1536" loading="lazy" decoding="async" />
+            <img class="world-card__poster" src="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/explorer/exploring-v4-poster.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <video class="world-card__preview" data-viewport-video muted loop playsinline preload="none" poster="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/explorer/exploring-v4-poster.jpg" aria-hidden="true">
+              <source src="https://shattered-dragons-enigma.thomas-judes.workers.dev/assets/explorer/exploring-the-world-v4-web-loop-muted.mp4" type="video/mp4" />
+            </video>
+            <span class="world-card__scrim" aria-hidden="true"></span>
             <div class="world-card__body">
               <h3>Exploration as creative practice</h3>
               <p>Aconcagua and Mont Blanc. The Sinai and Wahiba Sands on foot. Experiences that feed the worlds I create.</p>
@@ -700,7 +704,7 @@
   <script src="script.js?v=20261014-hero-readability-v1"></script>
   <script src="native-media-v4.js?v=20261022-real-trailers"></script>
   <script src="i18n.js?v=20260808-canonical-lang-v2"></script>
-  <script src="video-lightbox-v1.js?v=20261022-real-trailers"></script>
+  <script src="video-lightbox-v1.js?v=20261023-explorer-v4"></script>
   <script src="/engagement-v1.js?v=20260808-v1"></script>
   <script src="/raluvaaa/visual-engine-v3.js?v=20260918-bloom-v3"></script>
   <script src="/straydogs/tile.js" defer></script>
