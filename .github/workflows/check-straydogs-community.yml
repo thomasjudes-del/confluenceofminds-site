@@ -1,0 +1,44 @@
+name: Check StrayDogs community
+on:
+  pull_request:
+    paths: ['straydogs/community/**', 'straydogs/member-api/**', '.github/workflows/check-straydogs-community.yml']
+permissions:
+  contents: read
+concurrency:
+  group: straydogs-community-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check JavaScript and no-send unit tests
+        run: |
+          node --check straydogs/community/app.js
+          node --check straydogs/community/live.js
+          node --check straydogs/community/api-client.js
+          node straydogs/community/qa-model.cjs
+          node straydogs/community/qa-events.cjs
+          node straydogs/community/qa-live-render.cjs
+          node --test straydogs/community/qa-api-client.cjs
+          cd straydogs/member-api
+          npm test
+      - name: Install browser for isolated synthetic UI tests
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Real browser flows, intercepted fake API, no emails
+        run: node straydogs/community/qa-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: straydogs-browser-qa-only
+          path: straydogs/community/qa-artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
