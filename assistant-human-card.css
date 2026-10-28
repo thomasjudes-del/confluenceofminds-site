@@ -4,3 +4,6 @@
 
 .world-card .project-type{font-size:10px!important;line-height:1.4!important;letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin:0 0 6px!important}
 .world-card--assistant-human a[data-project-link]{position:relative;z-index:4;width:fit-content;margin-top:8px;text-decoration:underline;text-underline-offset:4px;font-size:13px!important}
+/* Keep the independent teaser control away from the project link on small cards. */
+.world-card--assistant-human{scroll-margin-top:100px}
+.world-card.world-card--assistant-human .world-card__play{top:auto!important;left:auto!important;right:14px!important;bottom:14px!important;transform:none!important;width:40px!important;height:40px!important}

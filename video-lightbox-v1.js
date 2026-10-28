@@ -20,7 +20,7 @@
 
     card.addEventListener('click', (event) => {
       const action = event.target.closest('[data-project-link]');
-      if (!action || !card.contains(action)) return;
+      if (!action || !card.contains(action) || action.matches('a[href]')) return;
       event.preventDefault();
       event.stopPropagation();
       window.open(destination, '_blank', 'noopener,noreferrer');
@@ -165,12 +165,17 @@
     });
 
     card.addEventListener('click', (event) => {
-      const titanDestination = event.target.closest('.world-card--titan .world-card__cta');
-      if (titanDestination) return;
+      // Real project links must navigate; the dedicated play control remains video-only.
+      if (event.target.closest('a[href]')) return;
       if (event.target.closest('[data-project-link]')) return;
       if (event.target.closest('.world-card__play')) return;
       event.preventDefault();
       event.stopPropagation();
+      const projectLink = card.querySelector('a[data-project-link][href], a.world-card__link[href], a.memoryx-cta[href]');
+      if (projectLink) {
+        projectLink.click();
+        return;
+      }
       openLightbox(card, playButton);
     });
   });
