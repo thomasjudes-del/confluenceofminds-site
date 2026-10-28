@@ -175,7 +175,7 @@
     const copy = COPY[lang];
 
     document.documentElement.lang = lang;
-    document.title = 'Confluence of Minds';
+    document.title = lang === 'fr' ? 'Confluence of Minds — Le studio créatif de Thomas Judes' : 'Confluence of Minds — The creative studio of Thomas Judes';
     const metaDescription = one('meta[name="description"]');
     if (metaDescription) metaDescription.setAttribute('content', copy.meta);
 

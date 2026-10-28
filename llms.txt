@@ -34,6 +34,9 @@ Important behavior: FICTURN serves fixed, finished story prose. It does not gene
 ## Other Confluence of Minds works
 
 Home: https://confluenceofminds.com/
+ASSISTANT:HUMAN — speculative fiction in development by Thomas Judes, not an AI assistant product: https://confluenceofminds.com/assistant-human/
+Stray Dogs — creative collective: https://confluenceofminds.com/straydogs/
+Raluvaaa — interactive world of wishes: https://confluenceofminds.com/raluvaaa/world/
 Incident on Titan: https://confluenceofminds.com/titan/
 Authentiques Victimes: https://confluenceofminds.com/authentiques-victimes/
 Confluences essays: https://confluenceofminds.com/confluences/
