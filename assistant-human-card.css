@@ -1,3 +1,6 @@
 .world-card--assistant-human .world-card__preview { object-fit: contain !important; transform: none !important; }
 .world-card--assistant-human .world-card__body { display:flex !important; flex-direction:column; gap:7px !important; }
 .world-card--assistant-human p { white-space:normal !important; overflow:visible !important; max-width:54ch !important; }
+
+.world-card .project-type{font-size:10px!important;line-height:1.4!important;letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin:0 0 6px!important}
+.world-card--assistant-human a[data-project-link]{position:relative;z-index:4;width:fit-content;margin-top:8px;text-decoration:underline;text-underline-offset:4px;font-size:13px!important}
