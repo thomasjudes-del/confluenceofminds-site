@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-05-v1",
+  "version": "2026-11-02-v1",
   "purpose": "Automatic learning layer for Confluence of Minds content performance. Updated by the weekly performance analyst and read by the autonomous editor before future publishing decisions.",
   "site_analytics": {
     "status": "not_instrumented",
@@ -134,50 +134,60 @@
     ]
   },
   "heatmap": {
-    "updated_at": "2026-09-21",
-    "status": "early-autonomous-data",
+    "updated_at": "2026-11-02",
+    "status": "mixed_provenance_insufficient_clean_family_repeats",
     "rows": [
       {
-        "world_id": "incident-on-titan",
-        "content_mode": "archive-remix",
-        "asset_type": "reel-video",
-        "post_count_platforms": 4,
-        "confidence": "low",
-        "discovery": "strongest cross-platform discovery of the mature tests, especially YouTube and Facebook",
-        "retention": "weak for a 17.5 s cut: Instagram avg watch 2.51 s and 20% 3-second hold; TikTok avg watch 3.47 s",
-        "resonance": "low overall; 1 Instagram like, 4 Facebook likes, no shares or comments",
-        "growth": "one Facebook follower acquired on the publication day; no attributable Instagram/TikTok/YouTube conversion",
+        "family": "Stray Dogs creator collaboration / practical collective value",
         "decision": "MUTATE",
-        "learning": "Keep the concrete factual contradiction but recut to 6-9 s and strengthen the first visual beat. Do not repeat the 17.5 s trailer-style execution."
+        "confidence": "medium for propagation signal; low for repeatability",
+        "evidence": "16 Oct Instagram launch 12 shares on 75 views and 9.92s average watch versus 30 Oct repeat 0 shares on 119 views and 1.66s average watch. One genuine form application observed on 26 Oct; personal email outreach precedes that application and public-post acquisition cannot be attributed.",
+        "next_test": "Produce one creator-to-creator example/collaboration with concrete payoff and a trackable form link, rather than another generic recruitment call."
       },
       {
-        "world_id": "silmea",
-        "content_mode": "archive-remix",
-        "asset_type": "reel-video",
-        "post_count_platforms": 4,
-        "confidence": "low",
-        "discovery": "weak across platforms",
-        "retention": "better than Titan after shortening to 12 s: Instagram avg watch 3.70 s and 35% 3-second hold; TikTok avg watch 5.37 s",
-        "resonance": "one Instagram save, otherwise no comments or shares",
-        "growth": "no measured follower or subscriber gain",
+        "family": "Voynich documented cultural/scientific mystery",
         "decision": "MUTATE",
-        "learning": "The idea may be sound but the execution is not earning distribution. Shorten further and make the first frame itself prove the sound-cinema idea instead of relying on a question or trailer framing."
+        "confidence": "medium",
+        "evidence": "22 Oct follow-up 244 YouTube views, 136 Instagram views (1 save) and 98 TikTok views (6 likes); earlier 8 Oct first sample 94 YouTube views, 44 Instagram views and 96 TikTok views. No demonstrated conversation or attributable subscriber conversion.",
+        "next_test": "One closely related, verified visual-proof microstory with stronger payoff in first 3 seconds and no unverified decryption claim."
       },
       {
-        "world_id": "raluvaaa",
-        "content_mode": "archive-remix",
-        "asset_type": "reel-video",
-        "post_count_platforms": 3,
-        "confidence": "low",
-        "discovery": "promising on TikTok: 251 views versus 82-83 for the two prior tests; weak/too-fresh evidence elsewhere",
-        "retention": "TikTok avg watch 3.71 s on an 8 s video, materially better as a share of duration than Titan and similar to SILMEA",
-        "resonance": "no measured reactions, comments or shares yet",
-        "growth": "no measured follower gain",
+        "family": "Titan concrete science contradiction",
+        "decision": "MUTATE",
+        "confidence": "medium",
+        "evidence": "3 Oct TikTok factual short 266 views with 3 likes and 3.16s average watch of 17.5s; Sept variants also got discovery but no propagation.",
+        "next_test": "Preserve the scientifically concrete premise and owned imagery, improve retention through visual-first reveal and much shorter setup."
+      },
+      {
+        "family": "Science-reality curiosity (Rogue Waves)",
         "decision": "HOLD",
-        "learning": "This is the strongest signal for the 6-9 s concept-first format, but one platform result with zero propagation is not enough to SCALE the world. Test descendants with a more concrete visual payoff and less abstract question wording."
+        "confidence": "low",
+        "evidence": "5 Oct YouTube Short reached 135 Buffer views, against 52 Instagram and 83 TikTok. Only one current concept instance, not a repeated family winner.",
+        "next_test": "One second documented reality-is-stranger-than-fiction case with a visibly different storytelling pattern."
+      },
+      {
+        "family": "Literary worlds and narrative excerpts (Opaline/Kashgar/Katephomi)",
+        "decision": "HOLD",
+        "confidence": "low",
+        "evidence": "4 Oct Opaline YouTube 180 Buffer views; book-led reels on Instagram often below 60. The editorial plan already paused new book-led production; insufficient clean comparable repetitions and no measured reader conversion.",
+        "next_test": "Maintain pause except exceptionally strong self-contained material; do not call the worlds failures."
+      },
+      {
+        "family": "RALUVAAA and Centauro product/concept explanations",
+        "decision": "HOLD",
+        "confidence": "low",
+        "evidence": "RALUVAAA 12 Oct Instagram 76 views, 2 shares, 9.28s average watch for 40s; Centauro 8 Oct Instagram 122 views but 3.36s average watch for 42s. Mixed audiences and one clean sample per format.",
+        "next_test": "Show one unmistakable user action or mechanics payoff before abstract exposition."
+      },
+      {
+        "family": "Generic question cards / choice prompts / quote filler",
+        "decision": "KILL",
+        "confidence": "medium editorial; weak commercial evidence",
+        "evidence": "Instagram 3 Oct 'Choose one' generated 11 views with no likes, comments, shares or saves; previous three posts were similarly weak. This generic style lacks project specificity and was already rejected in the Oct review.",
+        "next_test": "No further release; clean legacy queue and approval gate."
       }
     ],
-    "note": "Current evidence is too small for world-level winners. The useful signal is executional: shorter concept-first cuts improve retention, while concrete factual hooks currently distribute better on YouTube/Facebook."
+    "note": "Derived from Metricool October 3-November 1 cohorts and Buffer per-video metrics. Preserve context: 30/45 posts missing from publication log, current creative renders not visually audited, insufficient clean per-family repeats to SCALE."
   },
   "learning_rules": [
     "Never optimize solely for views or reach.",
@@ -400,23 +410,24 @@
     }
   ],
   "editor_feedback": {
-    "updated_at": "2026-10-05",
-    "status": "monthly_operating_model_pivot",
+    "updated_at": "2026-11-02",
+    "status": "measurement_gap_and_editorial_reallocation",
     "current_priority": [
-      "approval-only publication integrity",
-      "authored world-specific visual and audio language",
-      "10-14 s platform-native narrative mutations for TikTok tests",
-      "premise-driven YouTube Shorts with close descendants of strong signals",
-      "selective high-quality Instagram publishing",
-      "website analytics and UTM instrumentation"
+      "repair Buffer-to-GitHub post ID reconciliation and verify approval/QC metadata",
+      "test Stray Dogs creator value demonstration with trackable genuine conversion",
+      "use Voynich-like visually documented mysteries and concentrated YouTube hypotheses",
+      "improve first-three-second story payoff and retention on TikTok",
+      "explicit owned audience / website source attribution and clean QC proof",
+      "1-2 strong masters per week, no generic filler"
     ],
     "stop": [
-      "generic engagement-bait prompts and quote cards",
-      "legacy queue items that bypass explicit approval",
-      "treating posting volume as experimental evidence",
-      "identical long-master distribution across every platform without testing duration fit"
+      "generic prompts/quote filler",
+      "automated unsupervised legacy queue publication",
+      "falsely inferring subscriptions/applications from individual posts",
+      "all-platform identical long masters without format justification",
+      "assuming visual/audio QC without actual media inspection"
     ],
-    "evidence_rule": "Only QC-passed, user-approved creatives with verified live status count as clean family/platform experiments. Very fresh posts remain provisional until metrics mature."
+    "evidence_rule": "Only explicitly approved, visually checked final masters with source-traced platform IDs and mature comparable metrics may support SCALE; treat unlogged/legacy posts as uncertain, not automatically unapproved."
   },
   "methodology_corrections": [
     {
@@ -608,6 +619,354 @@
         "Reconcile Buffer/Metricool/live-network state into the publication log and prevent any unapproved legacy queue item from publishing."
       ],
       "monthly_decision": "STRATEGIC PIVOT IN OPERATING MODEL, NOT POSITIONING: fewer/no filler posts, approval-only queue integrity, authored short-form variants by platform, and conversion instrumentation. No world should be SCALEd or KILLed yet except the generic filler family."
+    },
+    {
+      "date": "2026-11-02",
+      "current_window": "2026-10-03/2026-11-01",
+      "previous_window": "2026-09-03/2026-10-02",
+      "timezone": "Europe/Paris",
+      "source_priority": {
+        "primary": "Metricool brand 7019567, evolution and published Instagram Reel/TikTok video rows",
+        "secondary": "Buffer My Organization, sent-post metrics (YouTube per-video data unavailable in Metricool)",
+        "editorial": "GitHub data/com-publication-log.json + data/com-content-map.json + data/com-outreach-queue.json + data/com-distribution-map.json",
+        "conversion": "Google Sheet Straydogs — Prospection et collaborations, form responses; Google Forms notification emails and directly relevant outreach thread"
+      },
+      "comparison_quality": {
+        "status": "PARTIAL, NON-CAUSAL",
+        "qualifications": [
+          "The current and previous windows use different creative mixes, approval provenance and posting frequency. Per-post averages are descriptive, not a platform algorithm experiment.",
+          "Metricool YouTube Published in range Videos returns no rows: YouTube per-video performance comes from Buffer, while channel-wide activity and subscriber change come from Metricool.",
+          "Metricool and Buffer post-cohort views differ by freshness/ingestion (Instagram 839 vs 854; TikTok 1606 vs 1660; YouTube 893 activity-period views vs 880 Buffer views on current published cohort). Do not merge denominators.",
+          "Not all recent posts have a verified user-approval/QC record. Do not infer intrinsic world success or failure from mixed-quality material.",
+          "No direct frame-level/aural inspection of the final creative exports was possible in this review. Visual and audio critiques concern observable format, sources, past quality feedback and caption design, not a new frame-by-frame QC certification.",
+          "The observed metrics are a snapshot near 2026-11-02, while some items were published as recently as 2026-10-30, creating unequal maturation."
+        ]
+      },
+      "platform_trends": {
+        "instagram": {
+          "current": {
+            "reels": 12,
+            "reel_views": 839,
+            "reel_reach_sum_per_post": 725,
+            "reel_likes": 26,
+            "reel_comments": 4,
+            "reel_shares": 16,
+            "reel_saves": 1,
+            "feed_posts": 1,
+            "feed_views": 11,
+            "followers_last": 1046,
+            "followers_gained": 14,
+            "followers_lost": 10,
+            "net_followers": 4
+          },
+          "previous": {
+            "reels": 9,
+            "reel_views": 365,
+            "reel_reach_sum_per_post": 315,
+            "reel_likes": 4,
+            "reel_comments": 0,
+            "reel_shares": 0,
+            "feed_posts": 3,
+            "feed_views": 50,
+            "followers_gained": 3,
+            "followers_lost": 5,
+            "net_followers": -2
+          },
+          "avg_views_per_published_reel": {
+            "current": 69.9,
+            "previous": 40.6
+          },
+          "standout": "Stray Dogs Collective launch on 2026-10-16: 75 views, 62 reach, 12 shares, 3 likes, 9.92 s average watch on a 30 s master. Repeat recruitment post on 2026-10-30: 119 views, 0 shares/likes and 1.66 s average watch on 27 s. This is evidence of execution/offer sensitivity, not a repeatable proven winner.",
+          "interpretation": "Instagram has its first material propagation signal but it is concentrated in one community-value post. Visibility grew but per-family replication remains missing; preserve premium feed discipline."
+        },
+        "tiktok": {
+          "current": {
+            "videos": 16,
+            "views_on_published_videos": 1606,
+            "likes": 79,
+            "comments": 0,
+            "shares": 0,
+            "followers_last": 13,
+            "net_followers": 4
+          },
+          "previous": {
+            "videos": 11,
+            "views_on_published_videos": 1332,
+            "likes": 15,
+            "comments": 0,
+            "shares": 0,
+            "followers_last": 9,
+            "net_followers": 2
+          },
+          "avg_views_per_published_video": {
+            "current": 100.4,
+            "previous": 121.1
+          },
+          "likes_per_1000_views": {
+            "current": 49.2,
+            "previous": 11.3
+          },
+          "retention_cases": [
+            {
+              "video": "Titan factual hook, 17.5s",
+              "views": 266,
+              "avg_watch_sec": 3.16
+            },
+            {
+              "video": "Voynich five hands, 28s",
+              "views": 98,
+              "avg_watch_sec": 4
+            },
+            {
+              "video": "Stray Dogs recruitment 30 Oct, 27s",
+              "views": 106,
+              "avg_watch_sec": 2.54
+            }
+          ],
+          "interpretation": "Higher shallow reaction per view but lower average discovery per upload. Zero comments/shares on 16 current published videos and weak watch times mean the account lacks a proven travel/propagation engine."
+        },
+        "youtube": {
+          "current": {
+            "metricool_channel_video_views_during_period": 893,
+            "metricool_subscribers_last": 5,
+            "metricool_subscribers_gained": 4,
+            "metricool_revenue_reported": 0,
+            "buffer_sent_video_count": 16,
+            "buffer_post_cohort_views": 880,
+            "buffer_likes": 5,
+            "buffer_comments": 0
+          },
+          "previous": {
+            "metricool_channel_video_views_during_period": 354,
+            "metricool_subscribers_last": 1,
+            "metricool_subscribers_gained": 0,
+            "buffer_sent_video_count": 10,
+            "buffer_post_cohort_views": 343
+          },
+          "top_current_buffer_posts": [
+            {
+              "world": "Voynich",
+              "date": "2026-10-22",
+              "views": 244,
+              "likes": 2
+            },
+            {
+              "world": "Authentiques Victimes (Opaline)",
+              "date": "2026-10-04",
+              "views": 180,
+              "likes": 0
+            },
+            {
+              "world": "Rogue Waves",
+              "date": "2026-10-05",
+              "views": 135,
+              "likes": 0
+            }
+          ],
+          "top3_share_of_current_post_cohort_views": 0.635,
+          "watch_time": "Per-video YouTube watch duration/retention rows unavailable through Metricool in this review.",
+          "interpretation": "YouTube discovery has strengthened and subscribers grew from 1 to 5, but the lift is concentrated in three concept-led Shorts. Do not assert that those videos caused the new subscriptions."
+        },
+        "facebook": {
+          "current": {
+            "published_reels": 0,
+            "followers_last": 2,
+            "followers_gained": 1,
+            "followers_lost": 1,
+            "net_followers": 0
+          },
+          "previous": {
+            "published_reels": 2,
+            "reel_views": 215,
+            "reel_likes": 4,
+            "reel_comments": 1,
+            "followers_gained": 2
+          },
+          "interpretation": "No new Facebook creative sample in October, so platform reallocation is unsupported."
+        }
+      },
+      "source_consistency": {
+        "buffer_current_window": {
+          "sent": 45,
+          "instagram": 13,
+          "tiktok": 16,
+          "youtube": 16,
+          "draft": 1
+        },
+        "publication_log": {
+          "entries_total": 49,
+          "current_sent_posts_matched_by_id": 15,
+          "current_sent_posts_missing": 30,
+          "additional_current_buffer_draft_missing": 1
+        },
+        "content_map": {
+          "last_version": "2026-09-21-v3",
+          "missing_active_topics": [
+            "Voynich Manuscript",
+            "Stray Dogs Collective",
+            "Centauro Quest",
+            "Rogue Waves"
+          ]
+        },
+        "outreach_log": {
+          "last_version": "2026-09-20",
+          "entries": 3,
+          "all_historical_skips": true
+        },
+        "assessment": "HIGH-SEVERITY MEASUREMENT AND APPROVAL-PROVENANCE GAP: 30 of 45 sent Buffer posts in this window lack matching entries in GitHub publication log. A missing log is not proof the posts were unapproved, but it prevents clean QC attribution and reliable learning."
+      },
+      "creative_quality_and_positioning": {
+        "diversity": "October materially broadened beyond AI: Titan, Rogue Waves, Voynich, Shattered Dragons, RALUVAAA, Centauro Quest, Kashgar/Katephomi, literary microfiction and Stray Dogs. No evidence of AI news dominating the monthly mix. Content map is now stale relative to actual publishing.",
+        "hook_language": "The earlier repeated What if/Why/Can opening remains visible in legacy content, but October now contains more distinctive declarative and concrete premises: 'One unread manuscript. More than one hand', 'A dragon is easy to recognize', 'The rivers run black'. This is an improvement in copy diversity, not proof of retention improvement.",
+        "first_frame_and_visuals": "Quality-gate needed. Unable to re-open the current video exports for visual frame inspection; do not certify first-frame, typography-safe-zone or AI-looking visual quality from captions and asset names. Existing user feedback flags synthetic filler, repeated imagery and weak music, and must remain active constraints.",
+        "format_and_duration": "Running the same 20-42 second master on all platforms is not supported by retention evidence. Platform-specific opening and duration tests are justified, without imposing an automatic 8-second length or destroying a strong owned master.",
+        "narrative": "Self-contained concrete mysteries and narrative contradictions yield more YouTube visibility than many abstract project descriptions. In October, the three leading Shorts (Voynich, Opaline, Rogue Waves) contributed 559/880 views, while conversion still needs verification.",
+        "site_identity": "The portfolio mixes fiction, strange science and a creator network. Build a coherent editorial hierarchy with explicit audience outcomes instead of using platform output volume as brand positioning."
+      },
+      "family_decisions": [
+        {
+          "family": "Stray Dogs creator collaboration / practical collective value",
+          "decision": "MUTATE",
+          "confidence": "medium for propagation signal; low for repeatability",
+          "evidence": "16 Oct Instagram launch 12 shares on 75 views and 9.92s average watch versus 30 Oct repeat 0 shares on 119 views and 1.66s average watch. One genuine form application observed on 26 Oct; personal email outreach precedes that application and public-post acquisition cannot be attributed.",
+          "next_test": "Produce one creator-to-creator example/collaboration with concrete payoff and a trackable form link, rather than another generic recruitment call."
+        },
+        {
+          "family": "Voynich documented cultural/scientific mystery",
+          "decision": "MUTATE",
+          "confidence": "medium",
+          "evidence": "22 Oct follow-up 244 YouTube views, 136 Instagram views (1 save) and 98 TikTok views (6 likes); earlier 8 Oct first sample 94 YouTube views, 44 Instagram views and 96 TikTok views. No demonstrated conversation or attributable subscriber conversion.",
+          "next_test": "One closely related, verified visual-proof microstory with stronger payoff in first 3 seconds and no unverified decryption claim."
+        },
+        {
+          "family": "Titan concrete science contradiction",
+          "decision": "MUTATE",
+          "confidence": "medium",
+          "evidence": "3 Oct TikTok factual short 266 views with 3 likes and 3.16s average watch of 17.5s; Sept variants also got discovery but no propagation.",
+          "next_test": "Preserve the scientifically concrete premise and owned imagery, improve retention through visual-first reveal and much shorter setup."
+        },
+        {
+          "family": "Science-reality curiosity (Rogue Waves)",
+          "decision": "HOLD",
+          "confidence": "low",
+          "evidence": "5 Oct YouTube Short reached 135 Buffer views, against 52 Instagram and 83 TikTok. Only one current concept instance, not a repeated family winner.",
+          "next_test": "One second documented reality-is-stranger-than-fiction case with a visibly different storytelling pattern."
+        },
+        {
+          "family": "Literary worlds and narrative excerpts (Opaline/Kashgar/Katephomi)",
+          "decision": "HOLD",
+          "confidence": "low",
+          "evidence": "4 Oct Opaline YouTube 180 Buffer views; book-led reels on Instagram often below 60. The editorial plan already paused new book-led production; insufficient clean comparable repetitions and no measured reader conversion.",
+          "next_test": "Maintain pause except exceptionally strong self-contained material; do not call the worlds failures."
+        },
+        {
+          "family": "RALUVAAA and Centauro product/concept explanations",
+          "decision": "HOLD",
+          "confidence": "low",
+          "evidence": "RALUVAAA 12 Oct Instagram 76 views, 2 shares, 9.28s average watch for 40s; Centauro 8 Oct Instagram 122 views but 3.36s average watch for 42s. Mixed audiences and one clean sample per format.",
+          "next_test": "Show one unmistakable user action or mechanics payoff before abstract exposition."
+        },
+        {
+          "family": "Generic question cards / choice prompts / quote filler",
+          "decision": "KILL",
+          "confidence": "medium editorial; weak commercial evidence",
+          "evidence": "Instagram 3 Oct 'Choose one' generated 11 views with no likes, comments, shares or saves; previous three posts were similarly weak. This generic style lacks project specificity and was already rejected in the Oct review.",
+          "next_test": "No further release; clean legacy queue and approval gate."
+        }
+      ],
+      "owned_audience_monetization": {
+        "community_funnel": {
+          "form_notifications": "Two Google Forms response notifications on 23 and 26 Oct. The 23 Oct entry is explicitly a Thomas test. Exactly one genuine application dated 26 Oct was observed in the linked response sheet.",
+          "source_attribution": "Applicant had been in a direct email collaboration exchange and explicitly intended to join; no evidence supports attributing application to the Instagram 12-share post.",
+          "creator_prospecting": "Straydogs prospecting workbook documented 1030 creator profile records and 307 distinct public email addresses, but this is research coverage, not opt-ins, consent, successful outreach, or active partners."
+        },
+        "website_analytics": "Not instrumented in com-performance.json; Metricool website traffic returns only zero placeholder values, so social-to-site click and reader/creator conversion cannot be measured.",
+        "social_subscribers": "Instagram net +4, TikTok net +4, YouTube +4, Facebook net 0 for the 30-day activity window. These are small account-level changes with no post-level causal attribution.",
+        "revenue": "Metricool YouTube revenue 0 where reported. No verified book sales, memberships, creator revenue or other monetization results; absence of measured sales is not proof of zero actual sales.",
+        "external_collaborations": "One relevant external creator gave an exploratory offer for an Instagram Collab with indicative fee from EUR 500, not an accepted collaboration or revenue. One early-stage product founder expressed interest in joining Stray Dogs; actual one form application confirmed."
+      },
+      "system_reliability": {
+        "status": "NEEDS INTERVENTION",
+        "issues": [
+          "Reconcile 30 sent Buffer posts absent from the current GitHub publication log, including 16-30 October Stray Dogs and Voynich assets; log approved/QC status only where verified.",
+          "Update com-content-map.json to include active October worlds/pillars and remove deprecated selection assumptions.",
+          "Reconcile the single unsent Buffer YouTube draft and legacy approval gating; a missing GitHub log alone cannot establish an unauthorized publication.",
+          "Instrument confluenceofminds.com website/CTAs with privacy-respecting analytics and source-specific tagged links for Stray Dogs and world pages.",
+          "Improve cross-platform creative measurement with same-family repeats and track thumbnail/first-frame QC evidence and meaningful viewer actions."
+        ]
+      },
+      "next_month_allocation": {
+        "principle": "Fewer but genuinely authored masters; 1-2 quality releases per week maximum by default, only after explicit approval, with platform-specific metadata and intentional adaptations.",
+        "indicative_test_mix": [
+          "2 credible science/cultural mysteries (Voynich and another independently sourced oddity)",
+          "1-2 visually distinctive authored world narratives (Titan or other suitable owned masters)",
+          "1 concrete Stray Dogs creator-collaboration demonstration, not another generic recruiting ad",
+          "0-1 RALUVAAA/Centauro mechanical demonstration with real proof of concept"
+        ],
+        "platform_strategy": "Use YouTube for complete concept-led Shorts; Instagram for premium branded stories and community propagation; TikTok for short narrative visual-payoff tests. Do not treat FB as a priority on current evidence.",
+        "gates": [
+          "No SCALE without repeated user-approved QC-passed comparable tests with propagation or retention improvement",
+          "No new generic post filler",
+          "Track source link and application attribution",
+          "Reconcile post IDs and approval provenance before drawing stronger family-level conclusions"
+        ],
+        "decision": "OPERATING-MODEL REFOCUS; NOT A BRAND POSITIONING PIVOT. Prioritize share-worthy collaboration and concrete strange-real curiosities, alongside selected authored fiction."
+      },
+      "meaningful_changes": [
+        "First unusual Instagram propagation event: Stray Dogs launch 12 shares at 75 views, not replicated on 30 October.",
+        "YouTube visibility 893 in-period views versus 354 prior and subscribers 1 to 5, but a concentrated sample and no attributable acquisition funnel.",
+        "First genuine Stray Dogs application verified; origin cannot be attributed to the social post because there was prior direct email outreach.",
+        "30 of 45 current sent Buffer posts are absent from the GitHub publication log, invalidating automated approval-status learning until repaired."
+      ],
+      "interpretation_status": "mixed_execution_and_measurement_provenance"
+    }
+  ],
+  "heatmap_history": [
+    {
+      "updated_at": "2026-09-21",
+      "status": "early-autonomous-data",
+      "rows": [
+        {
+          "world_id": "incident-on-titan",
+          "content_mode": "archive-remix",
+          "asset_type": "reel-video",
+          "post_count_platforms": 4,
+          "confidence": "low",
+          "discovery": "strongest cross-platform discovery of the mature tests, especially YouTube and Facebook",
+          "retention": "weak for a 17.5 s cut: Instagram avg watch 2.51 s and 20% 3-second hold; TikTok avg watch 3.47 s",
+          "resonance": "low overall; 1 Instagram like, 4 Facebook likes, no shares or comments",
+          "growth": "one Facebook follower acquired on the publication day; no attributable Instagram/TikTok/YouTube conversion",
+          "decision": "MUTATE",
+          "learning": "Keep the concrete factual contradiction but recut to 6-9 s and strengthen the first visual beat. Do not repeat the 17.5 s trailer-style execution."
+        },
+        {
+          "world_id": "silmea",
+          "content_mode": "archive-remix",
+          "asset_type": "reel-video",
+          "post_count_platforms": 4,
+          "confidence": "low",
+          "discovery": "weak across platforms",
+          "retention": "better than Titan after shortening to 12 s: Instagram avg watch 3.70 s and 35% 3-second hold; TikTok avg watch 5.37 s",
+          "resonance": "one Instagram save, otherwise no comments or shares",
+          "growth": "no measured follower or subscriber gain",
+          "decision": "MUTATE",
+          "learning": "The idea may be sound but the execution is not earning distribution. Shorten further and make the first frame itself prove the sound-cinema idea instead of relying on a question or trailer framing."
+        },
+        {
+          "world_id": "raluvaaa",
+          "content_mode": "archive-remix",
+          "asset_type": "reel-video",
+          "post_count_platforms": 3,
+          "confidence": "low",
+          "discovery": "promising on TikTok: 251 views versus 82-83 for the two prior tests; weak/too-fresh evidence elsewhere",
+          "retention": "TikTok avg watch 3.71 s on an 8 s video, materially better as a share of duration than Titan and similar to SILMEA",
+          "resonance": "no measured reactions, comments or shares yet",
+          "growth": "no measured follower gain",
+          "decision": "HOLD",
+          "learning": "This is the strongest signal for the 6-9 s concept-first format, but one platform result with zero propagation is not enough to SCALE the world. Test descendants with a more concrete visual payoff and less abstract question wording."
+        }
+      ],
+      "note": "Current evidence is too small for world-level winners. The useful signal is executional: shorter concept-first cuts improve retention, while concrete factual hooks currently distribute better on YouTube/Facebook."
     }
   ]
 }
