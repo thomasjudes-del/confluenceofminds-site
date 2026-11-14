@@ -86,7 +86,8 @@ export class Actor{
  aim(upper,lower,elbow);aim(lower,hand,target);
  }
  update(s,dt){restoreCapture(this);const p=V.point(s.x,s.y);this.root.position.set(p.x,p.y,0);const turning=turnStep(this.turn,this.turnVelocity||0,s.face,dt);this.turn=turning.angle;this.turnVelocity=turning.velocity;this.root.rotation.y=this.turn;
- const bankReach=s.swimming?T.MathUtils.smoothstep(s.x,L.C.bank-110,L.C.bank-25)*Math.max(0,Math.cos(this.turn)):0;
+ const shore=s.face<0?L.C.dive:L.C.bank,shoreSide=s.face<0?-1:1;
+ const bankReach=s.swimming?T.MathUtils.smoothstep(shoreSide*s.x,shoreSide*shore-110,shoreSide*shore-25)*Math.max(0,shoreSide*Math.cos(this.turn)):0;
  let pose=V.pose(s);let name=pose==='climb'?(s.climb.t<.36?'crouch':'idle'):pose==='push'?(Math.abs(s.vx)>15?'run':'idle'):pose==='swim'?(this.actions.swim?'swim':'run'):pose; if(pose==='crouch'&&Math.abs(s.vx)>8&&this.actions.crouchwalk)name='crouchwalk'; if(!this.actions[name])name='idle';
  const entry=s.entrance&&s.entranceLand>=0&&!s.entranceControlled?1-T.MathUtils.smoothstep(s.entranceLand,.12,.7):0;
  if(name==='jump'&&this.lastAction!=='jump')this.actions.jump.reset().play();this.lastAction=name;
@@ -95,17 +96,18 @@ export class Actor{
  if(!this.wardrobe)livingPose(this,s,dt,pose);
  if(s.swimming){this.model.rotation.z=this.actions.swim?0:-L.swimAngle(s)*.8;this.model.position.y=this.actions.swim?-.35*(1-bankReach):.38;}else{this.model.rotation.z=0;this.model.position.y=0;}
  // Prepare the shore grip while still in the water; the existing climb then keeps it planted.
- if(bankReach>0){for(const side of ['L','R']){this.root.updateMatrixWorld(true);const free=this.bones[side+'handbone'].getWorldPosition(v()),contact=v(L.C.bank*U,.035,side==='L'?-.19:.19);this.ik(side,free.lerp(contact,bankReach));}}
+ if(bankReach>0){for(const side of ['L','R']){this.root.updateMatrixWorld(true);const free=this.bones[side+'handbone'].getWorldPosition(v()),contact=v(shore*U,.035,side==='L'?-.19:.19);this.ik(side,free.lerp(contact,bankReach));}}
  if(pose==='push'){this.model.rotation.z=-.12;for(const side of ['L','R'])this.ik(side,v((s.boxX-s.face*(L.C.boxHalf+2))*U,1.05,side==='L'?-.19:.19));}
- if(s.climb){const top=(510-s.climb.top)*U,release=T.MathUtils.smoothstep(s.climb.t,.34,.54);this.root.updateMatrixWorld(true);const shoulder=this.bones.Lupperarm.getWorldPosition(v());const supportHeight=.29+(s.climb.edge===L.C.bank?.24*T.MathUtils.smoothstep(s.climb.t,.04,.30):0);this.model.position.y=-Math.max(0,shoulder.y-top-supportHeight)*(1-release);if(release<1)for(const side of ['L','R']){this.root.updateMatrixWorld(true);const free=this.bones[side+'handbone'].getWorldPosition(v()),contact=v(s.climb.edge*U,top+.035,side==='L'?-.19:.19);this.ik(side,free.lerp(contact,1-release));}}
+ if(s.climb){const top=(510-s.climb.top)*U,release=T.MathUtils.smoothstep(s.climb.t,.34,.54);this.root.updateMatrixWorld(true);const shoulder=this.bones.Lupperarm.getWorldPosition(v());const supportHeight=.29+((s.climb.edge===L.C.bank||s.climb.edge===L.C.dive)?.24*T.MathUtils.smoothstep(s.climb.t,.04,.30):0);this.model.position.y=-Math.max(0,shoulder.y-top-supportHeight)*(1-release);if(release<1)for(const side of ['L','R']){this.root.updateMatrixWorld(true);const free=this.bones[side+'handbone'].getWorldPosition(v()),contact=v(s.climb.edge*U,top+.035,side==='L'?-.19:.19);this.ik(side,free.lerp(contact,1-release));}}
  // Lead foot gathers above the shore, then bears weight before the hands release.
- if(s.climb&&s.climb.edge===L.C.bank){
+ if(s.climb&&(s.climb.edge===L.C.bank||s.climb.edge===L.C.dive)){
+  const bankSide=s.climb.edge===L.C.dive?-1:1;
   const t=s.climb.t,w=T.MathUtils.smoothstep(t,.07,.23)*(1-T.MathUtils.smoothstep(t,.39,.54));
   this.root.updateMatrixWorld(true);
   const foot=this.bones.Lfoot,free=foot.getWorldPosition(v()),footRotation=foot.getWorldQuaternion(new T.Quaternion());
   const lift=.19*(1-T.MathUtils.smoothstep(t,.19,.30));
-  const target=free.lerp(v(s.climb.edge*U+.25,.105+lift,-.12),w);
-  target.x=Math.min(target.x,s.climb.edge*U-.08+.33*T.MathUtils.smoothstep(t,.18,.27)+(t>.39?T.MathUtils.smoothstep(t,.39,.54):0));
+  const target=free.lerp(v(s.climb.edge*U+bankSide*.25,.105+lift,-.12*bankSide),w);
+  target.x=bankSide*Math.min(bankSide*target.x,bankSide*s.climb.edge*U-.08+.33*T.MathUtils.smoothstep(t,.18,.27)+(t>.39?T.MathUtils.smoothstep(t,.39,.54):0));
   if(t>=.30)target.y=Math.max(.085,target.y);
   this.ik('L',target,true);
   this.root.updateMatrixWorld(true);

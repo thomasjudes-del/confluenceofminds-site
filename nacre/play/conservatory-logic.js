@@ -25,6 +25,8 @@ function step(s,input={},dt=1/60){if(s.paused)return s;dt=B.clamp(dt,0,1/30);
  if(wasRespawn&&!s.respawn){puzzle(s,s.checkpoint>=3);s.entrance=false;s.entranceLand=-1;s.mothStart=-1;}
  if(s.entrance){if(s.onGround&&s.entranceLand<0)s.entranceLand=0;if(s.entranceLand>=0)s.entranceLand+=dt;if(s.entranceLand>=.7||s.x>390||s.respawn)s.entrance=false;}
  if((s.mothStart??-1)<0&&Math.abs(s.x-s.boxX)<230&&!s.respawn){s.mothStart=s.time;s.mothOrigin=s.boxX;s.events.push('wings');}if(s.respawn||s.finished)return s;
+ // Return to the entrance bank uses the same supported climb as the far shore.
+ if(s.swimming&&s.x<B.C.dive+24&&input.axis<0){s.climb={t:0,x:s.x,y:s.y,top:510,edge:B.C.dive,targetX:B.C.dive-25};s.swimming=false;s.face=-1;s.events.push('climb');}
  // Optional living encounter after the bank: no input lock or mandatory waiting.
  const nearBloom=s.x>7240&&!s.swimming&&!s.climb;
  s.bloomOpen=B.clamp((s.bloomOpen||0)+dt*(nearBloom?.26:-.18),0,1);
