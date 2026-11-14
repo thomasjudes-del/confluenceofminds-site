@@ -11,6 +11,8 @@ function step(s,input={},dt=1/60){if(s.paused)return s;dt=B.clamp(dt,0,1/30);
  s.retryFade=Math.max(0,(s.retryFade||0)-dt*3.5);
  const oldX=s.x,wasRespawn=s.respawn>0;
  if(s.entrance){if(input.axis||input.jump||input.hold)s.entranceControlled=true;if(!s.entranceControlled&&s.entranceLand<.12)input={...input,axis:.38};}
+ // A jump gesture releases the crate even while the other thumb holds action.
+ if(input.jump&&input.hold)input={...input,hold:false};
  B.step(s,input,dt);
  if(!wasRespawn&&s.respawn&&s.events.includes('caught')){const hunter=s.hunterTime>=0,vehicle=s.chaseTime>=0&&!s.escaped;const side=hunter?-1:1;s.capture={t:0,x:s.x,y:s.y,side,sourceX:hunter?s.hunterX:s.x+126,vy:Math.max(0,s.vy),groundY:Math.min(Number.isFinite(B.floorAt(s,s.x))?B.floorAt(s,s.x):510,...B.solids(s).filter(o=>s.x>=o.a&&s.x<=o.b&&o.top>=s.y).map(o=>o.top)),kind:vehicle?'vehicle':hunter?'hunter':'warden',contact:false};return s;}
  if((s.witnessStart??-1)===-1&&s.checkpoint===0&&s.x>440){s.witnessStart=s.time;s.events.push('distant-steps');}
