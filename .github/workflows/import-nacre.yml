@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: thomasjudes-del/Nacre
-          ref: 7213cdfb968393ebfa68d919a2caa670973ad06c
+          ref: 71a0e593400bb5a0ddf6f16f9e80ab5fb492a948
           path: .nacre-source
       - name: Copy validated game
         run: |
