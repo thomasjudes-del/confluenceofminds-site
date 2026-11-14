@@ -7,6 +7,7 @@ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
 function acousticSpace(s){
  const x=s.x||0;
+ if(s.chapter==='forest')return {wet:s.swimming?.10:.025,delay:.065};
  if(s.chapter==='desert')return {wet:.025,delay:.065};
  if(s.chapter==='red'){const open=smooth(5950,6250,x);return {wet:.18-.14*open,delay:.145-.06*open};}
  const cover=smooth(4400,4550,x)*(1-smooth(4920,5100,x));
@@ -23,6 +24,7 @@ function spatialCue(p,s){
   wet:room.wet,delay:room.delay};
 }
 function surface(s){
+ if(s.chapter==='forest')return s.x>4490&&s.x<4920||Math.abs(s.y-438)<4?'wood':'sand';
  if(s.chapter==='desert')return s.x>1320&&s.x<1660?'wood':s.x>=7800?'stone':'sand';
  if(s.chapter==='red')return s.x>860&&s.x<1210||s.x>3550&&s.x<4200&&Math.abs(s.y-400)<4?'wood':'stone';
  return Math.abs(s.y-438)<4?'wood':'stone';

@@ -13,11 +13,12 @@ export class CisternTransfer{
   slab(2.3,1.35,.10,M.dark,0,.63,-.38,this.tank);
   tube([[-1.18,1.35,.38],[-1.18,1.35,-.38],[1.18,1.35,-.38],[1.18,1.35,.38]],.065,M.bronze,this.tank);
   for(const y of [.3,.6,.9,1.2])slab(.23,.035,.06,M.salt,-.97,y,.42,this.tank);
-  const waterMat=new T.MeshStandardMaterial({color:'#76a6a6',roughness:.24,metalness:.25});
+  const waterMat=new T.MeshStandardMaterial({color:'#76a6a6',roughness:.21,metalness:.25,transparent:true,opacity:.66,depthWrite:false});
   const glass=new T.MeshStandardMaterial({color:'#abc5c1',transparent:true,opacity:.12,roughness:.18,depthWrite:false});
   mesh(new T.BoxGeometry(2.13,1.3,.035),glass,v(0,.66,.355),this.tank);
   for(const y of [.1,1.25])for(const x of [-1.04,1.04])mesh(new T.SphereGeometry(.055,8,6),M.bronze,v(x,y,.4),this.tank);
   this.water=mesh(new T.BoxGeometry(2.12,1,.64),waterMat,v(0,.1,0),this.tank);
+  this.surface=mesh(new T.PlaneGeometry(2.10,.62).rotateX(-Math.PI/2),new T.MeshStandardMaterial({color:'#90b5ae',roughness:.18,metalness:.48}),v(0,.13,0),this.tank);
   this.bleed=mesh(new T.CylinderGeometry(.024,.035,.55,7),waterMat,v(1.12,-.3,.1),this.tank);
   tube([[1.06,.14,.1],[1.12,-.1,.1]],.055,M.bronze,this.tank);
   this.float=slab(.5,.12,.66,M.salt,.38,.2,0,this.tank);
@@ -26,6 +27,8 @@ export class CisternTransfer{
   tube([[46,4,-2.7],[56,4,-2.7],[56,6.1,-2.7],[x,6.1,-2.7],[x,5.5,-1.5]],.18,M.bronze,fixed);
   for(const px of [56,60,x]){slab(.6,.18,.7,M.dark,px,6.1,-2.7,fixed);}
   this.stream=mesh(new T.CylinderGeometry(.11,.15,1,9),waterMat,v(x,4,-1.5),parent);
+  this.impact=mesh(new T.TorusGeometry(.18,.012,6,24).rotateX(-Math.PI/2),M.salt,v(),parent);
+  this.spill=mesh(new T.CylinderGeometry(.055,.07,1,9),waterMat,v(x,3,-1.5),parent);
   this.ripple=mesh(new T.TorusGeometry(.35,.025,6,28),waterMat,v(x,-1.12,-1.5),parent);this.ripple.rotation.x=Math.PI/2;
   // Flexible control hose, held behind/below the walking plane. Reused segments, no per-frame meshes.
   this.hose=[];for(let i=0;i<20;i++)this.hose.push(mesh(new T.CylinderGeometry(.065,.065,1,8),M.bronze,v(),parent));
@@ -46,9 +49,12 @@ export class CisternTransfer{
  update(s){const r=F.receiver,g=F.exitGate,base=110/60,fill=s.ferryFill||0,opening=s.exitGate||0,x=F.sample(s.ferryClock||0).x/60;
   this.bleed.visible=fill>.03;
   this.water.scale.y=Math.max(.01,fill*1.15);this.water.position.y=.12+fill*.575;this.float.position.y=.22+fill*1.15;
-  const catching=F.catchment(s.ferryClock||0)>0,low=catching?base+1.53:-1.1;
+  const caught=F.catchment(s.ferryClock||0),catching=caught>0,level=.12+fill*1.15,low=catching?base+.18+level:-1.1;
+  this.water.visible=fill>.004;this.surface.visible=fill>.004;this.surface.position.y=level+.004;
+  this.impact.visible=!!s.drainOpen&&catching;this.impact.position.set(r.streamX/60,low+.012,-1.5);this.impact.scale.setScalar(.55+((s.time*2)%1)*.55);
+  this.spill.visible=!!s.drainOpen&&caught>0&&caught<1;this.spill.position.y=(5.5-1.1)/2;this.spill.scale.set(Math.sqrt(1-caught),6.6,Math.sqrt(1-caught));
   this.stream.visible=!!s.drainOpen;this.stream.scale.y=5.5-low;this.stream.position.y=(5.5+low)/2;
-  this.stream.scale.x=this.stream.scale.z=.92+Math.sin(s.time*13)*.08;
+  this.stream.scale.x=this.stream.scale.z=(.96+Math.sin(s.time*13)*.04)*Math.sqrt(catching?caught:1);
   this.ripple.visible=!!s.drainOpen&&!catching;this.ripple.scale.setScalar(.8+((s.time*1.3)%1)*.8);
   this.gate.position.set(g.x/60,base+opening*g.travel/60,0);
   const rodBottom=base+3.5+opening*g.travel/60,rodTop=base+7.3;
