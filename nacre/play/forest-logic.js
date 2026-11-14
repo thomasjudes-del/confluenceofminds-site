@@ -4,8 +4,10 @@ const C={ground:510,speed:320,gravity:1350,jump:450,world:8800,wall:2590,ledge:3
 const covers=[{a:1150,b:1350,top:405},{a:1630,b:1810,top:395}];
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),approach=(a,b,n)=>a<b?Math.min(a+n,b):Math.max(a-n,b);
 function createState(){return{bridgeLower:0,bridgeLatched:false,winding:false,x:130,y:510,vx:0,vy:0,face:1,onGround:true,walk:0,seed:'none',veil:0,time:0,landing:0,lean:0,actionAge:10,grabbing:false,guiding:false,grabOffset:65,boxX:2280,boxV:0,crouch:0,vehicleTime:-1,scanTime:-1,searchPassed:false,alert:0,checkpoint:0,chaseTime:-1,chaser:0,escaped:false,inspection:0,hunterTime:-1,hunterX:0,hunterV:378,hunterRest:0,swimming:false,splashAge:10,splashX:0,finished:false,ending:0,deaths:0,respawn:0,events:[],jumpBuffer:0,coyote:.1,climb:null,jumps:0};}
+function bridgeAngle(s){return (1-(s.bridgeLower||0))*.85;}
+function bridgeTip(s){return 7650+420*Math.cos(bridgeAngle(s));}
 function bridgeTop(s,x){return 510-(x-7650)*Math.tan((1-(s.bridgeLower||0))*.85);}
-function floorAt(s,x){if(x>7650&&x<8070)return (s.bridgeLower||0)>.82?bridgeTop(s,x):Infinity;if(x>=C.dive&&x<C.bank)return Infinity;if(x>=C.gap&&x<=C.gapEnd)return Infinity;if(x>=C.wall&&x<=C.ledgeEnd)return C.ledge;return C.ground;}
+function floorAt(s,x){if(x>7650&&x<8070)return x<=bridgeTip(s)?bridgeTop(s,x):Infinity;if(x>=C.dive&&x<C.bank)return Infinity;if(x>=C.gap&&x<=C.gapEnd)return Infinity;if(x>=C.wall&&x<=C.ledgeEnd)return C.ledge;return C.ground;}
 function beam(s){const phase=((s.scanTime%6)+6)%6;return{target:1510+500*Math.cos(phase*Math.PI/3),width:150,active:s.scanTime>.8&&!s.searchPassed,source:{x:2070,y:285}};}
 // One world-space footprint controls both the visible light and detection.
 function patrol(s){
@@ -38,7 +40,10 @@ function step(s,input={},dt=1/60){dt=clamp(dt,0,1/30);s.events=[];if(s.paused)re
  if(input.hold&&s.onGround&&Math.abs(s.x-8200)<48&&oldLower>.82)s.bridgeLatched=true;
  s.bridgeLower=approach(oldLower,s.bridgeLatched||s.winding?1:0,dt*(s.winding?.22:.035));
  if(s.bridgeLower!==oldLower&&Math.floor(s.bridgeLower*12)!==Math.floor(oldLower*12))s.events.push('grab');
- if(s.onGround&&s.x>7650&&s.x<8070)s.y+=bridgeTop(s,s.x)-(510-(s.x-7650)*Math.tan((1-oldLower)*.85));
+ if(s.onGround&&s.x>7650&&s.x<=7650+420*Math.cos((1-oldLower)*.85)){
+ const distance=(s.x-7650)/Math.cos((1-oldLower)*.85);
+ s.x=7650+distance*Math.cos(bridgeAngle(s));s.y=510-distance*Math.sin(bridgeAngle(s));
+ }
  if(s.x>7290&&s.onGround&&s.checkpoint<6){s.checkpoint=6;s.events.push('checkpoint');}
  if(s.vehicleTime>=0)s.vehicleTime+=dt;if(s.scanTime>=0&&!s.searchPassed)s.scanTime+=dt;
  if(s.x>340&&s.vehicleTime<0){s.vehicleTime=0;s.events.push('convoy');}
@@ -57,26 +62,29 @@ function step(s,input={},dt=1/60){dt=clamp(dt,0,1/30);s.events=[];if(s.paused)re
  const cover=sheltered(s),low=s.x>C.refuge-45&&s.x<C.refugeExit;s.crouch=approach(s.crouch,cover||low?1:0,dt*4.8);
  if(!(s.escaped&&patrolVisible(s)))s.alert=visible(s)?s.alert+dt:Math.max(0,s.alert-dt*2);if(s.alert>.22&&!s.escaped){fail(s,'caught');return s;}
  if(s.climb){const a=s.climb;a.t+=dt;const u=clamp(a.t/.54,0,1),rise=clamp(u/.82,0,1),shift=clamp((u-.22)/.78,0,1),e=rise*rise*(3-2*rise),h=shift*shift*(3-2*shift);s.x=a.x+(a.targetX-a.x)*h;s.y=a.y+(a.top-a.y)*e;s.vx=0;s.vy=0;s.onGround=false;s.guiding=true;s.handleX=a.edge;s.handleY=a.top;s.grabbing=false;if(u>=1){s.climb=null;s.guiding=false;s.onGround=true;s.events.push('land');}return s;}
- let axis=clamp(input.axis||0,-1,1),hold=!!input.hold;const oldX=s.x,oldY=s.y;s.guiding=!!s.winding;if(s.winding){s.handleX=7500;s.handleY=450;s.face=s.x<7500?1:-1;}
+ let axis=clamp(input.axis||0,-1,1),hold=!!input.hold;const oldX=s.x,oldY=s.y,wasGround=s.onGround;s.guiding=!!s.winding;if(s.winding){s.handleX=7500;s.handleY=450;s.face=s.x<7500?1:-1;}
  if(input.jump)s.jumpBuffer=.13;else s.jumpBuffer=Math.max(0,s.jumpBuffer-dt);s.coyote=s.onGround?.1:Math.max(0,s.coyote-dt);
  if(hold&&interactable(s)&&!s.grabbing){s.grabbing=true;s.grabOffset=s.boxX-s.x;s.face=Math.sign(s.grabOffset)||s.face;s.events.push('grab');}if(!hold||!s.onGround||input.jump)s.grabbing=false;
  if(!s.swimming&&s.x>C.dive&&s.x<C.bank&&s.y>540){s.swimming=true;s.vy=clamp(s.vy,-120,120);s.splashAge=0;s.splashX=s.x;s.events.push("splash");}
- const maxSpeed=s.swimming?185:s.grabbing?128:low?210:cover?175:C.speed,target=axis*maxSpeed;s.vx=approach(s.vx,target,(axis?2300:2900)*dt);s.lean=clamp((target-s.vx)/200,-1,1);if(axis&&!s.grabbing)s.face=Math.sign(axis);
+ const maxSpeed=s.swimming?185:s.grabbing?128:low?210:cover?175:C.speed,target=axis*maxSpeed-(s.onGround&&s.x>7650&&s.x<bridgeTip(s)?Math.max(0,Math.sin(bridgeAngle(s))-.2)*700:0);s.vx=approach(s.vx,target,(axis?2300:2900)*dt);s.lean=clamp((target-s.vx)/200,-1,1);if(axis&&!s.grabbing)s.face=Math.sign(axis);
  if(s.jumpBuffer>0&&s.coyote>0&&!s.grabbing&&!low){s.vy=-C.jump;s.onGround=false;s.coyote=0;s.jumpBuffer=0;s.jumps++;s.events.push('jump');}
  if(s.grabbing){const before=s.boxX;s.boxX=clamp(s.boxX+s.vx*dt,2180,C.wall-C.boxHalf);s.boxV=(s.boxX-before)/dt;s.x=s.boxX-s.grabOffset;s.vx=s.boxV;}else{s.boxV=approach(s.boxV,0,dt*420);s.boxX=clamp(s.boxX+s.boxV*dt,2180,C.wall-C.boxHalf);s.x+=s.vx*dt;}
  if(s.swimming&&s.x<C.dive+12)s.vx=Math.max(0,s.vx);s.x=clamp(s.x,s.swimming?C.dive+12:20,C.world);if(s.swimming){s.vy=clamp(s.vy+((595-s.y)*20-s.vy*9)*dt,-180,180);if(input.jump)s.vy=-150;}else s.vy+=C.gravity*dt;s.y+=s.vy*dt;if(low&&s.y<495){s.y=495;s.vy=Math.max(0,s.vy);}s.onGround=false;
  if(s.swimming&&s.x<C.dive+24&&axis<0){s.climb={t:0,x:s.x,y:s.y,top:510,edge:C.dive,targetX:C.dive-25};s.swimming=false;s.face=-1;s.events.push('climb');return s;}
  if(s.swimming&&s.x>C.bank-20){s.climb={t:0,x:s.x,y:s.y,top:510,edge:C.bank,targetX:C.bank+25};s.swimming=false;s.events.push('climb');return s;}
- const walls=solids(s);if((s.bridgeLower||0)<.82)walls.push({a:7640,b:7670,top:190});
+ const walls=solids(s);
  for(const b of walls){if(s.x+12<=b.a||s.x-12>=b.b)continue;if(oldY<=b.top+2&&s.y>=b.top&&s.vy>=0){s.y=b.top;s.vy=0;s.onGround=true;continue;}if(s.y>b.top+3){
  const fromLeft=oldX<=b.a+12,edge=fromLeft?b.a:b.b,toward=fromLeft?axis>0:axis<0;
  if(toward&&s.vy<145&&s.y-b.top<=69&&oldY>b.top&&!s.grabbing){s.climb={t:0,x:fromLeft?b.a-13:b.b+13,y:s.y,top:b.top,edge,targetX:edge+(fromLeft?24:-24)};s.x=s.climb.x;s.vx=0;s.vy=0;s.events.push('climb');break;}
  if(oldX<b.a){s.x=b.a-12;s.vx=0;}else if(oldX>b.b){s.x=b.b+12;s.vx=0;}
  }}
- const floor=floorAt(s,s.x);if(s.y>=floor&&oldY<=floor+4&&s.vy>=0){if(s.vy>180){s.landing=1;s.events.push('land');}s.y=floor;s.vy=0;s.onGround=true;}
+ const floor=floorAt(s,s.x);
+ // Project a grounded step onto the actual plank surface, including entry at the hinge.
+ if(wasGround&&!input.jump&&s.x>7650&&s.x<=bridgeTip(s)&&oldX>=7638&&oldX<=bridgeTip(s)+12&&Math.abs(oldY-(oldX<=7650?510:bridgeTop(s,oldX)))<5){s.y=floor;s.vy=0;s.onGround=true;}
+ if(s.y>=floor&&oldY<=floor+4&&s.vy>=0){if(s.vy>180){s.landing=1;s.events.push('land');}s.y=floor;s.vy=0;s.onGround=true;}
  if(s.y>830)fail(s,'fall');if(s.x>C.finish&&s.onGround){s.finished=true;s.events.push('finish');}
  const walkBefore=Math.floor(s.walk);s.walk+=Math.abs(s.x-oldX)/(s.grabbing?47:96);if(s.onGround&&Math.floor(s.walk)>walkBefore)s.events.push('step');return s;
 }
 function recoverCheckpoint(cp){const s=createState();s.checkpoint=Number.isInteger(cp)&&cp>=1&&cp<=6?cp:0;restartAtCheckpoint(s);s.events=[];return s;}
-const api={recoverCheckpoint,C,covers,clamp,createState,step,beam,swimAngle,pursuerPose,patrol,patrolVisible,sheltered,visible,interactable,floorAt,solids};if(typeof module!=='undefined')module.exports=api;root.NacreForest=api;
+const api={recoverCheckpoint,C,covers,clamp,createState,step,beam,swimAngle,pursuerPose,patrol,patrolVisible,sheltered,visible,interactable,floorAt,solids,bridgeAngle,bridgeTip,bridgeTop};if(typeof module!=='undefined')module.exports=api;root.NacreForest=api;
 })(typeof window!=='undefined'?window:globalThis);
