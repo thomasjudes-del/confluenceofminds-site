@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: thomasjudes-del/Nacre
-          ref: e44a24abe176a038efc734b39b0ac47924b43098
+          ref: 9adb8f8161e4ab353e1cd89295492297545dda66
           path: .nacre-source
       - name: Copy validated game
         run: |
@@ -23,5 +23,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add nacre/play
-          git diff --cached --quiet || git commit -m "Publish NACRE crate contact e44a24a"
+          git diff --cached --quiet || git commit -m "Publish NACRE swimming wake 9adb8f8"
           git push
