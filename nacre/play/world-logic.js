@@ -44,6 +44,9 @@ if(s.x>g.x+g.halfWidth+g.bodyRadius&&s.exitGate>.5&&!s.exitLatched){s.exitLatche
 let target=axis*(s.grabbing?108:315);if(s.chapter==='desert'&&s.x>1880&&s.x<2680&&!s.grabbing&&axis){const gust=Math.max(0,Math.sin(s.time*.9));target-=gust*80;}
 s.vx+=(target-s.vx)*(1-Math.exp(-dt*(axis?14:20)));if(Math.abs(s.vx)<.1)s.vx=0;const oldX=s.x;let nx=clamp(s.x+s.vx*dt,25,s.chapter==='desert'?9150:6750);
 if(s.chapter==='desert'){
+ // Block the visible face while the descending deck is above the lower path.
+ const crustEdge=Crust.C.end+saltGate.bodyRadius;
+ if(oldX>=Crust.C.end&&nx<crustEdge&&s.y>Crust.sample(s).y+1){nx=crustEdge;s.vx=0;}
  if(oldX>=7800&&nx<7800&&s.y>511){nx=7800;s.vx=0;}
  if(s.movingShelter){const before=s.shelterX;s.shelterX=clamp(before+nx-oldX,4900,5260);nx=oldX+s.shelterX-before;}
  if(s.grabbing&&Math.abs(s.x-s.stoneX)<70){const before=s.stoneX;s.stoneX=clamp(s.stoneX+nx-oldX,760,1210);nx=oldX+s.stoneX-before;}
