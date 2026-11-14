@@ -3,7 +3,7 @@
 const captureDuration=1.94;
 const gateX=2770,plateX=B.C.wall-B.C.boxHalf;
 function plateCoverage(boxX){const halfPlate=1.95*60/2,halfBox=B.C.boxHalf;return B.clamp((Math.min(boxX+halfBox,plateX+halfPlate)-Math.max(boxX-halfBox,plateX-halfPlate))/(halfBox*2),0,1);}
-function puzzle(s,done=false){s.gate=done?1:0;s.gateLatched=done;s.plateLoaded=false;s.platePressure=0;return s;}
+function puzzle(s,done=false){s.gate=done?1:0;s.gateLatched=done;s.plateLoaded=false;s.platePressure=0;s.bloomOpen=0;return s;}
 function createState(){return Object.assign(puzzle(B.createState()),{y:400,vy:100,vx:150,onGround:false,coyote:0,entrance:true,entranceLand:-1,entranceControlled:false,mothStart:-1});}
 function recoverCheckpoint(cp){return puzzle(B.recoverCheckpoint(cp),cp>=3);}
 function step(s,input={},dt=1/60){if(s.paused)return s;dt=B.clamp(dt,0,1/30);
@@ -18,6 +18,9 @@ function step(s,input={},dt=1/60){if(s.paused)return s;dt=B.clamp(dt,0,1/30);
  if(wasRespawn&&!s.respawn){puzzle(s,s.checkpoint>=3);s.entrance=false;s.entranceLand=-1;s.mothStart=-1;}
  if(s.entrance){if(s.onGround&&s.entranceLand<0)s.entranceLand=0;if(s.entranceLand>=0)s.entranceLand+=dt;if(s.entranceLand>=.7||s.x>390||s.respawn)s.entrance=false;}
  if((s.mothStart??-1)<0&&Math.abs(s.x-s.boxX)<230&&!s.respawn){s.mothStart=s.time;s.mothOrigin=s.boxX;s.events.push('wings');}if(s.respawn||s.finished)return s;
+ // Optional living encounter after the bank: no input lock or mandatory waiting.
+ const nearBloom=s.x>7240&&!s.swimming&&!s.climb;
+ s.bloomOpen=B.clamp((s.bloomOpen||0)+dt*(nearBloom?.26:-.18),0,1);
  const coverage=plateCoverage(s.boxX),onBox=s.onGround&&Math.abs(s.y-(B.C.ground-B.C.boxHeight))<3&&Math.abs(s.x-s.boxX)<B.C.boxHalf+3;
  s.plateLoaded=coverage>=.6&&onBox;
  s.platePressure=s.plateLoaded?1:coverage*.48;

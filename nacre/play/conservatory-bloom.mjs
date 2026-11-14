@@ -23,6 +23,10 @@ export class ConservatoryBloom {
    const m=new T.Mesh(g,shell);m.castShadow=m.receiveShadow=true;this.root.add(m);this.petals.push(m);
   }
   this.heart=new T.Mesh(new T.SphereGeometry(1,32,20),pearl);this.heart.position.y=2.05;this.heart.scale.set(.51,1.23,.51);this.root.add(this.heart);
+  this.seeds=new T.Group();this.root.add(this.seeds);
+  const seedMat=new T.MeshStandardMaterial({color:'#bcc9ad',emissive:'#62847a',emissiveIntensity:.35,roughness:.7});
+  const seedShape=new T.SphereGeometry(.035,6,4);
+  for(let k=0;k<14;k++)this.seeds.add(new T.Mesh(seedShape,seedMat));
   const rootMat=new T.MeshStandardMaterial({color:'#253f3a',roughness:.96});
   const bed=new T.Mesh(new T.DodecahedronGeometry(1,2),rootMat);bed.position.y=-.62;bed.scale.set(1.35,.72,1.12);bed.castShadow=bed.receiveShadow=true;this.root.add(bed);
   for(let k=0;k<5;k++){
@@ -31,8 +35,16 @@ export class ConservatoryBloom {
   }
  }
  update(s){
-  const t=s.time||0;
-  for(let k=0;k<this.petals.length;k++){const p=this.petals[k],breath=Math.sin(t*.53+k*.17);p.scale.set(1+.018*breath,1+.006*breath,1+.018*breath);}
-  this.heart.material.emissiveIntensity=.25+.035*Math.sin(t*.53-.5);
+  const t=s.time||0,open=T.MathUtils.clamp(s.bloomOpen||0,0,1),ease=open*open*(3-2*open);
+  for(let k=0;k<this.petals.length;k++){const p=this.petals[k],breath=Math.sin(t*.53+k*.17);const spread=.42+.58*ease+.012*breath;
+   p.scale.set(spread,1.06-.06*ease+.006*breath,spread);}
+  this.heart.material.emissiveIntensity=.12+.55*ease+.025*Math.sin(t*.53-.5);
+  const pulse=.8+.2*ease;this.heart.scale.set(.51*pulse,1.23*pulse,.51*pulse);
+  this.seeds.visible=open>.62;
+  for(let k=0;k<this.seeds.children.length;k++){
+   const seed=this.seeds.children[k],u=((t*.13+k*.137)%1),a=k*2.399+t*.16;
+   seed.position.set(Math.cos(a)*(.3+u*1.5),2.3+u*2.1,Math.sin(a)*(.3+u*1.5));
+   seed.scale.setScalar(Math.sin(Math.PI*u)*Math.max(0,(open-.62)/.38));
+  }
  }
 }
