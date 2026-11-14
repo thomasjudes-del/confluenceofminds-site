@@ -9,11 +9,16 @@ function recoverCheckpoint(cp){return puzzle(B.recoverCheckpoint(cp),cp>=3);}
 function step(s,input={},dt=1/60){if(s.paused)return s;dt=B.clamp(dt,0,1/30);
  if(s.capture){const c=s.capture;s.events=[];s.time+=dt;c.t+=dt;c.vy+=1350*dt;c.y=Math.min(c.groundY,c.y+c.vy*dt);s.y=c.y;s.vx=s.vy=0;s.respawn=.9;if(c.t>=.76&&!c.contact){c.contact=true;s.events.push('capture-grip');}if(c.t>=captureDuration){s.capture=null;s.respawn=.001;B.step(s,{},dt);puzzle(s,s.checkpoint>=3);s.entrance=false;s.entranceLand=-1;s.mothStart=-1;s.witnessStart=-2;s.retryFade=1;}return s;}
  s.retryFade=Math.max(0,(s.retryFade||0)-dt*3.5);
- const oldX=s.x,wasRespawn=s.respawn>0;
+ const oldX=s.x,oldBoxX=s.boxX,wasRespawn=s.respawn>0;
  if(s.entrance){if(input.axis||input.jump||input.hold)s.entranceControlled=true;if(!s.entranceControlled&&s.entranceLand<.12)input={...input,axis:.38};}
  // A jump gesture releases the crate even while the other thumb holds action.
  if(input.jump&&input.hold)input={...input,hold:false};
  B.step(s,input,dt);
+ // A wall stopping the body must also stop the held crate, preserving the grip.
+ if(s.grabbing&&!s.respawn&&Math.abs(s.boxX-s.grabOffset-s.x)>.001){
+  s.boxX=B.clamp(s.x+s.grabOffset,2180,B.C.wall-B.C.boxHalf);
+  s.boxV=dt>0?(s.boxX-oldBoxX)/dt:0;
+ }
  if(!wasRespawn&&s.respawn&&s.events.includes('caught')){const hunter=s.hunterTime>=0,vehicle=s.chaseTime>=0&&!s.escaped;const side=hunter?-1:1;s.capture={t:0,x:s.x,y:s.y,side,sourceX:hunter?s.hunterX:s.x+126,vy:Math.max(0,s.vy),groundY:Math.min(Number.isFinite(B.floorAt(s,s.x))?B.floorAt(s,s.x):510,...B.solids(s).filter(o=>s.x>=o.a&&s.x<=o.b&&o.top>=s.y).map(o=>o.top)),kind:vehicle?'vehicle':hunter?'hunter':'warden',contact:false};return s;}
  if((s.witnessStart??-1)===-1&&s.checkpoint===0&&s.x>440){s.witnessStart=s.time;s.events.push('distant-steps');}
  if(s.witnessStart>=0&&s.time-s.witnessStart>1.7&&!s.witnessListened){s.witnessListened=true;s.events.push('distant-stop');}
