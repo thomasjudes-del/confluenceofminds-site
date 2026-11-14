@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: thomasjudes-del/Nacre
-          ref: d96620662f96f69cbc6e5b49ea4da6c641846886
+          ref: 8686b8e7efb156fd41497dd6b0e8ac25c0b63479
           path: .nacre-source
       - name: Copy validated game
         run: |
@@ -23,5 +23,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add nacre/play
-          git diff --cached --quiet || git commit -m "Publish NACRE bridge contact d966206"
+          git diff --cached --quiet || git commit -m "Publish NACRE greenhouse repair 8686b8e"
           git push
