@@ -1,3 +1,4 @@
+import {ConservatoryWake} from './conservatory-wake.mjs';
 import {witnessPose,witnessShelter} from './witness-scene.mjs';
 import {captureView,restoreCapture,captureBody} from './capture-pose.mjs';
 import * as T from './vendor/three/three.module.js';
@@ -151,6 +152,7 @@ export class ConservatoryArt{
  this.water=new Reflector(new T.PlaneGeometry(160,90),{color:0x496b66,textureWidth:512,textureHeight:512,clipBias:.003});this.water.rotation.x=-Math.PI/2;this.water.position.set(64,-.72,-7);this.scene.add(this.water);this.water.material.uniforms.time={value:0};
  this.water.material.fragmentShader=this.water.material.fragmentShader.replace('uniform vec3 color;','uniform vec3 color; uniform float time;').replace('vec4 base = texture2DProj( tDiffuse, vUv );',`vec4 uv=vUv;uv.x+=sin(vUv.y*19.0+time*.8)*.0009*vUv.w;uv.y+=sin(vUv.x*41.0-time*.5)*.0006*vUv.w;vec4 base=texture2DProj(tDiffuse,uv);base.rgb=mix(base.rgb,vec3(.06,.16,.16),.32);`);
  const dustG=new T.BufferGeometry(),dust=new Float32Array(750*3);let rng=17;const rand=()=>{rng=(rng*16807)%2147483647;return rng/2147483647;};for(let i=0;i<dust.length;i+=3){dust[i]=rand()*130;dust[i+1]=rand()*10;dust[i+2]=rand()*25-20;}dustG.setAttribute('position',new T.BufferAttribute(dust,3));this.dust=new T.Points(dustG,new T.PointsMaterial({color:'#e1d0a8',size:.025,transparent:true,opacity:.3,depthWrite:false}));this.scene.add(this.dust);
+ this.wake=new ConservatoryWake(this.scene);
  this.ripples=[];for(let i=0;i<4;i++){const r=mesh(new T.RingGeometry(.3,.32,48),new T.MeshBasicMaterial({color:'#9bbbb1',side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false}),v(),this.scene);r.rotation.x=-Math.PI/2;this.ripples.push(r);}
  this.bloom=new ConservatoryBloom(this.scene);this.life=new ConservatoryLife(this.scene,this.M);this.lighting=new ConservatoryLight(this);this.resize();this.loading=this.load();
  }
@@ -173,7 +175,8 @@ export class ConservatoryArt{
  else if(wp.visible){this.guard.update({...s,...wp,y:510,vy:0,onGround:true,crouch:0,climb:null,swimming:false,grabbing:false,entrance:false,capture:null},dt);this.guard.root.position.z=-8.3;this.guard.root.position.y=1.25;}
 
  this.water.material.uniforms.time.value=t;this.dust.rotation.x=Math.sin(t*.025)*.002;
- for(let i=0;i<4;i++){const r=this.ripples[i],age=s.splashAge-i*.17,swim=s.swimming&&i===0;r.visible=(age>0&&age<2)||swim;if(r.visible){const n=swim?(.6+Math.sin(t*4)*.08):.2+age*2;r.position.set((swim?s.x:s.splashX)*U,-.705,0);r.scale.set(n,n*.7,1);r.material.opacity=swim?.14:Math.max(0,.28*(1-age/2));}}
+ this.wake.update(s);
+ for(let i=0;i<4;i++){const r=this.ripples[i],age=s.splashAge-i*.17;r.visible=age>0&&age<2;if(r.visible){const n=.2+age*2;r.position.set(s.splashX*U,-.705,0);r.scale.set(n,n*.7,1);r.material.opacity=Math.max(0,.28*(1-age/2));}}
  this.renderer.render(this.scene,this.camera);this.stats={calls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,pose:this.actor.pose,ready:true};
  }
 }
