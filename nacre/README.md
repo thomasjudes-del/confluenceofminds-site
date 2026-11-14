@@ -4,7 +4,7 @@ Presentation: https://confluenceofminds.com/nacre/
 Game: https://confluenceofminds.com/nacre/play/
 Canonical game source: https://github.com/thomasjudes-del/Nacre
 
-Imported build: d09f241b8269155d74a02f9e210a329fc80eabbe. Do not edit play/ independently; refresh the pinned import workflow after validating source changes. After import, ensure the Pages deployment includes that import commit. Commits made with GITHUB_TOKEN may not trigger Pages by themselves.
+Imported build: c0b35f3e6316a3215285653bc20069d7e4c2af05. Do not edit play/ independently; refresh the pinned import workflow after validating source changes. After import, ensure the Pages deployment includes that import commit. Commits made with GITHUB_TOKEN may not trigger Pages by themselves.
 
 Verification 2026-11-14: public presentation and game entry opened without authentication. GitHub game CI passed 239 tests. Cloud browser still reports GL_VENDOR Disabled and cannot validate real WebGL play; no physical iPhone test. The artwork on the presentation page is explicitly an atmosphere study, not a gameplay screenshot.
 
@@ -21,3 +21,5 @@ Verification 2026-11-14: public presentation and game entry opened without authe
 14 November, 17h pass: swimming leaves expanding rings at their birth positions, fading after stopping or reversing. Bounded pool of twelve meshes, pause and respawn handling, no save or collision changes. 266 local tests and source CI passed. Blender CPU basin reference inspected, but wake too subtle in that export to validate in-game appearance. Fresh cloud browser attempt still reports GL_VENDOR Disabled; no physical iPhone or perceptual audio test.
 
 14 November, 18h pass: left pool bank now supports a return climb with mirrored hand/foot support. Waiting guard still captures returning players and checkpoint recovery remains intact. 270 local tests and source CI passed; isolated locomotion at 30/60 Hz, actual guard capture/retry and CPU foot support tested. Blender CPU reference inspected, cloud WebGL unavailable, no physical iPhone test. No new puzzle or level.
+
+14 November evening: complete original greenhouse ported to 3D (mirror, two bridges, collapse, cart, lift, sluice and listening chamber), forest study with original articulated dogs and local CC0 barks, and both tank-filling effects corrected. The forest reuses the Convoi route and remains short; this is not a finished recreation of INSIDE. 280 local tests passed, source CI succeeded, save/reload and full routes simulated. Blender CPU references inspected. Cloud WebGL unavailable, no physical iPhone or critical listening validation. Sites private version 66, source 7beb1394e5d4a5c269afb3bc88105fc86e07be99.
