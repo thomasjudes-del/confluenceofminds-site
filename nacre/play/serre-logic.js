@@ -6,7 +6,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const approach=(v,target,amount)=
 function createState(){return {x:C.start,y:C.ground,vx:0,vy:0,face:1,walk:0,onGround:true,seed:'nest',charge:0,charges:[0,0],bridges:[0,0],bridge:0,mirror:0,mirrorAngle:0,mirrorHold:0,guiding:false,handleX:0,handleY:0,iris:0,concealed:false,veil:0,time:0,respawn:0,checkpoint:C.start,started:false,paused:false,finished:false,ending:0,offered:false,events:[],actionAge:9,fallCount:0,chargedOnce:false,pickedOnce:false,across:false,passedIris:false,stepClock:0,interaction:null,coyote:.1,jumpBuffer:0,landing:0,lean:0,blocked:0,focus:0,focusTime:0,collapseTime:0,escaped:false,fracture:0,actionKind:null,cartX:C.cartStart,cartV:0,grabbing:false,grabOffset:0,sluice:0,weightOn:false,sluicePassed:false,watchTime:0,watchAlert:0,watchTarget:4800,signals:[0,0],watchPassed:false,chapter:0,lift:0,liftCall:0,firstIris:1,firstPassed:false,introBlocked:0,pond:0,ballast:0,transfer:false,hydroGate:0};}
 function bridgeHeight(x){return C.ground-24*Math.sin(clamp((x-C.gapStart)/(C.gapEnd-C.gapStart),0,1)*Math.PI);}
 function collapseFront(s){return s.collapseTime>0?C.crumbleStart+Math.max(0,s.collapseTime-C.crumbleDelay)*C.crumbleSpeed:C.crumbleStart-1;}
-function floorAt(s,x){if(x>6120&&x<6380)return 510+170*(1-(s.pond||0));if(x>=C.liftStart&&x<C.liftEnd)return C.ground-140*s.lift;if(x>=C.liftEnd&&x<C.terraceEnd)return C.ground-140;if(Math.abs(x-s.cartX)<40)return C.ground-78;if(x>C.crumbleGapStart&&x<C.crumbleGapEnd)return Infinity;if(x>C.crumbleStart&&x<C.crumbleEnd&&s.collapseTime>C.crumbleDelay&&x<collapseFront(s))return Infinity;if(x>C.gapStart&&x<C.gapEnd){const side=x<(C.gapStart+C.gapEnd)/2?0:1;return s.bridges[side]>.86?bridgeHeight(x):Infinity;}if(x>960&&x<1013)return Infinity;return C.ground;}
+function floorAt(s,x){if(x>=C.terraceEnd&&x<4540)return 370+(x-C.terraceEnd)*140/160;if(x>6120&&x<6380)return 510+170*(1-(s.pond||0));if(x>=C.liftStart&&x<C.liftEnd)return C.ground-140*s.lift;if(x>=C.liftEnd&&x<C.terraceEnd)return C.ground-140;if(Math.abs(x-s.cartX)<40)return C.ground-78;if(x>C.crumbleGapStart&&x<C.crumbleGapEnd)return Infinity;if(x>C.crumbleStart&&x<C.crumbleEnd&&s.collapseTime>C.crumbleDelay&&x<collapseFront(s))return Infinity;if(x>C.gapStart&&x<C.gapEnd){const side=x<(C.gapStart+C.gapEnd)/2?0:1;return s.bridges[side]>.86?bridgeHeight(x):Infinity;}if(x>960&&x<1013)return Infinity;return C.ground;}
 function nearby(s){if(s.offered||s.respawn>0||!s.onGround)return null;if(Math.abs(s.x-6080)<40)return 'fillPond';if(Math.abs(s.x-6425)<40)return 'transferWater';if(s.seed==='nest'&&Math.abs(s.x-C.seed)<58)return 'take';if(Math.abs(s.x-C.liftLever)<44)return 'callLift';if(Math.abs(s.x-s.cartX)<88&&s.x>3300)return 'grab';if(Math.abs(s.x-C.mirror)<49)return 'reflect';if(Math.abs(s.x-C.socket)<55){if(s.seed==='held')return 'place';if(s.seed==='socket')return 'retrieve';}if(Math.abs(s.x-C.altar)<75&&s.seed==='held')return 'offer';return null;}
 function interact(s){const n=nearby(s);s.actionAge=0;s.actionKind=n;
 if(n==='transferWater'){s.transfer=!s.transfer;s.events.push('sluice');}if(n==='take'){s.seed='held';s.pickedOnce=true;s.events.push('take');}
@@ -16,7 +16,9 @@ if(n==='reflect'){s.mirrorHold=.25;s.events.push('reflect');s.focus=1;s.focusTim
 if(n==='callLift'){s.liftCall=3.1;s.events.push('sluice');}if(n==='grab'){s.events.push('grab');}if(n==='offer'){s.seed='altar';s.offered=true;s.events.push('offer');}return n;}
 function step(s,input,dt){dt=clamp(dt,0,1/30);s.events.length=0;if(!s.started||s.paused||s.finished)return;s.time+=dt;s.actionAge+=dt;s.focusTime=Math.max(0,s.focusTime-dt);s.landing=Math.max(0,s.landing-dt*3);s.fracture=Math.max(0,s.fracture-dt*2);
 if(s.offered){s.ending+=dt;s.vx=approach(s.vx,0,1000*dt);s.veil=approach(s.veil,0,dt*3);if(s.ending>9.5){s.finished=true;s.events.push('finish');}return;}
-if(s.respawn>0){s.respawn=Math.max(0,s.respawn-dt);if(s.respawn===0){if(s.seed==='socket')s.across=false;s.collapseTime=0;s.escaped=false;s.x=s.checkpoint>=6020?6020:s.checkpoint>=4480?4480:s.checkpoint>=3250?3250:s.across?2220:(s.checkpoint>=1230?1230:(s.pickedOnce?830:C.start));s.watchAlert=0;s.watchTime=0;s.grabbing=false;s.y=C.ground;s.vx=s.vy=0;s.onGround=true;s.coyote=.1;s.jumpBuffer=0;s.concealed=false;s.veil=0;if(s.seed==='socket')s.seed='held';s.charges=[0,0];s.bridges=[0,0];s.bridge=s.charge=0;s.events.push('reborn');}return;}
+if(s.respawn>0){s.respawn=Math.max(0,s.respawn-dt);if(s.respawn===0){if(s.seed==='socket')s.across=false;s.collapseTime=0;s.escaped=false;s.x=s.checkpoint>=6020?6020:s.checkpoint>=4480?4480:s.checkpoint>=3250?3250:s.across?2220:(s.checkpoint>=1230?1230:(s.pickedOnce?830:C.start));s.watchAlert=0;s.watchTime=0;s.grabbing=false;s.bankClimb=null;s.y=floorAt(s,s.x);s.vx=s.vy=0;s.onGround=true;s.coyote=.1;s.jumpBuffer=0;s.concealed=false;s.veil=0;if(s.seed==='socket')s.seed='held';s.charges=[0,0];s.bridges=[0,0];s.bridge=s.charge=0;s.events.push('reborn');}return;}
+if(s.onGround&&s.x>=C.terraceEnd&&s.x<4540&&s.y>floorAt(s,s.x))s.y=floorAt(s,s.x);
+if(s.bankClimb){const c=s.bankClimb;c.t+=dt;const u=clamp(c.t/.85,0,1),r=clamp(u/.7,0,1),h=clamp((u-.65)/.35,0,1);s.x=c.x+(c.targetX-c.x)*h*h*(3-2*h);s.y=c.y+(510-c.y)*r*r*(3-2*r);s.vx=s.vy=0;s.onGround=false;s.guiding=true;s.handleX=c.edge;s.handleY=Math.max(510,s.y-60);if(u>=1){s.bankClimb=null;s.guiding=false;s.onGround=true;}return;}
 if(input.interact)interact(s);
 s.pond=s.pond||0;s.ballast=s.ballast||0;s.hydroGate=s.hydroGate||0;
 s.filling=!!input.veil&&Math.abs(s.x-6080)<40&&s.onGround;const beforePond=s.pond;if(s.filling)s.pond=Math.min(1,s.pond+dt*.18);
@@ -38,7 +40,10 @@ const pace=s.grabbing?.40:s.concealed?.82:1;s.vx=approach(s.vx,analog*C.speed*pa
 if(input.jump)s.jumpBuffer=.13;else s.jumpBuffer=Math.max(0,s.jumpBuffer-dt);
 s.coyote=s.onGround?.12:Math.max(0,s.coyote-dt);if(s.jumpBuffer>0&&s.coyote>0){s.vy=-C.jump;s.onGround=false;s.coyote=0;s.jumpBuffer=0;s.events.push('jump');}
 if(s.guiding&&Math.abs(analog)<.1){s.vx=clamp((s.handleX-s.face*27-s.x)*9,-120,120);}
-const oldX=s.x,oldY=s.y;s.x=clamp(s.x+s.vx*dt,70,C.world-130);
+const oldX=s.x,oldY=s.y,wasGround=s.onGround;
+// Reach either visible escape ladder from the floating deck, even when empty.
+if(s.onGround&&s.x>6120&&s.x<6380&&s.y>530&&input.veil&&((analog<0&&s.x<6170)||(analog>0&&s.x>6330))){const edge=analog<0?6120:6380;s.bankClimb={t:0,x:s.x,y:s.y,edge,targetX:edge+(analog<0?-28:28)};s.grabbing=false;s.events.push('climb');return;}
+s.x=clamp(s.x+s.vx*dt,70,C.world-130);
 // A heavy rolling specimen carriage provides a physical counterweight.
 if(s.grabbing){const desired=clamp(s.x-s.grabOffset,3415,3900);s.cartV=(desired-s.cartX)/dt;s.cartX=desired;s.x=s.cartX+s.grabOffset;}else{s.cartV=approach(s.cartV,0,dt*900);s.cartX=clamp(s.cartX+s.cartV*dt,3415,3900);}
 if(s.y>C.ground-68&&!s.grabbing){if(oldX<=s.cartX-52&&s.x>s.cartX-52)s.x=s.cartX-52;if(oldX>=s.cartX+52&&s.x<s.cartX+52)s.x=s.cartX+52;}
@@ -50,6 +55,9 @@ wall(6530,s.y-102<510-200*s.hydroGate);wall(C.firstIris,s.firstIris<.84&&!s.firs
 wall(C.liftStart,s.x<C.liftStart&&s.y>C.ground-140*s.lift+26);wall(C.liftEnd,s.x<C.liftEnd&&s.y>396);const gateBottom=370-204*s.sluice,gateOverlap=y=>y>gateBottom-168&&y-102<gateBottom;if(Math.abs(s.x-C.sluice)<25&&s.sluice<beforeGate&&gateOverlap(s.y))s.sluice=beforeGate;wall(C.sluice,gateOverlap(s.y+s.vy*dt));wall(C.watchEnd,!s.signals.every(v=>v>=1));
 if(s.iris<.8){const left=C.iris-34,right=C.iris+34;if(oldX<=left&&s.x>left){s.x=left;s.vx=0;s.blocked+=dt;}else if(oldX>=right&&s.x<right){s.x=right;s.vx=0;s.blocked+=dt;}}else s.blocked=0;
 s.vy+=C.gravity*dt;s.y+=s.vy*dt;const bottom=370-204*s.sluice;if(Math.abs(s.x-C.sluice)<25&&oldY-102>=bottom&&s.y-102<bottom){s.y=bottom+102;s.vy=Math.max(0,s.vy);}const hydroBottom=510-200*s.hydroGate;if(Math.abs(s.x-6530)<25&&oldY-102>=hydroBottom&&s.y-102<hydroBottom){s.y=hydroBottom+102;s.vy=Math.max(0,s.vy);}const floor=floorAt(s,s.x);
+// Follow the visible buttress ramp continuously in both directions.
+if(wasGround&&!input.jump&&s.vy>=0&&oldX>=C.terraceEnd-12&&oldX<=4552&&s.x>=C.terraceEnd&&s.x<=4540&&Math.abs(oldY-floorAt(s,oldX))<5){s.y=floor;s.vy=0;s.onGround=true;}
+
 if(s.vy>=0&&s.y>=floor&&oldY<floor+32){if(!s.onGround&&s.vy>100){s.events.push('land');s.landing=Math.min(1,s.vy/500);}s.y=floor;s.vy=0;s.onGround=true;}else if(!Number.isFinite(floor)||s.y<floor-4)s.onGround=false;
 if(s.x>1120&&s.onGround)s.checkpoint=Math.max(s.checkpoint,1230);if(s.x>3220&&s.onGround)s.checkpoint=Math.max(s.checkpoint,3250);if(s.x>4400&&s.onGround){s.sluicePassed=true;s.checkpoint=Math.max(s.checkpoint,4480);}if(s.x>C.watchEnd+35){s.watchPassed=true;s.checkpoint=Math.max(s.checkpoint,6020);}
 if(s.x>C.gapEnd+30&&s.onGround){if(!s.across)s.events.push('crossed');s.across=true;}
@@ -66,7 +74,7 @@ const oldAlert=s.watchAlert;s.watchAlert=clamp(s.watchAlert+(detected?dt*.9:-dt*
 for(let i=0;i<2;i++){if(s.signals[i]>=1)continue;const lit=Math.abs(s.x-C.signals[i])<68&&s.seed==='held'&&s.veil<.4&&s.onGround;s.signals[i]=clamp(s.signals[i]+(lit?dt*.48:-dt*.10),0,1);if(s.signals[i]>=.999){s.signals[i]=1;s.events.push('resonance');}}
 if(s.watchAlert>=1){s.respawn=1.3;s.fallCount++;s.events.push('caught');}
 }
-if(s.y>675){s.respawn=1.3;s.fallCount++;s.events.push('fall');}
+if(s.y>675&&!(s.x>6120&&s.x<6380&&s.y<=floorAt(s,s.x)+2)){s.respawn=1.3;s.fallCount++;s.events.push('fall');}
 s.walk+=Math.abs(s.vx)*dt/15.4;
 if(s.onGround&&Math.abs(s.vx)>25){s.stepClock+=Math.abs(s.vx)*dt;if(s.stepClock>(s.grabbing?47:40+56*clamp((Math.abs(s.vx)-85)/235,0,1))){s.stepClock=0;s.events.push('step');}}
 s.interaction=nearby(s);
