@@ -1,0 +1,9 @@
+/* Fill the available game viewport; landscape gating remains in the controllers. */
+html,body{height:100%;height:100dvh;overscroll-behavior:none}
+body #gameShell{height:100vh;height:100dvh;top:0;transform:none;width:100%;overflow:hidden}
+#hud{left:max(20px,env(safe-area-inset-left));right:max(20px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top))}
+#intro,#pauseMenu{overflow-y:auto;touch-action:pan-y}
+.install-dialog{max-width:min(440px,88vw);max-height:88dvh;overflow:auto;background:#10272a;color:#d5dfd1;border:1px solid #647a6a;padding:24px;font:15px/1.6 Georgia,serif;box-shadow:0 20px 80px #0009}
+.install-dialog::backdrop{background:#031012d9}.install-dialog h2{font-weight:400;font-size:28px}.install-dialog li{padding:3px 0}.install-close{float:right;background:none;color:inherit;border:0;font-size:30px;cursor:pointer}.immersive-entry{font-size:10px;margin-top:12px;letter-spacing:.12em}
+#captureVeil{position:absolute;inset:0;background:#03090b;opacity:0;pointer-events:none;z-index:3}
+@media(max-height:500px){.immersive-entry{margin-top:6px;font-size:9px}.install-dialog{font-size:13px;padding:14px}.install-dialog h2{font-size:22px;margin:5px 0}}

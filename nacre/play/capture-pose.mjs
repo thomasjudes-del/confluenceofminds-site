@@ -1,0 +1,5 @@
+// Presentation is deterministic, including pause and checkpoint transitions.
+export const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+export function captureView(s){const c=s.capture;if(!c)return null;const contact=smooth(.56,.84,c.t),collapse=smooth(.68,1.32,c.t),arrive=smooth(0,.7,c.t);return {contact,collapse,fade:smooth(1.42,1.94,c.t),guardX:c.sourceX+(c.x+c.side*27-c.sourceX)*arrive,guardFace:-c.side,body:{...s,x:c.x,y:c.y,vx:0,vy:0,face:c.side,onGround:true,swimming:false,climb:null,grabbing:false,crouch:collapse*.85},guardVisible:c.kind!=='vehicle'};}
+export function restoreCapture(actor){if(actor.captureBase){for(const [name,q]of Object.entries(actor.captureBase))actor.bones[name].quaternion.copy(q);actor.captureBase=null;}}
+export function captureBody(actor,c){if(!c)return;actor.captureBase={};for(const name of ['chest','head','Lupperarm','Rupperarm'])actor.captureBase[name]=actor.bones[name].quaternion.clone();actor.bones.chest.rotation.z-=.18*c.collapse;actor.bones.head.rotation.z-=.20*c.contact;actor.bones.Lupperarm.rotation.z-=.28*c.contact;actor.bones.Rupperarm.rotation.z+=.30*c.contact;}
