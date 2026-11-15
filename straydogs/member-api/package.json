@@ -1,0 +1,13 @@
+{
+  "name": "straydogs-private-api-alpha",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check src/worker.mjs && node --check src/maintenance.mjs"
+  }
+}
